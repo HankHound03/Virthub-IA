@@ -1,0 +1,7 @@
+@import url(../style.css);
+
+iframe {
+  width: 98.9%;
+  height: 675px;
+  margin: 5px 5px 5px 5px;
+}

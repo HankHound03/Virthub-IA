@@ -1,0 +1,120 @@
+body {
+    background-image: url('./pics/background.jpg');
+    margin-top: 2%;
+    margin-left: 15%;
+    margin-right: 15%;
+}
+
+header {
+    text-align: center;
+    background-color: rgba(142, 166, 255, 0.2);
+    backdrop-filter: blur(10px); /* Este añade un efecto de desenfoque al fondo del header similar al aero */
+    color: #75e1a0;
+    font-family: Monocraft Nerd Font, monospace;
+    margin: auto 5px 5px 5px;
+    padding: 15px 0;
+}
+
+.toggleable-sidebar {
+    position: fixed;
+    left: 0;
+    background-color: rgba(142, 166, 255, 0.2);
+    backdrop-filter: blur(10px); /* Este añade un efecto de desenfoque al fondo del botón similar al aero */
+    padding: 10px;
+    font-family: Monocraft Nerd Font, monospace;
+    color: #75e1a0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.sidebar {
+    position: relative;
+    height: 625px;
+    left: 0;
+    width: auto;
+    background-color: rgba(142, 166, 255, 0.2);
+    backdrop-filter: blur(10px); /* Este añade un efecto de desenfoque al fondo de la barra lateral similar al aero */
+    padding: 10px;
+    font-family: Monocraft Nerd Font, monospace;
+    color: #75e1a0;
+    z-index: 5;
+    overflow-y: auto;
+}
+
+.sidebar h2 {
+    text-align: center;
+}
+
+.sidebar button {
+    display: block;
+    width: 90%;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: rgba(117, 225, 160, 0.2);
+    border: none;
+    color: #75e1a0;
+    font-family: Monocraft Nerd Font, monospace;
+    cursor: pointer;
+    backdrop-filter: blur(10px); /* Este añade un efecto de desenfoque al fondo del botón similar al aero */
+}
+
+.sidebar button:hover {
+    background-color: rgba(117, 225, 160, 0.4);
+}
+
+.login-screen {
+    background-color: rgba(117, 225, 160, 0.2);
+    color: #76e0a172;
+    padding: 222px 0px;
+    font-family: Monocraft Nerd Font, monospace;
+    font-size: large;
+    margin-left:5px;
+    margin-right: 5px;
+    text-align: center;
+}
+
+.login-screen label{
+    color: white;
+}
+
+.login-screen input{
+    background-color: rgba(127, 255, 212, 0.324);
+    color: white;
+    margin: 5px auto auto auto ;
+    padding: 5px;
+    width: 30%;
+    border-radius: 10px;
+    font-family: Monocraft Nerd Font, monospace;
+    font-size: large;
+}
+
+.login-screen button{
+    background-color: rgba(127, 255, 212);
+    color: rgb(0, 0, 0);
+    border-radius: 10px;
+    font-size: large;
+    font-family: Monocraft Nerd Font, monospace;
+}
+
+.login-screen button:hover{
+    background-color: rgba(0, 134, 90, 0.5);
+    color: white;
+    border-radius: 10px;
+} 
+
+footer {
+    position: fixed;
+    left: 15%;
+    right: 15%;
+    bottom: 10px;
+    width: auto; /* mantiene el ancho relativo al body */
+    z-index: 5;
+    margin: auto 5px 5px 5px;
+    background-color: rgba(142, 166, 255, 0.2);
+    text-align: center;
+    padding: 10px 0;
+    font-size: 14px;
+    font-family: Monocraft Nerd Font, monospace;
+    color: #75e1a0;
+    backdrop-filter: blur(10px); /* Este añade un efecto de desenfoque al fondo del footer similar al aero */
+}
