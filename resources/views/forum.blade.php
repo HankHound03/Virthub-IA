@@ -270,7 +270,7 @@
                 <span class="theme-icon" aria-hidden="true"></span>
             </div>
         </div>
-            @if (!empty($currentUser) && ($currentUser['role'] ?? 'guest') !== 'guest')
+            @if (!empty($currentUser))
                 @php
                     $headerProfileImage = (string) ($currentUser['profile_image_path'] ?? '');
                     $headerFrameColor = (string) ($currentUser['profile_frame_color'] ?? '#6ea8ff');
@@ -285,7 +285,9 @@
                         @endif
                     </div>
                     <div class="profile-menu" onclick="event.stopPropagation()">
-                        <button type="button" onclick="location.href='{{ url('/configuracion') }}'">Configuracion</button>
+                        @if (($currentUser['role'] ?? 'guest') !== 'guest')
+                            <button type="button" onclick="location.href='{{ url('/configuracion') }}'">Configuracion</button>
+                        @endif
                         <form method="POST" action="/logout">
                             @csrf
                             <button type="submit">Cerrar Sesion</button>
