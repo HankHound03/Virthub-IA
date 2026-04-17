@@ -104,7 +104,7 @@
                     @csrf
                     <label for="username">Usuario<p><input type="text" name="username" id="username" value="{{ old('username') }}" required><p></label>
                     <label for="password">Contrasena<p><input type="password" name="password" id="password" required onkeypress="if(event.key==='Enter') document.getElementById('loginForm').requestSubmit();"><p></label>
-                    <button type="submit" style="display:none;">Enviar</button>
+                    <button type="submit" style="display:none;">Iniciar Sesion</button>
                 </form>
 
                 <form method="POST" action="/guest-login" id="guestLoginForm">
