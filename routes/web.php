@@ -1,5 +1,7 @@
 <?php
 
+use App\Services\ChatStore;
+use App\Services\ForumStore;
 use App\Services\JsonUserStore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -94,6 +96,8 @@ if (!function_exists('virthub_active_user')) {
 			return [
 				'username' => (string) $sessionUser['username'],
 				'role' => 'guest',
+				'profile_image_path' => null,
+				'profile_frame_color' => '#6ea8ff',
 			];
 		}
 
@@ -109,7 +113,25 @@ if (!function_exists('virthub_active_user')) {
 		return [
 			'username' => $freshUser['username'],
 			'role' => $freshUser['role'] ?? 'user',
+			'profile_image_path' => $freshUser['profile_image_path'] ?? null,
+			'profile_frame_color' => $freshUser['profile_frame_color'] ?? '#6ea8ff',
 		];
+	}
+}
+
+if (!function_exists('virthub_chat_is_recent_presence')) {
+	function virthub_chat_is_recent_presence(?string $lastSeenAt, int $windowSeconds = 90): bool
+	{
+		if (!$lastSeenAt) {
+			return false;
+		}
+
+		$timestamp = strtotime($lastSeenAt);
+		if ($timestamp === false) {
+			return false;
+		}
+
+		return (time() - $timestamp) <= $windowSeconds;
 	}
 }
 
@@ -132,6 +154,177 @@ Route::get('/', function (Request $request, JsonUserStore $users) {
 		'systemStatus' => $systemStatus,
 		'guestRemainingSeconds' => $guestRemainingSeconds,
 	]);
+});
+
+Route::get('/foro', function (Request $request, JsonUserStore $users, ForumStore $forumStore) {
+	$users->bootstrapAdminFromEnv();
+	$currentUser = virthub_active_user($request, $users);
+	$canPost = !empty($currentUser) && ($currentUser['role'] ?? 'guest') !== 'guest';
+
+	return view('forum', [
+		'currentUser' => $currentUser,
+		'canPost' => $canPost,
+		'posts' => $forumStore->latestPosts(120),
+	]);
+});
+
+Route::post('/foro', function (Request $request, JsonUserStore $users, ForumStore $forumStore) {
+	$currentUser = virthub_active_user($request, $users);
+
+	if (empty($currentUser) || ($currentUser['role'] ?? 'guest') === 'guest') {
+		return redirect('/foro')->with('error', 'Solo usuarios registrados pueden publicar en el foro.');
+	}
+
+	$validated = $request->validate([
+		'title' => 'nullable|string|max:120',
+		'content' => 'required|string|max:5000',
+		'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:5120',
+	]);
+
+	try {
+		$post = $forumStore->addPost(
+			(string) ($currentUser['username'] ?? 'usuario'),
+			(string) $validated['content'],
+			isset($validated['title']) ? (string) $validated['title'] : null
+		);
+
+		if ($request->hasFile('image')) {
+			$uploaded = $request->file('image');
+			$uploadsDir = public_path('uploads/forum');
+
+			if (!is_dir($uploadsDir)) {
+				mkdir($uploadsDir, 0755, true);
+			}
+
+			$extension = strtolower((string) $uploaded->getClientOriginalExtension());
+			if ($extension === '') {
+				$extension = 'jpg';
+			}
+
+			$filename = bin2hex(random_bytes(8)) . '_' . time() . '.' . $extension;
+			$uploaded->move($uploadsDir, $filename);
+			$forumStore->setPostImagePath((string) ($post['id'] ?? ''), 'uploads/forum/' . $filename);
+		}
+
+		return redirect('/foro')->with('success', 'Publicacion creada en el foro.');
+	} catch (RuntimeException $e) {
+		return redirect('/foro')->with('error', $e->getMessage());
+	}
+});
+
+Route::post('/foro/{postId}/react', function (Request $request, string $postId, JsonUserStore $users, ForumStore $forumStore) {
+	$currentUser = virthub_active_user($request, $users);
+
+	if (empty($currentUser) || ($currentUser['role'] ?? 'guest') === 'guest') {
+		return redirect('/foro')->with('error', 'Solo usuarios registrados pueden reaccionar en el foro.');
+	}
+
+	$validated = $request->validate([
+		'reaction' => 'required|string|in:like,love,fire',
+	]);
+
+	$reactionMap = [
+		'like' => '👍',
+		'love' => '❤️',
+		'fire' => '🔥',
+	];
+
+	try {
+		$forumStore->toggleReaction(
+			$postId,
+			(string) ($currentUser['username'] ?? ''),
+			$reactionMap[(string) $validated['reaction']] ?? '👍'
+		);
+
+		return redirect('/foro');
+	} catch (RuntimeException $e) {
+		return redirect('/foro')->with('error', $e->getMessage());
+	}
+});
+
+Route::post('/foro/{postId}/comment', function (Request $request, string $postId, JsonUserStore $users, ForumStore $forumStore) {
+	$currentUser = virthub_active_user($request, $users);
+
+	if (empty($currentUser) || ($currentUser['role'] ?? 'guest') === 'guest') {
+		return redirect('/foro')->with('error', 'Solo usuarios registrados pueden comentar en el foro.');
+	}
+
+	$validated = $request->validate([
+		'content' => 'required|string|max:1500',
+	]);
+
+	try {
+		$forumStore->addComment(
+			$postId,
+			(string) ($currentUser['username'] ?? ''),
+			(string) $validated['content']
+		);
+
+		return redirect('/foro');
+	} catch (RuntimeException $e) {
+		return redirect('/foro')->with('error', $e->getMessage());
+	}
+});
+
+Route::post('/foro/{postId}/report', function (Request $request, string $postId, JsonUserStore $users, ForumStore $forumStore) {
+	$currentUser = virthub_active_user($request, $users);
+
+	if (empty($currentUser) || ($currentUser['role'] ?? 'guest') === 'guest') {
+		return redirect('/foro')->with('error', 'Solo usuarios registrados pueden reportar publicaciones.');
+	}
+
+	$validated = $request->validate([
+		'reason' => 'nullable|string|max:280',
+	]);
+
+	try {
+		$forumStore->addReport(
+			$postId,
+			(string) ($currentUser['username'] ?? ''),
+			isset($validated['reason']) ? (string) $validated['reason'] : 'Sin detalle'
+		);
+
+		return redirect('/foro')->with('success', 'Reporte enviado a moderacion.');
+	} catch (RuntimeException $e) {
+		return redirect('/foro')->with('error', $e->getMessage());
+	}
+});
+
+Route::post('/foro/{postId}/delete', function (Request $request, string $postId, JsonUserStore $users, ForumStore $forumStore) {
+	$currentUser = virthub_active_user($request, $users);
+
+	if (empty($currentUser) || ($currentUser['role'] ?? 'guest') === 'guest') {
+		return redirect('/foro')->with('error', 'Solo usuarios registrados pueden eliminar publicaciones.');
+	}
+
+	$post = $forumStore->findById($postId);
+
+	if (!$post) {
+		return redirect('/foro')->with('error', 'No existe la publicacion solicitada.');
+	}
+
+	$isAdmin = (($currentUser['role'] ?? 'user') === 'admin');
+	$isOwner = (($post['author'] ?? '') === ($currentUser['username'] ?? ''));
+
+	if (!$isAdmin && !$isOwner) {
+		return redirect('/foro')->with('error', 'Solo puedes borrar tus propias publicaciones.');
+	}
+
+	$deleted = $forumStore->deletePost($postId);
+
+	if (!$deleted) {
+		return redirect('/foro')->with('error', 'No se pudo eliminar la publicacion.');
+	}
+
+	$imagePath = (string) ($deleted['image_path'] ?? '');
+	if ($imagePath !== '') {
+		$fullPath = public_path(ltrim($imagePath, '/'));
+		if (is_file($fullPath)) {
+			@unlink($fullPath);
+		}
+	}
+
+	return redirect('/foro')->with('success', 'Publicacion eliminada del foro.');
 });
 
 Route::post('/login', function (Request $request, JsonUserStore $users) {
@@ -202,17 +395,160 @@ Route::post('/logout', function (Request $request) {
 	return redirect('/')->with('success', 'Sesion cerrada.');
 });
 
-Route::get('/admin/users', function (Request $request, JsonUserStore $users) {
+Route::get('/configuracion', function (Request $request, JsonUserStore $users) {
+	$currentUser = virthub_active_user($request, $users);
+
+	if (!$currentUser || ($currentUser['role'] ?? 'guest') === 'guest') {
+		return redirect('/')->with('error', 'Solo usuarios registrados pueden acceder a configuracion.');
+	}
+
+	return view('configuracion', [
+		'currentUser' => $currentUser,
+	]);
+});
+
+Route::post('/profile/appearance', function (Request $request, JsonUserStore $users) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser || ($authUser['role'] ?? 'guest') === 'guest') {
+		return redirect('/')->with('error', 'Debes iniciar sesion con usuario registrado para editar tu perfil.');
+	}
+
+	$validated = $request->validate([
+		'frame_color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+		'profile_image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
+	]);
+
+	$username = (string) ($authUser['username'] ?? '');
+	$existingUser = $users->findByUsername($username);
+
+	if (!$existingUser) {
+		return redirect('/')->with('error', 'Usuario no encontrado.');
+	}
+
+	$newImagePath = null;
+	$shouldUpdateImage = false;
+
+	if ($request->hasFile('profile_image')) {
+		$uploadsDir = public_path('uploads/profiles');
+
+		if (!is_dir($uploadsDir)) {
+			mkdir($uploadsDir, 0755, true);
+		}
+
+		$uploaded = $request->file('profile_image');
+		$extension = strtolower((string) $uploaded->getClientOriginalExtension());
+		if ($extension === '') {
+			$extension = 'jpg';
+		}
+
+		$filename = bin2hex(random_bytes(8)) . '_' . time() . '.' . $extension;
+		$uploaded->move($uploadsDir, $filename);
+		$newImagePath = 'uploads/profiles/' . $filename;
+		$shouldUpdateImage = true;
+
+		$oldImagePath = (string) ($existingUser['profile_image_path'] ?? '');
+		if ($oldImagePath !== '') {
+			$oldFullPath = public_path(ltrim($oldImagePath, '/'));
+			if (is_file($oldFullPath)) {
+				@unlink($oldFullPath);
+			}
+		}
+	}
+
+	$users->updateProfileAppearance(
+		$username,
+		$shouldUpdateImage ? $newImagePath : null,
+		(string) $validated['frame_color']
+	);
+
+	return redirect('/')->with('success', 'Perfil actualizado correctamente.');
+});
+
+Route::post('/profile/password', function (Request $request, JsonUserStore $users) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser || ($authUser['role'] ?? 'guest') === 'guest') {
+		return redirect('/')->with('error', 'Debes iniciar sesion con usuario registrado para cambiar tu password.');
+	}
+
+	$validated = $request->validate([
+		'current_password' => 'required|string|min:6|max:72',
+		'new_password' => 'required|string|min:6|max:72|confirmed',
+	]);
+
+	$username = (string) ($authUser['username'] ?? '');
+
+	if (!$users->verifyPassword($username, (string) $validated['current_password'])) {
+		return redirect('/')->with('error', 'La contrasena actual no es correcta.');
+	}
+
+	$users->updatePassword($username, (string) $validated['new_password']);
+
+	return redirect('/')->with('success', 'Tu contrasena fue actualizada correctamente.');
+});
+
+Route::get('/admin/users', function (Request $request, JsonUserStore $users, ForumStore $forumStore) {
 	$authUser = virthub_active_user($request, $users);
 
 	if (!$authUser || ($authUser['role'] ?? 'user') !== 'admin') {
 		return redirect('/')->with('error', 'Solo admin puede acceder a gestion de usuarios.');
 	}
 
+	$forumReports = [];
+	$posts = $forumStore->latestPosts(300);
+
+	foreach ($posts as $post) {
+		$reports = is_array($post['reports'] ?? null) ? $post['reports'] : [];
+
+		foreach ($reports as $report) {
+			$forumReports[] = [
+				'report_id' => (string) ($report['id'] ?? ''),
+				'post_id' => (string) ($post['id'] ?? ''),
+				'post_title' => (string) ($post['title'] ?? ''),
+				'post_author' => (string) ($post['author'] ?? ''),
+				'post_created_at' => (string) ($post['created_at'] ?? ''),
+				'post_content' => (string) ($post['content'] ?? ''),
+				'reporter' => (string) ($report['reporter'] ?? ''),
+				'reason' => (string) ($report['reason'] ?? 'Sin detalle'),
+				'reported_at' => (string) ($report['created_at'] ?? ''),
+			];
+		}
+	}
+
+	usort($forumReports, function (array $a, array $b): int {
+		return strcmp((string) ($b['reported_at'] ?? ''), (string) ($a['reported_at'] ?? ''));
+	});
+
 	return view('admin-users', [
 		'currentUser' => $authUser,
 		'users' => $users->allPublicUsers(),
+		'forumReports' => $forumReports,
 	]);
+});
+
+Route::post('/admin/forum-reports/delete', function (Request $request, JsonUserStore $users, ForumStore $forumStore) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser || ($authUser['role'] ?? 'user') !== 'admin') {
+		return redirect('/')->with('error', 'Solo admin puede gestionar reportes.');
+	}
+
+	$validated = $request->validate([
+		'post_id' => 'required|string',
+		'report_id' => 'required|string',
+	]);
+
+	$deleted = $forumStore->removeReport(
+		(string) $validated['post_id'],
+		(string) $validated['report_id']
+	);
+
+	if (!$deleted) {
+		return redirect('/admin/users')->with('error', 'No se pudo eliminar el reporte o ya no existe.');
+	}
+
+	return redirect('/admin/users')->with('success', 'Reporte marcado como verificado y eliminado.');
 });
 
 Route::post('/admin/users', function (Request $request, JsonUserStore $users) {
@@ -351,6 +687,127 @@ Route::post('/admin/users/delete', function (Request $request, JsonUserStore $us
 	} catch (RuntimeException $e) {
 		return redirect('/admin/users')->with('error', $e->getMessage());
 	}
+});
+
+Route::get('/chat/users', function (Request $request, JsonUserStore $users) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser) {
+		return response()->json(['error' => 'No autenticado'], 401);
+	}
+
+	$users->bootstrapAdminFromEnv();
+	$users->touchPresence((string) $authUser['username']);
+	$currentUsername = (string) ($authUser['username'] ?? '');
+	$contacts = array_values(array_filter($users->allPublicUsers(), function (array $user) use ($currentUsername): bool {
+		return ($user['username'] ?? '') !== ''
+			&& ($user['username'] ?? '') !== $currentUsername;
+	}));
+
+	$contacts = array_map(function (array $user): array {
+		$accountActive = (bool) ($user['is_active'] ?? true);
+		$presenceActive = virthub_chat_is_recent_presence($user['last_seen_at'] ?? null);
+
+		$user['account_active'] = $accountActive;
+		$user['presence_status'] = $presenceActive ? 'online' : 'offline';
+
+		return $user;
+	}, $contacts);
+
+	return response()->json(['users' => $contacts], 200);
+});
+
+Route::post('/chat/presence', function (Request $request, JsonUserStore $users) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser) {
+		return response()->json(['error' => 'No autenticado'], 401);
+	}
+
+	$users->touchPresence((string) $authUser['username']);
+
+	return response()->json(['ok' => true], 200);
+});
+
+Route::get('/chat/conversation/{username}', function (Request $request, string $username, JsonUserStore $users, ChatStore $chatStore) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser) {
+		return response()->json(['error' => 'No autenticado'], 401);
+	}
+
+	$users->touchPresence((string) $authUser['username']);
+
+	$targetUser = $users->findByUsername($username);
+
+	if (!$targetUser || !($targetUser['is_active'] ?? true)) {
+		return response()->json(['error' => 'Usuario no encontrado'], 404);
+	}
+
+	return response()->json([
+		'messages' => $chatStore->getConversationMessages((string) $authUser['username'], $username),
+	], 200);
+});
+
+Route::post('/chat/conversation/{username}', function (Request $request, string $username, JsonUserStore $users, ChatStore $chatStore) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser) {
+		return response()->json(['error' => 'No autenticado'], 401);
+	}
+
+	$users->touchPresence((string) $authUser['username']);
+
+	$targetUser = $users->findByUsername($username);
+
+	if (!$targetUser || !($targetUser['is_active'] ?? true)) {
+		return response()->json(['error' => 'Usuario no encontrado'], 404);
+	}
+
+	$validated = $request->validate([
+		'message' => 'required|string|max:1000',
+	]);
+
+	$message = $chatStore->appendConversationMessage(
+		(string) $authUser['username'],
+		$username,
+		(string) $validated['message']
+	);
+
+	return response()->json(['message' => $message], 201);
+});
+
+Route::get('/chat/broadcast', function (Request $request, JsonUserStore $users, ChatStore $chatStore) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser) {
+		return response()->json(['error' => 'No autenticado'], 401);
+	}
+
+	$users->touchPresence((string) $authUser['username']);
+
+	return response()->json(['messages' => $chatStore->getBroadcastMessages()], 200);
+});
+
+Route::post('/chat/broadcast', function (Request $request, JsonUserStore $users, ChatStore $chatStore) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser || ($authUser['role'] ?? 'user') !== 'admin') {
+		return response()->json(['error' => 'Solo admin puede publicar anuncios'], 403);
+	}
+
+	$users->touchPresence((string) $authUser['username']);
+
+	$validated = $request->validate([
+		'message' => 'required|string|max:1000',
+	]);
+
+	$message = $chatStore->appendBroadcastMessage(
+		(string) $authUser['username'],
+		(string) $validated['message']
+	);
+
+	return response()->json(['message' => $message], 201);
 });
 
 Route::get('/contenedor', function (Request $request) {

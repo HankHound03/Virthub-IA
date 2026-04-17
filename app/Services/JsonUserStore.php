@@ -36,8 +36,11 @@ class JsonUserStore
             'password_hash' => Hash::make($adminPassword),
             'role' => 'admin',
             'is_active' => true,
+            'profile_image_path' => null,
+            'profile_frame_color' => '#6ea8ff',
             'created_at' => now()->toDateTimeString(),
             'last_login_at' => null,
+            'last_seen_at' => null,
         ];
 
         $this->writeUsers($users);
@@ -52,7 +55,10 @@ class JsonUserStore
                 'username' => $user['username'] ?? '',
                 'role' => $user['role'] ?? 'user',
                 'last_login_at' => $user['last_login_at'] ?? null,
+                'last_seen_at' => $user['last_seen_at'] ?? null,
                 'is_active' => $user['is_active'] ?? true,
+                'profile_image_path' => $user['profile_image_path'] ?? null,
+                'profile_frame_color' => $user['profile_frame_color'] ?? '#6ea8ff',
             ];
         }, $users);
     }
@@ -92,6 +98,34 @@ class JsonUserStore
         ];
     }
 
+    public function touchPresence(string $username): void
+    {
+        $username = trim($username);
+
+        if ($username === '') {
+            throw new RuntimeException('Debes indicar un username valido.');
+        }
+
+        $users = $this->readUsers();
+        $updated = false;
+        $now = now()->toDateTimeString();
+
+        foreach ($users as &$user) {
+            if (($user['username'] ?? '') === $username) {
+                $user['last_seen_at'] = $now;
+                $updated = true;
+                break;
+            }
+        }
+        unset($user);
+
+        if (!$updated) {
+            throw new RuntimeException('No existe un usuario con ese username.');
+        }
+
+        $this->writeUsers($users);
+    }
+
     public function createUser(string $username, string $password, string $role = 'user'): array
     {
         $username = trim($username);
@@ -112,8 +146,11 @@ class JsonUserStore
             'password_hash' => Hash::make($password),
             'role' => $role === 'admin' ? 'admin' : 'user',
             'is_active' => true,
+            'profile_image_path' => null,
+            'profile_frame_color' => '#6ea8ff',
             'created_at' => now()->toDateTimeString(),
             'last_login_at' => null,
+            'last_seen_at' => null,
         ];
 
         $users[] = $record;
@@ -152,6 +189,53 @@ class JsonUserStore
         $this->writeUsers($users);
     }
 
+    public function verifyPassword(string $username, string $password): bool
+    {
+        $user = $this->findByUsername($username);
+
+        if (!$user) {
+            return false;
+        }
+
+        return Hash::check($password, (string) ($user['password_hash'] ?? ''));
+    }
+
+    public function updateProfileAppearance(string $username, ?string $profileImagePath, ?string $profileFrameColor): void
+    {
+        $username = trim($username);
+
+        if ($username === '') {
+            throw new RuntimeException('Debes indicar un username valido.');
+        }
+
+        $users = $this->readUsers();
+        $updated = false;
+
+        foreach ($users as &$user) {
+            if (($user['username'] ?? '') !== $username) {
+                continue;
+            }
+
+            if ($profileImagePath !== null) {
+                $user['profile_image_path'] = $profileImagePath;
+            }
+
+            if ($profileFrameColor !== null) {
+                $user['profile_frame_color'] = $profileFrameColor;
+            }
+
+            $updated = true;
+            break;
+        }
+        unset($user);
+
+        if (!$updated) {
+            throw new RuntimeException('No existe un usuario con ese username.');
+        }
+
+        $this->writeUsers($users);
+    }
+
     public function recordLogin(string $username): void
     {
         $username = trim($username);
@@ -167,6 +251,7 @@ class JsonUserStore
         foreach ($users as &$user) {
             if (($user['username'] ?? '') === $username) {
                 $user['last_login_at'] = $loginAt;
+                $user['last_seen_at'] = $loginAt;
                 $updated = true;
                 break;
             }

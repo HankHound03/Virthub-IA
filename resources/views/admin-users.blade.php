@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin Usuarios</title>
     <link rel="stylesheet" href="{{ asset('style.css') }}?v={{ filemtime(public_path('style.css')) }}">
+    <link rel="stylesheet" href="{{ asset('container.css') }}?v={{ filemtime(public_path('container.css')) }}">
     <style>
         .admin-wrapper {
             display: grid;
@@ -394,6 +396,104 @@
             width: 100%;
         }
 
+        .admin-full-width {
+            grid-column: 1 / -1;
+        }
+
+        .reports-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .reports-table th,
+        .reports-table td {
+            border-bottom: 1px solid rgba(117, 225, 160, 0.3);
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .reports-table th {
+            color: #9bf2c1;
+            font-size: 12px;
+        }
+
+        .report-reason {
+            max-width: 280px;
+            white-space: normal;
+        }
+
+        .report-post-snippet {
+            color: #d7ffea;
+            font-size: 12px;
+            line-height: 1.4;
+            max-width: 420px;
+            white-space: normal;
+        }
+
+        .admin-link-btn {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            background-color: rgba(127, 255, 212, 0.75);
+            color: #0b1b2d;
+            font-size: 12px;
+        }
+
+        .admin-link-btn:hover {
+            background-color: rgba(127, 255, 212, 0.95);
+            color: #0b1b2d;
+        }
+
+        .report-delete-form {
+            margin-top: 6px;
+        }
+
+        .report-delete-btn {
+            width: 100%;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(255, 100, 100, 0.78);
+            color: #ffffff;
+            font-family: Monocraft Nerd Font, monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .report-delete-btn:hover {
+            background-color: rgba(255, 100, 100, 0.95);
+        }
+
+        body.dark-mode .reports-table th,
+        body.dark-mode .reports-table td {
+            border-bottom-color: rgba(255, 255, 255, 0.08);
+        }
+
+        body.dark-mode .report-post-snippet {
+            color: #cfe4ff;
+        }
+
+        body.dark-mode .admin-link-btn {
+            background-color: rgba(99, 136, 191, 0.9);
+            color: #f2fbff;
+        }
+
+        body.dark-mode .admin-link-btn:hover {
+            background-color: rgba(120, 158, 214, 0.95);
+            color: #ffffff;
+        }
+
+        body.dark-mode .report-delete-btn {
+            background-color: rgba(198, 88, 88, 0.85);
+        }
+
+        body.dark-mode .report-delete-btn:hover {
+            background-color: rgba(222, 102, 102, 0.95);
+        }
+
         @media (max-width: 900px) {
             .admin-wrapper {
                 grid-template-columns: 1fr;
@@ -410,10 +510,6 @@
                 <div class="sidebar" onclick="event.stopPropagation()">
                     <button onclick="location.href='{{ url('/') }}'">Home</button>
                     <button onclick="location.href='{{ url('/contenedor') }}'">Contenedor</button>
-                    <form method="POST" action="/logout">
-                        @csrf
-                        <button type="submit">Cerrar Sesion</button>
-                    </form>
                 </div>
             </div>
             <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">
@@ -422,6 +518,8 @@
         </div>
         <h1>Admin de Usuarios - {{ $currentUser['username'] ?? 'admin' }}</h1>
     </header>
+
+    @include('partials.chat-widget')
 
 
     <div class="admin-wrapper">
@@ -545,9 +643,53 @@
                 </tbody>
             </table>
         </section>
+
+        <section class="admin-card admin-full-width">
+            <h2>Reportes del Foro</h2>
+
+            @if (empty($forumReports ?? []))
+                <p>No hay reportes del foro por ahora.</p>
+            @else
+                <table class="reports-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha reporte</th>
+                            <th>Reportado por</th>
+                            <th>Motivo</th>
+                            <th>Post</th>
+                            <th>Autor post</th>
+                            <th>Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($forumReports as $report)
+                            <tr>
+                                <td>{{ $report['reported_at'] ?: '-' }}</td>
+                                <td>{{ $report['reporter'] ?: '-' }}</td>
+                                <td class="report-reason">{{ $report['reason'] ?: 'Sin detalle' }}</td>
+                                <td>
+                                    <div><strong>{{ $report['post_title'] ?: 'Publicacion sin titulo' }}</strong></div>
+                                    <div class="report-post-snippet">{{ \Illuminate\Support\Str::limit($report['post_content'] ?: '', 180) }}</div>
+                                </td>
+                                <td>{{ $report['post_author'] ?: '-' }}</td>
+                                <td>
+                                    <a class="admin-link-btn" href="{{ url('/foro') }}">Ir al foro</a>
+                                    <form class="report-delete-form" method="POST" action="{{ url('/admin/forum-reports/delete') }}">
+                                        @csrf
+                                        <input type="hidden" name="post_id" value="{{ $report['post_id'] }}">
+                                        <input type="hidden" name="report_id" value="{{ $report['report_id'] }}">
+                                        <button type="submit" class="report-delete-btn">Reporte verificado</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </section>
     </div>
 
-    <footer>Codename VirtHub v0.4</footer>
+    <footer>Codename Virthub v0.7b</footer>
 
     <div class="confirmation-modal" id="confirmationModal">
         <div class="modal-content">

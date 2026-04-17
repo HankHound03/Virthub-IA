@@ -102,6 +102,90 @@ header {
     z-index: 1000;
 }
 
+.header-profile-dock {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1001;
+    text-decoration: none;
+}
+
+.toggleable-profile-menu {
+    cursor: pointer;
+}
+
+.profile-menu {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    pointer-events: none;
+    width: 150px;
+    background-color: var(--vh-surface);
+    backdrop-filter: blur(10px);
+    padding: 10px;
+    font-family: Monocraft Nerd Font, monospace;
+    color: var(--vh-text);
+    z-index: 1002;
+    overflow-y: auto;
+    border-radius: 10px;
+    border: 1px solid var(--vh-border);
+    transition: opacity 0.24s ease, transform 0.24s ease, visibility 0.24s ease, background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+}
+
+.toggleable-profile-menu.is-open .profile-menu {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.profile-menu form {
+    margin: 0;
+}
+
+.profile-menu button {
+    display: block;
+    width: 100%;
+    margin: 6px auto;
+    padding: 8px;
+    background-color: var(--vh-button-bg);
+    border: none;
+    color: var(--vh-text);
+    font-family: Monocraft Nerd Font, monospace;
+    font-size: 13px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.profile-menu button:hover {
+    background-color: var(--vh-button-hover);
+}
+
+.profile-aero-frame.profile-aero-frame-sm {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    padding: 3px;
+}
+
+.profile-aero-frame.profile-aero-frame-sm::before {
+    border-radius: 11px;
+}
+
+.profile-aero-frame.profile-aero-frame-sm img,
+.profile-aero-frame.profile-aero-frame-sm span {
+    border-radius: 11px;
+    font-size: 21px;
+}
+
 .toggleable-sidebar {
     position: relative;
     width: 44px;
@@ -149,6 +233,64 @@ header {
 .theme-toggle:hover {
     background-color: var(--vh-button-hover);
     transform: translateY(-1px);
+}
+
+.chat-toggle {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--vh-surface);
+    backdrop-filter: blur(10px);
+    font-family: Monocraft Nerd Font, monospace;
+    color: var(--vh-text);
+    cursor: pointer;
+    z-index: 1001;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    border: 1px solid var(--vh-border);
+    user-select: none;
+    font-size: 18px;
+    line-height: 1;
+    transition: background-color 0.28s ease, border-color 0.28s ease, transform 0.2s ease;
+}
+
+.chat-toggle:hover {
+    background-color: var(--vh-button-hover);
+    transform: translateY(-1px);
+}
+
+.chat-icon {
+    position: relative;
+    display: block;
+    width: 18px;
+    height: 18px;
+}
+
+.chat-icon::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 65%;
+    border: 2px solid var(--vh-icon);
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.chat-icon::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 6px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 0px solid transparent;
+    border-top: 4px solid var(--vh-icon);
 }
 
 .menu-icon {
@@ -210,6 +352,128 @@ header {
 
 .theme-toggle.is-dark .theme-icon::after {
     opacity: 0;
+}
+
+.profile-area-card {
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border: 1px solid var(--vh-border);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(117, 225, 160, 0.10));
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+}
+
+.profile-aero-frame {
+    --profile-frame-color: #6ea8ff;
+    width: 76px;
+    height: 76px;
+    border-radius: 22px;
+    padding: 4px;
+    box-sizing: border-box;
+    background: radial-gradient(circle at 22% 20%, rgba(255, 255, 255, 0.92), color-mix(in srgb, var(--profile-frame-color) 65%, #ffffff 35%) 34%, color-mix(in srgb, var(--profile-frame-color) 84%, #000000 16%) 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.58), 0 8px 24px color-mix(in srgb, var(--profile-frame-color) 35%, rgba(0, 0, 0, 0.2) 65%);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-aero-frame::before {
+    content: '';
+    position: absolute;
+    inset: 2px 2px 45% 2px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.0));
+    pointer-events: none;
+}
+
+.profile-aero-frame img,
+.profile-aero-frame span {
+    width: 100%;
+    height: 100%;
+    border-radius: 18px;
+    object-fit: cover;
+    background-color: rgba(5, 9, 16, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.26);
+}
+
+.profile-aero-frame span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: bold;
+    color: #f2fbff;
+}
+
+.profile-aero-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.profile-aero-meta strong {
+    color: var(--vh-text);
+    font-size: 14px;
+}
+
+.profile-aero-meta small {
+    color: var(--vh-text-soft);
+    font-size: 11px;
+}
+
+.profile-form-block {
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid var(--vh-border);
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.12);
+}
+
+.profile-form-block label {
+    display: block;
+    margin: 0 0 8px 0;
+    color: var(--vh-text-soft);
+    font-size: 12px;
+}
+
+.profile-form-block input {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 4px;
+    padding: 8px;
+    border: 1px solid var(--vh-border);
+    background-color: var(--vh-button-bg);
+    color: var(--vh-text);
+    border-radius: 10px;
+    font-family: Monocraft Nerd Font, monospace;
+}
+
+.profile-form-block input[type="color"] {
+    height: 40px;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.profile-form-block input[type="file"] {
+    cursor: pointer;
+}
+
+.profile-form-block button {
+    width: 100%;
+    margin-top: 2px;
+    padding: 9px 10px;
+    border: 1px solid var(--vh-border);
+    background-color: var(--vh-button-bg);
+    color: var(--vh-text);
+    border-radius: 10px;
+    font-family: Monocraft Nerd Font, monospace;
+    cursor: pointer;
+}
+
+.profile-form-block button:hover {
+    background-color: var(--vh-button-hover);
 }
 
 .sidebar {

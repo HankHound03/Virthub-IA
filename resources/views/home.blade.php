@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>VirtHub</title>
     <link rel="stylesheet" href="{{ asset('style.css') }}?v={{ filemtime(public_path('style.css')) }}">
+    <link rel="stylesheet" href="{{ asset('container.css') }}?v={{ filemtime(public_path('container.css')) }}">
 </head>
 <body>
     <header>
@@ -14,6 +16,7 @@
                 <span class="menu-icon" aria-hidden="true"></span>
                 <div class="sidebar" onclick="event.stopPropagation()">
                     <button onclick="location.href='{{ url('/') }}'">Home</button>
+                    <button onclick="location.href='{{ url('/foro') }}'">Foro</button>
                     <button onclick="window.open('https://github.com/FrankMon03/Virthub-IA', '_blank')">GitHub Project</button>
                 </div>
             </div>
@@ -21,8 +24,34 @@
                 <span class="theme-icon" aria-hidden="true"></span>
             </div>
         </div>
+
+        @if (!empty($currentUser) && ($currentUser['role'] ?? 'guest') !== 'guest')
+            @php
+                $headerProfileImage = (string) ($currentUser['profile_image_path'] ?? '');
+                $headerFrameColor = (string) ($currentUser['profile_frame_color'] ?? '#6ea8ff');
+                $headerInitial = strtoupper(substr((string) ($currentUser['username'] ?? 'U'), 0, 1));
+            @endphp
+            <div class="header-profile-dock toggleable-profile-menu" onclick="toggleProfileMenu(event)" title="Menu de perfil" aria-label="Menu de perfil">
+                <div class="profile-aero-frame profile-aero-frame-sm" style="--profile-frame-color: {{ $headerFrameColor }};">
+                    @if ($headerProfileImage !== '')
+                        <img src="{{ asset($headerProfileImage) }}" alt="Foto de perfil de {{ $currentUser['username'] }}" loading="lazy">
+                    @else
+                        <span>{{ $headerInitial }}</span>
+                    @endif
+                </div>
+                <div class="profile-menu" onclick="event.stopPropagation()">
+                    <button type="button" onclick="location.href='{{ url('/configuracion') }}'">Configuracion</button>
+                    <form method="POST" action="/logout">
+                        @csrf
+                        <button type="submit">Cerrar Sesion</button>
+                    </form>
+                </div>
+            </div>
+        @endif
         <h1>VirtHub</h1>
     </header>
+
+    @include('partials.chat-widget')
 
     <div class="home-panels" id="gadgetBoard">
         <aside class="linux-news-panel gadget" data-gadget-id="news">
@@ -81,23 +110,22 @@
                     Sesion activa: {{ $currentUser['username'] }} ({{ $currentUser['role'] }})
                 </p>
 
+                @if (($currentUser['role'] ?? 'guest') !== 'guest')
+                    <p class="auth-message auth-success">Tu perfil y seguridad ahora se gestionan en Configuracion.</p>
+                @endif
+
                 @if (($currentUser['role'] ?? 'user') === 'guest')
                     <p class="auth-message auth-success" id="guestRemainingLabel" data-guest-remaining="{{ (int) ($guestRemainingSeconds ?? 0) }}">
                         Tiempo restante invitado: calculando...
                     </p>
                 @endif
 
-                <form method="POST" action="/logout" id="logoutForm" class="hidden-submit-form">
-                    @csrf
-                    <input type="hidden" name="_silent" value="1">
-                </form>
-
                 <div class="quick-links-grid access-links-grid">
+                    <button type="button" onclick="location.href='{{ url('/foro') }}'">Foro</button>
                     <button type="button" onclick="location.href='{{ url('/contenedor') }}'">Contenedor</button>
                     @if (($currentUser['role'] ?? 'user') === 'admin')
                         <button type="button" onclick="location.href='{{ url('/admin/users') }}'">Panel Admin</button>
                     @endif
-                    <button type="button" onclick="document.getElementById('logoutForm')?.submit()">Cerrar Sesión</button>
                 </div>
             @else
                 <form method="POST" action="/login" id="loginForm">
@@ -114,6 +142,7 @@
                 <div class="quick-links-grid access-links-grid">
                     <button type="button" onclick="document.getElementById('loginForm')?.requestSubmit()">Iniciar Sesión</button>
                     <button type="button" onclick="document.getElementById('guestLoginForm')?.submit()">Invitado</button>
+                    <button type="button" onclick="location.href='{{ url('/foro') }}'">Foro</button>
                 </div>
             @endif
         </div>
@@ -139,7 +168,8 @@
             </aside>
         @endif
     </div>
-    <footer>Codename VirtHub v0.4</footer>
+
+    <footer>Codename Virthub v0.7b</footer>
     <script>
         function getUserKey() {
             return @json($currentUser['username'] ?? 'guest');
@@ -162,6 +192,11 @@
             if (!launcher) return;
 
             launcher.classList.remove('is-open');
+
+            const profileLauncher = document.querySelector('.toggleable-profile-menu');
+            if (profileLauncher) {
+                profileLauncher.classList.remove('is-open');
+            }
         }
 
         function applyThemeState() {
@@ -192,6 +227,17 @@
             }
 
             const launcher = document.querySelector('.toggleable-sidebar');
+            if (!launcher) return;
+
+            launcher.classList.toggle('is-open');
+        }
+
+        function toggleProfileMenu(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+
+            const launcher = document.querySelector('.toggleable-profile-menu');
             if (!launcher) return;
 
             launcher.classList.toggle('is-open');
