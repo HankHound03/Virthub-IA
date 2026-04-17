@@ -312,6 +312,70 @@
             background-color: rgba(255, 100, 100, 0.95);
         }
 
+        body:not(.dark-mode) .admin-card {
+            background-color: var(--vh-surface-strong);
+            border-color: var(--vh-border);
+            color: var(--vh-text);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        body:not(.dark-mode) .admin-card h2,
+        body:not(.dark-mode) .users-table th,
+        body:not(.dark-mode) .modal-content p {
+            color: var(--vh-text);
+        }
+
+        body:not(.dark-mode) .admin-card input,
+        body:not(.dark-mode) .admin-card select,
+        body:not(.dark-mode) .credentials-dropdown select {
+            background-color: var(--vh-button-bg);
+            border-color: var(--vh-border);
+            color: var(--vh-text);
+        }
+
+        body:not(.dark-mode) .admin-card button {
+            background-color: var(--vh-button-bg);
+            border: 1px solid var(--vh-border);
+            color: var(--vh-text);
+        }
+
+        body:not(.dark-mode) .admin-card button:hover {
+            background-color: var(--vh-button-hover);
+            color: var(--vh-text);
+        }
+
+        body:not(.dark-mode) .users-table th,
+        body:not(.dark-mode) .users-table td,
+        body:not(.dark-mode) .reports-table th,
+        body:not(.dark-mode) .reports-table td {
+            border-bottom-color: var(--vh-border);
+        }
+
+        body:not(.dark-mode) .credentials-dropdown {
+            background-color: rgba(7, 20, 33, 0.38);
+            border-color: var(--vh-border);
+        }
+
+        body:not(.dark-mode) .report-post-snippet {
+            color: var(--vh-text-soft);
+        }
+
+        body:not(.dark-mode) .modal-content {
+            background-color: rgba(7, 20, 33, 0.92);
+            border-color: rgba(255, 120, 120, 0.45);
+        }
+
+        body:not(.dark-mode) .admin-link-btn {
+            background-color: var(--vh-button-bg);
+            color: var(--vh-text);
+            border: 1px solid var(--vh-border);
+        }
+
+        body:not(.dark-mode) .admin-link-btn:hover {
+            background-color: var(--vh-button-hover);
+            color: var(--vh-text);
+        }
+
         body.dark-mode .admin-card {
             background-color: rgba(10, 14, 24, 0.64);
             border-color: rgba(255, 255, 255, 0.08);
@@ -498,6 +562,18 @@
             .admin-wrapper {
                 grid-template-columns: 1fr;
                 min-height: auto;
+            }
+
+            header h1 {
+                font-size: clamp(24px, 8vw, 46px);
+                line-height: 1.15;
+                word-break: break-word;
+                margin: 6px 0 0;
+                text-align: center;
+            }
+
+            .admin-card {
+                padding: 16px;
             }
         }
     </style>
@@ -713,7 +789,7 @@
         </section>
     </div>
 
-    <footer>Codename Virthub v0.8</footer>
+    <footer>Codename Virthub 0.9 PreRelease</footer>
 
     <div class="confirmation-modal" id="confirmationModal">
         <div class="modal-content">
@@ -769,6 +845,17 @@
             }
 
             const launcher = document.querySelector('.toggleable-sidebar');
+            if (!launcher) return;
+
+            launcher.classList.toggle('is-open');
+        }
+
+        function toggleProfileMenu(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+
+            const launcher = document.querySelector('.toggleable-profile-menu');
             if (!launcher) return;
 
             launcher.classList.toggle('is-open');
@@ -921,6 +1008,18 @@
         document.getElementById('confirmationModal').addEventListener('click', function(event) {
             if (event.target === this) {
                 closeConfirmation();
+            }
+        });
+
+        window.addEventListener('click', function() {
+            const sidebarLauncher = document.querySelector('.toggleable-sidebar');
+            if (sidebarLauncher) {
+                sidebarLauncher.classList.remove('is-open');
+            }
+
+            const profileLauncher = document.querySelector('.toggleable-profile-menu');
+            if (profileLauncher) {
+                profileLauncher.classList.remove('is-open');
             }
         });
 

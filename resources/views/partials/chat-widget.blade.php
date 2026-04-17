@@ -29,6 +29,17 @@
             pointer-events: auto;
         }
 
+        .global-chat-widget .chat-toggle {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+        }
+
+        .global-chat-widget .chat-toggle .chat-icon {
+            width: 22px;
+            height: 22px;
+        }
+
         .global-chat-widget .chat-panel {
             position: relative;
             height: min(520px, calc(100vh - 120px));
@@ -45,6 +56,16 @@
             .global-chat-widget {
                 right: 8px;
                 bottom: 8px;
+            }
+
+            .global-chat-widget .chat-toggle {
+                width: 54px;
+                height: 54px;
+            }
+
+            .global-chat-widget .chat-toggle .chat-icon {
+                width: 24px;
+                height: 24px;
             }
 
             .global-chat-widget .chat-panel.is-open {

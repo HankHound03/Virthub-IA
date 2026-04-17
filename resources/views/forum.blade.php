@@ -270,6 +270,29 @@
                 <span class="theme-icon" aria-hidden="true"></span>
             </div>
         </div>
+            @if (!empty($currentUser) && ($currentUser['role'] ?? 'guest') !== 'guest')
+                @php
+                    $headerProfileImage = (string) ($currentUser['profile_image_path'] ?? '');
+                    $headerFrameColor = (string) ($currentUser['profile_frame_color'] ?? '#6ea8ff');
+                    $headerInitial = strtoupper(substr((string) ($currentUser['username'] ?? 'U'), 0, 1));
+                @endphp
+                <div class="header-profile-dock toggleable-profile-menu" onclick="toggleProfileMenu(event)" title="Menu de perfil" aria-label="Menu de perfil">
+                    <div class="profile-aero-frame profile-aero-frame-sm" style="--profile-frame-color: {{ $headerFrameColor }};">
+                        @if ($headerProfileImage !== '')
+                            <img src="{{ asset($headerProfileImage) }}" alt="Foto de perfil de {{ $currentUser['username'] }}" loading="lazy">
+                        @else
+                            <span>{{ $headerInitial }}</span>
+                        @endif
+                    </div>
+                    <div class="profile-menu" onclick="event.stopPropagation()">
+                        <button type="button" onclick="location.href='{{ url('/configuracion') }}'">Configuracion</button>
+                        <form method="POST" action="/logout">
+                            @csrf
+                            <button type="submit">Cerrar Sesion</button>
+                        </form>
+                    </div>
+                </div>
+            @endif
         <h1>Foro VirtHub</h1>
     </header>
 
@@ -403,7 +426,7 @@
         </div>
     </div>
 
-    <footer>Codename Virthub v0.8</footer>
+    <footer>Codename Virthub 0.9 PreRelease</footer>
 
     <script>
         function getUserKey() {
@@ -453,6 +476,29 @@
 
             launcher.classList.toggle('is-open');
         }
+
+            function toggleProfileMenu(event) {
+                if (event) {
+                    event.stopPropagation();
+                }
+
+                const launcher = document.querySelector('.toggleable-profile-menu');
+                if (!launcher) return;
+
+                launcher.classList.toggle('is-open');
+            }
+
+            window.addEventListener('click', function() {
+                const sidebarLauncher = document.querySelector('.toggleable-sidebar');
+                if (sidebarLauncher) {
+                    sidebarLauncher.classList.remove('is-open');
+                }
+
+                const profileLauncher = document.querySelector('.toggleable-profile-menu');
+                if (profileLauncher) {
+                    profileLauncher.classList.remove('is-open');
+                }
+            });
 
         window.addEventListener('DOMContentLoaded', applySidebarState);
         window.addEventListener('DOMContentLoaded', applyThemeState);

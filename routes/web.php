@@ -645,6 +645,10 @@ Route::post('/admin/users/deactivate', function (Request $request, JsonUserStore
 
 	try {
 		$targetUser = $users->findByUsername((string) $validated['username']);
+		if ($targetUser && strtolower((string) ($targetUser['username'] ?? '')) === 'admin') {
+			return redirect('/admin/users')->with('error', 'No se permite desactivar la cuenta admin principal.');
+		}
+
 		if ($targetUser && (($targetUser['role'] ?? 'user') === 'admin') && $users->countActiveAdmins() <= 1) {
 			return redirect('/admin/users')->with('error', 'No puedes desactivar al ultimo admin activo.');
 		}
@@ -688,8 +692,8 @@ Route::post('/admin/users/delete', function (Request $request, JsonUserStore $us
 
 	try {
 		$targetUser = $users->findByUsername((string) $validated['username']);
-		if ($targetUser && (($targetUser['role'] ?? 'user') === 'admin') && $users->countAdmins() <= 1) {
-			return redirect('/admin/users')->with('error', 'No puedes eliminar al ultimo admin.');
+		if ($targetUser && strtolower((string) ($targetUser['username'] ?? '')) === 'admin') {
+			return redirect('/admin/users')->with('error', 'No se permite eliminar la cuenta admin principal.');
 		}
 
 		$users->deleteUser((string) $validated['username']);

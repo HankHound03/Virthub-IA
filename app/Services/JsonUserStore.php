@@ -301,6 +301,10 @@ class JsonUserStore
         $this->updateUsers(function (array &$users) use ($username): void {
             $updated = false;
 
+            if (strtolower($username) === 'admin') {
+                throw new RuntimeException('No se permite desactivar la cuenta admin principal.');
+            }
+
             if ($this->countAdminsFromUsers($users, true) <= 1) {
                 foreach ($users as $user) {
                     if (($user['username'] ?? '') === $username && ($user['role'] ?? 'user') === 'admin') {
@@ -372,8 +376,8 @@ class JsonUserStore
                 throw new RuntimeException('No existe un usuario con ese username.');
             }
 
-            if (($targetUser['role'] ?? 'user') === 'admin' && $this->countAdminsFromUsers($users) <= 1) {
-                throw new RuntimeException('No puedes eliminar al ultimo admin.');
+            if (strtolower((string) ($targetUser['username'] ?? '')) === 'admin') {
+                throw new RuntimeException('No se permite eliminar la cuenta admin principal.');
             }
 
             $users = array_values(array_filter($users, function ($user) use ($username) {

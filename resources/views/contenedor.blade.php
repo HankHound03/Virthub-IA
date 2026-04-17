@@ -28,6 +28,29 @@
                 <span class="theme-icon" aria-hidden="true"></span>
             </div>
         </div>
+        @if (!empty($currentUser) && ($currentUser['role'] ?? 'guest') !== 'guest')
+            @php
+                $headerProfileImage = (string) ($currentUser['profile_image_path'] ?? '');
+                $headerFrameColor = (string) ($currentUser['profile_frame_color'] ?? '#6ea8ff');
+                $headerInitial = strtoupper(substr((string) ($currentUser['username'] ?? 'U'), 0, 1));
+            @endphp
+            <div class="header-profile-dock toggleable-profile-menu" onclick="toggleProfileMenu(event)" title="Menu de perfil" aria-label="Menu de perfil">
+                <div class="profile-aero-frame profile-aero-frame-sm" style="--profile-frame-color: {{ $headerFrameColor }};">
+                    @if ($headerProfileImage !== '')
+                        <img src="{{ asset($headerProfileImage) }}" alt="Foto de perfil de {{ $currentUser['username'] }}" loading="lazy">
+                    @else
+                        <span>{{ $headerInitial }}</span>
+                    @endif
+                </div>
+                <div class="profile-menu" onclick="event.stopPropagation()">
+                    <button type="button" onclick="location.href='{{ url('/configuracion') }}'">Configuracion</button>
+                    <form method="POST" action="/logout">
+                        @csrf
+                        <button type="submit">Cerrar Sesion</button>
+                    </form>
+                </div>
+            </div>
+        @endif
         <h1>Bienvenido {{ $currentUser['username'] ?? 'Usuario' }}</h1>
         @if (($currentUser['role'] ?? 'user') === 'guest')
             <p class="auth-message auth-success" id="guestRemainingLabel" data-guest-remaining="{{ (int) ($guestRemainingSeconds ?? 0) }}" style="max-width: 360px; margin: 0 auto 10px auto;">
@@ -81,7 +104,7 @@
             <iframe id="viewer"></iframe>
         </div>
     </div>
-    <footer>Codename Virthub v0.8</footer>
+    <footer>Codename Virthub 0.9 PreRelease</footer>
     <script>
         const currentUserName = @json($currentUser['username'] ?? 'guest');
         const chatNotificationSoundUrl = @json(asset('sounds/chat-notificacion.mp3'));
@@ -292,6 +315,29 @@
 
             launcher.classList.toggle('is-open');
         }
+
+        function toggleProfileMenu(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+
+            const launcher = document.querySelector('.toggleable-profile-menu');
+            if (!launcher) return;
+
+            launcher.classList.toggle('is-open');
+        }
+
+        window.addEventListener('click', function() {
+            const sidebarLauncher = document.querySelector('.toggleable-sidebar');
+            if (sidebarLauncher) {
+                sidebarLauncher.classList.remove('is-open');
+            }
+
+            const profileLauncher = document.querySelector('.toggleable-profile-menu');
+            if (profileLauncher) {
+                profileLauncher.classList.remove('is-open');
+            }
+        });
 
         function loadInIframe(force = false) {
             const iframe = document.getElementById('viewer');
