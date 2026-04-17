@@ -1,7 +1,44 @@
-@import url(../style.css);
-
 iframe {
-  width: 98.9%;
-  height: 675px;
-  margin: 5px 5px 5px 5px;
+  display: block;
+  width: calc(100% - 10px);
+  height: calc(100vh - 260px);
+  min-height: 420px;
+  margin: 5px;
+  border: 1px solid rgba(117, 225, 160, 0.22);
+  box-sizing: border-box;
+  background-color: rgba(117, 225, 160, 0.08);
+}
+
+.container-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 5px;
+}
+
+.container-load-btn {
+  padding: 8px 14px;
+  border: 1px solid var(--vh-border);
+  border-radius: 10px;
+  background-color: var(--vh-button-bg);
+  color: var(--vh-text);
+  font-family: Monocraft Nerd Font, monospace;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.container-load-btn:hover {
+  background-color: var(--vh-button-hover);
+}
+
+body.dark-mode iframe {
+  border-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(10, 14, 24, 0.72);
+}
+
+@media (max-width: 768px) {
+  iframe {
+    height: 55vh;
+    min-height: 320px;
+  }
 }

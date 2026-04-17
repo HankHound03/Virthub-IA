@@ -1,106 +1,581 @@
+html,
 body {
-    background-image: url('./pics/background.jpg');
-    margin-top: 2%;
-    margin-left: 15%;
-    margin-right: 15%;
+    margin: 0;
+    min-height: 100%;
+}
+
+html {
+    background-color: #02050b;
+}
+
+:root {
+    --vh-body-bg: url('/pics/background.jpg');
+    --vh-page-overlay: linear-gradient(180deg, rgba(7, 14, 24, 0.10), rgba(7, 14, 24, 0.20));
+    --vh-surface: rgba(142, 166, 255, 0.2);
+    --vh-surface-strong: rgba(117, 225, 160, 0.2);
+    --vh-border: rgba(117, 225, 160, 0.22);
+    --vh-icon: #24405c;
+    --vh-text: #75e1a0;
+    --vh-text-soft: #d8ffea;
+    --vh-button-bg: rgba(117, 225, 160, 0.2);
+    --vh-button-hover: rgba(117, 225, 160, 0.4);
+    --vh-panel-text: #e8fff3;
+}
+
+body {
+    position: relative;
+    padding-top: 2%;
+    padding-left: 15%;
+    padding-right: 15%;
+    padding-bottom: 56px;
+    box-sizing: border-box;
+    color: var(--vh-text);
+    transition: color 0.35s ease;
+}
+
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    transition: opacity 0.45s ease;
+}
+
+body::before {
+    background-image: linear-gradient(180deg, rgba(7, 14, 24, 0.10), rgba(7, 14, 24, 0.20)), url('/pics/background.jpg');
+    opacity: 1;
+}
+
+body::after {
+    background-image: linear-gradient(180deg, rgba(2, 4, 8, 0.18), rgba(2, 4, 8, 0.46)), url('/pics/background_darkmode.jpg');
+    opacity: 0;
+}
+
+body.dark-mode {
+    --vh-body-bg: url('/pics/background_darkmode.jpg');
+    --vh-page-overlay: linear-gradient(180deg, rgba(2, 4, 8, 0.18), rgba(2, 4, 8, 0.46));
+    --vh-surface: rgba(10, 14, 24, 0.58);
+    --vh-surface-strong: rgba(8, 12, 20, 0.72);
+    --vh-border: rgba(255, 255, 255, 0.08);
+    --vh-icon: #dcfff3;
+    --vh-text: #d5f8ff;
+    --vh-text-soft: #eef9ff;
+    --vh-button-bg: rgba(29, 42, 66, 0.78);
+    --vh-button-hover: rgba(53, 74, 112, 0.9);
+    --vh-panel-text: #f2fbff;
+    color: var(--vh-text);
+}
+
+body.dark-mode::before {
+    opacity: 0;
+}
+
+body.dark-mode::after {
+    opacity: 1;
 }
 
 header {
+    position: relative;
+    z-index: 20;
     text-align: center;
-    background-color: rgba(142, 166, 255, 0.2);
+    background-color: var(--vh-surface);
     backdrop-filter: blur(10px); /* Este añade un efecto de desenfoque al fondo del header similar al aero */
-    color: #75e1a0;
+    color: var(--vh-text);
     font-family: Monocraft Nerd Font, monospace;
     margin: auto 5px 5px 5px;
     padding: 15px 0;
+    transition: background-color 0.45s ease, color 0.45s ease, border-color 0.45s ease;
+}
+
+.header-controls {
+    position: absolute;
+    left: 12px;
+    top: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    z-index: 1000;
 }
 
 .toggleable-sidebar {
-    position: fixed;
-    left: 0;
-    background-color: rgba(142, 166, 255, 0.2);
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--vh-surface);
     backdrop-filter: blur(10px); /* Este añade un efecto de desenfoque al fondo del botón similar al aero */
-    padding: 10px;
     font-family: Monocraft Nerd Font, monospace;
-    color: #75e1a0;
+    color: var(--vh-text);
     cursor: pointer;
-    z-index: 10;
+    z-index: 1001;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    border: 1px solid var(--vh-border);
+    user-select: none;
+    font-size: 20px;
+    transition: background-color 0.28s ease, border-color 0.28s ease, transform 0.2s ease;
+}
+
+.theme-toggle {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--vh-surface);
+    backdrop-filter: blur(10px);
+    font-family: Monocraft Nerd Font, monospace;
+    color: var(--vh-text);
+    cursor: pointer;
+    z-index: 1001;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    border: 1px solid var(--vh-border);
+    user-select: none;
+    font-size: 18px;
+    line-height: 1;
+    transition: background-color 0.28s ease, border-color 0.28s ease, transform 0.2s ease;
+}
+
+.toggleable-sidebar:hover,
+.theme-toggle:hover {
+    background-color: var(--vh-button-hover);
+    transform: translateY(-1px);
+}
+
+.menu-icon {
+    position: relative;
+    display: block;
+    width: 18px;
+    height: 2px;
+    background-color: var(--vh-icon);
+    border-radius: 2px;
+    margin: 0 auto;
+}
+
+.menu-icon::before,
+.menu-icon::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 18px;
+    height: 2px;
+    background-color: var(--vh-icon);
+    border-radius: 2px;
+}
+
+.menu-icon::before {
+    top: -6px;
+}
+
+.menu-icon::after {
+    top: 6px;
+}
+
+.theme-icon {
+    position: relative;
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--vh-icon);
+    box-sizing: border-box;
+    transition: all 0.35s ease;
+}
+
+.theme-icon::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--vh-surface);
+    transition: background-color 0.35s ease, opacity 0.35s ease;
+}
+
+.theme-toggle.is-dark .theme-icon {
+    background-color: var(--vh-icon);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+}
+
+.theme-toggle.is-dark .theme-icon::after {
+    opacity: 0;
 }
 
 .sidebar {
-    position: relative;
-    height: 625px;
+    position: absolute;
+    top: 52px;
     left: 0;
-    width: auto;
-    background-color: rgba(142, 166, 255, 0.2);
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    pointer-events: none;
+    height: calc(100vh - 250px);
+    min-height: 360px;
+    width: 110px;
+    background-color: var(--vh-surface);
     backdrop-filter: blur(10px); /* Este añade un efecto de desenfoque al fondo de la barra lateral similar al aero */
     padding: 10px;
     font-family: Monocraft Nerd Font, monospace;
-    color: #75e1a0;
-    z-index: 5;
+    color: var(--vh-text);
+    z-index: 1002;
     overflow-y: auto;
+    border-radius: 10px;
+    margin-top: 0;
+    border: 1px solid var(--vh-border);
+    transition: opacity 0.24s ease, transform 0.24s ease, visibility 0.24s ease, background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+}
+
+.toggleable-sidebar.is-open .sidebar {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
 }
 
 .sidebar h2 {
     text-align: center;
+    margin: 8px 0 12px;
 }
 
 .sidebar button {
     display: block;
-    width: 90%;
+    width: 100%;
     margin: 10px auto;
-    padding: 10px;
-    background-color: rgba(117, 225, 160, 0.2);
+    padding: 8px;
+    background-color: var(--vh-button-bg);
     border: none;
-    color: #75e1a0;
+    color: var(--vh-text);
     font-family: Monocraft Nerd Font, monospace;
+    font-size: 13px;
     cursor: pointer;
     backdrop-filter: blur(10px); /* Este añade un efecto de desenfoque al fondo del botón similar al aero */
+    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .sidebar button:hover {
-    background-color: rgba(117, 225, 160, 0.4);
+    background-color: var(--vh-button-hover);
+}
+
+.home-panels {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
+    gap: 10px;
+    margin: 5px;
+    align-items: start;
+    min-height: calc(100vh - 280px);
+}
+
+.gadget {
+    min-width: 0;
+}
+
+.gadget-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.gadget-head h3 {
+    margin: 0;
+}
+
+.gadget-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.quick-access-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.access-gadget {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: #ffffff;
+}
+
+.access-gadget h3,
+.access-gadget p,
+.access-gadget label,
+.access-gadget div {
+    color: #ffffff;
+}
+
+.access-intro {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.access-links-grid {
+    margin-top: 2px;
+}
+
+.access-gadget form {
+    margin-top: 0;
+}
+
+.hidden-submit-form {
+    display: none;
+}
+
+.quick-links-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.gadget-mini-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--vh-border);
+    border-radius: 8px;
+    background-color: var(--vh-button-bg);
+    color: var(--vh-icon);
+    cursor: pointer;
+    font-family: Monocraft Nerd Font, monospace;
+    font-size: 13px;
+    line-height: 1;
+    transition: background-color 0.2s ease;
+}
+
+.gadget-mini-btn:hover {
+    background-color: var(--vh-button-hover);
 }
 
 .login-screen {
-    background-color: rgba(117, 225, 160, 0.2);
+    background-color: var(--vh-surface-strong);
     color: #76e0a172;
-    padding: 222px 0px;
+    padding: 50px 20px;
     font-family: Monocraft Nerd Font, monospace;
     font-size: large;
-    margin-left:5px;
-    margin-right: 5px;
+    margin: 0;
     text-align: center;
+    width: auto;
+    min-height: 320px;
+    box-sizing: border-box;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--vh-border);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
 }
 
 .login-screen label{
-    color: white;
+    color: var(--vh-panel-text);
+}
+
+.auth-message {
+    border-radius: 8px;
+    margin: 0 auto 12px auto;
+    padding: 8px 10px;
+    width: 78%;
+    font-size: 14px;
+}
+
+.auth-error {
+    background-color: rgba(255, 120, 120, 0.2);
+    color: #ffd6d6;
+}
+
+.auth-success {
+    background-color: rgba(117, 225, 160, 0.2);
+    color: #d8ffea;
 }
 
 .login-screen input{
-    background-color: rgba(127, 255, 212, 0.324);
-    color: white;
-    margin: 5px auto auto auto ;
-    padding: 5px;
-    width: 30%;
+    background-color: var(--vh-button-bg);
+    color: var(--vh-text);
+    margin: 5px auto auto auto;
+    padding: 8px 10px;
+    width: 46%;
     border-radius: 10px;
+    border: 1px solid var(--vh-border);
     font-family: Monocraft Nerd Font, monospace;
-    font-size: large;
+    font-size: 13px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.login-screen button{
-    background-color: rgba(127, 255, 212);
-    color: rgb(0, 0, 0);
-    border-radius: 10px;
-    font-size: large;
-    font-family: Monocraft Nerd Font, monospace;
+.login-screen input:focus {
+    background-color: var(--vh-button-hover);
+    border-color: var(--vh-border);
+    outline: none;
 }
 
-.login-screen button:hover{
-    background-color: rgba(0, 134, 90, 0.5);
-    color: white;
+.quick-links-grid button {
+    border: 1px solid var(--vh-border);
     border-radius: 10px;
-} 
+    background-color: var(--vh-button-bg);
+    color: var(--vh-text);
+    font-family: Monocraft Nerd Font, monospace;
+    font-size: 13px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.quick-links-grid button:hover {
+    background-color: var(--vh-button-hover);
+    transform: translateY(-1px);
+}
+
+.linux-news-panel {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    min-height: 320px;
+    max-height: none;
+    overflow-y: auto;
+    background-color: var(--vh-surface-strong);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    z-index: 7;
+    font-family: Monocraft Nerd Font, monospace;
+    color: var(--vh-text-soft);
+    box-sizing: border-box;
+    border: 1px solid var(--vh-border);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+}
+
+.linux-news-panel h3 {
+    margin: 0 0 15px 0;
+    text-align: center;
+}
+
+.news-filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.news-filter-btn {
+    border: 1px solid var(--vh-border);
+    border-radius: 10px;
+    background-color: var(--vh-button-bg);
+    color: var(--vh-text);
+    font-family: Monocraft Nerd Font, monospace;
+    font-size: 12px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.news-filter-btn:hover,
+.news-filter-btn.is-active {
+    background-color: var(--vh-button-hover);
+}
+
+.system-status-panel {
+    grid-column: 1 / -1;
+}
+
+.system-status-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.system-status-list li {
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.news-section-title {
+    margin-top: 24px !important;
+}
+
+.linux-news-panel ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.linux-news-panel li {
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.linux-news-panel a {
+    color: var(--vh-panel-text);
+    text-decoration: none;
+}
+
+.linux-news-panel a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-left: 3%;
+        padding-right: 3%;
+    }
+
+    .header-controls {
+        left: 6px;
+        top: 6px;
+    }
+
+    .sidebar {
+        height: auto;
+        min-height: 240px;
+        width: 110px;
+    }
+
+    .home-panels {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+
+    .linux-news-panel {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: auto;
+        max-height: 240px;
+        min-height: auto;
+        margin: 0;
+    }
+
+    .quick-links-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .login-screen {
+        width: auto;
+        min-height: auto;
+        padding: 30px 15px;
+    }
+
+    .linux-news-panel {
+        min-height: auto;
+    }
+
+    .login-screen input {
+        width: 72%;
+    }
+}
 
 footer {
     position: fixed;
@@ -110,11 +585,18 @@ footer {
     width: auto; /* mantiene el ancho relativo al body */
     z-index: 5;
     margin: auto 5px 5px 5px;
-    background-color: rgba(142, 166, 255, 0.2);
+    background-color: var(--vh-surface);
     text-align: center;
     padding: 10px 0;
     font-size: 14px;
     font-family: Monocraft Nerd Font, monospace;
-    color: #75e1a0;
+    color: var(--vh-text);
     backdrop-filter: blur(10px); /* Este añade un efecto de desenfoque al fondo del footer similar al aero */
+    border-top: 1px solid var(--vh-border);
+    transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+}
+
+.admin-wrapper {
+    position: relative;
+    z-index: 1;
 }
