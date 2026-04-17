@@ -17,33 +17,29 @@ class JsonUserStore
 
     public function bootstrapAdminFromEnv(): void
     {
-        $this->ensureStore();
-
         $adminUsername = (string) env('ADMIN_USERNAME', 'admin');
         $adminPassword = (string) env('ADMIN_PASSWORD', 'ChangeMeNow123!');
 
-        $users = $this->readUsers();
+		$this->updateUsers(function (array &$users) use ($adminUsername, $adminPassword): void {
+			foreach ($users as $user) {
+				if (($user['role'] ?? '') === 'admin' && ($user['username'] ?? '') === $adminUsername) {
+					return;
+				}
+			}
 
-        foreach ($users as $user) {
-            if (($user['role'] ?? '') === 'admin' && ($user['username'] ?? '') === $adminUsername) {
-                return;
-            }
-        }
-
-        $users[] = [
-            'id' => Str::uuid()->toString(),
-            'username' => $adminUsername,
-            'password_hash' => Hash::make($adminPassword),
-            'role' => 'admin',
-            'is_active' => true,
-            'profile_image_path' => null,
-            'profile_frame_color' => '#6ea8ff',
-            'created_at' => now()->toDateTimeString(),
-            'last_login_at' => null,
-            'last_seen_at' => null,
-        ];
-
-        $this->writeUsers($users);
+			$users[] = [
+				'id' => Str::uuid()->toString(),
+				'username' => $adminUsername,
+				'password_hash' => Hash::make($adminPassword),
+				'role' => 'admin',
+				'is_active' => true,
+				'profile_image_path' => null,
+				'profile_frame_color' => '#6ea8ff',
+				'created_at' => now()->toDateTimeString(),
+				'last_login_at' => null,
+				'last_seen_at' => null,
+			];
+		});
     }
 
     public function allPublicUsers(): array
@@ -106,24 +102,23 @@ class JsonUserStore
             throw new RuntimeException('Debes indicar un username valido.');
         }
 
-        $users = $this->readUsers();
-        $updated = false;
-        $now = now()->toDateTimeString();
+        $this->updateUsers(function (array &$users) use ($username): void {
+            $updated = false;
+            $now = now()->toDateTimeString();
 
-        foreach ($users as &$user) {
-            if (($user['username'] ?? '') === $username) {
-                $user['last_seen_at'] = $now;
-                $updated = true;
-                break;
+            foreach ($users as &$user) {
+                if (($user['username'] ?? '') === $username) {
+                    $user['last_seen_at'] = $now;
+                    $updated = true;
+                    break;
+                }
             }
-        }
-        unset($user);
+            unset($user);
 
-        if (!$updated) {
-            throw new RuntimeException('No existe un usuario con ese username.');
-        }
-
-        $this->writeUsers($users);
+            if (!$updated) {
+                throw new RuntimeException('No existe un usuario con ese username.');
+            }
+        });
     }
 
     public function createUser(string $username, string $password, string $role = 'user'): array
@@ -134,32 +129,33 @@ class JsonUserStore
             throw new RuntimeException('El username no puede estar vacio.');
         }
 
-        if ($this->findByUsername($username)) {
-            throw new RuntimeException('Ese username ya existe.');
-        }
+        return $this->updateUsers(function (array &$users) use ($username, $password, $role): array {
+            foreach ($users as $user) {
+                if (($user['username'] ?? '') === $username) {
+                    throw new RuntimeException('Ese username ya existe.');
+                }
+            }
 
-        $users = $this->readUsers();
+            $record = [
+                'id' => Str::uuid()->toString(),
+                'username' => $username,
+                'password_hash' => Hash::make($password),
+                'role' => $role === 'admin' ? 'admin' : 'user',
+                'is_active' => true,
+                'profile_image_path' => null,
+                'profile_frame_color' => '#6ea8ff',
+                'created_at' => now()->toDateTimeString(),
+                'last_login_at' => null,
+                'last_seen_at' => null,
+            ];
 
-        $record = [
-            'id' => Str::uuid()->toString(),
-            'username' => $username,
-            'password_hash' => Hash::make($password),
-            'role' => $role === 'admin' ? 'admin' : 'user',
-            'is_active' => true,
-            'profile_image_path' => null,
-            'profile_frame_color' => '#6ea8ff',
-            'created_at' => now()->toDateTimeString(),
-            'last_login_at' => null,
-            'last_seen_at' => null,
-        ];
+            $users[] = $record;
 
-        $users[] = $record;
-        $this->writeUsers($users);
-
-        return [
-            'username' => $record['username'],
-            'role' => $record['role'],
-        ];
+            return [
+                'username' => $record['username'],
+                'role' => $record['role'],
+            ];
+        });
     }
 
     public function updatePassword(string $username, string $newPassword): void
@@ -170,23 +166,22 @@ class JsonUserStore
             throw new RuntimeException('Debes indicar un username valido.');
         }
 
-        $users = $this->readUsers();
-        $updated = false;
+        $this->updateUsers(function (array &$users) use ($username, $newPassword): void {
+            $updated = false;
 
-        foreach ($users as &$user) {
-            if (($user['username'] ?? '') === $username) {
-                $user['password_hash'] = Hash::make($newPassword);
-                $updated = true;
-                break;
+            foreach ($users as &$user) {
+                if (($user['username'] ?? '') === $username) {
+                    $user['password_hash'] = Hash::make($newPassword);
+                    $updated = true;
+                    break;
+                }
             }
-        }
-        unset($user);
+            unset($user);
 
-        if (!$updated) {
-            throw new RuntimeException('No existe un usuario con ese username.');
-        }
-
-        $this->writeUsers($users);
+            if (!$updated) {
+                throw new RuntimeException('No existe un usuario con ese username.');
+            }
+        });
     }
 
     public function verifyPassword(string $username, string $password): bool
@@ -208,32 +203,31 @@ class JsonUserStore
             throw new RuntimeException('Debes indicar un username valido.');
         }
 
-        $users = $this->readUsers();
-        $updated = false;
+        $this->updateUsers(function (array &$users) use ($username, $profileImagePath, $profileFrameColor): void {
+            $updated = false;
 
-        foreach ($users as &$user) {
-            if (($user['username'] ?? '') !== $username) {
-                continue;
+            foreach ($users as &$user) {
+                if (($user['username'] ?? '') !== $username) {
+                    continue;
+                }
+
+                if ($profileImagePath !== null) {
+                    $user['profile_image_path'] = $profileImagePath;
+                }
+
+                if ($profileFrameColor !== null) {
+                    $user['profile_frame_color'] = $profileFrameColor;
+                }
+
+                $updated = true;
+                break;
             }
+            unset($user);
 
-            if ($profileImagePath !== null) {
-                $user['profile_image_path'] = $profileImagePath;
+            if (!$updated) {
+                throw new RuntimeException('No existe un usuario con ese username.');
             }
-
-            if ($profileFrameColor !== null) {
-                $user['profile_frame_color'] = $profileFrameColor;
-            }
-
-            $updated = true;
-            break;
-        }
-        unset($user);
-
-        if (!$updated) {
-            throw new RuntimeException('No existe un usuario con ese username.');
-        }
-
-        $this->writeUsers($users);
+        });
     }
 
     public function recordLogin(string $username): void
@@ -244,25 +238,24 @@ class JsonUserStore
             throw new RuntimeException('Debes indicar un username valido.');
         }
 
-        $users = $this->readUsers();
-        $updated = false;
-        $loginAt = date('Y-m-d H:i:s');
+		$this->updateUsers(function (array &$users) use ($username): void {
+			$updated = false;
+			$loginAt = date('Y-m-d H:i:s');
 
-        foreach ($users as &$user) {
-            if (($user['username'] ?? '') === $username) {
-                $user['last_login_at'] = $loginAt;
-                $user['last_seen_at'] = $loginAt;
-                $updated = true;
-                break;
-            }
-        }
-        unset($user);
+			foreach ($users as &$user) {
+				if (($user['username'] ?? '') === $username) {
+					$user['last_login_at'] = $loginAt;
+					$user['last_seen_at'] = $loginAt;
+					$updated = true;
+					break;
+				}
+			}
+			unset($user);
 
-        if (!$updated) {
-            throw new RuntimeException('No existe un usuario con ese username.');
-        }
-
-        $this->writeUsers($users);
+			if (!$updated) {
+				throw new RuntimeException('No existe un usuario con ese username.');
+			}
+		});
     }
 
     public function generateRandomUsername(string $prefix = 'user'): string
@@ -305,23 +298,30 @@ class JsonUserStore
             throw new RuntimeException('Debes indicar un username valido.');
         }
 
-        $users = $this->readUsers();
-        $updated = false;
+        $this->updateUsers(function (array &$users) use ($username): void {
+            $updated = false;
 
-        foreach ($users as &$user) {
-            if (($user['username'] ?? '') === $username) {
-                $user['is_active'] = false;
-                $updated = true;
-                break;
+            if ($this->countAdminsFromUsers($users, true) <= 1) {
+                foreach ($users as $user) {
+                    if (($user['username'] ?? '') === $username && ($user['role'] ?? 'user') === 'admin') {
+                        throw new RuntimeException('No puedes desactivar al ultimo admin activo.');
+                    }
+                }
             }
-        }
-        unset($user);
 
-        if (!$updated) {
-            throw new RuntimeException('No existe un usuario con ese username.');
-        }
+            foreach ($users as &$user) {
+                if (($user['username'] ?? '') === $username) {
+                    $user['is_active'] = false;
+                    $updated = true;
+                    break;
+                }
+            }
+            unset($user);
 
-        $this->writeUsers($users);
+            if (!$updated) {
+                throw new RuntimeException('No existe un usuario con ese username.');
+            }
+        });
     }
 
     public function activateUser(string $username): void
@@ -332,23 +332,22 @@ class JsonUserStore
             throw new RuntimeException('Debes indicar un username valido.');
         }
 
-        $users = $this->readUsers();
-        $updated = false;
+		$this->updateUsers(function (array &$users) use ($username): void {
+			$updated = false;
 
-        foreach ($users as &$user) {
-            if (($user['username'] ?? '') === $username) {
-                $user['is_active'] = true;
-                $updated = true;
-                break;
-            }
-        }
-        unset($user);
+			foreach ($users as &$user) {
+				if (($user['username'] ?? '') === $username) {
+					$user['is_active'] = true;
+					$updated = true;
+					break;
+				}
+			}
+			unset($user);
 
-        if (!$updated) {
-            throw new RuntimeException('No existe un usuario con ese username.');
-        }
-
-        $this->writeUsers($users);
+			if (!$updated) {
+				throw new RuntimeException('No existe un usuario con ese username.');
+			}
+		});
     }
 
     public function deleteUser(string $username): void
@@ -359,18 +358,38 @@ class JsonUserStore
             throw new RuntimeException('Debes indicar un username valido.');
         }
 
-        $users = $this->readUsers();
-        $originalCount = count($users);
+        $this->updateUsers(function (array &$users) use ($username): void {
+            $targetUser = null;
 
-        $users = array_filter($users, function ($user) use ($username) {
-            return ($user['username'] ?? '') !== $username;
+            foreach ($users as $user) {
+                if (($user['username'] ?? '') === $username) {
+                    $targetUser = $user;
+                    break;
+                }
+            }
+
+            if (!$targetUser) {
+                throw new RuntimeException('No existe un usuario con ese username.');
+            }
+
+            if (($targetUser['role'] ?? 'user') === 'admin' && $this->countAdminsFromUsers($users) <= 1) {
+                throw new RuntimeException('No puedes eliminar al ultimo admin.');
+            }
+
+            $users = array_values(array_filter($users, function ($user) use ($username) {
+                return ($user['username'] ?? '') !== $username;
+            }));
         });
+    }
 
-        if (count($users) === $originalCount) {
-            throw new RuntimeException('No existe un usuario con ese username.');
-        }
+    public function countAdmins(): int
+    {
+        return $this->countAdminsFromUsers($this->readUsers());
+    }
 
-        $this->writeUsers($users);
+    public function countActiveAdmins(): int
+    {
+        return $this->countAdminsFromUsers($this->readUsers(), true);
     }
 
     private function ensureStore(): void
@@ -384,6 +403,65 @@ class JsonUserStore
         if (!file_exists($this->filePath)) {
             file_put_contents($this->filePath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         }
+    }
+
+    private function updateUsers(callable $callback): mixed
+    {
+        $this->ensureStore();
+
+        $handle = fopen($this->filePath, 'c+b');
+
+        if ($handle === false) {
+            throw new RuntimeException('No se pudo abrir la base de usuarios JSON.');
+        }
+
+        try {
+            if (!flock($handle, LOCK_EX)) {
+                throw new RuntimeException('No se pudo bloquear la base de usuarios JSON.');
+            }
+
+            rewind($handle);
+            $content = stream_get_contents($handle);
+            $decoded = json_decode($content !== false ? $content : '', true);
+            $users = is_array($decoded) ? $decoded : [];
+
+            $result = $callback($users);
+
+            $encoded = json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+            if ($encoded === false) {
+                throw new RuntimeException('No se pudo guardar la base de usuarios JSON.');
+            }
+
+            rewind($handle);
+            ftruncate($handle, 0);
+            fwrite($handle, $encoded);
+            fflush($handle);
+
+            return $result;
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
+        }
+    }
+
+    private function countAdminsFromUsers(array $users, bool $activeOnly = false): int
+    {
+        $count = 0;
+
+        foreach ($users as $user) {
+            if (($user['role'] ?? '') !== 'admin') {
+                continue;
+            }
+
+            if ($activeOnly && !($user['is_active'] ?? true)) {
+                continue;
+            }
+
+            $count++;
+        }
+
+        return $count;
     }
 
     private function readUsers(): array

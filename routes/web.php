@@ -373,7 +373,7 @@ Route::post('/login', function (Request $request, JsonUserStore $users) {
 	$users->recordLogin((string) $authUser['username']);
 
 	return redirect('/')->with('success', 'Sesion iniciada correctamente.');
-});
+})->middleware('throttle:login-ip');
 
 Route::post('/guest-login', function (Request $request) {
 	$request->session()->regenerate();
@@ -644,6 +644,11 @@ Route::post('/admin/users/deactivate', function (Request $request, JsonUserStore
 	]);
 
 	try {
+		$targetUser = $users->findByUsername((string) $validated['username']);
+		if ($targetUser && (($targetUser['role'] ?? 'user') === 'admin') && $users->countActiveAdmins() <= 1) {
+			return redirect('/admin/users')->with('error', 'No puedes desactivar al ultimo admin activo.');
+		}
+
 		$users->deactivateUser((string) $validated['username']);
 		return redirect('/admin/users')->with('success', 'Usuario ' . $validated['username'] . ' desactivado.');
 	} catch (RuntimeException $e) {
@@ -682,6 +687,11 @@ Route::post('/admin/users/delete', function (Request $request, JsonUserStore $us
 	]);
 
 	try {
+		$targetUser = $users->findByUsername((string) $validated['username']);
+		if ($targetUser && (($targetUser['role'] ?? 'user') === 'admin') && $users->countAdmins() <= 1) {
+			return redirect('/admin/users')->with('error', 'No puedes eliminar al ultimo admin.');
+		}
+
 		$users->deleteUser((string) $validated['username']);
 		return redirect('/admin/users')->with('success', 'Usuario ' . $validated['username'] . ' eliminado.');
 	} catch (RuntimeException $e) {

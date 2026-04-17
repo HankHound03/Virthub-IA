@@ -23,23 +23,22 @@ class ChatStore
 
     public function appendConversationMessage(string $fromUser, string $toUser, string $message): array
     {
-        $data = $this->readData();
-        $key = $this->conversationKey($fromUser, $toUser);
+        return $this->updateData(function (array &$data) use ($fromUser, $toUser, $message): array {
+            $key = $this->conversationKey($fromUser, $toUser);
 
-        $entry = [
-            'from' => $fromUser,
-            'to' => $toUser,
-            'message' => $message,
-            'created_at' => date('Y-m-d H:i:s'),
-        ];
+            $entry = [
+                'from' => $fromUser,
+                'to' => $toUser,
+                'message' => $message,
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
 
-        $data['conversations'][$key] = $data['conversations'][$key] ?? [];
-        $data['conversations'][$key][] = $entry;
-        $data['conversations'][$key] = array_slice($data['conversations'][$key], -100);
+            $data['conversations'][$key] = $data['conversations'][$key] ?? [];
+            $data['conversations'][$key][] = $entry;
+            $data['conversations'][$key] = array_slice($data['conversations'][$key], -100);
 
-        $this->writeData($data);
-
-        return $entry;
+            return $entry;
+        });
     }
 
     public function getBroadcastMessages(): array
@@ -51,21 +50,19 @@ class ChatStore
 
     public function appendBroadcastMessage(string $fromUser, string $message): array
     {
-        $data = $this->readData();
+        return $this->updateData(function (array &$data) use ($fromUser, $message): array {
+            $entry = [
+                'from' => $fromUser,
+                'message' => $message,
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
 
-        $entry = [
-            'from' => $fromUser,
-            'message' => $message,
-            'created_at' => date('Y-m-d H:i:s'),
-        ];
+            $data['broadcasts'] = $data['broadcasts'] ?? [];
+            $data['broadcasts'][] = $entry;
+            $data['broadcasts'] = array_slice($data['broadcasts'], -100);
 
-        $data['broadcasts'] = $data['broadcasts'] ?? [];
-        $data['broadcasts'][] = $entry;
-        $data['broadcasts'] = array_slice($data['broadcasts'], -100);
-
-        $this->writeData($data);
-
-        return $entry;
+            return $entry;
+        });
     }
 
     private function conversationKey(string $firstUser, string $secondUser): string
@@ -100,6 +97,53 @@ class ChatStore
                 'conversations' => new \stdClass(),
                 'broadcasts' => [],
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        }
+    }
+
+    private function updateData(callable $callback): mixed
+    {
+        $this->ensureStore();
+
+        $handle = fopen($this->filePath, 'c+b');
+
+        if ($handle === false) {
+            throw new RuntimeException('No se pudo abrir el chat JSON.');
+        }
+
+        try {
+            if (!flock($handle, LOCK_EX)) {
+                throw new RuntimeException('No se pudo bloquear el chat JSON.');
+            }
+
+            rewind($handle);
+            $content = stream_get_contents($handle);
+            $decoded = json_decode($content !== false ? $content : '', true);
+
+            $data = is_array($decoded) ? $decoded : [
+                'conversations' => [],
+                'broadcasts' => [],
+            ];
+
+            $data['conversations'] = is_array($data['conversations'] ?? null) ? $data['conversations'] : [];
+            $data['broadcasts'] = is_array($data['broadcasts'] ?? null) ? $data['broadcasts'] : [];
+
+            $result = $callback($data);
+
+            $encoded = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+            if ($encoded === false) {
+                throw new RuntimeException('No se pudo guardar el chat JSON.');
+            }
+
+            rewind($handle);
+            ftruncate($handle, 0);
+            fwrite($handle, $encoded);
+            fflush($handle);
+
+            return $result;
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
         }
     }
 

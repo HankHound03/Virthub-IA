@@ -36,25 +36,24 @@ class ForumStore
             throw new RuntimeException('El contenido del post no puede estar vacio.');
         }
 
-        $posts = $this->readPosts();
-        $record = [
-            'id' => Str::uuid()->toString(),
-            'author' => $author,
-            'title' => $title,
-            'content' => $content,
-            'image_path' => null,
-            'reactions' => [],
-            'comments' => [],
-            'reports' => [],
-            'created_at' => date('Y-m-d H:i:s'),
-        ];
+        return $this->updatePosts(function (array &$posts) use ($author, $content, $title): array {
+            $record = [
+                'id' => Str::uuid()->toString(),
+                'author' => $author,
+                'title' => $title,
+                'content' => $content,
+                'image_path' => null,
+                'reactions' => [],
+                'comments' => [],
+                'reports' => [],
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
 
-        $posts[] = $record;
-        $posts = array_slice($posts, -300);
+            $posts[] = $record;
+            $posts = array_slice($posts, -300);
 
-        $this->writePosts($posts);
-
-        return $record;
+            return $record;
+        });
     }
 
     public function findById(string $postId): ?array
@@ -76,23 +75,22 @@ class ForumStore
 
     public function setPostImagePath(string $postId, ?string $imagePath): void
     {
-        $posts = $this->readPosts();
-        $updated = false;
+        $this->updatePosts(function (array &$posts) use ($postId, $imagePath): void {
+            $updated = false;
 
-        foreach ($posts as &$post) {
-            if (($post['id'] ?? '') === $postId) {
-                $post['image_path'] = $imagePath;
-                $updated = true;
-                break;
+            foreach ($posts as &$post) {
+                if (($post['id'] ?? '') === $postId) {
+                    $post['image_path'] = $imagePath;
+                    $updated = true;
+                    break;
+                }
             }
-        }
-        unset($post);
+            unset($post);
 
-        if (!$updated) {
-            throw new RuntimeException('No existe una publicacion con ese id.');
-        }
-
-        $this->writePosts($posts);
+            if (!$updated) {
+                throw new RuntimeException('No existe una publicacion con ese id.');
+            }
+        });
     }
 
     public function toggleReaction(string $postId, string $username, string $reaction): array
@@ -105,11 +103,11 @@ class ForumStore
             throw new RuntimeException('Datos invalidos para reaccionar.');
         }
 
-        $posts = $this->readPosts();
-        $updatedPost = null;
-        $updated = false;
+		return $this->updatePosts(function (array &$posts) use ($postId, $username, $reaction): array {
+			$updatedPost = null;
+			$updated = false;
 
-        foreach ($posts as &$post) {
+			foreach ($posts as &$post) {
             if (($post['id'] ?? '') !== $postId) {
                 continue;
             }
@@ -136,15 +134,14 @@ class ForumStore
             $updated = true;
             break;
         }
-        unset($post);
+            unset($post);
 
-        if (!$updated) {
-            throw new RuntimeException('No existe una publicacion con ese id.');
-        }
+            if (!$updated) {
+                throw new RuntimeException('No existe una publicacion con ese id.');
+            }
 
-        $this->writePosts($posts);
-
-        return $updatedPost ?? [];
+            return $updatedPost ?? [];
+        });
     }
 
     public function deletePost(string $postId): ?array
@@ -155,26 +152,27 @@ class ForumStore
             return null;
         }
 
-        $posts = $this->readPosts();
-        $kept = [];
-        $deleted = null;
+        return $this->updatePosts(function (array &$posts) use ($postId): ?array {
+            $kept = [];
+            $deleted = null;
 
-        foreach ($posts as $post) {
-            if (($post['id'] ?? '') === $postId) {
-                $deleted = $post;
-                continue;
+            foreach ($posts as $post) {
+                if (($post['id'] ?? '') === $postId) {
+                    $deleted = $post;
+                    continue;
+                }
+
+                $kept[] = $post;
             }
 
-            $kept[] = $post;
-        }
+            if (!$deleted) {
+                return null;
+            }
 
-        if (!$deleted) {
-            return null;
-        }
+            $posts = $kept;
 
-        $this->writePosts($kept);
-
-        return $deleted;
+            return $deleted;
+        });
     }
 
     public function addComment(string $postId, string $author, string $content): array
@@ -187,11 +185,11 @@ class ForumStore
             throw new RuntimeException('Datos invalidos para comentar.');
         }
 
-        $posts = $this->readPosts();
-        $updated = false;
-        $updatedPost = null;
+		return $this->updatePosts(function (array &$posts) use ($postId, $author, $content): array {
+			$updated = false;
+			$updatedPost = null;
 
-        foreach ($posts as &$post) {
+			foreach ($posts as &$post) {
             if (($post['id'] ?? '') !== $postId) {
                 continue;
             }
@@ -208,15 +206,14 @@ class ForumStore
             $updated = true;
             break;
         }
-        unset($post);
+            unset($post);
 
-        if (!$updated) {
-            throw new RuntimeException('No existe una publicacion con ese id.');
-        }
+            if (!$updated) {
+                throw new RuntimeException('No existe una publicacion con ese id.');
+            }
 
-        $this->writePosts($posts);
-
-        return $updatedPost ?? [];
+            return $updatedPost ?? [];
+        });
     }
 
     public function addReport(string $postId, string $reporter, string $reason): array
@@ -233,11 +230,11 @@ class ForumStore
             $reason = 'Sin detalle';
         }
 
-        $posts = $this->readPosts();
-        $updated = false;
-        $updatedPost = null;
+		return $this->updatePosts(function (array &$posts) use ($postId, $reporter, $reason): array {
+			$updated = false;
+			$updatedPost = null;
 
-        foreach ($posts as &$post) {
+			foreach ($posts as &$post) {
             if (($post['id'] ?? '') !== $postId) {
                 continue;
             }
@@ -254,15 +251,14 @@ class ForumStore
             $updated = true;
             break;
         }
-        unset($post);
+            unset($post);
 
-        if (!$updated) {
-            throw new RuntimeException('No existe una publicacion con ese id.');
-        }
+            if (!$updated) {
+                throw new RuntimeException('No existe una publicacion con ese id.');
+            }
 
-        $this->writePosts($posts);
-
-        return $updatedPost ?? [];
+            return $updatedPost ?? [];
+        });
     }
 
     public function removeReport(string $postId, string $reportId): bool
@@ -274,11 +270,11 @@ class ForumStore
             return false;
         }
 
-        $posts = $this->readPosts();
-        $updated = false;
-        $removed = false;
+		return $this->updatePosts(function (array &$posts) use ($postId, $reportId): bool {
+			$updated = false;
+			$removed = false;
 
-        foreach ($posts as &$post) {
+			foreach ($posts as &$post) {
             if (($post['id'] ?? '') !== $postId) {
                 continue;
             }
@@ -299,13 +295,10 @@ class ForumStore
             $updated = true;
             break;
         }
-        unset($post);
+            unset($post);
 
-        if ($updated) {
-            $this->writePosts($posts);
-        }
-
-        return $removed;
+            return $removed;
+        });
     }
 
     private function ensureStore(): void
@@ -318,6 +311,46 @@ class ForumStore
 
         if (!file_exists($this->filePath)) {
             file_put_contents($this->filePath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        }
+    }
+
+    private function updatePosts(callable $callback): mixed
+    {
+        $this->ensureStore();
+
+        $handle = fopen($this->filePath, 'c+b');
+
+        if ($handle === false) {
+            throw new RuntimeException('No se pudo abrir el foro JSON.');
+        }
+
+        try {
+            if (!flock($handle, LOCK_EX)) {
+                throw new RuntimeException('No se pudo bloquear el foro JSON.');
+            }
+
+            rewind($handle);
+            $content = stream_get_contents($handle);
+            $decoded = json_decode($content !== false ? $content : '', true);
+            $posts = is_array($decoded) ? $decoded : [];
+
+            $result = $callback($posts);
+
+            $encoded = json_encode($posts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+            if ($encoded === false) {
+                throw new RuntimeException('No se pudo guardar el foro JSON.');
+            }
+
+            rewind($handle);
+            ftruncate($handle, 0);
+            fwrite($handle, $encoded);
+            fflush($handle);
+
+            return $result;
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
         }
     }
 
