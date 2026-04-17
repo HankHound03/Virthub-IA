@@ -744,8 +744,19 @@ Route::get('/chat/conversation/{username}', function (Request $request, string $
 		return response()->json(['error' => 'Usuario no encontrado'], 404);
 	}
 
+	$messages = $chatStore->getConversationMessages((string) $authUser['username'], $username);
+	
+	// Enriquecer mensajes con profile_image_path del remitente
+	$enrichedMessages = array_map(function ($message) use ($users) {
+		$sender = $users->findByUsername($message['from'] ?? '');
+		if ($sender) {
+			$message['profile_image_path'] = $sender['profile_image_path'] ?? null;
+		}
+		return $message;
+	}, $messages);
+
 	return response()->json([
-		'messages' => $chatStore->getConversationMessages((string) $authUser['username'], $username),
+		'messages' => $enrichedMessages,
 	], 200);
 });
 
@@ -773,6 +784,12 @@ Route::post('/chat/conversation/{username}', function (Request $request, string 
 		$username,
 		(string) $validated['message']
 	);
+	
+	// Enriquecer mensaje con profile_image_path del remitente
+	$sender = $users->findByUsername($message['from'] ?? '');
+	if ($sender) {
+		$message['profile_image_path'] = $sender['profile_image_path'] ?? null;
+	}
 
 	return response()->json(['message' => $message], 201);
 });
@@ -786,7 +803,18 @@ Route::get('/chat/broadcast', function (Request $request, JsonUserStore $users, 
 
 	$users->touchPresence((string) $authUser['username']);
 
-	return response()->json(['messages' => $chatStore->getBroadcastMessages()], 200);
+	$messages = $chatStore->getBroadcastMessages();
+	
+	// Enriquecer mensajes con información de perfil del usuario
+	$enrichedMessages = array_map(function ($message) use ($users) {
+		$sender = $users->findByUsername($message['from'] ?? '');
+		if ($sender) {
+			$message['profile_image_path'] = $sender['profile_image_path'] ?? null;
+		}
+		return $message;
+	}, $messages);
+
+	return response()->json(['messages' => $enrichedMessages], 200);
 });
 
 Route::post('/chat/broadcast', function (Request $request, JsonUserStore $users, ChatStore $chatStore) {

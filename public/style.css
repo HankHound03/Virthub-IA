@@ -47,7 +47,7 @@ body::after {
 }
 
 body::before {
-    background-image: linear-gradient(180deg, rgba(7, 14, 24, 0.10), rgba(7, 14, 24, 0.20)), url('/pics/background.jpg');
+    background-image: linear-gradient(180deg, rgba(7, 14, 24, 0.06), rgba(7, 14, 24, 0.14)), url('/pics/background.jpg?v=20260417-light');
     opacity: 1;
 }
 
@@ -77,6 +77,27 @@ body.dark-mode::before {
 
 body.dark-mode::after {
     opacity: 1;
+}
+
+body:not(.dark-mode) {
+    --vh-surface: rgba(10, 36, 54, 0.64);
+    --vh-surface-strong: rgba(10, 42, 62, 0.7);
+    --vh-border: rgba(184, 236, 255, 0.28);
+    --vh-icon: #ecf9ff;
+    --vh-text: #dbf4ff;
+    --vh-text-soft: #eef9ff;
+    --vh-button-bg: rgba(67, 145, 179, 0.38);
+    --vh-button-hover: rgba(92, 176, 212, 0.56);
+    --vh-panel-text: #f3fbff;
+}
+
+body:not(.dark-mode) header,
+body:not(.dark-mode) .linux-news-panel,
+body:not(.dark-mode) .login-screen,
+body:not(.dark-mode) .sidebar,
+body:not(.dark-mode) .profile-menu,
+body:not(.dark-mode) footer {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.48);
 }
 
 header {

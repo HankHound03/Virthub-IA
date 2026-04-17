@@ -46,7 +46,7 @@
             <div class="chat-tabs" id="chatTabs">
                 <button type="button" class="chat-tab-btn active" onclick="switchChatTab('messages')" data-tab="messages">Mensajes</button>
                 <button type="button" class="chat-tab-btn" onclick="switchChatTab('users')" data-tab="users">Usuarios</button>
-                <button type="button" class="chat-tab-btn" onclick="switchChatTab('broadcast')" data-tab="broadcast">@if (($currentUser['role'] ?? 'user') === 'admin')Global@else Notificaciones @endif</button>
+                <button type="button" class="chat-tab-btn" onclick="switchChatTab('broadcast')" data-tab="broadcast">Anuncios</button>
             </div>
 
             <div id="messagesView" class="chat-view active">
@@ -81,7 +81,7 @@
             <iframe id="viewer"></iframe>
         </div>
     </div>
-    <footer>Codename Virthub v0.7b</footer>
+    <footer>Codename Virthub v0.8</footer>
     <script>
         const currentUserName = @json($currentUser['username'] ?? 'guest');
         const chatNotificationSoundUrl = @json(asset('sounds/chat-notificacion.mp3'));
@@ -219,6 +219,15 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = 'chat-message' + ((message.from || '') === ownUser ? ' own' : '');
 
+                const header = document.createElement('div');
+                header.className = 'chat-message-header';
+
+                const sender = message.from || '';
+                const senderProfile = { username: sender, profile_image_path: message.profile_image_path || null };
+                
+                const avatarNode = buildAvatarNode(senderProfile, 'chat-message-avatar');
+                header.appendChild(avatarNode);
+
                 const body = document.createElement('p');
                 const messageText = message.message || '';
 
@@ -232,10 +241,10 @@
                 }
 
                 const meta = document.createElement('small');
-                const sender = message.from || '';
                 const timeLabel = safeTimeLabel(message.created_at);
                 meta.textContent = timeLabel ? `${sender}${sender ? ' • ' : ''}${timeLabel}` : sender;
 
+                wrapper.appendChild(header);
                 wrapper.appendChild(body);
                 wrapper.appendChild(meta);
                 container.appendChild(wrapper);
@@ -373,6 +382,29 @@
             }
         }
 
+        function userInitial(username) {
+            const value = String(username || 'U').trim();
+            return (value.charAt(0) || 'U').toUpperCase();
+        }
+
+        function buildAvatarNode(profile, className = 'chat-user-avatar') {
+            const avatar = document.createElement('span');
+            avatar.className = className;
+
+            const imagePath = (profile && profile.profile_image_path) ? String(profile.profile_image_path) : '';
+            if (imagePath) {
+                const img = document.createElement('img');
+                img.src = imagePath.charAt(0) === '/' ? imagePath : '/' + imagePath;
+                img.alt = 'avatar';
+                img.loading = 'lazy';
+                avatar.appendChild(img);
+                return avatar;
+            }
+
+            avatar.textContent = userInitial(profile && profile.username ? profile.username : 'U');
+            return avatar;
+        }
+
         async function loadUsersList() {
             const list = document.getElementById('chatUsersList');
             if (!list) return;
@@ -391,25 +423,53 @@
                 const otherUsers = (payload.users || []).filter(user => user.username !== getUserKey());
 
                 if (otherUsers.length === 0) {
-                    list.innerHTML = '<p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">No hay otros usuarios conectados.</p>';
+                    list.innerHTML = '<p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">No hay otros usuarios disponibles.</p>';
                     return;
                 }
 
                 list.innerHTML = '';
                 otherUsers.forEach(user => {
+                    const accountActive = user.account_active !== undefined ? !!user.account_active : !!user.is_active;
+                    const isOnline = (user.presence_status || (accountActive ? 'online' : 'offline')) === 'online';
+
                     const item = document.createElement('div');
                     item.className = 'chat-user-item';
-                    item.addEventListener('click', () => selectChatUser(user.username));
+                    if (!accountActive) {
+                        item.classList.add('inactive');
+                    } else {
+                        item.addEventListener('click', () => selectChatUser(user.username));
+                    }
+
+                    const main = document.createElement('div');
+                    main.className = 'chat-user-main';
+
+                    main.appendChild(buildAvatarNode({
+                        username: user.username,
+                        profile_image_path: user.profile_image_path || null,
+                    }));
 
                     const name = document.createElement('span');
+                    name.className = 'chat-user-name';
                     name.textContent = user.username;
+                    main.appendChild(name);
+
+                    const status = document.createElement('span');
+                    status.className = 'chat-user-status ' + (isOnline ? 'active' : 'inactive');
+                    status.title = isOnline ? 'Conectado recientemente' : 'Desconectado';
+                    main.appendChild(status);
+
+                    const right = document.createElement('div');
+                    right.style.display = 'flex';
+                    right.style.alignItems = 'center';
+                    right.style.gap = '6px';
 
                     const badge = document.createElement('span');
                     badge.className = 'chat-user-badge';
                     badge.textContent = user.role || 'user';
+                    right.appendChild(badge);
 
-                    item.appendChild(name);
-                    item.appendChild(badge);
+                    item.appendChild(main);
+                    item.appendChild(right);
                     list.appendChild(item);
                 });
             } catch (error) {
@@ -515,7 +575,7 @@
                 }
 
                 const messages = payload.messages || [];
-                renderChatMessages(messagesDiv, messages, 'Sin notificaciones aún.', getUserKey(), '[ANUNCIO]');
+                renderChatMessages(messagesDiv, messages, 'No hay anuncios aún.', getUserKey(), '[ANUNCIO]');
 
                 chatSnapshots.broadcast = messages.length;
             } catch (error) {
@@ -550,14 +610,18 @@
         }
 
         function startChatPolling() {
+            let notificationsPrimed = false;
+
             setInterval(async () => {
                 try {
                     if (chatContacts.length === 0) {
                         await loadUsersList();
                     }
 
+                    const shouldNotify = notificationsPrimed;
+
                     for (const contact of chatContacts) {
-                        await refreshConversationSilently(contact.username, true);
+                        await refreshConversationSilently(contact.username, shouldNotify);
                     }
 
                     const response = await apiFetch('/chat/broadcast');
@@ -569,19 +633,23 @@
 
                         if (messages.length > previousCount) {
                             const newMessages = messages.slice(previousCount);
-                            newMessages.forEach(message => {
-                                if ((message.from || '') !== getUserKey()) {
-                                    showChatNotification(`Broadcast de ${message.from || 'Sistema'}`, message.message || 'Nuevo anuncio disponible.');
-                                }
-                            });
+                            if (shouldNotify) {
+                                newMessages.forEach(message => {
+                                    if ((message.from || '') !== getUserKey()) {
+                                        showChatNotification(`Broadcast de ${message.from || 'Sistema'}`, message.message || 'Nuevo anuncio disponible.');
+                                    }
+                                });
+                            }
 
                             chatSnapshots.broadcast = messages.length;
 
                             if (document.getElementById('broadcastView')?.classList.contains('active')) {
-                                renderChatMessages(document.getElementById('broadcastMessages'), messages, 'Sin notificaciones aún.', getUserKey(), '[ANUNCIO]');
+                                renderChatMessages(document.getElementById('broadcastMessages'), messages, 'No hay anuncios aún.', getUserKey(), '[ANUNCIO]');
                             }
                         }
                     }
+
+                    notificationsPrimed = true;
                 } catch (error) {
                     // Silenciar errores temporales de polling.
                 }

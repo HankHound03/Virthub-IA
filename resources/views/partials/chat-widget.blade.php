@@ -70,7 +70,7 @@
             <div class="chat-tabs" id="chatTabs">
                 <button type="button" class="chat-tab-btn active" onclick="switchChatTab('messages')" data-tab="messages">Mensajes</button>
                 <button type="button" class="chat-tab-btn" onclick="switchChatTab('users')" data-tab="users">Usuarios</button>
-                <button type="button" class="chat-tab-btn" onclick="switchChatTab('broadcast')" data-tab="broadcast">@if (($currentUser['role'] ?? 'user') === 'admin')Global@else Notificaciones @endif</button>
+                <button type="button" class="chat-tab-btn" onclick="switchChatTab('broadcast')" data-tab="broadcast">Anuncios</button>
             </div>
 
             <div id="messagesView" class="chat-view active">

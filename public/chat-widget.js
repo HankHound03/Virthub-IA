@@ -317,7 +317,7 @@
             if (!res.ok) throw new Error(payload.error || 'No se pudieron cargar las notificaciones');
 
             const messages = payload.messages || [];
-            renderMessages(box, messages, 'Sin notificaciones aún.', currentUserName, '[ANUNCIO]');
+            renderMessages(box, messages, 'No hay anuncios aún.', currentUserName, '[ANUNCIO]');
             snapshots.broadcast = messages.length;
         } catch (error) {
             box.innerHTML = '<p style="text-align:center;color:var(--vh-text-soft);font-size:12px;padding:20px 10px;">' + error.message + '</p>';
@@ -438,7 +438,7 @@
 
                     snapshots.broadcast = messages.length;
                     if (document.getElementById('broadcastView') && document.getElementById('broadcastView').classList.contains('active')) {
-                        renderMessages(document.getElementById('broadcastMessages'), messages, 'Sin notificaciones aún.', currentUserName, '[ANUNCIO]');
+                        renderMessages(document.getElementById('broadcastMessages'), messages, 'No hay anuncios aún.', currentUserName, '[ANUNCIO]');
                     }
                 }
 

@@ -505,10 +505,11 @@
 <body>
     <header>
         <div class="header-controls">
-            <div class="toggleable-sidebar" onclick="toggleMenu(event)" aria-label="Abrir menu" title="Menu">
+            <div class= "toggleable-sidebar" onclick="toggleMenu(event)" aria-label="Abrir menu" title="Menu">
                 <span class="menu-icon" aria-hidden="true"></span>
                 <div class="sidebar" onclick="event.stopPropagation()">
-                    <button onclick="location.href='{{ url('/') }}'">Home</button>
+                    <button onclick="location.href='{{ url('/') }}'">Volver a Inicio</button>
+                    <button onclick="location.href='{{ url('/foro') }}'">Foro</button>
                     <button onclick="location.href='{{ url('/contenedor') }}'">Contenedor</button>
                 </div>
             </div>
@@ -516,6 +517,29 @@
                 <span class="theme-icon" aria-hidden="true"></span>
             </div>
         </div>
+        @if (!empty($currentUser) && ($currentUser['role'] ?? 'guest') !== 'guest')
+            @php
+                $headerProfileImage = (string) ($currentUser['profile_image_path'] ?? '');
+                $headerFrameColor = (string) ($currentUser['profile_frame_color'] ?? '#6ea8ff');
+                $headerInitial = strtoupper(substr((string) ($currentUser['username'] ?? 'U'), 0, 1));
+            @endphp
+            <div class="header-profile-dock toggleable-profile-menu" onclick="toggleProfileMenu(event)" title="Menu de perfil" aria-label="Menu de perfil">
+                <div class="profile-aero-frame profile-aero-frame-sm" style="--profile-frame-color: {{ $headerFrameColor }};">
+                    @if ($headerProfileImage !== '')
+                        <img src="{{ asset($headerProfileImage) }}" alt="Foto de perfil de {{ $currentUser['username'] }}" loading="lazy">
+                    @else
+                        <span>{{ $headerInitial }}</span>
+                    @endif
+                </div>
+                <div class="profile-menu" onclick="event.stopPropagation()">
+                    <button type="button" onclick="location.href='{{ url('/configuracion') }}'">Configuracion</button>
+                    <form method="POST" action="/logout">
+                        @csrf
+                        <button type="submit">Cerrar Sesion</button>
+                    </form>
+                </div>
+            </div>
+        @endif
         <h1>Admin de Usuarios - {{ $currentUser['username'] ?? 'admin' }}</h1>
     </header>
 
@@ -689,7 +713,7 @@
         </section>
     </div>
 
-    <footer>Codename Virthub v0.7b</footer>
+    <footer>Codename Virthub v0.8</footer>
 
     <div class="confirmation-modal" id="confirmationModal">
         <div class="modal-content">
