@@ -151,7 +151,7 @@
             @endif
         </div>
 
-        @if (($currentUser['role'] ?? '') !== 'guest')
+        @if (!empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest'))
         <aside class="linux-news-panel gadget todo-gadget gadget-size-normal" data-gadget-id="todo" data-gadget-size="normal" data-default-size="normal">
             <div class="gadget-head">
                 <h3>To-do</h3>
