@@ -8,6 +8,8 @@
     if (!chatPanel || !chatToggle) return;
 
     const currentUserName = window.VIRTHUB_CHAT_USER || 'guest';
+    const chatMode = window.VIRTHUB_CHAT_MODE || 'full';
+    const isBroadcastOnly = chatMode === 'broadcast-only';
     const chatNotificationSoundUrl = window.VIRTHUB_CHAT_SOUND || '/sounds/chat-notificacion.mp3';
     const currentUserProfile = window.VIRTHUB_CHAT_CURRENT_PROFILE || { username: currentUserName, profile_image_path: null, is_active: true };
     const chatNotificationAudio = new Audio(chatNotificationSoundUrl);
@@ -341,6 +343,8 @@
     }
 
     async function sendChatMessage() {
+        if (isBroadcastOnly) return;
+
         const input = document.getElementById('chatInput');
         if (!input || !input.value.trim() || !currentChatUser) {
             if (!currentChatUser) alert('Selecciona un usuario primero');
@@ -386,6 +390,10 @@
     }
 
     async function switchChatTab(tab) {
+        if (isBroadcastOnly) {
+            tab = 'broadcast';
+        }
+
         document.querySelectorAll('.chat-tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.chat-view').forEach(view => view.classList.remove('active'));
 
@@ -404,6 +412,9 @@
         if (chatPanel.classList.contains('is-open')) {
             requestPermission();
             sendPresenceHeartbeat();
+            if (isBroadcastOnly) {
+                switchChatTab('broadcast');
+            }
         }
     }
 
@@ -414,11 +425,13 @@
             try {
                 await sendPresenceHeartbeat();
 
-                if (chatContacts.length === 0) await loadUsersList();
-
                 const shouldNotify = notificationsPrimed;
-                for (const c of chatContacts) {
-                    await refreshConversationSilently(c.username, shouldNotify);
+
+                if (!isBroadcastOnly) {
+                    if (chatContacts.length === 0) await loadUsersList();
+                    for (const c of chatContacts) {
+                        await refreshConversationSilently(c.username, shouldNotify);
+                    }
                 }
 
                 const res = await apiFetch('/chat/broadcast');
@@ -463,7 +476,11 @@
         unlockAudio();
         await sendPresenceHeartbeat();
         await loadBroadcastMessages();
-        await loadUsersList();
+        if (!isBroadcastOnly) {
+            await loadUsersList();
+        } else {
+            await switchChatTab('broadcast');
+        }
         startChatPolling();
     });
 })();

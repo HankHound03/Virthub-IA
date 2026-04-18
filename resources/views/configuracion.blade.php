@@ -41,9 +41,46 @@
             margin: 0 0 8px 0;
         }
 
+        @media (max-width: 1100px) {
+            .config-shell {
+                margin: 3px;
+                padding: 10px;
+            }
+        }
+
         @media (max-width: 900px) {
             .config-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .config-card {
+                padding: 10px;
+            }
+
+            .profile-area-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .config-shell {
+                margin: 0;
+                padding: 8px;
+            }
+
+            .config-card h3 {
+                font-size: 16px;
+            }
+
+            .config-note,
+            .config-card label {
+                font-size: 12px;
+            }
+
+            .config-card button {
+                width: 100%;
             }
         }
     </style>
@@ -54,12 +91,7 @@
             <div class="toggleable-sidebar" onclick="toggleMenu(event)" aria-label="Abrir menu" title="Menu">
                 <span class="menu-icon" aria-hidden="true"></span>
                 <div class="sidebar" onclick="event.stopPropagation()">
-                    <button type="button" onclick="location.href='{{ url('/') }}'">Home</button>
-                    <button type="button" onclick="location.href='{{ url('/foro') }}'">Foro</button>
-                    <button type="button" onclick="location.href='{{ url('/contenedor') }}'">Contenedor</button>
-                    @if (($currentUser['role'] ?? 'user') === 'admin')
-                        <button type="button" onclick="location.href='{{ url('/admin/users') }}'">Panel Admin</button>
-                    @endif
+                    @include('partials.navigation-menu', ['currentUser' => $currentUser ?? null, 'currentPage' => 'configuracion'])
                 </div>
             </div>
             <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">
@@ -159,7 +191,7 @@
         </div>
     </div>
 
-    <footer>Codename Virthub 0.9 PreRelease</footer>
+    <footer>Codename Virthub 0.9b PreRelease</footer>
 
     <script>
         function getUserKey() {

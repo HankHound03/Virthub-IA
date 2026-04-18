@@ -15,9 +15,7 @@
             <div class= "toggleable-sidebar" onclick="toggleMenu(event)" aria-label="Abrir menu" title="Menu">
                 <span class="menu-icon" aria-hidden="true"></span>
                 <div class="sidebar" onclick="event.stopPropagation()">
-                    <button onclick="location.href='{{ url('/') }}'">Home</button>
-                    <button onclick="location.href='{{ url('/foro') }}'">Foro</button>
-                    <button onclick="window.open('https://github.com/FrankMon03/Virthub-IA', '_blank')">GitHub Project</button>
+                    @include('partials.navigation-menu', ['currentUser' => $currentUser ?? null, 'currentPage' => 'home'])
                 </div>
             </div>
             <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">
@@ -56,13 +54,15 @@
     @include('partials.chat-widget')
 
     <div class="home-panels" id="gadgetBoard">
-        <aside class="linux-news-panel gadget" data-gadget-id="news">
+        <aside class="linux-news-panel gadget gadget-size-normal" data-gadget-id="news" data-gadget-size="normal" data-default-size="normal">
             <div class="gadget-head">
                 <h3>Noticias</h3>
-                <div class="gadget-actions">
-                    <button type="button" class="gadget-mini-btn" onclick="moveGadget('news', -1)">↑</button>
-                    <button type="button" class="gadget-mini-btn" onclick="moveGadget('news', 1)">↓</button>
-                </div>
+                @if (!empty($currentUser))
+                    <div class="gadget-actions gadget-actions-compact">
+                        <span class="gadget-drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                        <button type="button" class="gadget-mini-btn gadget-size-text-btn" onclick="cycleHomeGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">Normal</button>
+                    </div>
+                @endif
             </div>
 
             <div class="news-filter-bar">
@@ -86,18 +86,26 @@
             </div>
         </aside>
 
-        <div class="login-screen gadget access-gadget" data-gadget-id="access">
+        <div class="login-screen gadget access-gadget gadget-size-normal" data-gadget-id="access" data-gadget-size="normal" data-default-size="normal">
             <div class="gadget-head">
                 <h3>Acceso</h3>
-                <div class="gadget-actions">
-                    <button type="button" class="gadget-mini-btn" onclick="moveGadget('access', -1)">↑</button>
-                    <button type="button" class="gadget-mini-btn" onclick="moveGadget('access', 1)">↓</button>
-                </div>
+                @if (!empty($currentUser))
+                    <div class="gadget-actions gadget-actions-compact">
+                        <span class="gadget-drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                        <button type="button" class="gadget-mini-btn gadget-size-text-btn" onclick="cycleHomeGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">Normal</button>
+                    </div>
+                @endif
             </div>
 
-            <p class="access-intro">
-                Accede rápido a la parte principal del sistema, o entra como invitado si solo necesitas una sesión temporal.
-            </p>
+            @if (!empty($currentUser))
+                <p class="access-intro">
+                    Sesion iniciada. Usa estos accesos rapidos para entrar a las secciones principales de VirtHub.
+                </p>
+            @else
+                <p class="access-intro">
+                    No has iniciado sesion. Entra con tu cuenta o usa Invitado para una sesion temporal.
+                </p>
+            @endif
 
             @if (session('error'))
                 <p class="auth-message auth-error">{{ session('error') }}</p>
@@ -108,14 +116,6 @@
             @endif
 
             @if (!empty($currentUser))
-                <p class="auth-message auth-success">
-                    Sesion activa: {{ $currentUser['username'] }} ({{ $currentUser['role'] }})
-                </p>
-
-                @if (($currentUser['role'] ?? 'guest') !== 'guest')
-                    <p class="auth-message auth-success">Tu perfil y seguridad ahora se gestionan en Configuracion.</p>
-                @endif
-
                 @if (($currentUser['role'] ?? 'user') === 'guest')
                     <p class="auth-message auth-success" id="guestRemainingLabel" data-guest-remaining="{{ (int) ($guestRemainingSeconds ?? 0) }}">
                         Tiempo restante invitado: calculando...
@@ -124,6 +124,7 @@
 
                 <div class="quick-links-grid access-links-grid">
                     <button type="button" onclick="location.href='{{ url('/foro') }}'">Foro</button>
+                    <button type="button" onclick="location.href='{{ url('/sugerencias') }}'">Sugerencias</button>
                     <button type="button" onclick="location.href='{{ url('/contenedor') }}'">Contenedor</button>
                     @if (($currentUser['role'] ?? 'user') === 'admin')
                         <button type="button" onclick="location.href='{{ url('/admin/users') }}'">Panel Admin</button>
@@ -145,33 +146,98 @@
                     <button type="button" onclick="document.getElementById('loginForm')?.requestSubmit()">Iniciar Sesión</button>
                     <button type="button" onclick="document.getElementById('guestLoginForm')?.submit()">Invitado</button>
                     <button type="button" onclick="location.href='{{ url('/foro') }}'">Foro</button>
+                    <button type="button" onclick="location.href='{{ url('/sugerencias') }}'">Sugerencias</button>
                 </div>
             @endif
         </div>
 
+        @if (($currentUser['role'] ?? '') !== 'guest')
+        <aside class="linux-news-panel gadget todo-gadget gadget-size-normal" data-gadget-id="todo" data-gadget-size="normal" data-default-size="normal">
+            <div class="gadget-head">
+                <h3>To-do</h3>
+                @if (!empty($currentUser))
+                    <div class="gadget-actions gadget-actions-compact">
+                        <span class="gadget-drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                        <button type="button" class="gadget-mini-btn gadget-size-text-btn" onclick="cycleHomeGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">Normal</button>
+                    </div>
+                @endif
+            </div>
+
+            <section class="todo-widget" aria-label="Tareas pendientes">
+                <form id="todoForm" class="todo-form">
+                    <input id="todoInput" type="text" maxlength="120" placeholder="Escribe una tarea y presiona Enter" autocomplete="off">
+                    <button type="submit">Agregar</button>
+                </form>
+                <ul id="todoList" class="todo-list"></ul>
+            </section>
+
+        </aside>
+
+        <aside class="linux-news-panel gadget notes-gadget gadget-size-normal" data-gadget-id="notes" data-gadget-size="normal" data-default-size="normal">
+            <div class="gadget-head">
+                <h3>Notas rapidas</h3>
+                @if (!empty($currentUser))
+                    <div class="gadget-actions gadget-actions-compact">
+                        <span class="gadget-drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                        <button type="button" class="gadget-mini-btn gadget-size-text-btn" onclick="cycleHomeGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">Normal</button>
+                    </div>
+                @endif
+            </div>
+
+            <section class="notes-widget" aria-label="Notas rapidas">
+                <textarea id="quickNotesInput" class="quick-notes-input" rows="7" maxlength="2400" placeholder="Anota ideas, recordatorios o pasos rapidos..."></textarea>
+            </section>
+        </aside>
+        @endif
+
         @if (!empty($currentUser) && ($currentUser['role'] ?? 'user') === 'admin')
-            <aside class="linux-news-panel gadget system-status-panel" data-gadget-id="system">
+            <aside class="linux-news-panel gadget system-status-panel gadget-size-wide" data-gadget-id="system" data-gadget-size="wide" data-default-size="wide">
                 <div class="gadget-head">
                     <h3>Estado del Sistema</h3>
-                    <div class="gadget-actions">
-                        <button type="button" class="gadget-mini-btn" onclick="moveGadget('system', -1)">↑</button>
-                        <button type="button" class="gadget-mini-btn" onclick="moveGadget('system', 1)">↓</button>
-                    </div>
+                    @if (!empty($currentUser))
+                        <div class="gadget-actions gadget-actions-compact">
+                            <span class="gadget-drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                            <button type="button" class="gadget-mini-btn gadget-size-text-btn" onclick="cycleHomeGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">Ancho</button>
+                        </div>
+                    @endif
                 </div>
 
-                <ul class="system-status-list" id="systemStatusList">
-                    <li>Hora: <strong id="sys_timestamp">{{ $systemStatus['timestamp'] ?? '-' }}</strong></li>
-                    <li>CPU en uso: <strong id="sys_cpu">{{ isset($systemStatus['cpu_usage_percent']) ? $systemStatus['cpu_usage_percent'] . '%' : '-' }}</strong></li>
-                    <li>RAM en uso: <strong id="sys_ram">{{ isset($systemStatus['ram_used_percent']) ? $systemStatus['ram_used_percent'] . '%' : '-' }}</strong></li>
-                    <li>RAM usada MB: <strong id="sys_ram_mb">{{ $systemStatus['ram_used_mb'] ?? '-' }}</strong></li>
-                    <li>Disco usado: <strong id="sys_disk">{{ isset($systemStatus['disk_used_percent']) ? $systemStatus['disk_used_percent'] . '%' : '-' }}</strong></li>
-                    <li>WebTop: <strong id="sys_webtop">{{ !empty($systemStatus['webtop_online']) ? 'Online' : 'Offline' }}</strong></li>
-                </ul>
+                <div class="system-status-live" id="systemStatusList">
+                    <div class="system-status-meta">
+                        <span>Ultima muestra: <strong id="sys_timestamp">{{ $systemStatus['timestamp'] ?? '-' }}</strong></span>
+                    </div>
+
+                    <div class="system-metric-grid">
+                        <article class="system-metric-card">
+                            <header><h4>CPU</h4><strong id="sys_cpu">{{ isset($systemStatus['cpu_usage_percent']) ? $systemStatus['cpu_usage_percent'] . '%' : '-' }}</strong></header>
+                            <div class="system-meter"><span id="sys_cpu_bar" style="width: {{ isset($systemStatus['cpu_usage_percent']) ? max(0, min(100, (float) $systemStatus['cpu_usage_percent'])) : 0 }}%"></span></div>
+                            <canvas id="sys_cpu_chart" class="system-sparkline" width="320" height="84" aria-label="Grafico CPU"></canvas>
+                        </article>
+
+                        <article class="system-metric-card">
+                            <header><h4>RAM</h4><strong id="sys_ram">{{ isset($systemStatus['ram_used_percent']) ? $systemStatus['ram_used_percent'] . '%' : '-' }}</strong></header>
+                            <p class="system-metric-sub">Usada MB: <strong id="sys_ram_mb">{{ $systemStatus['ram_used_mb'] ?? '-' }}</strong></p>
+                            <div class="system-meter"><span id="sys_ram_bar" style="width: {{ isset($systemStatus['ram_used_percent']) ? max(0, min(100, (float) $systemStatus['ram_used_percent'])) : 0 }}%"></span></div>
+                            <canvas id="sys_ram_chart" class="system-sparkline" width="320" height="84" aria-label="Grafico RAM"></canvas>
+                        </article>
+
+                        <article class="system-metric-card">
+                            <header><h4>Disco</h4><strong id="sys_disk">{{ isset($systemStatus['disk_used_percent']) ? $systemStatus['disk_used_percent'] . '%' : '-' }}</strong></header>
+                            <div class="system-meter"><span id="sys_disk_bar" style="width: {{ isset($systemStatus['disk_used_percent']) ? max(0, min(100, (float) $systemStatus['disk_used_percent'])) : 0 }}%"></span></div>
+                            <canvas id="sys_disk_chart" class="system-sparkline" width="320" height="84" aria-label="Grafico Disco"></canvas>
+                        </article>
+
+                        <article class="system-metric-card system-metric-card-compact">
+                            <header><h4>WebTop</h4><strong id="sys_webtop">{{ !empty($systemStatus['webtop_online']) ? 'Online' : 'Offline' }}</strong></header>
+                            <div class="system-state-pill" id="sys_webtop_pill">{{ !empty($systemStatus['webtop_online']) ? 'Servicio activo' : 'Servicio no disponible' }}</div>
+                        </article>
+                    </div>
+                </div>
             </aside>
         @endif
     </div>
 
-    <footer>Codename Virthub 0.9 PreRelease</footer>
+    <footer>Codename Virthub 0.9b PreRelease</footer>
     <script>
         function getUserKey() {
             return @json($currentUser['username'] ?? 'guest');
@@ -187,6 +253,104 @@
 
         function getGadgetOrderKey() {
             return 'virthub_gadget_order_' + getUserKey();
+        }
+
+        function getGadgetSizeKey() {
+            return 'virthub_gadget_size_' + getUserKey();
+        }
+
+        function getProductivityKey() {
+            return 'virthub_productivity_' + getUserKey();
+        }
+
+        function isHomeResponsiveView() {
+            return window.matchMedia('(max-width: 768px)').matches;
+        }
+
+        function canCustomizeHome() {
+            return @json(!empty($currentUser)) && !isHomeResponsiveView();
+        }
+
+        function setHomeGadgetSize(gadget, size) {
+            if (!gadget) return;
+
+            const allowed = ['normal', 'wide'];
+            const nextSize = allowed.includes(size) ? size : 'normal';
+            gadget.classList.remove('gadget-size-normal', 'gadget-size-wide', 'gadget-size-tall');
+            gadget.classList.add('gadget-size-' + nextSize);
+            gadget.dataset.gadgetSize = nextSize;
+
+            const btn = gadget.querySelector('.gadget-mini-btn');
+            if (btn) {
+                const labels = {
+                    normal: 'Normal',
+                    wide: 'Ancho',
+                };
+                btn.textContent = labels[nextSize] || 'Normal';
+            }
+        }
+
+        function saveGadgetSizes() {
+            if (!canCustomizeHome()) return;
+
+            const board = document.getElementById('gadgetBoard');
+            if (!board) return;
+
+            const payload = {};
+            board.querySelectorAll('.gadget').forEach(gadget => {
+                const id = gadget.dataset.gadgetId;
+                if (!id) return;
+                payload[id] = gadget.dataset.gadgetSize || 'normal';
+            });
+
+            localStorage.setItem(getGadgetSizeKey(), JSON.stringify(payload));
+        }
+
+        function applySavedGadgetSizes() {
+            const board = document.getElementById('gadgetBoard');
+            if (!board) return;
+
+            if (!canCustomizeHome()) {
+                board.querySelectorAll('.gadget').forEach(gadget => {
+                    const defaultSize = gadget.dataset.defaultSize || 'normal';
+                    setHomeGadgetSize(gadget, defaultSize);
+                });
+                return;
+            }
+
+            const raw = localStorage.getItem(getGadgetSizeKey());
+            let payload = {};
+            try {
+                payload = raw ? JSON.parse(raw) : {};
+            } catch (error) {
+                payload = {};
+            }
+
+            board.querySelectorAll('.gadget').forEach(gadget => {
+                const id = gadget.dataset.gadgetId;
+                const defaultSize = gadget.dataset.defaultSize || gadget.dataset.gadgetSize || 'normal';
+                const size = (id && payload[id]) ? payload[id] : defaultSize;
+                setHomeGadgetSize(gadget, size);
+            });
+        }
+
+        function cycleHomeGadgetSize(event, triggerBtn) {
+            if (!canCustomizeHome()) return;
+
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            const gadget = triggerBtn ? triggerBtn.closest('.gadget') : null;
+            if (!gadget) return;
+
+            const sizes = ['normal', 'wide'];
+            const current = gadget.dataset.gadgetSize || 'normal';
+            const index = sizes.indexOf(current);
+            const next = sizes[(index >= 0 ? index + 1 : 0) % sizes.length];
+            setHomeGadgetSize(gadget, next);
+            saveGadgetSizes();
         }
 
         function applySidebarState() {
@@ -246,6 +410,8 @@
         }
 
         function saveGadgetOrder() {
+            if (!canCustomizeHome()) return;
+
             const board = document.getElementById('gadgetBoard');
             if (!board) return;
 
@@ -257,6 +423,19 @@
             const board = document.getElementById('gadgetBoard');
             if (!board) return;
 
+            const knownOrder = ['news', 'access', 'todo', 'notes', 'system'];
+
+            if (!canCustomizeHome()) {
+                const defaultOrder = ['news', 'access', 'todo', 'notes', 'system'];
+                defaultOrder.forEach(id => {
+                    const gadget = board.querySelector(`.gadget[data-gadget-id="${id}"]`);
+                    if (gadget) {
+                        board.appendChild(gadget);
+                    }
+                });
+                return;
+            }
+
             const raw = localStorage.getItem(getGadgetOrderKey());
             if (!raw) return;
 
@@ -264,7 +443,28 @@
                 const order = JSON.parse(raw);
                 if (!Array.isArray(order)) return;
 
+                const finalOrder = [];
                 order.forEach(id => {
+                    if (id === 'productivity') {
+                        if (!finalOrder.includes('todo')) {
+                            finalOrder.push('todo');
+                        }
+                        if (!finalOrder.includes('notes')) {
+                            finalOrder.push('notes');
+                        }
+                        return;
+                    }
+                    if (knownOrder.includes(id) && !finalOrder.includes(id)) {
+                        finalOrder.push(id);
+                    }
+                });
+                knownOrder.forEach(id => {
+                    if (!finalOrder.includes(id)) {
+                        finalOrder.push(id);
+                    }
+                });
+
+                finalOrder.forEach(id => {
                     const gadget = board.querySelector(`.gadget[data-gadget-id="${id}"]`);
                     if (gadget) {
                         board.appendChild(gadget);
@@ -276,6 +476,8 @@
         }
 
         function moveGadget(gadgetId, direction) {
+            if (!canCustomizeHome()) return;
+
             const board = document.getElementById('gadgetBoard');
             if (!board) return;
 
@@ -296,6 +498,71 @@
             }
 
             saveGadgetOrder();
+        }
+
+        function enableHomeGadgetDnD() {
+            if (!canCustomizeHome()) return;
+
+            const board = document.getElementById('gadgetBoard');
+            if (!board) return;
+
+            const gadgets = Array.from(board.querySelectorAll('.gadget'));
+            gadgets.forEach(gadget => {
+                gadget.setAttribute('draggable', 'true');
+                gadget.dataset.dragFromHead = '0';
+
+                const head = gadget.querySelector('.gadget-head');
+                if (head) {
+                    head.addEventListener('mousedown', event => {
+                        if (event.target.closest('.gadget-mini-btn')) {
+                            gadget.dataset.dragFromHead = '0';
+                            return;
+                        }
+                        gadget.dataset.dragFromHead = '1';
+                    });
+                }
+
+                gadget.addEventListener('dragstart', event => {
+                    if (gadget.dataset.dragFromHead !== '1') {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    gadget.classList.add('dragging');
+                    if (event.dataTransfer) {
+                        event.dataTransfer.effectAllowed = 'move';
+                        event.dataTransfer.setData('text/plain', gadget.dataset.gadgetId || '');
+                    }
+                });
+
+                gadget.addEventListener('dragend', () => {
+                    gadget.classList.remove('dragging');
+                    gadget.dataset.dragFromHead = '0';
+                    saveGadgetOrder();
+                });
+            });
+
+            board.addEventListener('dragover', event => {
+                event.preventDefault();
+                const dragging = board.querySelector('.gadget.dragging');
+                const target = event.target.closest('.gadget');
+                if (!dragging || !target || dragging === target) return;
+
+                const rect = target.getBoundingClientRect();
+                const before = event.clientY < (rect.top + rect.height / 2);
+                board.insertBefore(dragging, before ? target : target.nextSibling);
+            });
+
+            board.addEventListener('drop', event => {
+                event.preventDefault();
+                saveGadgetOrder();
+            });
+
+            window.addEventListener('mouseup', () => {
+                board.querySelectorAll('.gadget').forEach(gadget => {
+                    gadget.dataset.dragFromHead = '0';
+                });
+            });
         }
 
         function applyNewsFilter(filter, persist = true) {
@@ -322,6 +589,236 @@
             applyNewsFilter(savedFilter, false);
         }
 
+        function sanitizeTodoText(value) {
+            const text = String(value || '').replace(/\s+/g, ' ').trim();
+            if (!text) return '';
+            return text.slice(0, 120);
+        }
+
+        function readProductivityState() {
+            const fallback = { todos: [], notes: '' };
+            const raw = localStorage.getItem(getProductivityKey());
+            if (!raw) return fallback;
+
+            try {
+                const parsed = JSON.parse(raw);
+                const todos = Array.isArray(parsed.todos)
+                    ? parsed.todos
+                        .map(item => ({
+                            id: String(item.id || ''),
+                            text: sanitizeTodoText(item.text || ''),
+                            done: !!item.done,
+                        }))
+                        .filter(item => item.id && item.text)
+                        .slice(0, 120)
+                    : [];
+
+                const notes = String(parsed.notes || '').slice(0, 2400);
+                return { todos, notes };
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function saveProductivityState(state) {
+            localStorage.setItem(getProductivityKey(), JSON.stringify({
+                todos: Array.isArray(state.todos) ? state.todos : [],
+                notes: String(state.notes || ''),
+            }));
+        }
+
+        function renderTodoList(state) {
+            const list = document.getElementById('todoList');
+            if (!list) return;
+
+            list.innerHTML = '';
+
+            if (!state.todos.length) {
+                const empty = document.createElement('li');
+                empty.className = 'todo-empty';
+                empty.textContent = 'Sin tareas por ahora.';
+                list.appendChild(empty);
+                return;
+            }
+
+            state.todos.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'todo-item';
+                li.dataset.todoId = item.id;
+
+                const check = document.createElement('input');
+                check.type = 'checkbox';
+                check.checked = item.done;
+                check.setAttribute('aria-label', 'Marcar tarea completada');
+                check.addEventListener('change', () => {
+                    const target = state.todos.find(todo => todo.id === item.id);
+                    if (!target) return;
+                    target.done = check.checked;
+                    saveProductivityState(state);
+                    renderTodoList(state);
+                });
+
+                const text = document.createElement('span');
+                text.className = 'todo-item-text';
+                if (item.done) {
+                    text.classList.add('is-done');
+                }
+                text.textContent = item.text;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'todo-remove-btn';
+                removeBtn.textContent = 'Quitar';
+                removeBtn.setAttribute('aria-label', 'Eliminar tarea');
+                removeBtn.addEventListener('click', () => {
+                    state.todos = state.todos.filter(todo => todo.id !== item.id);
+                    saveProductivityState(state);
+                    renderTodoList(state);
+                });
+
+                li.appendChild(check);
+                li.appendChild(text);
+                li.appendChild(removeBtn);
+                list.appendChild(li);
+            });
+        }
+
+        function initProductivityWidget() {
+            const todoForm = document.getElementById('todoForm');
+            const todoInput = document.getElementById('todoInput');
+            const notesInput = document.getElementById('quickNotesInput');
+            if (!todoForm || !todoInput || !notesInput) return;
+
+            const state = readProductivityState();
+            notesInput.value = state.notes;
+            renderTodoList(state);
+
+            todoForm.addEventListener('submit', event => {
+                event.preventDefault();
+                const text = sanitizeTodoText(todoInput.value);
+                if (!text) return;
+
+                state.todos.unshift({
+                    id: 'todo_' + Date.now() + '_' + Math.random().toString(16).slice(2, 8),
+                    text,
+                    done: false,
+                });
+                if (state.todos.length > 120) {
+                    state.todos = state.todos.slice(0, 120);
+                }
+
+                saveProductivityState(state);
+                renderTodoList(state);
+                todoInput.value = '';
+                todoInput.focus();
+            });
+
+            notesInput.addEventListener('input', () => {
+                state.notes = String(notesInput.value || '').slice(0, 2400);
+                saveProductivityState(state);
+            });
+        }
+
+        const systemMetricHistory = {
+            cpu: [],
+            ram: [],
+            disk: [],
+        };
+        const SYSTEM_HISTORY_LIMIT = 24;
+
+        function toPercent(value) {
+            const parsed = Number(value);
+            if (!Number.isFinite(parsed)) return null;
+            return Math.max(0, Math.min(100, parsed));
+        }
+
+        function pushSystemMetric(metricName, value) {
+            if (!Object.prototype.hasOwnProperty.call(systemMetricHistory, metricName)) return;
+            if (!Number.isFinite(value)) return;
+
+            const bucket = systemMetricHistory[metricName];
+            bucket.push(value);
+            if (bucket.length > SYSTEM_HISTORY_LIMIT) {
+                bucket.shift();
+            }
+        }
+
+        function setMeterValue(id, value) {
+            const meter = document.getElementById(id);
+            if (!meter) return;
+            meter.style.width = `${Math.max(0, Math.min(100, value))}%`;
+        }
+
+        function drawSparkline(canvasId, points, strokeStyle) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas || !points.length) return;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            const ratio = window.devicePixelRatio || 1;
+            const width = Math.max(180, canvas.clientWidth || canvas.width);
+            const height = Math.max(56, canvas.clientHeight || canvas.height);
+
+            canvas.width = Math.floor(width * ratio);
+            canvas.height = Math.floor(height * ratio);
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+            ctx.clearRect(0, 0, width, height);
+
+            const maxValue = 100;
+            const minValue = 0;
+            const xStep = points.length > 1 ? width / (points.length - 1) : width;
+
+            ctx.beginPath();
+            points.forEach((value, index) => {
+                const x = index * xStep;
+                const normalized = (value - minValue) / (maxValue - minValue || 1);
+                const y = height - (normalized * (height - 8)) - 4;
+
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = strokeStyle;
+            ctx.stroke();
+
+            const lastX = (points.length - 1) * xStep;
+            const lastNormalized = (points[points.length - 1] - minValue) / (maxValue - minValue || 1);
+            const lastY = height - (lastNormalized * (height - 8)) - 4;
+            ctx.beginPath();
+            ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
+            ctx.fillStyle = strokeStyle;
+            ctx.fill();
+        }
+
+        function updateSystemCharts(status) {
+            const cpu = toPercent(status.cpu_usage_percent);
+            const ram = toPercent(status.ram_used_percent);
+            const disk = toPercent(status.disk_used_percent);
+
+            if (cpu !== null) {
+                pushSystemMetric('cpu', cpu);
+                setMeterValue('sys_cpu_bar', cpu);
+            }
+            if (ram !== null) {
+                pushSystemMetric('ram', ram);
+                setMeterValue('sys_ram_bar', ram);
+            }
+            if (disk !== null) {
+                pushSystemMetric('disk', disk);
+                setMeterValue('sys_disk_bar', disk);
+            }
+
+            drawSparkline('sys_cpu_chart', systemMetricHistory.cpu, '#9ac6ff');
+            drawSparkline('sys_ram_chart', systemMetricHistory.ram, '#76e0a1');
+            drawSparkline('sys_disk_chart', systemMetricHistory.disk, '#ffd27a');
+        }
+
         async function refreshSystemStatus() {
             const list = document.getElementById('systemStatusList');
             if (!list) return;
@@ -339,6 +836,13 @@
                 document.getElementById('sys_ram_mb').textContent = status.ram_used_mb ?? '-';
                 document.getElementById('sys_disk').textContent = status.disk_used_percent != null ? `${status.disk_used_percent}%` : '-';
                 document.getElementById('sys_webtop').textContent = status.webtop_online ? 'Online' : 'Offline';
+                const webtopPill = document.getElementById('sys_webtop_pill');
+                if (webtopPill) {
+                    webtopPill.textContent = status.webtop_online ? 'Servicio activo' : 'Servicio no disponible';
+                    webtopPill.classList.toggle('is-online', !!status.webtop_online);
+                    webtopPill.classList.toggle('is-offline', !status.webtop_online);
+                }
+                updateSystemCharts(status);
             } catch (error) {
                 // Keep last known values when request fails.
             }
@@ -396,12 +900,21 @@
         window.addEventListener('DOMContentLoaded', applySidebarState);
         window.addEventListener('DOMContentLoaded', applyThemeState);
         window.addEventListener('DOMContentLoaded', applySavedGadgetOrder);
+        window.addEventListener('DOMContentLoaded', applySavedGadgetSizes);
+        window.addEventListener('DOMContentLoaded', enableHomeGadgetDnD);
         window.addEventListener('DOMContentLoaded', applySavedNewsFilter);
+        window.addEventListener('DOMContentLoaded', initProductivityWidget);
         window.addEventListener('DOMContentLoaded', refreshSystemStatus);
         window.addEventListener('DOMContentLoaded', startGuestCountdown);
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('systemStatusList')) return;
+            drawSparkline('sys_cpu_chart', systemMetricHistory.cpu, '#9ac6ff');
+            drawSparkline('sys_ram_chart', systemMetricHistory.ram, '#76e0a1');
+            drawSparkline('sys_disk_chart', systemMetricHistory.disk, '#ffd27a');
+        });
 
         if (document.getElementById('systemStatusList')) {
-            setInterval(refreshSystemStatus, 15000);
+            setInterval(refreshSystemStatus, 5000);
         }
     </script>
 </body>

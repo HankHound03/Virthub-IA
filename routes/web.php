@@ -168,6 +168,66 @@ Route::get('/foro', function (Request $request, JsonUserStore $users, ForumStore
 	]);
 });
 
+Route::get('/sugerencias', function (Request $request, JsonUserStore $users) {
+	$users->bootstrapAdminFromEnv();
+	$currentUser = virthub_active_user($request, $users);
+
+	return view('sugerencias', [
+		'currentUser' => $currentUser,
+	]);
+});
+
+Route::post('/sugerencias', function (Request $request, JsonUserStore $users) {
+	$users->bootstrapAdminFromEnv();
+	$currentUser = virthub_active_user($request, $users);
+	$canIdentifySuggestionAuthor = !empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest');
+
+	$validated = $request->validate([
+		'author_mode' => 'required|string|in:anonymous,identified',
+		'message' => 'required|string|min:8|max:2000',
+	]);
+
+	$authorMode = $canIdentifySuggestionAuthor ? (string) $validated['author_mode'] : 'anonymous';
+	$author = 'Anonimo';
+
+	if ($authorMode === 'identified') {
+		if ($currentUser && !empty($currentUser['username'])) {
+			$author = (string) $currentUser['username'];
+		} else {
+			$author = 'visitante';
+		}
+	}
+
+	$entry = [
+		'id' => bin2hex(random_bytes(8)),
+		'author_mode' => $authorMode,
+		'author' => $author,
+		'message' => trim((string) $validated['message']),
+		'created_at' => date('c'),
+	];
+
+	$dataDir = storage_path('app/data');
+	if (!is_dir($dataDir)) {
+		mkdir($dataDir, 0755, true);
+	}
+
+	$file = $dataDir . DIRECTORY_SEPARATOR . 'suggestions.json';
+	$payload = ['suggestions' => []];
+
+	if (is_file($file)) {
+		$raw = @file_get_contents($file);
+		$decoded = is_string($raw) ? json_decode($raw, true) : null;
+		if (is_array($decoded) && is_array($decoded['suggestions'] ?? null)) {
+			$payload = $decoded;
+		}
+	}
+
+	$payload['suggestions'][] = $entry;
+	@file_put_contents($file, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+
+	return redirect('/sugerencias')->with('success', 'Gracias por compartir tu sugerencia. Ya fue registrada.');
+})->middleware('throttle:30,1');
+
 Route::post('/foro', function (Request $request, JsonUserStore $users, ForumStore $forumStore) {
 	$currentUser = virthub_active_user($request, $users);
 
@@ -179,13 +239,45 @@ Route::post('/foro', function (Request $request, JsonUserStore $users, ForumStor
 		'title' => 'nullable|string|max:120',
 		'content' => 'required|string|max:5000',
 		'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:5120',
+		'poll_question' => 'nullable|string|max:180',
+		'poll_option_1' => 'nullable|string|max:120',
+		'poll_option_2' => 'nullable|string|max:120',
+		'poll_option_3' => 'nullable|string|max:120',
+		'poll_option_4' => 'nullable|string|max:120',
 	]);
+
+	$pollQuestion = trim((string) ($validated['poll_question'] ?? ''));
+	$pollOptions = [];
+	foreach (['poll_option_1', 'poll_option_2', 'poll_option_3', 'poll_option_4'] as $field) {
+		$option = trim((string) ($validated[$field] ?? ''));
+		if ($option !== '') {
+			$pollOptions[] = $option;
+		}
+	}
+	$pollOptions = array_values(array_unique($pollOptions));
+
+	if ($pollQuestion === '' && count($pollOptions) > 0) {
+		return redirect('/foro')->withInput()->with('error', 'Para crear una encuesta debes completar la pregunta.');
+	}
+
+	if ($pollQuestion !== '' && count($pollOptions) < 2) {
+		return redirect('/foro')->withInput()->with('error', 'La encuesta necesita al menos 2 opciones.');
+	}
+
+	$pollPayload = null;
+	if ($pollQuestion !== '' && count($pollOptions) >= 2) {
+		$pollPayload = [
+			'question' => $pollQuestion,
+			'options' => $pollOptions,
+		];
+	}
 
 	try {
 		$post = $forumStore->addPost(
 			(string) ($currentUser['username'] ?? 'usuario'),
 			(string) $validated['content'],
-			isset($validated['title']) ? (string) $validated['title'] : null
+			isset($validated['title']) ? (string) $validated['title'] : null,
+			$pollPayload
 		);
 
 		if ($request->hasFile('image')) {
@@ -207,6 +299,30 @@ Route::post('/foro', function (Request $request, JsonUserStore $users, ForumStor
 		}
 
 		return redirect('/foro')->with('success', 'Publicacion creada en el foro.');
+	} catch (RuntimeException $e) {
+		return redirect('/foro')->with('error', $e->getMessage());
+	}
+});
+
+Route::post('/foro/{postId}/poll-vote', function (Request $request, string $postId, JsonUserStore $users, ForumStore $forumStore) {
+	$currentUser = virthub_active_user($request, $users);
+
+	if (empty($currentUser) || ($currentUser['role'] ?? 'guest') === 'guest') {
+		return redirect('/foro')->with('error', 'Solo usuarios registrados pueden votar en encuestas.');
+	}
+
+	$validated = $request->validate([
+		'option_id' => 'required|string',
+	]);
+
+	try {
+		$forumStore->votePoll(
+			$postId,
+			(string) ($currentUser['username'] ?? ''),
+			(string) $validated['option_id']
+		);
+
+		return redirect('/foro')->with('success', 'Voto registrado en la encuesta.');
 	} catch (RuntimeException $e) {
 		return redirect('/foro')->with('error', $e->getMessage());
 	}
@@ -274,14 +390,14 @@ Route::post('/foro/{postId}/report', function (Request $request, string $postId,
 	}
 
 	$validated = $request->validate([
-		'reason' => 'nullable|string|max:280',
+		'reason' => 'required|string|min:8|max:280',
 	]);
 
 	try {
 		$forumStore->addReport(
 			$postId,
 			(string) ($currentUser['username'] ?? ''),
-			isset($validated['reason']) ? (string) $validated['reason'] : 'Sin detalle'
+			(string) $validated['reason']
 		);
 
 		return redirect('/foro')->with('success', 'Reporte enviado a moderacion.');
@@ -520,10 +636,27 @@ Route::get('/admin/users', function (Request $request, JsonUserStore $users, For
 		return strcmp((string) ($b['reported_at'] ?? ''), (string) ($a['reported_at'] ?? ''));
 	});
 
+	$suggestions = [];
+	$suggestionsFile = storage_path('app/data/suggestions.json');
+
+	if (is_file($suggestionsFile)) {
+		$rawSuggestions = @file_get_contents($suggestionsFile);
+		$decodedSuggestions = is_string($rawSuggestions) ? json_decode($rawSuggestions, true) : null;
+
+		if (is_array($decodedSuggestions) && is_array($decodedSuggestions['suggestions'] ?? null)) {
+			$suggestions = $decodedSuggestions['suggestions'];
+		}
+	}
+
+	usort($suggestions, function (array $a, array $b): int {
+		return strcmp((string) ($b['created_at'] ?? ''), (string) ($a['created_at'] ?? ''));
+	});
+
 	return view('admin-users', [
 		'currentUser' => $authUser,
 		'users' => $users->allPublicUsers(),
 		'forumReports' => $forumReports,
+		'suggestions' => $suggestions,
 	]);
 });
 
@@ -710,6 +843,10 @@ Route::get('/chat/users', function (Request $request, JsonUserStore $users) {
 		return response()->json(['error' => 'No autenticado'], 401);
 	}
 
+	if (($authUser['role'] ?? 'guest') === 'guest') {
+		return response()->json(['error' => 'Los invitados solo pueden ver anuncios.'], 403);
+	}
+
 	$users->bootstrapAdminFromEnv();
 	$users->touchPresence((string) $authUser['username']);
 	$currentUsername = (string) ($authUser['username'] ?? '');
@@ -738,7 +875,9 @@ Route::post('/chat/presence', function (Request $request, JsonUserStore $users) 
 		return response()->json(['error' => 'No autenticado'], 401);
 	}
 
-	$users->touchPresence((string) $authUser['username']);
+	if (($authUser['role'] ?? 'guest') !== 'guest') {
+		$users->touchPresence((string) $authUser['username']);
+	}
 
 	return response()->json(['ok' => true], 200);
 });
@@ -748,6 +887,10 @@ Route::get('/chat/conversation/{username}', function (Request $request, string $
 
 	if (!$authUser) {
 		return response()->json(['error' => 'No autenticado'], 401);
+	}
+
+	if (($authUser['role'] ?? 'guest') === 'guest') {
+		return response()->json(['error' => 'Los invitados no pueden abrir conversaciones privadas.'], 403);
 	}
 
 	$users->touchPresence((string) $authUser['username']);
@@ -779,6 +922,10 @@ Route::post('/chat/conversation/{username}', function (Request $request, string 
 
 	if (!$authUser) {
 		return response()->json(['error' => 'No autenticado'], 401);
+	}
+
+	if (($authUser['role'] ?? 'guest') === 'guest') {
+		return response()->json(['error' => 'Los invitados no pueden enviar mensajes privados.'], 403);
 	}
 
 	$users->touchPresence((string) $authUser['username']);
@@ -815,7 +962,9 @@ Route::get('/chat/broadcast', function (Request $request, JsonUserStore $users, 
 		return response()->json(['error' => 'No autenticado'], 401);
 	}
 
-	$users->touchPresence((string) $authUser['username']);
+	if (($authUser['role'] ?? 'guest') !== 'guest') {
+		$users->touchPresence((string) $authUser['username']);
+	}
 
 	$messages = $chatStore->getBroadcastMessages();
 	

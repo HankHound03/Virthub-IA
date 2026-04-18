@@ -14,11 +14,7 @@
             <div class= "toggleable-sidebar" onclick="toggleMenu(event)" aria-label="Abrir menu" title="Menu">
                 <span class="menu-icon" aria-hidden="true"></span>
                 <div class="sidebar" onclick="event.stopPropagation()">
-                    <button type="button" onclick="location.href='{{ url('/') }}'">Volver a Inicio</button>
-                    <button type="button" onclick="location.href='{{ url('/foro') }}'">Foro</button>
-                    @if (($currentUser['role'] ?? 'user') === 'admin')
-                        <button type="button" onclick="location.href='{{ url('/admin/users') }}'">Panel Admin</button>
-                    @endif
+                    @include('partials.navigation-menu', ['currentUser' => $currentUser ?? null, 'currentPage' => 'contenedor'])
                 </div>
             </div>
             <div class="chat-toggle" onclick="toggleChat()" id="chatToggle" title="Abrir chat" aria-label="Abrir chat">
@@ -69,11 +65,16 @@
             </div>
             
             <div class="chat-tabs" id="chatTabs">
+                @if (($currentUser['role'] ?? 'guest') !== 'guest')
                 <button type="button" class="chat-tab-btn active" onclick="switchChatTab('messages')" data-tab="messages">Mensajes</button>
                 <button type="button" class="chat-tab-btn" onclick="switchChatTab('users')" data-tab="users">Usuarios</button>
                 <button type="button" class="chat-tab-btn" onclick="switchChatTab('broadcast')" data-tab="broadcast">Anuncios</button>
+                @else
+                <button type="button" class="chat-tab-btn active" onclick="switchChatTab('broadcast')" data-tab="broadcast">Anuncios</button>
+                @endif
             </div>
 
+            @if (($currentUser['role'] ?? 'guest') !== 'guest')
             <div id="messagesView" class="chat-view active">
                 <div class="chat-messages" id="chatMessages">
                     <p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">Sin mensajes aún. Selecciona un usuario.</p>
@@ -89,8 +90,9 @@
                     <p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">Cargando usuarios...</p>
                 </div>
             </div>
+            @endif
 
-            <div id="broadcastView" class="chat-view">
+            <div id="broadcastView" class="chat-view {{ (($currentUser['role'] ?? 'guest') === 'guest') ? 'active' : '' }}">
                 <div class="chat-messages" id="broadcastMessages"></div>
                 <div class="chat-input-area" @if (($currentUser['role'] ?? 'user') !== 'admin') style="display:none;" @endif>
                     <input type="text" id="broadcastInput" placeholder="Mensaje para todos..." onkeypress="if(event.key==='Enter') sendBroadcast();">
@@ -106,9 +108,10 @@
             <iframe id="viewer"></iframe>
         </div>
     </div>
-    <footer>Codename Virthub 0.9 PreRelease</footer>
+    <footer>Codename Virthub 0.9b PreRelease</footer>
     <script>
         const currentUserName = @json($currentUser['username'] ?? 'guest');
+        const isGuestChatMode = @json((($currentUser['role'] ?? 'guest') === 'guest'));
         const chatNotificationSoundUrl = @json(asset('sounds/chat-notificacion.mp3'));
         const chatNotificationAudio = new Audio(chatNotificationSoundUrl);
         chatNotificationAudio.preload = 'auto';
@@ -412,6 +415,10 @@
         let chatContacts = [];
 
         async function switchChatTab(tab) {
+            if (isGuestChatMode) {
+                tab = 'broadcast';
+            }
+
             document.querySelectorAll('.chat-tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.chat-view').forEach(view => view.classList.remove('active'));
 
@@ -577,6 +584,8 @@
         }
 
         async function sendChatMessage() {
+            if (isGuestChatMode) return;
+
             const input = document.getElementById('chatInput');
             if (!input || !input.value.trim() || !currentChatUser) {
                 if (!currentChatUser) alert('Selecciona un usuario primero');
@@ -662,14 +671,16 @@
 
             setInterval(async () => {
                 try {
-                    if (chatContacts.length === 0) {
-                        await loadUsersList();
-                    }
-
                     const shouldNotify = notificationsPrimed;
 
-                    for (const contact of chatContacts) {
-                        await refreshConversationSilently(contact.username, shouldNotify);
+                    if (!isGuestChatMode) {
+                        if (chatContacts.length === 0) {
+                            await loadUsersList();
+                        }
+
+                        for (const contact of chatContacts) {
+                            await refreshConversationSilently(contact.username, shouldNotify);
+                        }
                     }
 
                     const response = await apiFetch('/chat/broadcast');
@@ -712,7 +723,11 @@
             startGuestCountdown();
             unlockChatNotificationAudio();
             await loadBroadcastMessages();
-            await loadUsersList();
+            if (!isGuestChatMode) {
+                await loadUsersList();
+            } else {
+                await switchChatTab('broadcast');
+            }
             startChatPolling();
         });
     </script>

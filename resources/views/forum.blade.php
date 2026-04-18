@@ -81,6 +81,94 @@
             background-color: var(--vh-button-hover);
         }
 
+        .poll-builder {
+            margin-top: 10px;
+            border: 1px dashed var(--vh-border);
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .poll-builder h4 {
+            margin: 0 0 8px 0;
+            color: var(--vh-text);
+            font-size: 13px;
+        }
+
+        .poll-builder-help {
+            margin: 0 0 8px 0;
+            font-size: 11px;
+            color: var(--vh-text-soft);
+        }
+
+        .forum-poll {
+            margin-top: 12px;
+            border: 1px solid var(--vh-border);
+            background-color: rgba(0, 0, 0, 0.11);
+            padding: 10px;
+        }
+
+        .forum-poll-question {
+            margin: 0 0 8px 0;
+            color: var(--vh-text);
+            font-size: 14px;
+        }
+
+        .forum-poll-meta {
+            margin-bottom: 8px;
+            font-size: 11px;
+            color: var(--vh-text-soft);
+        }
+
+        .forum-poll-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .forum-poll-item {
+            border: 1px solid var(--vh-border);
+            padding: 8px;
+            background-color: rgba(0, 0, 0, 0.12);
+        }
+
+        .forum-poll-vote-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
+        .forum-poll-label {
+            color: var(--vh-panel-text);
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .forum-poll-stats {
+            color: var(--vh-text-soft);
+            font-size: 11px;
+        }
+
+        .forum-poll-bar {
+            height: 8px;
+            border-radius: 999px;
+            background-color: rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+        }
+
+        .forum-poll-bar-fill {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, rgba(109, 181, 255, 0.85), rgba(122, 228, 170, 0.92));
+            transition: width 0.25s ease;
+        }
+
         .forum-posts {
             display: flex;
             flex-direction: column;
@@ -190,6 +278,70 @@
             border-color: rgba(255, 206, 100, 0.45);
         }
 
+        .forum-report-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-color: rgba(8, 17, 28, 0.68);
+            backdrop-filter: blur(2px);
+        }
+
+        .forum-report-modal.is-open {
+            display: flex;
+        }
+
+        .forum-report-card {
+            width: min(560px, 100%);
+            border: 1px solid var(--vh-border);
+            background-color: var(--vh-surface-strong);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+            padding: 14px;
+            color: var(--vh-panel-text);
+            font-family: Monocraft Nerd Font, monospace;
+        }
+
+        .forum-report-card h3 {
+            margin: 0 0 8px 0;
+            color: var(--vh-text);
+            font-size: 16px;
+        }
+
+        .forum-report-help {
+            margin: 0 0 10px 0;
+            color: var(--vh-text-soft);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .forum-report-card textarea {
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 120px;
+            resize: vertical;
+            border: 1px solid var(--vh-border);
+            background-color: var(--vh-button-bg);
+            color: var(--vh-text);
+            font-family: Monocraft Nerd Font, monospace;
+            font-size: 12px;
+            padding: 8px;
+        }
+
+        .forum-report-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .forum-report-actions button {
+            min-width: 120px;
+        }
+
         .comment-box {
             margin-top: 12px;
             border-top: 1px solid var(--vh-border);
@@ -245,8 +397,99 @@
         }
 
         @media (max-width: 900px) {
+            .forum-shell {
+                margin: 3px;
+                padding: 10px;
+            }
+
             .forum-layout {
                 grid-template-columns: 1fr;
+            }
+
+            .forum-card,
+            .forum-post {
+                padding: 10px;
+            }
+
+            .forum-post-image {
+                max-height: 320px;
+            }
+
+            .forum-form button,
+            .poll-builder .reaction-btn,
+            .forum-poll .reaction-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .forum-post-actions {
+                gap: 6px;
+            }
+
+            .forum-post-menu {
+                margin-left: 0;
+            }
+
+            .forum-post-menu-panel {
+                right: auto;
+                left: 0;
+                min-width: 170px;
+            }
+
+            .comment-form {
+                flex-direction: column;
+            }
+
+            .comment-form .reaction-btn {
+                width: 100%;
+            }
+
+            .forum-poll-vote-row {
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .forum-poll-label {
+                width: 100%;
+            }
+
+            .forum-poll-stats {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .forum-shell {
+                margin: 0;
+                padding: 8px;
+            }
+
+            .forum-card h3,
+            .forum-post h4,
+            .forum-poll-question {
+                font-size: 14px;
+            }
+
+            .forum-form label,
+            .forum-post-meta,
+            .forum-poll-label {
+                font-size: 12px;
+            }
+
+            .forum-form input,
+            .forum-form textarea,
+            .comment-form textarea,
+            .reaction-btn,
+            .delete-btn {
+                font-size: 12px;
+            }
+
+            .poll-builder {
+                padding: 8px;
+            }
+
+            .forum-poll {
+                padding: 8px;
             }
         }
     </style>
@@ -257,13 +500,7 @@
             <div class="toggleable-sidebar" onclick="toggleMenu(event)" aria-label="Abrir menu" title="Menu">
                 <span class="menu-icon" aria-hidden="true"></span>
                 <div class="sidebar" onclick="event.stopPropagation()">
-                    <button type="button" onclick="location.href='{{ url('/') }}'">Home</button>
-                    @if (!empty($currentUser))
-                        <button type="button" onclick="location.href='{{ url('/contenedor') }}'">Contenedor</button>
-                    @endif
-                    @if (($currentUser['role'] ?? 'user') === 'admin')
-                        <button type="button" onclick="location.href='{{ url('/admin/users') }}'">Panel Admin</button>
-                    @endif
+                    @include('partials.navigation-menu', ['currentUser' => $currentUser ?? null, 'currentPage' => 'foro'])
                 </div>
             </div>
             <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">
@@ -325,6 +562,27 @@
                         <label for="forumImage">Foto (opcional)
                             <input type="file" id="forumImage" name="image" accept="image/png,image/jpeg,image/webp,image/gif">
                         </label>
+
+                        <div class="poll-builder">
+                            <h4>Encuesta (opcional)</h4>
+                            <p class="poll-builder-help">Si agregas pregunta, debes completar al menos 2 opciones.</p>
+                            <label for="pollQuestion">Pregunta
+                                <input type="text" id="pollQuestion" name="poll_question" maxlength="180" value="{{ old('poll_question') }}" placeholder="Ejemplo: Que tema quieres ver la proxima semana?">
+                            </label>
+                            <label for="pollOption1">Opcion 1
+                                <input type="text" id="pollOption1" name="poll_option_1" maxlength="120" value="{{ old('poll_option_1') }}" placeholder="Primera opcion">
+                            </label>
+                            <label for="pollOption2">Opcion 2
+                                <input type="text" id="pollOption2" name="poll_option_2" maxlength="120" value="{{ old('poll_option_2') }}" placeholder="Segunda opcion">
+                            </label>
+                            <label for="pollOption3">Opcion 3 (opcional)
+                                <input type="text" id="pollOption3" name="poll_option_3" maxlength="120" value="{{ old('poll_option_3') }}" placeholder="Tercera opcion">
+                            </label>
+                            <label for="pollOption4">Opcion 4 (opcional)
+                                <input type="text" id="pollOption4" name="poll_option_4" maxlength="120" value="{{ old('poll_option_4') }}" placeholder="Cuarta opcion">
+                            </label>
+                        </div>
+
                         <button type="submit">Publicar</button>
                     </form>
                 @else
@@ -347,6 +605,42 @@
                             $canDelete = !empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest') && ($isAdmin || $isOwner);
                             $canReact = !empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest');
                             $comments = is_array($post['comments'] ?? null) ? $post['comments'] : [];
+                            $poll = is_array($post['poll'] ?? null) ? $post['poll'] : null;
+                            $pollQuestion = trim((string) ($poll['question'] ?? ''));
+                            $pollOptionsRaw = is_array($poll['options'] ?? null) ? $poll['options'] : [];
+                            $pollOptions = [];
+                            $totalPollVotes = 0;
+                            $currentPollVoteId = null;
+                            $currentPollUser = (string) ($currentUser['username'] ?? '');
+
+                            foreach ($pollOptionsRaw as $option) {
+                                $optionId = (string) ($option['id'] ?? '');
+                                $optionLabel = trim((string) ($option['label'] ?? ''));
+                                $optionVotes = is_array($option['votes'] ?? null) ? $option['votes'] : [];
+                                $optionVotes = array_values(array_filter($optionVotes, function ($voteUser): bool {
+                                    return is_string($voteUser) && trim($voteUser) !== '';
+                                }));
+
+                                if ($optionId === '' || $optionLabel === '') {
+                                    continue;
+                                }
+
+                                if ($currentPollUser !== '' && in_array($currentPollUser, $optionVotes, true)) {
+                                    $currentPollVoteId = $optionId;
+                                }
+
+                                $voteCount = count($optionVotes);
+                                $totalPollVotes += $voteCount;
+
+                                $pollOptions[] = [
+                                    'id' => $optionId,
+                                    'label' => $optionLabel,
+                                    'votes' => $optionVotes,
+                                    'count' => $voteCount,
+                                ];
+                            }
+
+                            $hasPoll = $pollQuestion !== '' && count($pollOptions) >= 2;
                         @endphp
                         <h4>{{ $post['title'] ?: 'Publicacion sin titulo' }}</h4>
                         <span class="forum-post-meta">{{ $post['author'] ?? 'usuario' }} | {{ $post['created_at'] ?? '-' }}</span>
@@ -354,6 +648,44 @@
 
                         @if (!empty($post['image_path']))
                             <img class="forum-post-image" src="{{ asset($post['image_path']) }}" alt="Imagen de publicacion de {{ $post['author'] ?? 'usuario' }}" loading="lazy">
+                        @endif
+
+                        @if ($hasPoll)
+                            <div class="forum-poll">
+                                <h5 class="forum-poll-question">Encuesta: {{ $pollQuestion }}</h5>
+                                <div class="forum-poll-meta">Total de votos: {{ $totalPollVotes }}</div>
+
+                                <ul class="forum-poll-list">
+                                    @foreach ($pollOptions as $pollOption)
+                                        @php
+                                            $optionCount = (int) ($pollOption['count'] ?? 0);
+                                            $optionPercent = $totalPollVotes > 0 ? round(($optionCount / $totalPollVotes) * 100, 1) : 0;
+                                            $isCurrentVote = (($pollOption['id'] ?? '') === $currentPollVoteId);
+                                        @endphp
+                                        <li class="forum-poll-item">
+                                            <div class="forum-poll-vote-row">
+                                                <span class="forum-poll-label">{{ $pollOption['label'] ?? '-' }}</span>
+                                                <span class="forum-poll-stats">{{ $optionCount }} voto(s) | {{ $optionPercent }}%</span>
+                                            </div>
+                                            <div class="forum-poll-bar">
+                                                <span class="forum-poll-bar-fill" style="width: {{ $optionPercent }}%"></span>
+                                            </div>
+
+                                            @if ($canReact)
+                                                <form class="reaction-form" method="POST" action="{{ url('/foro/' . ($post['id'] ?? '') . '/poll-vote') }}" style="margin-top: 8px;">
+                                                    @csrf
+                                                    <input type="hidden" name="option_id" value="{{ $pollOption['id'] ?? '' }}">
+                                                    <button type="submit" class="reaction-btn">{{ $isCurrentVote ? 'Tu voto' : 'Votar' }}</button>
+                                                </form>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+
+                                @if (!$canReact)
+                                    <div class="forum-poll-meta" style="margin-top: 8px;">Inicia sesion con usuario registrado para votar en la encuesta.</div>
+                                @endif
+                            </div>
                         @endif
 
                         <div class="forum-post-actions">
@@ -381,11 +713,13 @@
                                 <details class="forum-post-menu">
                                     <summary>⋯</summary>
                                     <div class="forum-post-menu-panel">
-                                        <form class="reaction-form" method="POST" action="{{ url('/foro/' . ($post['id'] ?? '') . '/report') }}">
-                                            @csrf
-                                            <input type="hidden" name="reason" value="Contenido reportado por usuario">
-                                            <button type="submit" class="reaction-btn report-btn">Reportar</button>
-                                        </form>
+                                        <button
+                                            type="button"
+                                            class="reaction-btn report-btn js-open-report-modal"
+                                            data-post-id="{{ $post['id'] ?? '' }}"
+                                        >
+                                            Reportar
+                                        </button>
 
                                         @if ($canDelete)
                                             <form class="delete-form" method="POST" action="{{ url('/foro/' . ($post['id'] ?? '') . '/delete') }}">
@@ -428,7 +762,25 @@
         </div>
     </div>
 
-    <footer>Codename Virthub 0.9 PreRelease</footer>
+    <div class="forum-report-modal" id="forumReportModal" aria-hidden="true">
+        <div class="forum-report-card" role="dialog" aria-modal="true" aria-labelledby="forumReportTitle" onclick="event.stopPropagation()">
+            <h3 id="forumReportTitle">Reportar publicacion</h3>
+            <p class="forum-report-help">Describe brevemente el motivo del reporte para moderacion (minimo 8 caracteres).</p>
+
+            <form id="forumReportForm" method="POST" action="{{ url('/foro') }}">
+                @csrf
+                <label for="forumReportReason" class="forum-post-meta">Motivo</label>
+                <textarea id="forumReportReason" name="reason" maxlength="280" minlength="8" required placeholder="Ejemplo: spam repetido, insultos, contenido fuera de reglas..."></textarea>
+
+                <div class="forum-report-actions">
+                    <button type="button" class="reaction-btn" id="forumReportCancel">Cancelar</button>
+                    <button type="submit" class="reaction-btn report-btn">Enviar reporte</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>Codename Virthub 0.9b PreRelease</footer>
 
     <script>
         function getUserKey() {
@@ -444,6 +796,66 @@
             if (!launcher) return;
 
             launcher.classList.remove('is-open');
+        }
+
+        function buildReportAction(postId) {
+            return '/foro/' + encodeURIComponent(postId) + '/report';
+        }
+
+        function openReportModal(postId) {
+            const modal = document.getElementById('forumReportModal');
+            const form = document.getElementById('forumReportForm');
+            const textarea = document.getElementById('forumReportReason');
+            if (!modal || !form || !textarea || !postId) return;
+
+            form.setAttribute('action', buildReportAction(postId));
+            textarea.value = '';
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+
+            window.setTimeout(() => textarea.focus(), 20);
+        }
+
+        function closeReportModal() {
+            const modal = document.getElementById('forumReportModal');
+            if (!modal) return;
+
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function bindReportModalEvents() {
+            document.querySelectorAll('.js-open-report-modal').forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const postId = button.getAttribute('data-post-id') || '';
+                    openReportModal(postId);
+                });
+            });
+
+            const modal = document.getElementById('forumReportModal');
+            const cancelBtn = document.getElementById('forumReportCancel');
+
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    closeReportModal();
+                });
+            }
+
+            if (modal) {
+                modal.addEventListener('click', function () {
+                    closeReportModal();
+                });
+            }
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeReportModal();
+                }
+            });
         }
 
         function applyThemeState() {
@@ -504,6 +916,7 @@
 
         window.addEventListener('DOMContentLoaded', applySidebarState);
         window.addEventListener('DOMContentLoaded', applyThemeState);
+        window.addEventListener('DOMContentLoaded', bindReportModalEvents);
     </script>
 </body>
 </html>

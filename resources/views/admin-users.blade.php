@@ -10,10 +10,11 @@
     <style>
         .admin-wrapper {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(320px, 1fr));
             gap: 10px;
             margin: 5px;
             min-height: calc(100vh - 260px);
+            align-items: start;
         }
 
         .admin-card {
@@ -25,6 +26,138 @@
             color: #e8fff3;
             font-family: Monocraft Nerd Font, monospace;
             overflow: auto;
+        }
+
+        .admin-gadget {
+            cursor: grab;
+            user-select: none;
+            transition: min-height 0.25s ease, grid-column 0.25s ease, transform 0.2s ease, opacity 0.2s ease, padding 0.2s ease;
+        }
+
+        .admin-gadget.is-collapsed {
+            min-height: 0 !important;
+            padding: 12px 16px;
+            overflow: hidden;
+        }
+
+        .admin-gadget.is-collapsed .gadget-head {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .admin-gadget.is-collapsed .gadget-content {
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-6px);
+            pointer-events: none;
+            margin-top: 0;
+        }
+
+        .gadget-content {
+            max-height: 5000px;
+            opacity: 1;
+            transform: translateY(0);
+            overflow: hidden;
+            transition: max-height 0.34s ease, opacity 0.22s ease, transform 0.22s ease, margin-top 0.22s ease;
+            will-change: max-height, opacity, transform;
+        }
+
+        .admin-gadget.dragging {
+            opacity: 0.72;
+            transform: scale(0.99);
+            cursor: grabbing;
+        }
+
+        .admin-gadget input,
+        .admin-gadget select,
+        .admin-gadget button,
+        .admin-gadget textarea,
+        .admin-gadget a {
+            cursor: auto;
+        }
+
+        .gadget-head {
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(117, 225, 160, 0.26);
+            padding-bottom: 8px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .gadget-head h2 {
+            margin-bottom: 0;
+            text-align: left;
+        }
+
+        .gadget-head-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .gadget-control-btn {
+            width: auto !important;
+            margin-top: 0 !important;
+            border: 1px solid var(--vh-border) !important;
+            border-radius: 999px !important;
+            background-color: var(--vh-button-bg) !important;
+            color: var(--vh-text) !important;
+            font-family: Monocraft Nerd Font, monospace;
+            font-size: 11px !important;
+            padding: 4px 10px !important;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .gadget-control-btn:hover {
+            background-color: var(--vh-button-hover) !important;
+        }
+
+        .drag-chip {
+            font-size: 11px;
+            color: var(--vh-text-soft);
+            border: 1px solid var(--vh-border);
+            border-radius: 999px;
+            padding: 2px 8px;
+            background-color: rgba(0, 0, 0, 0.12);
+        }
+
+        .gadget-hide-btn {
+            border-color: rgba(255, 175, 96, 0.42) !important;
+            transition: transform 0.2s ease !important;
+        }
+
+        .admin-gadget.is-collapsed .gadget-hide-btn {
+            transform: rotate(-90deg);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .admin-gadget,
+            .gadget-content,
+            .gadget-hide-btn {
+                transition: none !important;
+            }
+        }
+
+
+        .admin-gadget.gadget-size-normal {
+            grid-column: auto;
+            min-height: 0;
+        }
+
+        .admin-gadget.gadget-size-wide {
+            grid-column: 1 / -1;
+            min-height: 0;
+        }
+
+        .admin-gadget.gadget-size-tall {
+            grid-column: auto;
+            min-height: 720px;
         }
 
         .admin-card h2 {
@@ -285,6 +418,23 @@
             transition: 0.2s;
         }
 
+        .admin-link-btn {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--vh-border);
+            font-size: 12px;
+            font-family: Monocraft Nerd Font, monospace;
+            text-decoration: none !important;
+            line-height: 1.2;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .admin-link-btn:visited {
+            text-decoration: none !important;
+        }
+
         .btn-deactivate {
             background-color: rgba(255, 193, 7, 0.7);
             color: #0b1b2d;
@@ -382,6 +532,11 @@
             color: #eef9ff;
         }
 
+        body.dark-mode .admin-gadget.is-collapsed {
+            background-color: rgba(8, 12, 20, 0.84);
+            border-color: rgba(120, 158, 214, 0.35);
+        }
+
         body.dark-mode .admin-card h2,
         body.dark-mode .users-table th,
         body.dark-mode .modal-content p {
@@ -403,6 +558,27 @@
         body.dark-mode .admin-card button:hover {
             background-color: rgba(99, 136, 191, 0.92);
             color: #ffffff;
+        }
+
+        body.dark-mode .drag-chip {
+            border-color: rgba(120, 158, 214, 0.42);
+            background-color: rgba(29, 42, 66, 0.75);
+            color: #dbeaff;
+        }
+
+        body.dark-mode .gadget-control-btn {
+            border-color: rgba(120, 158, 214, 0.42) !important;
+            background-color: rgba(71, 103, 150, 0.82) !important;
+            color: #f2fbff !important;
+        }
+
+        body.dark-mode .gadget-control-btn:hover {
+            background-color: rgba(99, 136, 191, 0.92) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-mode .gadget-hide-btn {
+            border-color: rgba(255, 155, 120, 0.48) !important;
         }
 
         body.dark-mode .admin-success {
@@ -449,86 +625,41 @@
             background-color: rgba(255, 120, 120, 0.18);
             color: #ffb8b8;
         }
-        .admin-top-actions {
-            margin-bottom: 10px;
-            display: flex;
-            gap: 10px;
+
+        .report-delete-btn:hover {
+            background-color: rgba(255, 100, 100, 0.95);
         }
 
-        .admin-top-actions form,
-        .admin-top-actions button {
-            width: 100%;
-        }
-
-        .admin-full-width {
-            grid-column: 1 / -1;
-        }
-
-        .reports-table {
+        .suggestions-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
 
-        .reports-table th,
-        .reports-table td {
+        .suggestions-table th,
+        .suggestions-table td {
             border-bottom: 1px solid rgba(117, 225, 160, 0.3);
             padding: 8px;
             text-align: left;
             vertical-align: top;
         }
 
-        .reports-table th {
+        .suggestions-table th {
             color: #9bf2c1;
             font-size: 12px;
         }
 
-        .report-reason {
-            max-width: 280px;
+        .suggestion-text {
+            max-width: 640px;
             white-space: normal;
+            line-height: 1.45;
+            color: var(--vh-panel-text);
         }
 
-        .report-post-snippet {
-            color: #d7ffea;
-            font-size: 12px;
-            line-height: 1.4;
-            max-width: 420px;
-            white-space: normal;
-        }
-
-        .admin-link-btn {
-            display: inline-block;
-            padding: 6px 10px;
-            border-radius: 8px;
-            text-decoration: none;
-            background-color: rgba(127, 255, 212, 0.75);
-            color: #0b1b2d;
-            font-size: 12px;
-        }
-
-        .admin-link-btn:hover {
-            background-color: rgba(127, 255, 212, 0.95);
-            color: #0b1b2d;
-        }
-
-        .report-delete-form {
-            margin-top: 6px;
-        }
-
-        .report-delete-btn {
+        .table-scroll {
             width: 100%;
-            padding: 6px 10px;
-            border: none;
-            border-radius: 8px;
-            background-color: rgba(255, 100, 100, 0.78);
-            color: #ffffff;
-            font-family: Monocraft Nerd Font, monospace;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .report-delete-btn:hover {
-            background-color: rgba(255, 100, 100, 0.95);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         body.dark-mode .reports-table th,
@@ -564,6 +695,13 @@
                 min-height: auto;
             }
 
+            .admin-gadget.gadget-size-normal,
+            .admin-gadget.gadget-size-wide,
+            .admin-gadget.gadget-size-tall {
+                grid-column: 1 / -1;
+                min-height: 0;
+            }
+
             header h1 {
                 font-size: clamp(24px, 8vw, 46px);
                 line-height: 1.15;
@@ -575,6 +713,77 @@
             .admin-card {
                 padding: 16px;
             }
+
+            .gadget-head {
+                flex-wrap: wrap;
+                align-items: flex-start;
+            }
+
+            .gadget-head h2 {
+                width: 100%;
+                margin-bottom: 6px;
+            }
+
+            .gadget-head-controls {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .users-table,
+            .reports-table,
+            .suggestions-table {
+                min-width: 760px;
+            }
+
+            .admin-link-btn,
+            .report-delete-form,
+            .report-delete-btn {
+                width: 100%;
+            }
+
+            .report-delete-form {
+                display: block;
+                margin-top: 6px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .admin-wrapper {
+                margin: 0;
+                gap: 8px;
+            }
+
+            .admin-card {
+                padding: 10px;
+            }
+
+            .gadget-control-btn {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+            }
+
+            .drag-chip {
+                font-size: 10px;
+                padding: 2px 7px;
+            }
+
+            .admin-card h2 {
+                font-size: 16px;
+            }
+
+            .modal-content {
+                width: calc(100vw - 24px);
+                padding: 20px;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-btn-cancel,
+            .modal-btn-confirm {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -584,9 +793,7 @@
             <div class= "toggleable-sidebar" onclick="toggleMenu(event)" aria-label="Abrir menu" title="Menu">
                 <span class="menu-icon" aria-hidden="true"></span>
                 <div class="sidebar" onclick="event.stopPropagation()">
-                    <button onclick="location.href='{{ url('/') }}'">Volver a Inicio</button>
-                    <button onclick="location.href='{{ url('/foro') }}'">Foro</button>
-                    <button onclick="location.href='{{ url('/contenedor') }}'">Contenedor</button>
+                    @include('partials.navigation-menu', ['currentUser' => $currentUser ?? null, 'currentPage' => 'admin'])
                 </div>
             </div>
             <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">
@@ -622,9 +829,18 @@
     @include('partials.chat-widget')
 
 
-    <div class="admin-wrapper">
-        <section class="admin-card">
-            <h2>Crear Usuario</h2>
+    <div class="admin-wrapper" id="adminGadgetBoard">
+        <section class="admin-card admin-gadget gadget-size-normal" data-gadget-id="create-user" data-gadget-size="normal" data-default-size="normal">
+            <div class="gadget-head">
+                <h2>Crear Usuario</h2>
+                <div class="gadget-head-controls">
+                    <span class="drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                    <button type="button" class="gadget-control-btn gadget-size-btn" onclick="cycleGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">◻</button>
+                    <button type="button" class="gadget-control-btn gadget-hide-btn" onclick="toggleCollapseGadget(event, this)" title="Contraer gadget" aria-label="Contraer gadget">▾</button>
+                </div>
+            </div>
+
+            <div class="gadget-content">
 
             @if (session('error'))
                 <div class="admin-message admin-error">{{ session('error') }}</div>
@@ -696,11 +912,22 @@
 
                 <button type="submit">Actualizar Password</button>
             </form>
+            </div>
         </section>
 
-        <section class="admin-card">
-            <h2>Usuarios Registrados</h2>
+        <section class="admin-card admin-gadget gadget-size-normal" data-gadget-id="registered-users" data-gadget-size="normal" data-default-size="normal">
+            <div class="gadget-head">
+                <h2>Usuarios Registrados</h2>
+                <div class="gadget-head-controls">
+                    <span class="drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                    <button type="button" class="gadget-control-btn gadget-size-btn" onclick="cycleGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">◻</button>
+                    <button type="button" class="gadget-control-btn gadget-hide-btn" onclick="toggleCollapseGadget(event, this)" title="Contraer gadget" aria-label="Contraer gadget">▾</button>
+                </div>
+            </div>
 
+            <div class="gadget-content">
+
+            <div class="table-scroll">
             <table class="users-table">
                 <thead>
                     <tr>
@@ -742,14 +969,26 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
+            </div>
         </section>
 
-        <section class="admin-card admin-full-width">
-            <h2>Reportes del Foro</h2>
+        <section class="admin-card admin-gadget gadget-size-wide" data-gadget-id="forum-reports" data-gadget-size="wide" data-default-size="wide">
+            <div class="gadget-head">
+                <h2>Reportes del Foro</h2>
+                <div class="gadget-head-controls">
+                    <span class="drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                    <button type="button" class="gadget-control-btn gadget-size-btn" onclick="cycleGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">▭</button>
+                    <button type="button" class="gadget-control-btn gadget-hide-btn" onclick="toggleCollapseGadget(event, this)" title="Contraer gadget" aria-label="Contraer gadget">▾</button>
+                </div>
+            </div>
+
+            <div class="gadget-content">
 
             @if (empty($forumReports ?? []))
                 <p>No hay reportes del foro por ahora.</p>
             @else
+                <div class="table-scroll">
                 <table class="reports-table">
                     <thead>
                         <tr>
@@ -785,11 +1024,54 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             @endif
+            </div>
+        </section>
+
+        <section class="admin-card admin-gadget gadget-size-wide" data-gadget-id="suggestions" data-gadget-size="wide" data-default-size="wide">
+            <div class="gadget-head">
+                <h2>Sugerencias Recibidas</h2>
+                <div class="gadget-head-controls">
+                    <span class="drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                    <button type="button" class="gadget-control-btn gadget-size-btn" onclick="cycleGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">▭</button>
+                    <button type="button" class="gadget-control-btn gadget-hide-btn" onclick="toggleCollapseGadget(event, this)" title="Contraer gadget" aria-label="Contraer gadget">▾</button>
+                </div>
+            </div>
+
+            <div class="gadget-content">
+
+            @if (empty($suggestions ?? []))
+                <p>No hay sugerencias registradas por ahora.</p>
+            @else
+                <div class="table-scroll">
+                <table class="suggestions-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Modo</th>
+                            <th>Autor</th>
+                            <th>Sugerencia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (($suggestions ?? []) as $suggestion)
+                            <tr>
+                                <td>{{ $suggestion['created_at'] ?? '-' }}</td>
+                                <td>{{ ($suggestion['author_mode'] ?? 'anonymous') === 'identified' ? 'Identificado' : 'Anonimo' }}</td>
+                                <td>{{ $suggestion['author'] ?? 'Anonimo' }}</td>
+                                <td class="suggestion-text">{{ $suggestion['message'] ?? '' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                </div>
+            @endif
+            </div>
         </section>
     </div>
 
-    <footer>Codename Virthub 0.9 PreRelease</footer>
+    <footer>Codename Virthub 0.9b PreRelease</footer>
 
     <div class="confirmation-modal" id="confirmationModal">
         <div class="modal-content">
@@ -808,6 +1090,253 @@
 
         function getThemeStorageKey() {
             return 'virthub_dark_mode_' + getUserKey();
+        }
+
+        function getAdminGadgetOrderKey() {
+            return 'virthub_admin_gadget_order_' + getUserKey();
+        }
+
+        function getAdminGadgetSizeKey() {
+            return 'virthub_admin_gadget_size_' + getUserKey();
+        }
+
+        function getAdminGadgetCollapseKey() {
+            return 'virthub_admin_gadget_collapsed_' + getUserKey();
+        }
+
+        function setGadgetSize(gadget, size) {
+            if (!gadget) return;
+
+            const allowed = ['normal', 'wide', 'tall'];
+            const nextSize = allowed.includes(size) ? size : 'normal';
+
+            gadget.classList.remove('gadget-size-normal', 'gadget-size-wide', 'gadget-size-tall');
+            gadget.classList.add('gadget-size-' + nextSize);
+            gadget.dataset.gadgetSize = nextSize;
+
+            const btn = gadget.querySelector('.gadget-size-btn');
+            if (btn) {
+                const labels = {
+                    normal: '◻',
+                    wide: '▭',
+                    tall: '▮',
+                };
+                btn.textContent = labels[nextSize] || '◻';
+            }
+        }
+
+        function saveAdminGadgetSizes() {
+            const board = document.getElementById('adminGadgetBoard');
+            if (!board) return;
+
+            const payload = {};
+            board.querySelectorAll('.admin-gadget').forEach(gadget => {
+                const id = gadget.dataset.gadgetId;
+                if (!id) return;
+                payload[id] = gadget.dataset.gadgetSize || 'normal';
+            });
+
+            localStorage.setItem(getAdminGadgetSizeKey(), JSON.stringify(payload));
+        }
+
+        function applySavedAdminGadgetSizes() {
+            const board = document.getElementById('adminGadgetBoard');
+            if (!board) return;
+
+            const raw = localStorage.getItem(getAdminGadgetSizeKey());
+            let payload = {};
+
+            try {
+                payload = raw ? JSON.parse(raw) : {};
+            } catch (error) {
+                payload = {};
+            }
+
+            board.querySelectorAll('.admin-gadget').forEach(gadget => {
+                const id = gadget.dataset.gadgetId;
+                const defaultSize = gadget.dataset.defaultSize || gadget.dataset.gadgetSize || 'normal';
+                const size = (id && payload[id]) ? payload[id] : defaultSize;
+                setGadgetSize(gadget, size);
+            });
+        }
+
+        function saveAdminGadgetCollapsedState() {
+            const board = document.getElementById('adminGadgetBoard');
+            if (!board) return;
+
+            const payload = {};
+            board.querySelectorAll('.admin-gadget').forEach(gadget => {
+                const id = gadget.dataset.gadgetId;
+                if (!id) return;
+                payload[id] = gadget.classList.contains('is-collapsed');
+            });
+
+            localStorage.setItem(getAdminGadgetCollapseKey(), JSON.stringify(payload));
+        }
+
+        function updateCollapseButton(gadget) {
+            const btn = gadget ? gadget.querySelector('.gadget-hide-btn') : null;
+            if (!btn || !gadget) return;
+
+            const isCollapsed = gadget.classList.contains('is-collapsed');
+            btn.textContent = isCollapsed ? '▸' : '▾';
+            btn.title = isCollapsed ? 'Expandir gadget' : 'Contraer gadget';
+            btn.setAttribute('aria-label', isCollapsed ? 'Expandir gadget' : 'Contraer gadget');
+        }
+
+        function applySavedAdminGadgetCollapsedState() {
+            const board = document.getElementById('adminGadgetBoard');
+            if (!board) return;
+
+            const raw = localStorage.getItem(getAdminGadgetCollapseKey());
+            let payload = {};
+
+            try {
+                payload = raw ? JSON.parse(raw) : {};
+            } catch (error) {
+                payload = {};
+            }
+
+            board.querySelectorAll('.admin-gadget').forEach(gadget => {
+                const id = gadget.dataset.gadgetId;
+                const shouldCollapse = !!(id && payload[id]);
+                gadget.classList.toggle('is-collapsed', shouldCollapse);
+                updateCollapseButton(gadget);
+            });
+        }
+
+        function toggleCollapseGadget(event, triggerBtn) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            const gadget = triggerBtn ? triggerBtn.closest('.admin-gadget') : null;
+            if (!gadget) return;
+
+            gadget.classList.toggle('is-collapsed');
+            updateCollapseButton(gadget);
+            saveAdminGadgetCollapsedState();
+        }
+
+        function resetAdminGadgetLayout() {
+            localStorage.removeItem(getAdminGadgetOrderKey());
+            localStorage.removeItem(getAdminGadgetSizeKey());
+            localStorage.removeItem(getAdminGadgetCollapseKey());
+            window.location.reload();
+        }
+
+        function cycleGadgetSize(event, triggerBtn) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            const gadget = triggerBtn ? triggerBtn.closest('.admin-gadget') : null;
+            if (!gadget) return;
+
+            const sizes = ['normal', 'wide', 'tall'];
+            const current = gadget.dataset.gadgetSize || 'normal';
+            const currentIndex = sizes.indexOf(current);
+            const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % sizes.length : 0;
+            const next = sizes[nextIndex];
+
+            setGadgetSize(gadget, next);
+            saveAdminGadgetSizes();
+        }
+
+        function saveAdminGadgetOrder() {
+            const board = document.getElementById('adminGadgetBoard');
+            if (!board) return;
+
+            const order = Array.from(board.querySelectorAll('.admin-gadget')).map(g => g.dataset.gadgetId);
+            localStorage.setItem(getAdminGadgetOrderKey(), JSON.stringify(order));
+        }
+
+        function applySavedAdminGadgetOrder() {
+            const board = document.getElementById('adminGadgetBoard');
+            if (!board) return;
+
+            const raw = localStorage.getItem(getAdminGadgetOrderKey());
+            if (!raw) return;
+
+            try {
+                const order = JSON.parse(raw);
+                if (!Array.isArray(order)) return;
+
+                order.forEach(id => {
+                    const gadget = board.querySelector(`.admin-gadget[data-gadget-id="${id}"]`);
+                    if (gadget) {
+                        board.appendChild(gadget);
+                    }
+                });
+            } catch (error) {
+                // Ignore invalid payload.
+            }
+        }
+
+        function enableAdminGadgetDnD() {
+            const board = document.getElementById('adminGadgetBoard');
+            if (!board) return;
+
+            const gadgets = Array.from(board.querySelectorAll('.admin-gadget'));
+            gadgets.forEach(gadget => {
+                gadget.setAttribute('draggable', 'true');
+                gadget.dataset.dragFromHead = '0';
+
+                const head = gadget.querySelector('.gadget-head');
+                if (head) {
+                    head.addEventListener('mousedown', event => {
+                        if (event.target.closest('.gadget-control-btn')) {
+                            gadget.dataset.dragFromHead = '0';
+                            return;
+                        }
+                        gadget.dataset.dragFromHead = '1';
+                    });
+                }
+
+                gadget.addEventListener('dragstart', event => {
+                    if (gadget.dataset.dragFromHead !== '1') {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    gadget.classList.add('dragging');
+                    if (event.dataTransfer) {
+                        event.dataTransfer.effectAllowed = 'move';
+                        event.dataTransfer.setData('text/plain', gadget.dataset.gadgetId || '');
+                    }
+                });
+
+                gadget.addEventListener('dragend', () => {
+                    gadget.classList.remove('dragging');
+                    gadget.dataset.dragFromHead = '0';
+                    saveAdminGadgetOrder();
+                });
+            });
+
+            window.addEventListener('mouseup', () => {
+                board.querySelectorAll('.admin-gadget').forEach(gadget => {
+                    gadget.dataset.dragFromHead = '0';
+                });
+            });
+
+            board.addEventListener('dragover', event => {
+                event.preventDefault();
+                const dragging = board.querySelector('.admin-gadget.dragging');
+                const target = event.target.closest('.admin-gadget');
+
+                if (!dragging || !target || dragging === target) return;
+
+                const rect = target.getBoundingClientRect();
+                const before = event.clientY < (rect.top + rect.height / 2);
+                board.insertBefore(dragging, before ? target : target.nextSibling);
+            });
+
+            board.addEventListener('drop', event => {
+                event.preventDefault();
+                saveAdminGadgetOrder();
+            });
         }
 
         function applySidebarState() {
@@ -1011,14 +1540,14 @@
             }
         });
 
-        window.addEventListener('click', function() {
+        window.addEventListener('click', function(event) {
             const sidebarLauncher = document.querySelector('.toggleable-sidebar');
-            if (sidebarLauncher) {
+            if (sidebarLauncher && !sidebarLauncher.contains(event.target)) {
                 sidebarLauncher.classList.remove('is-open');
             }
 
             const profileLauncher = document.querySelector('.toggleable-profile-menu');
-            if (profileLauncher) {
+            if (profileLauncher && !profileLauncher.contains(event.target)) {
                 profileLauncher.classList.remove('is-open');
             }
         });
@@ -1026,6 +1555,13 @@
         window.addEventListener('DOMContentLoaded', applySidebarState);
         window.addEventListener('DOMContentLoaded', applyThemeState);
         window.addEventListener('DOMContentLoaded', enforceAdminCredentialPolicy);
+        window.addEventListener('DOMContentLoaded', applySavedAdminGadgetOrder);
+        window.addEventListener('DOMContentLoaded', applySavedAdminGadgetSizes);
+        window.addEventListener('DOMContentLoaded', applySavedAdminGadgetCollapsedState);
+        window.addEventListener('DOMContentLoaded', enableAdminGadgetDnD);
+        window.cycleGadgetSize = cycleGadgetSize;
+        window.toggleCollapseGadget = toggleCollapseGadget;
+        window.resetAdminGadgetLayout = resetAdminGadgetLayout;
         document.getElementById('create_role')?.addEventListener('change', enforceAdminCredentialPolicy);
     </script>
 </body>

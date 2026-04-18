@@ -22,7 +22,7 @@ class ForumStore
         return array_slice($posts, 0, max(1, $limit));
     }
 
-    public function addPost(string $author, string $content, ?string $title = null): array
+    public function addPost(string $author, string $content, ?string $title = null, ?array $poll = null): array
     {
         $author = trim($author);
         $content = trim($content);
@@ -36,13 +36,42 @@ class ForumStore
             throw new RuntimeException('El contenido del post no puede estar vacio.');
         }
 
-        return $this->updatePosts(function (array &$posts) use ($author, $content, $title): array {
+        return $this->updatePosts(function (array &$posts) use ($author, $content, $title, $poll): array {
+            $pollRecord = null;
+            if (is_array($poll)) {
+                $question = trim((string) ($poll['question'] ?? ''));
+                $optionsRaw = is_array($poll['options'] ?? null) ? $poll['options'] : [];
+                $options = [];
+
+                foreach ($optionsRaw as $optionLabel) {
+                    $label = trim((string) $optionLabel);
+                    if ($label === '') {
+                        continue;
+                    }
+
+                    $options[] = [
+                        'id' => Str::uuid()->toString(),
+                        'label' => $label,
+                        'votes' => [],
+                    ];
+                }
+
+                if ($question !== '' && count($options) >= 2) {
+                    $pollRecord = [
+                        'question' => $question,
+                        'options' => $options,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ];
+                }
+            }
+
             $record = [
                 'id' => Str::uuid()->toString(),
                 'author' => $author,
                 'title' => $title,
                 'content' => $content,
                 'image_path' => null,
+                'poll' => $pollRecord,
                 'reactions' => [],
                 'comments' => [],
                 'reports' => [],
@@ -206,6 +235,68 @@ class ForumStore
             $updated = true;
             break;
         }
+            unset($post);
+
+            if (!$updated) {
+                throw new RuntimeException('No existe una publicacion con ese id.');
+            }
+
+            return $updatedPost ?? [];
+        });
+    }
+
+    public function votePoll(string $postId, string $username, string $optionId): array
+    {
+        $postId = trim($postId);
+        $username = trim($username);
+        $optionId = trim($optionId);
+
+        if ($postId === '' || $username === '' || $optionId === '') {
+            throw new RuntimeException('Datos invalidos para votar en encuesta.');
+        }
+
+        return $this->updatePosts(function (array &$posts) use ($postId, $username, $optionId): array {
+            $updated = false;
+            $updatedPost = null;
+
+            foreach ($posts as &$post) {
+                if (($post['id'] ?? '') !== $postId) {
+                    continue;
+                }
+
+                $poll = is_array($post['poll'] ?? null) ? $post['poll'] : null;
+                if (!$poll) {
+                    throw new RuntimeException('La publicacion no tiene encuesta activa.');
+                }
+
+                $options = is_array($poll['options'] ?? null) ? $poll['options'] : [];
+                $found = false;
+
+                foreach ($options as &$option) {
+                    $votes = is_array($option['votes'] ?? null) ? $option['votes'] : [];
+                    $votes = array_values(array_filter($votes, function ($voteUser) use ($username): bool {
+                        return is_string($voteUser) && trim($voteUser) !== '' && $voteUser !== $username;
+                    }));
+
+                    if ((string) ($option['id'] ?? '') === $optionId) {
+                        $votes[] = $username;
+                        $found = true;
+                    }
+
+                    $option['votes'] = array_values(array_unique($votes));
+                }
+                unset($option);
+
+                if (!$found) {
+                    throw new RuntimeException('La opcion de encuesta seleccionada no existe.');
+                }
+
+                $poll['options'] = $options;
+                $post['poll'] = $poll;
+                $updatedPost = $post;
+                $updated = true;
+                break;
+            }
             unset($post);
 
             if (!$updated) {

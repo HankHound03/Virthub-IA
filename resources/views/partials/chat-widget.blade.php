@@ -1,5 +1,6 @@
 @if (!empty($currentUser))
     @php
+        $isGuestChat = (($currentUser['role'] ?? 'guest') === 'guest');
         $chatCurrentProfile = [
             'username' => $currentUser['username'] ?? 'guest',
             'profile_image_path' => $currentUser['profile_image_path'] ?? null,
@@ -89,11 +90,16 @@
             </div>
 
             <div class="chat-tabs" id="chatTabs">
+                @if (!$isGuestChat)
                 <button type="button" class="chat-tab-btn active" onclick="switchChatTab('messages')" data-tab="messages">Mensajes</button>
                 <button type="button" class="chat-tab-btn" onclick="switchChatTab('users')" data-tab="users">Usuarios</button>
                 <button type="button" class="chat-tab-btn" onclick="switchChatTab('broadcast')" data-tab="broadcast">Anuncios</button>
+                @else
+                <button type="button" class="chat-tab-btn active" onclick="switchChatTab('broadcast')" data-tab="broadcast">Anuncios</button>
+                @endif
             </div>
 
+            @if (!$isGuestChat)
             <div id="messagesView" class="chat-view active">
                 <div class="chat-messages" id="chatMessages">
                     <p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">Sin mensajes aún. Selecciona un usuario.</p>
@@ -109,8 +115,9 @@
                     <p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">Cargando usuarios...</p>
                 </div>
             </div>
+            @endif
 
-            <div id="broadcastView" class="chat-view">
+            <div id="broadcastView" class="chat-view {{ $isGuestChat ? 'active' : '' }}">
                 <div class="chat-messages" id="broadcastMessages"></div>
                 <div class="chat-input-area" @if (($currentUser['role'] ?? 'user') !== 'admin') style="display:none;" @endif>
                     <input type="text" id="broadcastInput" placeholder="Mensaje para todos..." onkeypress="if(event.key==='Enter') sendBroadcast();">
@@ -124,6 +131,7 @@
         window.VIRTHUB_CHAT_USER = @json($currentUser['username'] ?? 'guest');
         window.VIRTHUB_CHAT_SOUND = @json(asset('sounds/chat-notificacion.mp3'));
         window.VIRTHUB_CHAT_CURRENT_PROFILE = @json($chatCurrentProfile);
+        window.VIRTHUB_CHAT_MODE = @json($isGuestChat ? 'broadcast-only' : 'full');
     </script>
     <script src="{{ asset('chat-widget.js') }}?v={{ filemtime(public_path('chat-widget.js')) }}"></script>
 @endif

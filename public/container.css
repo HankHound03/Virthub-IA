@@ -486,6 +486,32 @@ body.dark-mode iframe {
   }
 }
 
+@media (max-width: 560px) {
+  .container-wrapper {
+    margin: 0;
+    gap: 8px;
+  }
+
+  .container-toolbar {
+    padding: 8px;
+  }
+
+  .container-load-btn {
+    width: 100%;
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+
+  iframe {
+    min-height: 58vh;
+  }
+
+  .chat-toast-stack {
+    right: 10px;
+    bottom: 10px;
+  }
+}
+
 .chat-user-item:hover {
   background-color: var(--vh-button-hover);
 }
