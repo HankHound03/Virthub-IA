@@ -1154,14 +1154,33 @@ header {
         min-height: auto;
     }
 
+    .gadget,
+    .gadget-size-normal,
+    .gadget-size-wide,
+    .gadget-size-tall {
+        min-height: 0 !important;
+        height: auto;
+    }
+
+    .calendar-gadget,
+    .login-screen,
+    .linux-news-panel,
+    .access-gadget,
+    .todo-gadget,
+    .notes-gadget,
+    .system-status-panel {
+        min-height: 0;
+        height: auto;
+    }
+
     .linux-news-panel {
         position: relative;
         top: auto;
         left: auto;
         width: auto;
-        max-height: 240px;
         min-height: auto;
         margin: 0;
+        overflow: visible;
     }
 
     .quick-links-grid {
@@ -1181,7 +1200,7 @@ header {
     }
 
     .todo-list {
-        max-height: 180px;
+        max-height: none;
     }
 
     .todo-item {
@@ -1225,7 +1244,7 @@ header {
 
 @media (max-width: 560px) {
     .todo-list {
-        max-height: 150px;
+        max-height: none;
     }
 
     .todo-item-text {
