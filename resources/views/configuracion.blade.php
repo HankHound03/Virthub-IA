@@ -191,7 +191,7 @@
         </div>
     </div>
 
-    <footer>Codename Virthub 0.9b PreRelease</footer>
+    <footer>Codename Virthub 0.9c PreRelease</footer>
 
     <script>
         function getUserKey() {

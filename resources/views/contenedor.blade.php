@@ -108,7 +108,7 @@
             <iframe id="viewer"></iframe>
         </div>
     </div>
-    <footer>Codename Virthub 0.9b PreRelease</footer>
+    <footer>Codename Virthub 0.9c PreRelease</footer>
     <script>
         const currentUserName = @json($currentUser['username'] ?? 'guest');
         const isGuestChatMode = @json((($currentUser['role'] ?? 'guest') === 'guest'));

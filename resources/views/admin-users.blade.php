@@ -1071,7 +1071,7 @@
         </section>
     </div>
 
-    <footer>Codename Virthub 0.9b PreRelease</footer>
+    <footer>Codename Virthub 0.9c PreRelease</footer>
 
     <div class="confirmation-modal" id="confirmationModal">
         <div class="modal-content">

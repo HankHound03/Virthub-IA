@@ -20,6 +20,10 @@ html {
     --vh-button-bg: rgba(117, 225, 160, 0.2);
     --vh-button-hover: rgba(117, 225, 160, 0.4);
     --vh-panel-text: #e8fff3;
+    --vh-glass-blur: 16px;
+    --vh-glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.12) 34%, rgba(255, 255, 255, 0.02) 68%, rgba(255, 255, 255, 0) 100%);
+    --vh-glass-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    --vh-glass-drop-shadow: 0 14px 32px rgba(5, 20, 38, 0.34);
 }
 
 body {
@@ -47,7 +51,7 @@ body::after {
 }
 
 body::before {
-    background-image: linear-gradient(180deg, rgba(7, 14, 24, 0.06), rgba(7, 14, 24, 0.14)), url('/pics/background.jpg?v=20260417-light');
+    background-image: linear-gradient(180deg, rgba(7, 14, 24, 0.14), rgba(7, 14, 24, 0.3)), url('/pics/background.jpg?v=20260417-light');
     opacity: 1;
 }
 
@@ -68,6 +72,10 @@ body.dark-mode {
     --vh-button-bg: rgba(29, 42, 66, 0.78);
     --vh-button-hover: rgba(53, 74, 112, 0.9);
     --vh-panel-text: #f2fbff;
+    --vh-glass-blur: 15px;
+    --vh-glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.06) 30%, rgba(255, 255, 255, 0.01) 70%, rgba(255, 255, 255, 0) 100%);
+    --vh-glass-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+    --vh-glass-drop-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
     color: var(--vh-text);
 }
 
@@ -80,15 +88,40 @@ body.dark-mode::after {
 }
 
 body:not(.dark-mode) {
-    --vh-surface: rgba(10, 36, 54, 0.64);
-    --vh-surface-strong: rgba(10, 42, 62, 0.7);
-    --vh-border: rgba(184, 236, 255, 0.28);
+    --vh-surface: rgba(10, 36, 54, 0.52);
+    --vh-surface-strong: rgba(10, 42, 62, 0.58);
+    --vh-border: rgba(184, 236, 255, 0.22);
     --vh-icon: #ecf9ff;
-    --vh-text: #dbf4ff;
-    --vh-text-soft: #eef9ff;
-    --vh-button-bg: rgba(67, 145, 179, 0.38);
-    --vh-button-hover: rgba(92, 176, 212, 0.56);
+    --vh-text: #d5ebf4;
+    --vh-text-soft: #e7f4fb;
+    --vh-button-bg: rgba(67, 145, 179, 0.3);
+    --vh-button-hover: rgba(92, 176, 212, 0.44);
     --vh-panel-text: #f3fbff;
+    --vh-glass-blur: 13px;
+    --vh-glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.09) 34%, rgba(255, 255, 255, 0.015) 70%, rgba(255, 255, 255, 0) 100%);
+    --vh-glass-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+    --vh-glass-drop-shadow: 0 10px 24px rgba(11, 30, 50, 0.26);
+}
+
+header,
+footer,
+.linux-news-panel,
+.login-screen,
+.sidebar,
+.profile-menu,
+.toggleable-sidebar,
+.theme-toggle,
+.chat-toggle,
+.container-load-btn,
+.chat-panel,
+.chat-header,
+.chat-tabs,
+.chat-input-area,
+.chat-toast {
+    backdrop-filter: blur(var(--vh-glass-blur)) saturate(142%);
+    -webkit-backdrop-filter: blur(var(--vh-glass-blur)) saturate(142%);
+    background-image: var(--vh-glass-sheen);
+    box-shadow: var(--vh-glass-drop-shadow), var(--vh-glass-inner-shadow);
 }
 
 body:not(.dark-mode) header,
@@ -97,7 +130,7 @@ body:not(.dark-mode) .login-screen,
 body:not(.dark-mode) .sidebar,
 body:not(.dark-mode) .profile-menu,
 body:not(.dark-mode) footer {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.48);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
 }
 
 header {
@@ -578,12 +611,33 @@ header {
 
 .gadget {
     min-width: 0;
-    transition: grid-column 0.25s ease, min-height 0.25s ease, transform 0.2s ease, opacity 0.2s ease;
+    transition: grid-column 0.25s ease, min-height 0.25s ease, transform 0.24s ease, opacity 0.2s ease, box-shadow 0.24s ease, filter 0.24s ease;
+    will-change: transform, opacity;
 }
 
 .gadget.dragging {
-    opacity: 0.72;
-    transform: scale(0.99);
+    opacity: 0.92;
+    transform: translateY(-4px) scale(1.01);
+    filter: saturate(108%);
+    box-shadow: 0 14px 28px rgba(4, 20, 34, 0.34), 0 0 0 1px rgba(170, 224, 255, 0.22);
+    animation: gadget-drag-float 0.95s ease-in-out infinite;
+    z-index: 4;
+}
+
+.home-panels .gadget:not(.dragging) {
+    transition-timing-function: cubic-bezier(0.22, 0.9, 0.2, 1);
+}
+
+@keyframes gadget-drag-float {
+    0% {
+        transform: translateY(-3px) scale(1.008);
+    }
+    50% {
+        transform: translateY(-6px) scale(1.012);
+    }
+    100% {
+        transform: translateY(-3px) scale(1.008);
+    }
 }
 
 .gadget-size-normal {
@@ -973,12 +1027,15 @@ header {
 
 .todo-form {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
+    align-items: center;
 }
 
 .todo-form input {
     width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     border-radius: 10px;
     border: 1px solid var(--vh-border);
     background-color: var(--vh-button-bg);
@@ -989,6 +1046,7 @@ header {
 }
 
 .todo-form button {
+    white-space: nowrap;
     border: 1px solid var(--vh-border);
     border-radius: 10px;
     background-color: var(--vh-button-bg);
@@ -1202,4 +1260,30 @@ footer {
 .admin-wrapper {
     position: relative;
     z-index: 1;
+}
+
+/* Apply Aero glass consistently to page-level components that define their own inline styles. */
+body .forum-shell,
+body .forum-card,
+body .forum-post,
+body .forum-post-menu-panel,
+body .forum-poll,
+body .forum-poll-item,
+body .comment-item,
+body .forum-report-card,
+body .suggestions-shell,
+body .suggestions-card,
+body .config-shell,
+body .config-card,
+body .admin-card,
+body .modal-content,
+body .chat-widget-panel,
+body .chat-bubble,
+body .chat-modal,
+body .chat-conversation-panel,
+body .chat-users-panel {
+    backdrop-filter: blur(var(--vh-glass-blur)) saturate(142%) !important;
+    -webkit-backdrop-filter: blur(var(--vh-glass-blur)) saturate(142%) !important;
+    background-image: var(--vh-glass-sheen) !important;
+    box-shadow: var(--vh-glass-drop-shadow), var(--vh-glass-inner-shadow) !important;
 }

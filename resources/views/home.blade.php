@@ -1,6 +1,198 @@
 <!DOCTYPE html>
 <html lang="es">
-<style></style>
+<style>
+    .calendar-gadget {
+        min-height: 250px;
+    }
+
+    .calendar-headline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .calendar-month-title {
+        margin: 0;
+        color: var(--vh-text);
+        font-size: 15px;
+        text-transform: capitalize;
+    }
+
+    .calendar-nav {
+        display: inline-flex;
+        gap: 6px;
+    }
+
+    .calendar-nav button {
+        min-width: 32px;
+        padding: 4px 8px;
+        border: 1px solid var(--vh-border);
+        background-color: var(--vh-button-bg);
+        color: var(--vh-text);
+        cursor: pointer;
+        font-family: Monocraft Nerd Font, monospace;
+        font-size: 12px;
+    }
+
+    .calendar-nav button:hover {
+        background-color: var(--vh-button-hover);
+    }
+
+    .calendar-now {
+        margin: 0 0 8px 0;
+        color: var(--vh-text-soft);
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .calendar-weekday-row,
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    .calendar-weekday-row {
+        margin-bottom: 4px;
+    }
+
+    .calendar-weekday {
+        text-align: center;
+        color: var(--vh-text-soft);
+        font-size: 11px;
+        padding: 4px 0;
+    }
+
+    .calendar-day {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30px;
+        border: 1px solid var(--vh-border);
+        background-color: rgba(0, 0, 0, 0.10);
+        color: var(--vh-panel-text);
+        font-size: 12px;
+        cursor: pointer;
+        font-family: Monocraft Nerd Font, monospace;
+        padding: 0;
+    }
+
+    .calendar-day.is-out {
+        opacity: 0.45;
+    }
+
+    .calendar-day.is-today {
+        border-color: rgba(117, 225, 160, 0.62);
+        background-color: rgba(117, 225, 160, 0.18);
+        color: var(--vh-text);
+        font-weight: 700;
+    }
+
+    .calendar-day.is-selected {
+        border-color: rgba(122, 170, 255, 0.7);
+        background-color: rgba(122, 170, 255, 0.24);
+        color: var(--vh-text);
+    }
+
+    .calendar-day.has-events {
+        border-color: rgba(255, 199, 104, 0.72);
+        background-color: rgba(255, 199, 104, 0.22);
+        color: var(--vh-text);
+    }
+
+    .calendar-day.has-events.is-selected {
+        border-color: rgba(122, 170, 255, 0.84);
+        background: linear-gradient(0deg, rgba(122, 170, 255, 0.24), rgba(255, 199, 104, 0.2));
+    }
+
+    .calendar-day.has-events.is-today {
+        border-color: rgba(117, 225, 160, 0.78);
+        box-shadow: inset 0 0 0 1px rgba(255, 199, 104, 0.6);
+    }
+
+    .calendar-events {
+        margin-top: 10px;
+        border-top: 1px solid var(--vh-border);
+        padding-top: 8px;
+    }
+
+    .calendar-events-title {
+        margin: 0 0 6px 0;
+        color: var(--vh-text-soft);
+        font-size: 12px;
+    }
+
+    .calendar-event-form {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+
+    .calendar-event-form input {
+        flex: 1;
+        box-sizing: border-box;
+        border: 1px solid var(--vh-border);
+        background-color: var(--vh-button-bg);
+        color: var(--vh-text);
+        padding: 6px 8px;
+        font-size: 12px;
+        font-family: Monocraft Nerd Font, monospace;
+    }
+
+    .calendar-event-form button {
+        border: 1px solid var(--vh-border);
+        background-color: var(--vh-button-bg);
+        color: var(--vh-text);
+        padding: 6px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        font-family: Monocraft Nerd Font, monospace;
+    }
+
+    .calendar-event-form button:hover {
+        background-color: var(--vh-button-hover);
+    }
+
+    .calendar-events-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .calendar-events-list li {
+        border: 1px solid var(--vh-border);
+        background-color: rgba(0, 0, 0, 0.12);
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .calendar-events-list button {
+        border: 1px solid rgba(255, 120, 120, 0.4);
+        background-color: rgba(255, 120, 120, 0.12);
+        color: #ffdede;
+        padding: 4px 7px;
+        font-size: 11px;
+        cursor: pointer;
+        font-family: Monocraft Nerd Font, monospace;
+    }
+
+    .calendar-events-list button:hover {
+        background-color: rgba(255, 120, 120, 0.2);
+    }
+
+    .calendar-events-empty {
+        color: var(--vh-text-soft);
+        font-size: 12px;
+    }
+</style>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -152,6 +344,51 @@
         </div>
 
         @if (!empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest'))
+        <aside class="linux-news-panel gadget calendar-gadget gadget-size-wide" data-gadget-id="calendar" data-gadget-size="wide" data-default-size="wide">
+            <div class="gadget-head">
+                <h3>Mini calendario</h3>
+                @if (!empty($currentUser))
+                    <div class="gadget-actions gadget-actions-compact">
+                        <span class="gadget-drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                        <button type="button" class="gadget-mini-btn gadget-size-text-btn" onclick="cycleHomeGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">Ancho</button>
+                    </div>
+                @endif
+            </div>
+
+            <div class="calendar-headline">
+                <h4 class="calendar-month-title" id="miniCalendarMonth">Cargando...</h4>
+                <div class="calendar-nav">
+                    <button type="button" id="miniCalendarPrev" aria-label="Mes anterior">◀</button>
+                    <button type="button" id="miniCalendarNext" aria-label="Mes siguiente">▶</button>
+                </div>
+            </div>
+
+            <p class="calendar-now" id="miniCalendarNow">Detectando hora local...</p>
+
+            <div class="calendar-weekday-row" aria-hidden="true">
+                <span class="calendar-weekday">L</span>
+                <span class="calendar-weekday">M</span>
+                <span class="calendar-weekday">X</span>
+                <span class="calendar-weekday">J</span>
+                <span class="calendar-weekday">V</span>
+                <span class="calendar-weekday">S</span>
+                <span class="calendar-weekday">D</span>
+            </div>
+
+            <div class="calendar-grid" id="miniCalendarGrid"></div>
+
+            <section class="calendar-events" aria-label="Eventos de calendario">
+                <p class="calendar-events-title" id="miniCalendarSelectedDate">Eventos del dia: -</p>
+                <form class="calendar-event-form" id="miniCalendarEventForm">
+                    <input type="text" id="miniCalendarEventInput" maxlength="120" placeholder="Ejemplo: Reunion 10:30 con equipo" autocomplete="off">
+                    <button type="submit">Guardar</button>
+                </form>
+                <ul class="calendar-events-list" id="miniCalendarEventsList"></ul>
+            </section>
+        </aside>
+        @endif
+
+        @if (!empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest'))
         <aside class="linux-news-panel gadget todo-gadget gadget-size-normal" data-gadget-id="todo" data-gadget-size="normal" data-default-size="normal">
             <div class="gadget-head">
                 <h3>To-do</h3>
@@ -204,7 +441,8 @@
 
                 <div class="system-status-live" id="systemStatusList">
                     <div class="system-status-meta">
-                        <span>Ultima muestra: <strong id="sys_timestamp">{{ $systemStatus['timestamp'] ?? '-' }}</strong></span>
+                        <span>Ultima muestra: <strong id="sys_timestamp">Cargando hora local...</strong></span>
+                        <span>Zona local: <strong id="sys_timezone_label">Detectando...</strong></span>
                     </div>
 
                     <div class="system-metric-grid">
@@ -231,13 +469,14 @@
                             <header><h4>WebTop</h4><strong id="sys_webtop">{{ !empty($systemStatus['webtop_online']) ? 'Online' : 'Offline' }}</strong></header>
                             <div class="system-state-pill" id="sys_webtop_pill">{{ !empty($systemStatus['webtop_online']) ? 'Servicio activo' : 'Servicio no disponible' }}</div>
                         </article>
+
                     </div>
                 </div>
             </aside>
         @endif
     </div>
 
-    <footer>Codename Virthub 0.9b PreRelease</footer>
+    <footer>Codename Virthub 0.9c PreRelease</footer>
     <script>
         function getUserKey() {
             return @json($currentUser['username'] ?? 'guest');
@@ -261,6 +500,10 @@
 
         function getProductivityKey() {
             return 'virthub_productivity_' + getUserKey();
+        }
+
+        function getCalendarEventsKey() {
+            return 'virthub_calendar_events_' + getUserKey();
         }
 
         function isHomeResponsiveView() {
@@ -423,10 +666,10 @@
             const board = document.getElementById('gadgetBoard');
             if (!board) return;
 
-            const knownOrder = ['news', 'access', 'todo', 'notes', 'system'];
+            const knownOrder = ['news', 'access', 'calendar', 'todo', 'notes', 'system'];
 
             if (!canCustomizeHome()) {
-                const defaultOrder = ['news', 'access', 'todo', 'notes', 'system'];
+                const defaultOrder = ['news', 'access', 'calendar', 'todo', 'notes', 'system'];
                 defaultOrder.forEach(id => {
                     const gadget = board.querySelector(`.gadget[data-gadget-id="${id}"]`);
                     if (gadget) {
@@ -490,14 +733,56 @@
 
             if (newIndex < 0 || newIndex >= gadgets.length) return;
 
-            if (direction < 0) {
-                board.insertBefore(gadget, gadgets[newIndex]);
-            } else {
-                const ref = gadgets[newIndex].nextSibling;
-                board.insertBefore(gadget, ref);
-            }
+            animateGadgetReflow(board, () => {
+                if (direction < 0) {
+                    board.insertBefore(gadget, gadgets[newIndex]);
+                } else {
+                    const ref = gadgets[newIndex].nextSibling;
+                    board.insertBefore(gadget, ref);
+                }
+            });
 
             saveGadgetOrder();
+        }
+
+        function animateGadgetReflow(board, mutateLayout) {
+            if (!board || typeof mutateLayout !== 'function') return;
+
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const first = new Map();
+            board.querySelectorAll('.gadget').forEach(gadget => {
+                first.set(gadget, gadget.getBoundingClientRect());
+            });
+
+            mutateLayout();
+
+            if (prefersReducedMotion) return;
+
+            board.querySelectorAll('.gadget').forEach(gadget => {
+                if (gadget.classList.contains('dragging')) return;
+
+                const start = first.get(gadget);
+                if (!start) return;
+
+                const end = gadget.getBoundingClientRect();
+                const dx = start.left - end.left;
+                const dy = start.top - end.top;
+
+                if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+
+                gadget.getAnimations().forEach(animation => animation.cancel());
+
+                gadget.animate(
+                    [
+                        { transform: `translate(${dx}px, ${dy}px)` },
+                        { transform: 'translate(0, 0)' },
+                    ],
+                    {
+                        duration: 160,
+                        easing: 'cubic-bezier(0.22, 0.9, 0.2, 1)',
+                    }
+                );
+            });
         }
 
         function enableHomeGadgetDnD() {
@@ -505,25 +790,24 @@
 
             const board = document.getElementById('gadgetBoard');
             if (!board) return;
+            let lastReflowAnimationAt = 0;
 
             const gadgets = Array.from(board.querySelectorAll('.gadget'));
             gadgets.forEach(gadget => {
                 gadget.setAttribute('draggable', 'true');
                 gadget.dataset.dragFromHead = '0';
+                gadget.dataset.dragBlocked = '0';
 
-                const head = gadget.querySelector('.gadget-head');
-                if (head) {
-                    head.addEventListener('mousedown', event => {
-                        if (event.target.closest('.gadget-mini-btn')) {
-                            gadget.dataset.dragFromHead = '0';
-                            return;
-                        }
-                        gadget.dataset.dragFromHead = '1';
-                    });
-                }
+                gadget.addEventListener('mousedown', event => {
+                    const isInteractive = !!event.target.closest('button, input, textarea, select, a, label, form');
+                    const isHeaderControl = !!event.target.closest('.gadget-mini-btn');
+
+                    gadget.dataset.dragBlocked = (isInteractive || isHeaderControl) ? '1' : '0';
+                    gadget.dataset.dragFromHead = (isInteractive || isHeaderControl) ? '0' : '1';
+                });
 
                 gadget.addEventListener('dragstart', event => {
-                    if (gadget.dataset.dragFromHead !== '1') {
+                    if (gadget.dataset.dragFromHead !== '1' || gadget.dataset.dragBlocked === '1') {
                         event.preventDefault();
                         return;
                     }
@@ -538,6 +822,7 @@
                 gadget.addEventListener('dragend', () => {
                     gadget.classList.remove('dragging');
                     gadget.dataset.dragFromHead = '0';
+                    gadget.dataset.dragBlocked = '0';
                     saveGadgetOrder();
                 });
             });
@@ -550,7 +835,22 @@
 
                 const rect = target.getBoundingClientRect();
                 const before = event.clientY < (rect.top + rect.height / 2);
-                board.insertBefore(dragging, before ? target : target.nextSibling);
+                const insertionPoint = before ? target : target.nextSibling;
+
+                if (insertionPoint === dragging || dragging.nextSibling === insertionPoint) {
+                    return;
+                }
+
+                const now = performance.now();
+                if (now - lastReflowAnimationAt < 70) {
+                    board.insertBefore(dragging, insertionPoint);
+                    return;
+                }
+
+                lastReflowAnimationAt = now;
+                animateGadgetReflow(board, () => {
+                    board.insertBefore(dragging, insertionPoint);
+                });
             });
 
             board.addEventListener('drop', event => {
@@ -561,6 +861,7 @@
             window.addEventListener('mouseup', () => {
                 board.querySelectorAll('.gadget').forEach(gadget => {
                     gadget.dataset.dragFromHead = '0';
+                    gadget.dataset.dragBlocked = '0';
                 });
             });
         }
@@ -725,6 +1026,305 @@
             disk: [],
         };
         const SYSTEM_HISTORY_LIMIT = 24;
+        let miniCalendarCursor = null;
+        let miniCalendarSelectedIso = '';
+        let miniCalendarEventsState = {};
+
+        function getUserTimeZone() {
+            try {
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                return tz || 'UTC';
+            } catch (error) {
+                return 'UTC';
+            }
+        }
+
+        function getUserOffsetLabel(referenceDate = new Date()) {
+            const offsetMinutes = -referenceDate.getTimezoneOffset();
+            const sign = offsetMinutes >= 0 ? '+' : '-';
+            const absolute = Math.abs(offsetMinutes);
+            const hh = String(Math.floor(absolute / 60)).padStart(2, '0');
+            const mm = String(absolute % 60).padStart(2, '0');
+            return `GMT${sign}${hh}:${mm}`;
+        }
+
+        function formatLocalDateTime(date) {
+            return date.toLocaleString('es-MX', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+            });
+        }
+
+        function getSystemTimestampLocal(status) {
+            const rawUtc = String(status.timestamp_utc || '').trim();
+            if (rawUtc) {
+                const date = new Date(rawUtc);
+                if (!Number.isNaN(date.getTime())) {
+                    return formatLocalDateTime(date);
+                }
+            }
+
+            const rawLocal = String(status.timestamp || '').trim();
+            if (rawLocal) {
+                return rawLocal;
+            }
+
+            return '-';
+        }
+
+        function updateLocalTimezoneLabels() {
+            const tzNode = document.getElementById('sys_timezone_label');
+            if (tzNode) {
+                tzNode.textContent = `${getUserTimeZone()} (${getUserOffsetLabel()})`;
+            }
+        }
+
+        function toDateKey(date) {
+            const yyyy = String(date.getFullYear());
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function sanitizeCalendarEventText(value) {
+            return String(value || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+        }
+
+        function readCalendarEventsState() {
+            const raw = localStorage.getItem(getCalendarEventsKey());
+            if (!raw) return {};
+
+            try {
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                    return {};
+                }
+
+                const next = {};
+                Object.keys(parsed).forEach(dateKey => {
+                    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return;
+                    const items = Array.isArray(parsed[dateKey]) ? parsed[dateKey] : [];
+                    const cleaned = items
+                        .map(item => sanitizeCalendarEventText(item))
+                        .filter(item => item !== '')
+                        .slice(0, 20);
+
+                    if (cleaned.length) {
+                        next[dateKey] = cleaned;
+                    }
+                });
+
+                return next;
+            } catch (error) {
+                return {};
+            }
+        }
+
+        function saveCalendarEventsState() {
+            localStorage.setItem(getCalendarEventsKey(), JSON.stringify(miniCalendarEventsState));
+        }
+
+        function renderMiniCalendarEvents() {
+            const title = document.getElementById('miniCalendarSelectedDate');
+            const list = document.getElementById('miniCalendarEventsList');
+            if (!title || !list || !miniCalendarSelectedIso) return;
+
+            const selectedDate = new Date(`${miniCalendarSelectedIso}T00:00:00`);
+            const selectedLabel = selectedDate.toLocaleDateString('es-MX', {
+                weekday: 'long',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+            });
+            title.textContent = `Eventos del dia: ${selectedLabel}`;
+
+            const events = Array.isArray(miniCalendarEventsState[miniCalendarSelectedIso])
+                ? miniCalendarEventsState[miniCalendarSelectedIso]
+                : [];
+
+            list.innerHTML = '';
+
+            if (!events.length) {
+                const empty = document.createElement('li');
+                empty.className = 'calendar-events-empty';
+                empty.textContent = 'Sin eventos para esta fecha.';
+                list.appendChild(empty);
+                return;
+            }
+
+            events.forEach((eventText, index) => {
+                const item = document.createElement('li');
+                const text = document.createElement('span');
+                text.textContent = eventText;
+
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.textContent = 'Quitar';
+                remove.addEventListener('click', () => {
+                    const bucket = Array.isArray(miniCalendarEventsState[miniCalendarSelectedIso])
+                        ? miniCalendarEventsState[miniCalendarSelectedIso]
+                        : [];
+                    bucket.splice(index, 1);
+
+                    if (bucket.length) {
+                        miniCalendarEventsState[miniCalendarSelectedIso] = bucket;
+                    } else {
+                        delete miniCalendarEventsState[miniCalendarSelectedIso];
+                    }
+
+                    saveCalendarEventsState();
+                    renderMiniCalendarEvents();
+                });
+
+                item.appendChild(text);
+                item.appendChild(remove);
+                list.appendChild(item);
+            });
+        }
+
+        function setMiniCalendarSelectedDate(isoDate) {
+            miniCalendarSelectedIso = isoDate;
+            renderMiniCalendar();
+            renderMiniCalendarEvents();
+        }
+
+        function buildCalendarGrid(baseDate) {
+            const year = baseDate.getFullYear();
+            const month = baseDate.getMonth();
+
+            const firstDay = new Date(year, month, 1);
+            const firstWeekday = (firstDay.getDay() + 6) % 7;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+            const today = new Date();
+
+            const cells = [];
+
+            for (let i = 0; i < firstWeekday; i += 1) {
+                const day = daysInPrevMonth - firstWeekday + i + 1;
+                const date = new Date(year, month - 1, day);
+                cells.push({ day, inMonth: false, isToday: false, iso: toDateKey(date) });
+            }
+
+            for (let day = 1; day <= daysInMonth; day += 1) {
+                const isToday = (
+                    today.getFullYear() === year
+                    && today.getMonth() === month
+                    && today.getDate() === day
+                );
+                const date = new Date(year, month, day);
+                cells.push({ day, inMonth: true, isToday, iso: toDateKey(date) });
+            }
+
+            while (cells.length < 42) {
+                const day = cells.length - (firstWeekday + daysInMonth) + 1;
+                const date = new Date(year, month + 1, day);
+                cells.push({ day, inMonth: false, isToday: false, iso: toDateKey(date) });
+            }
+
+            return cells;
+        }
+
+        function renderMiniCalendar() {
+            const grid = document.getElementById('miniCalendarGrid');
+            const monthNode = document.getElementById('miniCalendarMonth');
+            const nowNode = document.getElementById('miniCalendarNow');
+            if (!grid || !monthNode || !nowNode) return;
+
+            const viewDate = miniCalendarCursor || new Date();
+            const monthTitle = viewDate.toLocaleDateString('es-MX', {
+                month: 'long',
+                year: 'numeric',
+            });
+
+            monthNode.textContent = monthTitle;
+            nowNode.textContent = `Ahora: ${formatLocalDateTime(new Date())} | ${getUserTimeZone()} (${getUserOffsetLabel()})`;
+
+            const cells = buildCalendarGrid(viewDate);
+            grid.innerHTML = '';
+
+            cells.forEach(cell => {
+                const node = document.createElement('button');
+                node.type = 'button';
+                node.className = 'calendar-day';
+                node.dataset.isoDate = cell.iso || '';
+                if (!cell.inMonth) {
+                    node.classList.add('is-out');
+                }
+                if (cell.isToday) {
+                    node.classList.add('is-today');
+                }
+                const dayEvents = Array.isArray(miniCalendarEventsState[cell.iso]) ? miniCalendarEventsState[cell.iso] : [];
+                if (dayEvents.length > 0) {
+                    node.classList.add('has-events');
+                }
+                if (miniCalendarSelectedIso && cell.iso === miniCalendarSelectedIso) {
+                    node.classList.add('is-selected');
+                }
+                node.textContent = String(cell.day);
+                node.addEventListener('click', () => {
+                    if (!cell.iso) return;
+                    setMiniCalendarSelectedDate(cell.iso);
+                });
+                grid.appendChild(node);
+            });
+        }
+
+        function initMiniCalendar() {
+            const grid = document.getElementById('miniCalendarGrid');
+            const prev = document.getElementById('miniCalendarPrev');
+            const next = document.getElementById('miniCalendarNext');
+            const form = document.getElementById('miniCalendarEventForm');
+            const input = document.getElementById('miniCalendarEventInput');
+            if (!grid || !form || !input) return;
+
+            miniCalendarCursor = new Date();
+            miniCalendarCursor = new Date(miniCalendarCursor.getFullYear(), miniCalendarCursor.getMonth(), 1);
+            miniCalendarSelectedIso = toDateKey(new Date());
+            miniCalendarEventsState = readCalendarEventsState();
+
+            if (prev) {
+                prev.addEventListener('click', () => {
+                    miniCalendarCursor = new Date(miniCalendarCursor.getFullYear(), miniCalendarCursor.getMonth() - 1, 1);
+                    renderMiniCalendar();
+                });
+            }
+
+            if (next) {
+                next.addEventListener('click', () => {
+                    miniCalendarCursor = new Date(miniCalendarCursor.getFullYear(), miniCalendarCursor.getMonth() + 1, 1);
+                    renderMiniCalendar();
+                });
+            }
+
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                if (!miniCalendarSelectedIso) return;
+
+                const text = sanitizeCalendarEventText(input.value);
+                if (!text) return;
+
+                const bucket = Array.isArray(miniCalendarEventsState[miniCalendarSelectedIso])
+                    ? miniCalendarEventsState[miniCalendarSelectedIso]
+                    : [];
+
+                bucket.unshift(text);
+                miniCalendarEventsState[miniCalendarSelectedIso] = bucket.slice(0, 20);
+
+                saveCalendarEventsState();
+                input.value = '';
+                renderMiniCalendarEvents();
+            });
+
+            renderMiniCalendar();
+            renderMiniCalendarEvents();
+            updateLocalTimezoneLabels();
+            setInterval(renderMiniCalendar, 1000);
+        }
 
         function toPercent(value) {
             const parsed = Number(value);
@@ -830,12 +1430,13 @@
                 const payload = await response.json();
                 const status = payload.status || {};
 
-                document.getElementById('sys_timestamp').textContent = status.timestamp ?? '-';
+                document.getElementById('sys_timestamp').textContent = getSystemTimestampLocal(status);
                 document.getElementById('sys_cpu').textContent = status.cpu_usage_percent != null ? `${status.cpu_usage_percent}%` : '-';
                 document.getElementById('sys_ram').textContent = status.ram_used_percent != null ? `${status.ram_used_percent}%` : '-';
                 document.getElementById('sys_ram_mb').textContent = status.ram_used_mb ?? '-';
                 document.getElementById('sys_disk').textContent = status.disk_used_percent != null ? `${status.disk_used_percent}%` : '-';
                 document.getElementById('sys_webtop').textContent = status.webtop_online ? 'Online' : 'Offline';
+                updateLocalTimezoneLabels();
                 const webtopPill = document.getElementById('sys_webtop_pill');
                 if (webtopPill) {
                     webtopPill.textContent = status.webtop_online ? 'Servicio activo' : 'Servicio no disponible';
@@ -904,6 +1505,7 @@
         window.addEventListener('DOMContentLoaded', enableHomeGadgetDnD);
         window.addEventListener('DOMContentLoaded', applySavedNewsFilter);
         window.addEventListener('DOMContentLoaded', initProductivityWidget);
+        window.addEventListener('DOMContentLoaded', initMiniCalendar);
         window.addEventListener('DOMContentLoaded', refreshSystemStatus);
         window.addEventListener('DOMContentLoaded', startGuestCountdown);
         window.addEventListener('resize', () => {

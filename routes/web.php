@@ -65,6 +65,7 @@ if (!function_exists('virthub_system_status')) {
 
 		return [
 			'timestamp' => date('Y-m-d H:i:s'),
+			'timestamp_utc' => gmdate('c'),
 			'cpu_usage_percent' => $cpuUsagePercent,
 			'ram_used_mb' => $ramUsedMb,
 			'ram_used_percent' => $ramUsedPercent,
