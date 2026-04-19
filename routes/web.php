@@ -213,18 +213,41 @@ Route::post('/sugerencias', function (Request $request, JsonUserStore $users) {
 	}
 
 	$file = $dataDir . DIRECTORY_SEPARATOR . 'suggestions.json';
-	$payload = ['suggestions' => []];
+	$handle = fopen($file, 'c+b');
 
-	if (is_file($file)) {
-		$raw = @file_get_contents($file);
-		$decoded = is_string($raw) ? json_decode($raw, true) : null;
-		if (is_array($decoded) && is_array($decoded['suggestions'] ?? null)) {
-			$payload = $decoded;
-		}
+	if ($handle === false) {
+		return redirect('/sugerencias')->with('error', 'No se pudo registrar la sugerencia en este momento.');
 	}
 
-	$payload['suggestions'][] = $entry;
-	@file_put_contents($file, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+	try {
+		if (!flock($handle, LOCK_EX)) {
+			throw new RuntimeException('No se pudo bloquear el archivo de sugerencias.');
+		}
+
+		rewind($handle);
+		$content = stream_get_contents($handle);
+		$decoded = json_decode($content !== false ? $content : '', true);
+		$payload = (is_array($decoded) && is_array($decoded['suggestions'] ?? null))
+			? $decoded
+			: ['suggestions' => []];
+
+		$payload['suggestions'][] = $entry;
+
+		$encoded = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+		if ($encoded === false) {
+			throw new RuntimeException('No se pudo codificar la sugerencia.');
+		}
+
+		rewind($handle);
+		ftruncate($handle, 0);
+		fwrite($handle, $encoded);
+		fflush($handle);
+	} catch (RuntimeException $e) {
+		return redirect('/sugerencias')->with('error', 'No se pudo registrar la sugerencia en este momento.');
+	} finally {
+		flock($handle, LOCK_UN);
+		fclose($handle);
+	}
 
 	return redirect('/sugerencias')->with('success', 'Gracias por compartir tu sugerencia. Ya fue registrada.');
 })->middleware('throttle:30,1');
@@ -357,7 +380,7 @@ Route::post('/foro/{postId}/react', function (Request $request, string $postId, 
 	} catch (RuntimeException $e) {
 		return redirect('/foro')->with('error', $e->getMessage());
 	}
-});
+})->middleware('throttle:60,1');
 
 Route::post('/foro/{postId}/comment', function (Request $request, string $postId, JsonUserStore $users, ForumStore $forumStore) {
 	$currentUser = virthub_active_user($request, $users);
@@ -381,7 +404,7 @@ Route::post('/foro/{postId}/comment', function (Request $request, string $postId
 	} catch (RuntimeException $e) {
 		return redirect('/foro')->with('error', $e->getMessage());
 	}
-});
+})->middleware('throttle:30,1');
 
 Route::post('/foro/{postId}/report', function (Request $request, string $postId, JsonUserStore $users, ForumStore $forumStore) {
 	$currentUser = virthub_active_user($request, $users);
@@ -1000,7 +1023,7 @@ Route::post('/chat/broadcast', function (Request $request, JsonUserStore $users,
 	);
 
 	return response()->json(['message' => $message], 201);
-});
+})->middleware('throttle:20,1');
 
 Route::get('/contenedor', function (Request $request) {
 	$authUser = virthub_active_user($request, app(JsonUserStore::class));

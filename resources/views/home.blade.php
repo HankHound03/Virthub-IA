@@ -718,33 +718,6 @@
             }
         }
 
-        function moveGadget(gadgetId, direction) {
-            if (!canCustomizeHome()) return;
-
-            const board = document.getElementById('gadgetBoard');
-            if (!board) return;
-
-            const gadget = board.querySelector(`.gadget[data-gadget-id="${gadgetId}"]`);
-            if (!gadget) return;
-
-            const gadgets = Array.from(board.querySelectorAll('.gadget'));
-            const index = gadgets.indexOf(gadget);
-            const newIndex = index + direction;
-
-            if (newIndex < 0 || newIndex >= gadgets.length) return;
-
-            animateGadgetReflow(board, () => {
-                if (direction < 0) {
-                    board.insertBefore(gadget, gadgets[newIndex]);
-                } else {
-                    const ref = gadgets[newIndex].nextSibling;
-                    board.insertBefore(gadget, ref);
-                }
-            });
-
-            saveGadgetOrder();
-        }
-
         function animateGadgetReflow(board, mutateLayout) {
             if (!board || typeof mutateLayout !== 'function') return;
 

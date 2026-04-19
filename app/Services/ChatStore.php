@@ -175,14 +175,4 @@ class ChatStore
         return $decoded;
     }
 
-    private function writeData(array $data): void
-    {
-        $encoded = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-
-        if ($encoded === false) {
-            throw new RuntimeException('No se pudo guardar el chat JSON.');
-        }
-
-        file_put_contents($this->filePath, $encoded, LOCK_EX);
-    }
 }

@@ -483,14 +483,4 @@ class JsonUserStore
         return is_array($decoded) ? $decoded : [];
     }
 
-    private function writeUsers(array $users): void
-    {
-        $encoded = json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-
-        if ($encoded === false) {
-            throw new RuntimeException('No se pudo guardar la base de usuarios JSON.');
-        }
-
-        file_put_contents($this->filePath, $encoded);
-    }
 }

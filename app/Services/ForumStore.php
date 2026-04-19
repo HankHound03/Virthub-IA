@@ -460,14 +460,4 @@ class ForumStore
         return is_array($decoded) ? $decoded : [];
     }
 
-    private function writePosts(array $posts): void
-    {
-        $encoded = json_encode($posts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-
-        if ($encoded === false) {
-            throw new RuntimeException('No se pudo guardar el foro JSON.');
-        }
-
-        file_put_contents($this->filePath, $encoded, LOCK_EX);
-    }
 }
