@@ -506,6 +506,17 @@
             return 'virthub_calendar_events_' + getUserKey();
         }
 
+        const initialWorkspaceState = @json($workspaceState ?? null);
+        const canSyncWorkspaceState = @json(!empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest'));
+        let workspaceState = {
+            todos: [],
+            notes: '',
+            calendarEvents: {},
+        };
+        let workspaceSyncTimer = null;
+        let workspaceSyncInFlight = false;
+        let workspaceSyncQueued = false;
+
         function isHomeResponsiveView() {
             return window.matchMedia('(max-width: 768px)').matches;
         }
@@ -863,6 +874,194 @@
             applyNewsFilter(savedFilter, false);
         }
 
+        function normalizeWorkspaceState(raw) {
+            const fallback = {
+                todos: [],
+                notes: '',
+                calendarEvents: {},
+            };
+
+            if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+                return fallback;
+            }
+
+            const todos = Array.isArray(raw.todos)
+                ? raw.todos
+                    .map(item => ({
+                        id: String(item?.id || '').trim(),
+                        text: sanitizeTodoText(item?.text || ''),
+                        done: !!item?.done,
+                    }))
+                    .filter(item => item.id && item.text)
+                    .slice(0, 120)
+                : [];
+
+            const notes = String(raw.notes || '').slice(0, 2400);
+            const calendarEvents = {};
+            const rawCalendarEvents = raw.calendarEvents && typeof raw.calendarEvents === 'object' && !Array.isArray(raw.calendarEvents)
+                ? raw.calendarEvents
+                : {};
+
+            Object.keys(rawCalendarEvents).forEach(dateKey => {
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return;
+
+                const items = Array.isArray(rawCalendarEvents[dateKey]) ? rawCalendarEvents[dateKey] : [];
+                const cleanedItems = items
+                    .map(item => sanitizeCalendarEventText(item))
+                    .filter(item => item !== '')
+                    .slice(0, 20);
+
+                if (cleanedItems.length) {
+                    calendarEvents[dateKey] = cleanedItems;
+                }
+            });
+
+            return { todos, notes, calendarEvents };
+        }
+
+        function isWorkspaceStateEmpty(state) {
+            return !state
+                || !Array.isArray(state.todos)
+                || state.todos.length === 0 && !String(state.notes || '').trim() && Object.keys(state.calendarEvents || {}).length === 0;
+        }
+
+        function readWorkspaceCacheState() {
+            const productivityRaw = localStorage.getItem(getProductivityKey());
+            const calendarRaw = localStorage.getItem(getCalendarEventsKey());
+
+            let todos = [];
+            let notes = '';
+            let calendarEvents = {};
+
+            if (productivityRaw) {
+                try {
+                    const parsed = JSON.parse(productivityRaw);
+                    todos = Array.isArray(parsed.todos)
+                        ? parsed.todos
+                            .map(item => ({
+                                id: String(item?.id || '').trim(),
+                                text: sanitizeTodoText(item?.text || ''),
+                                done: !!item?.done,
+                            }))
+                            .filter(item => item.id && item.text)
+                            .slice(0, 120)
+                        : [];
+                    notes = String(parsed.notes || '').slice(0, 2400);
+                } catch (error) {
+                    todos = [];
+                    notes = '';
+                }
+            }
+
+            if (calendarRaw) {
+                try {
+                    const parsed = JSON.parse(calendarRaw);
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                        Object.keys(parsed).forEach(dateKey => {
+                            if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return;
+                            const items = Array.isArray(parsed[dateKey]) ? parsed[dateKey] : [];
+                            const cleanedItems = items
+                                .map(item => sanitizeCalendarEventText(item))
+                                .filter(item => item !== '')
+                                .slice(0, 20);
+
+                            if (cleanedItems.length) {
+                                calendarEvents[dateKey] = cleanedItems;
+                            }
+                        });
+                    }
+                } catch (error) {
+                    calendarEvents = {};
+                }
+            }
+
+            return { todos, notes, calendarEvents };
+        }
+
+        function saveWorkspaceCacheState() {
+            localStorage.setItem(getProductivityKey(), JSON.stringify({
+                todos: Array.isArray(workspaceState.todos) ? workspaceState.todos : [],
+                notes: String(workspaceState.notes || ''),
+            }));
+            localStorage.setItem(getCalendarEventsKey(), JSON.stringify(workspaceState.calendarEvents || {}));
+        }
+
+        function bootstrapWorkspaceState() {
+            const serverState = normalizeWorkspaceState(initialWorkspaceState);
+            const cachedState = normalizeWorkspaceState(readWorkspaceCacheState());
+            const hasServerState = !isWorkspaceStateEmpty(serverState);
+
+            workspaceState = hasServerState ? serverState : cachedState;
+            miniCalendarEventsState = workspaceState.calendarEvents || {};
+            saveWorkspaceCacheState();
+
+            if (canSyncWorkspaceState && !hasServerState && !isWorkspaceStateEmpty(workspaceState)) {
+                scheduleWorkspaceSync(true);
+            }
+        }
+
+        function scheduleWorkspaceSync(immediate = false) {
+            if (!canSyncWorkspaceState) return;
+
+            if (workspaceSyncTimer) {
+                clearTimeout(workspaceSyncTimer);
+            }
+
+            workspaceSyncTimer = setTimeout(() => {
+                workspaceSyncTimer = null;
+                flushWorkspaceSync();
+            }, immediate ? 0 : 450);
+        }
+
+        async function flushWorkspaceSync() {
+            if (!canSyncWorkspaceState) return;
+
+            if (workspaceSyncInFlight) {
+                workspaceSyncQueued = true;
+                return;
+            }
+
+            workspaceSyncInFlight = true;
+
+            try {
+                const csrfTokenNode = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = csrfTokenNode ? csrfTokenNode.getAttribute('content') : '';
+
+                const response = await fetch('/home/state', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        todos: Array.isArray(workspaceState.todos) ? workspaceState.todos : [],
+                        notes: String(workspaceState.notes || ''),
+                        calendarEvents: workspaceState.calendarEvents || {},
+                    }),
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const payload = await response.json();
+                const serverState = normalizeWorkspaceState(payload.state || payload);
+                workspaceState = serverState;
+                saveWorkspaceCacheState();
+            } catch (error) {
+                // Keep local cache when sync is unavailable.
+            } finally {
+                workspaceSyncInFlight = false;
+
+                if (workspaceSyncQueued) {
+                    workspaceSyncQueued = false;
+                    scheduleWorkspaceSync();
+                }
+            }
+        }
+
         function sanitizeTodoText(value) {
             const text = String(value || '').replace(/\s+/g, ' ').trim();
             if (!text) return '';
@@ -870,35 +1069,17 @@
         }
 
         function readProductivityState() {
-            const fallback = { todos: [], notes: '' };
-            const raw = localStorage.getItem(getProductivityKey());
-            if (!raw) return fallback;
-
-            try {
-                const parsed = JSON.parse(raw);
-                const todos = Array.isArray(parsed.todos)
-                    ? parsed.todos
-                        .map(item => ({
-                            id: String(item.id || ''),
-                            text: sanitizeTodoText(item.text || ''),
-                            done: !!item.done,
-                        }))
-                        .filter(item => item.id && item.text)
-                        .slice(0, 120)
-                    : [];
-
-                const notes = String(parsed.notes || '').slice(0, 2400);
-                return { todos, notes };
-            } catch (error) {
-                return fallback;
-            }
+            return {
+                todos: Array.isArray(workspaceState.todos) ? workspaceState.todos : [],
+                notes: String(workspaceState.notes || ''),
+            };
         }
 
         function saveProductivityState(state) {
-            localStorage.setItem(getProductivityKey(), JSON.stringify({
-                todos: Array.isArray(state.todos) ? state.todos : [],
-                notes: String(state.notes || ''),
-            }));
+            workspaceState.todos = Array.isArray(state.todos) ? state.todos : [];
+            workspaceState.notes = String(state.notes || '').slice(0, 2400);
+            saveWorkspaceCacheState();
+            scheduleWorkspaceSync();
         }
 
         function renderTodoList(state) {
@@ -1068,37 +1249,13 @@
         }
 
         function readCalendarEventsState() {
-            const raw = localStorage.getItem(getCalendarEventsKey());
-            if (!raw) return {};
-
-            try {
-                const parsed = JSON.parse(raw);
-                if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-                    return {};
-                }
-
-                const next = {};
-                Object.keys(parsed).forEach(dateKey => {
-                    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return;
-                    const items = Array.isArray(parsed[dateKey]) ? parsed[dateKey] : [];
-                    const cleaned = items
-                        .map(item => sanitizeCalendarEventText(item))
-                        .filter(item => item !== '')
-                        .slice(0, 20);
-
-                    if (cleaned.length) {
-                        next[dateKey] = cleaned;
-                    }
-                });
-
-                return next;
-            } catch (error) {
-                return {};
-            }
+            return workspaceState.calendarEvents || {};
         }
 
         function saveCalendarEventsState() {
-            localStorage.setItem(getCalendarEventsKey(), JSON.stringify(miniCalendarEventsState));
+            workspaceState.calendarEvents = miniCalendarEventsState;
+            saveWorkspaceCacheState();
+            scheduleWorkspaceSync();
         }
 
         function renderMiniCalendarEvents() {
@@ -1469,6 +1626,7 @@
             }
         }
 
+        bootstrapWorkspaceState();
         loadNews('/linux-news', 'linux-news-list');
         loadNews('/cyber-news', 'cyber-news-list');
         window.addEventListener('DOMContentLoaded', applySidebarState);

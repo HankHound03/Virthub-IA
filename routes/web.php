@@ -3,6 +3,7 @@
 use App\Services\ChatStore;
 use App\Services\ForumStore;
 use App\Services\JsonUserStore;
+use App\Services\UserWorkspaceStore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -141,9 +142,14 @@ Route::get('/', function (Request $request, JsonUserStore $users) {
 	$currentUser = virthub_active_user($request, $users);
 	$systemStatus = null;
 	$guestRemainingSeconds = null;
+	$workspaceState = null;
 
 	if ($currentUser && ($currentUser['role'] ?? 'user') === 'admin') {
 		$systemStatus = virthub_system_status();
+	}
+
+	if ($currentUser && ($currentUser['role'] ?? 'guest') !== 'guest') {
+		$workspaceState = app(UserWorkspaceStore::class)->getState((string) $currentUser['username']);
 	}
 
 	if ($currentUser && ($currentUser['role'] ?? 'user') === 'guest') {
@@ -154,8 +160,39 @@ Route::get('/', function (Request $request, JsonUserStore $users) {
 		'currentUser' => $currentUser,
 		'systemStatus' => $systemStatus,
 		'guestRemainingSeconds' => $guestRemainingSeconds,
+		'workspaceState' => $workspaceState,
 	]);
 });
+
+Route::get('/home/state', function (Request $request, JsonUserStore $users, UserWorkspaceStore $workspaceStore) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser || ($authUser['role'] ?? 'guest') === 'guest') {
+		return response()->json(['error' => 'Debes iniciar sesion con usuario registrado.'], 403);
+	}
+
+	return response()->json([
+		'state' => $workspaceStore->getState((string) $authUser['username']),
+	], 200);
+});
+
+Route::post('/home/state', function (Request $request, JsonUserStore $users, UserWorkspaceStore $workspaceStore) {
+	$authUser = virthub_active_user($request, $users);
+
+	if (!$authUser || ($authUser['role'] ?? 'guest') === 'guest') {
+		return response()->json(['error' => 'Debes iniciar sesion con usuario registrado.'], 403);
+	}
+
+	$validated = $request->validate([
+		'todos' => 'required|array|max:120',
+		'notes' => 'required|string|max:2400',
+		'calendarEvents' => 'required|array',
+	]);
+
+	$state = $workspaceStore->saveState((string) $authUser['username'], $validated);
+
+	return response()->json(['state' => $state], 200);
+})->middleware('throttle:60,1');
 
 Route::get('/foro', function (Request $request, JsonUserStore $users, ForumStore $forumStore) {
 	$users->bootstrapAdminFromEnv();
