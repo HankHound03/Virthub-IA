@@ -202,6 +202,9 @@
     <link rel="stylesheet" href="{{ asset('container.css') }}?v={{ filemtime(public_path('container.css')) }}">
 </head>
 <body>
+    <audio id="chatNotificationAudio" preload="auto" style="display: none;">
+        <source src="{{ asset('sounds/chat-notificacion.mp3') }}" type="audio/mpeg">
+    </audio>
     <header>
         <div class="header-controls">
             <div class= "toggleable-sidebar" onclick="toggleMenu(event)" aria-label="Abrir menu" title="Menu">

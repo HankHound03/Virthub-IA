@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="{{ asset('container.css') }}?v={{ filemtime(public_path('container.css')) }}">
 </head>
 <body>
+    <audio id="chatNotificationAudio" preload="auto" style="display: none;">
+        <source src="{{ asset('sounds/chat-notificacion.mp3') }}" type="audio/mpeg">
+    </audio>
     <header>
         <div class="header-controls">
             <div class= "toggleable-sidebar" onclick="toggleMenu(event)" aria-label="Abrir menu" title="Menu">
@@ -113,8 +116,24 @@
         const currentUserName = @json($currentUser['username'] ?? 'guest');
         const isGuestChatMode = @json((($currentUser['role'] ?? 'guest') === 'guest'));
         const chatNotificationSoundUrl = @json(asset('sounds/chat-notificacion.mp3'));
-        const chatNotificationAudio = new Audio(chatNotificationSoundUrl);
-        chatNotificationAudio.preload = 'auto';
+        
+        let chatNotificationAudio = null;
+        
+        function initChatNotificationAudio() {
+            if (!chatNotificationAudio) {
+                // Intentar usar el elemento de audio del DOM primero
+                const audioElement = document.getElementById('chatNotificationAudio');
+                if (audioElement) {
+                    chatNotificationAudio = audioElement;
+                } else {
+                    // Fallback: crear audio programáticamente
+                    chatNotificationAudio = new Audio(chatNotificationSoundUrl);
+                    chatNotificationAudio.preload = 'auto';
+                }
+                chatNotificationAudio.volume = 0.75;
+            }
+            return chatNotificationAudio;
+        }
 
         function getUserKey() {
             return currentUserName;
@@ -182,18 +201,31 @@
         }
 
         function playChatNotificationSound() {
-            chatNotificationAudio.currentTime = 0;
-            chatNotificationAudio.volume = 0.75;
-            chatNotificationAudio.play().catch(() => {});
+            try {
+                const audio = initChatNotificationAudio();
+                audio.currentTime = 0;
+                audio.volume = 0.75;
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log('Notificación de audio no disponible:', error);
+                    });
+                }
+            } catch (error) {
+                console.log('Error al reproducir sonido:', error);
+            }
         }
 
         function unlockChatNotificationAudio() {
-            chatNotificationAudio.play().then(() => {
-                chatNotificationAudio.pause();
-                chatNotificationAudio.currentTime = 0;
-            }).catch(() => {});
-        }
+            try {
+                const audio = initChatNotificationAudio();
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).catch(() => {});
+            } catch (error) {}
 
+        }
         function showChatNotification(title, body) {
             playChatNotificationSound();
 
@@ -216,6 +248,76 @@
             if (Notification.permission === 'default') {
                 Notification.requestPermission().catch(() => {});
             }
+        }
+
+        function ensureNotificationContainer() {
+            let container = document.getElementById('chatFloatingNotificationContainer');
+            
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'chatFloatingNotificationContainer';
+                container.className = 'chat-notification-container container-position';
+                document.body.appendChild(container);
+            }
+            
+            return container;
+        }
+
+        function showFloatingNotification(sender, message, senderProfileImagePath) {
+            playChatNotificationSound();
+            const container = ensureNotificationContainer();
+            
+            const notification = document.createElement('div');
+            notification.className = 'chat-notification-item';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'chat-notification-avatar';
+            
+            if (senderProfileImagePath) {
+                const img = document.createElement('img');
+                img.src = senderProfileImagePath.charAt(0) === '/' ? senderProfileImagePath : '/' + senderProfileImagePath;
+                img.alt = sender;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.borderRadius = '50%';
+                img.style.objectFit = 'cover';
+                avatar.appendChild(img);
+            } else {
+                avatar.textContent = (sender || 'U').charAt(0).toUpperCase();
+            }
+
+            const content = document.createElement('div');
+            content.className = 'chat-notification-content';
+
+            const senderName = document.createElement('div');
+            senderName.className = 'chat-notification-sender';
+            senderName.textContent = sender || 'Nuevo mensaje';
+
+            const messageText = document.createElement('div');
+            messageText.className = 'chat-notification-message';
+            messageText.textContent = message || 'Tienes un nuevo mensaje';
+
+            content.appendChild(senderName);
+            content.appendChild(messageText);
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'chat-notification-close';
+            closeBtn.textContent = '×';
+            closeBtn.type = 'button';
+            closeBtn.onclick = () => {
+                notification.classList.add('removing');
+                setTimeout(() => notification.remove(), 300);
+            };
+
+            notification.appendChild(avatar);
+            notification.appendChild(content);
+            notification.appendChild(closeBtn);
+            container.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('removing');
+                setTimeout(() => notification.remove(), 300);
+            }, 5500);
         }
 
         function safeTimeLabel(value) {
@@ -541,9 +643,15 @@
             if (shouldNotify && messages.length > previousCount) {
                 const newMessages = messages.slice(previousCount);
                 const incoming = newMessages.filter(message => (message.from || '') !== getUserKey());
+                const isChatPanelOpen = document.getElementById('chatPanel')?.classList.contains('is-open');
+                const isConversationOpen = currentChatUser === username;
+                const shouldShowFloatingNotification = !isChatPanelOpen || (isChatPanelOpen && !isConversationOpen);
 
                 incoming.forEach(message => {
                     showChatNotification(`Nuevo mensaje de ${message.from || username}`, message.message || 'Tienes un nuevo mensaje.');
+                    if (shouldShowFloatingNotification) {
+                        showFloatingNotification(message.from || username, message.message || 'Tienes un nuevo mensaje.', message.profile_image_path || null);
+                    }
                 });
             }
 
@@ -696,6 +804,12 @@
                                 newMessages.forEach(message => {
                                     if ((message.from || '') !== getUserKey()) {
                                         showChatNotification(`Broadcast de ${message.from || 'Sistema'}`, message.message || 'Nuevo anuncio disponible.');
+                                        const isChatPanelOpen = document.getElementById('chatPanel')?.classList.contains('is-open');
+                                        const isBroadcastViewActive = document.getElementById('broadcastView')?.classList.contains('active');
+                                        const shouldShowFloatingNotification = !isChatPanelOpen || (isChatPanelOpen && !isBroadcastViewActive);
+                                        if (shouldShowFloatingNotification) {
+                                            showFloatingNotification(message.from || 'Sistema', message.message || 'Nuevo anuncio disponible.', message.profile_image_path || null);
+                                        }
                                     }
                                 });
                             }
@@ -712,7 +826,7 @@
                 } catch (error) {
                     // Silenciar errores temporales de polling.
                 }
-            }, 15000);
+            }, 2000);
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -730,6 +844,10 @@
             }
             startChatPolling();
         });
+
+        document.addEventListener('click', () => {
+            unlockChatNotificationAudio();
+        }, { once: true });
     </script>
 </body>
 </html>

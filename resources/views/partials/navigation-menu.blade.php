@@ -4,7 +4,7 @@
     $userRole = (string) ($currentUser['role'] ?? 'guest');
 
     $links = [
-        ['key' => 'home', 'label' => 'Home', 'url' => url('/'), 'visible' => true],
+        ['key' => 'home', 'label' => 'Inicio', 'url' => url('/'), 'visible' => true],
         ['key' => 'foro', 'label' => 'Foro', 'url' => url('/foro'), 'visible' => true],
         ['key' => 'sugerencias', 'label' => 'Sugerencias', 'url' => url('/sugerencias'), 'visible' => true],
         ['key' => 'contenedor', 'label' => 'Contenedor', 'url' => url('/contenedor'), 'visible' => $hasUser],

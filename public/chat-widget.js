@@ -12,8 +12,24 @@
     const isBroadcastOnly = chatMode === 'broadcast-only';
     const chatNotificationSoundUrl = window.VIRTHUB_CHAT_SOUND || '/sounds/chat-notificacion.mp3';
     const currentUserProfile = window.VIRTHUB_CHAT_CURRENT_PROFILE || { username: currentUserName, profile_image_path: null, is_active: true };
-    const chatNotificationAudio = new Audio(chatNotificationSoundUrl);
-    chatNotificationAudio.preload = 'auto';
+    
+    let chatNotificationAudio = null;
+    
+    function initAudio() {
+        if (!chatNotificationAudio) {
+            // Intentar usar el elemento de audio del DOM primero
+            const audioElement = document.getElementById('chatNotificationAudio');
+            if (audioElement) {
+                chatNotificationAudio = audioElement;
+            } else {
+                // Fallback: crear audio programáticamente
+                chatNotificationAudio = new Audio(chatNotificationSoundUrl);
+                chatNotificationAudio.preload = 'auto';
+            }
+            chatNotificationAudio.volume = 0.75;
+        }
+        return chatNotificationAudio;
+    }
 
     let currentChatUser = null;
     let chatContacts = [];
@@ -76,18 +92,31 @@
     }
 
     function playChatNotificationSound() {
-        chatNotificationAudio.currentTime = 0;
-        chatNotificationAudio.volume = 0.75;
-        chatNotificationAudio.play().catch(() => {});
+        try {
+            const audio = initAudio();
+            audio.currentTime = 0;
+            audio.volume = 0.75;
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log('Notificación de audio no disponible:', error);
+                });
+            }
+        } catch (error) {
+            console.log('Error al reproducir sonido:', error);
+        }
     }
 
     function unlockAudio() {
-        chatNotificationAudio.play().then(() => {
-            chatNotificationAudio.pause();
-            chatNotificationAudio.currentTime = 0;
-        }).catch(() => {});
-    }
+        try {
+            const audio = initAudio();
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+            }).catch(() => {});
+        } catch (error) {}
 
+    }
     function showNotification(title, body) {
         playChatNotificationSound();
 
@@ -97,6 +126,103 @@
         }
 
         showChatToast(title, body);
+    }
+
+    function updateNotificationBadge(count) {
+        const badge = document.getElementById('chatNotificationBadge');
+        if (!badge) return;
+
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    function incrementNotificationBadge() {
+        const badge = document.getElementById('chatNotificationBadge');
+        if (!badge) return;
+
+        const current = parseInt(badge.textContent) || 0;
+        updateNotificationBadge(current + 1);
+    }
+
+    function resetNotificationBadge() {
+        updateNotificationBadge(0);
+    }
+
+    function ensureNotificationContainer() {
+        const position = window.VIRTHUB_NOTIFICATION_POSITION || 'home';
+        let container = document.getElementById('chatFloatingNotificationContainer');
+        
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'chatFloatingNotificationContainer';
+            container.className = 'chat-notification-container ' + position + '-position';
+            document.body.appendChild(container);
+        }
+        
+        return container;
+    }
+
+    function showFloatingNotification(sender, message, senderProfile) {
+        playChatNotificationSound();
+        const container = ensureNotificationContainer();
+        
+        const notification = document.createElement('div');
+        notification.className = 'chat-notification-item';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'chat-notification-avatar';
+        
+        if (senderProfile && senderProfile.profile_image_path) {
+            const img = document.createElement('img');
+            img.src = senderProfile.profile_image_path.charAt(0) === '/' ? 
+                      senderProfile.profile_image_path : 
+                      '/' + senderProfile.profile_image_path;
+            img.alt = sender;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.borderRadius = '50%';
+            img.style.objectFit = 'cover';
+            avatar.appendChild(img);
+        } else {
+            avatar.textContent = (sender || 'U').charAt(0).toUpperCase();
+        }
+
+        const content = document.createElement('div');
+        content.className = 'chat-notification-content';
+
+        const senderName = document.createElement('div');
+        senderName.className = 'chat-notification-sender';
+        senderName.textContent = sender || 'Nuevo mensaje';
+
+        const messageText = document.createElement('div');
+        messageText.className = 'chat-notification-message';
+        messageText.textContent = message || 'Tienes un nuevo mensaje';
+
+        content.appendChild(senderName);
+        content.appendChild(messageText);
+
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'chat-notification-close';
+        closeBtn.textContent = '×';
+        closeBtn.type = 'button';
+        closeBtn.onclick = () => {
+            notification.classList.add('removing');
+            setTimeout(() => notification.remove(), 300);
+        };
+
+        notification.appendChild(avatar);
+        notification.appendChild(content);
+        notification.appendChild(closeBtn);
+        container.appendChild(notification);
+
+        setTimeout(() => {
+            notification.classList.add('removing');
+            setTimeout(() => notification.remove(), 300);
+        }, 5500);
     }
 
     function requestPermission() {
@@ -295,8 +421,17 @@
         snapshots.conversations[username] = messages.length;
 
         if (notify && messages.length > prev) {
-            messages.slice(prev).filter(m => (m.from || '') !== currentUserName).forEach(m => {
+            const newMessages = messages.slice(prev).filter(m => (m.from || '') !== currentUserName);
+            const isChatPanelOpen = chatPanel.classList.contains('is-open');
+            const isConversationOpen = currentChatUser === username;
+            const shouldShowFloatingNotification = !isChatPanelOpen || (isChatPanelOpen && !isConversationOpen);
+            
+            newMessages.forEach(m => {
                 showNotification('Nuevo mensaje de ' + (m.from || username), m.message || 'Tienes un nuevo mensaje.');
+                if (shouldShowFloatingNotification) {
+                    showFloatingNotification(m.from || username, m.message || 'Tienes un nuevo mensaje.', profileFor(m.from || username));
+                }
+                incrementNotificationBadge();
             });
         }
 
@@ -412,6 +547,7 @@
         if (chatPanel.classList.contains('is-open')) {
             requestPermission();
             sendPresenceHeartbeat();
+            resetNotificationBadge();
             if (isBroadcastOnly) {
                 switchChatTab('broadcast');
             }
@@ -442,9 +578,17 @@
                 const prev = snapshots.broadcast || 0;
                 if (messages.length > prev) {
                     if (shouldNotify) {
+                        const isChatPanelOpen = chatPanel.classList.contains('is-open');
+                        const isBroadcastViewActive = document.getElementById('broadcastView')?.classList.contains('active');
+                        const shouldShowFloatingNotification = !isChatPanelOpen || (isChatPanelOpen && !isBroadcastViewActive);
+                        
                         messages.slice(prev).forEach(m => {
                             if ((m.from || '') !== currentUserName) {
                                 showNotification('Broadcast de ' + (m.from || 'Sistema'), m.message || 'Nuevo anuncio disponible.');
+                                if (shouldShowFloatingNotification) {
+                                    showFloatingNotification(m.from || 'Sistema', m.message || 'Nuevo anuncio disponible.', profileFor(m.from || 'Sistema'));
+                                }
+                                incrementNotificationBadge();
                             }
                         });
                     }
@@ -459,13 +603,16 @@
             } catch (error) {
                 // ignore temporary polling failures
             }
-        }, 15000);
+        }, 2000);
     }
 
     window.switchChatTab = switchChatTab;
     window.sendChatMessage = sendChatMessage;
     window.sendBroadcast = sendBroadcast;
     window.toggleChat = toggleChat;
+    window.incrementNotificationBadge = incrementNotificationBadge;
+    window.resetNotificationBadge = resetNotificationBadge;
+    window.updateNotificationBadge = updateNotificationBadge;
 
     if (chatClose) {
         chatClose.addEventListener('click', toggleChat);
@@ -483,4 +630,8 @@
         }
         startChatPolling();
     });
+
+    document.addEventListener('click', () => {
+        unlockAudio();
+    }, { once: true });
 })();
