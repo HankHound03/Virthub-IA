@@ -1,3 +1,5 @@
+WRITE-HOST 'powershell -ExecutionPolicy Bypass -File .\install-windows.ps1' -ForegroundColor Yellow
+
 $ErrorActionPreference = 'Stop'
 
 Write-Host 'VirtHub Windows setup' -ForegroundColor Cyan
@@ -61,3 +63,4 @@ Write-Host 'Instalacion completada.' -ForegroundColor Green
 Write-Host 'Siguientes pasos:' -ForegroundColor Cyan
 Write-Host '  php artisan serve' -ForegroundColor White
 Write-Host '  npm run dev' -ForegroundColor White
+
