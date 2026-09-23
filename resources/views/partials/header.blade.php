@@ -1,5 +1,9 @@
 <header>
-    <h1>{{ $pageTitle ?? 'VirtHub' }}</h1>
+    <h1 class="brand-mark">
+        <a href="{{ url('/') }}" aria-label="Ir al inicio de VirtHub">
+            <img src="{{ asset('pics/logovh.png') }}" alt="VirtHub" class="brand-logo">
+        </a>
+    </h1>
     @include('partials.navigation-menu', ['currentUser' => $currentUser ?? null, 'currentPage' => $currentPage ?? 'home'])
     <div class="header-controls">
         @if (!empty($currentUser) && ($currentUser['role'] ?? 'guest') !== 'guest')

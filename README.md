@@ -62,6 +62,33 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 Este Proyecto esta en desarrollo
 
+## Ejecutar con Docker
+
+Requisitos: Docker Desktop con Compose habilitado.
+
+1. Crea el archivo de entorno a partir de `.env.example` y cambia `APP_KEY`, `INSTALL_KEY` y las contraseñas.
+2. Construye y levanta la aplicación junto con MariaDB:
+
+```bash
+docker compose up -d --build
+```
+
+La aplicación quedará disponible en `http://localhost:8080`. `app` y `mariadb` comparten la red virtual `virthub`; por eso la aplicación usa `DB_HOST=mariadb` y no `localhost`.
+
+Para ver los registros:
+
+```bash
+docker compose logs -f app
+```
+
+Para detener los contenedores sin borrar los datos:
+
+```bash
+docker compose down
+```
+
+Los datos de MariaDB y el contenido de `storage` se conservan en volúmenes Docker. Para eliminar también esos datos usa `docker compose down -v`.
+
 - ¿Que se espera que contega el proyecto?
     * Un Acceso a contenedores incluyendo un instalador via web para la terminal de Linux o Windows
     * Una IA con API's Gratuitas donde cada usuario seleccionara su IA preferida

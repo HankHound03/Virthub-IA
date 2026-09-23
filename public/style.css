@@ -279,6 +279,20 @@ header h1 {
     flex-shrink: 0;
 }
 
+.brand-mark a {
+    display: flex;
+    align-items: center;
+    height: 58px;
+}
+
+.brand-logo {
+    display: block;
+    width: 132px;
+    height: 58px;
+    object-fit: contain;
+    object-position: center;
+}
+
 .navbar {
     display: flex;
     gap: 10px;
@@ -1565,6 +1579,15 @@ header h1 {
         width: 100%;
         overflow-wrap: anywhere;
         text-align: center;
+    }
+
+    .brand-mark a {
+        justify-content: center;
+    }
+
+    .brand-logo {
+        width: 150px;
+        height: 64px;
     }
 
     .navbar {
