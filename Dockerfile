@@ -22,12 +22,12 @@ COPY public ./public
 COPY vite.config.js .
 RUN npm run build
 
-FROM php:8.3-apache
+FROM php:8.4-apache
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libzip-dev \
+    && apt-get install -y --no-install-recommends libonig-dev libzip-dev \
     && docker-php-ext-install pdo_mysql mbstring bcmath opcache \
     && a2enmod rewrite \
     && sed -ri "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/000-default.conf /etc/apache2/apache2.conf \
@@ -39,9 +39,12 @@ COPY --from=vendor /var/www/html/vendor ./vendor
 COPY . .
 COPY --from=assets /var/www/html/public/build ./public/build
 
+RUN rm -f bootstrap/cache/*.php \
+    && php artisan package:discover --ansi
+
 RUN mkdir -p storage/app/data storage/app/private storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
     && chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 80
 
-CMD ["sh", "-c", "php artisan migrate --force && php artisan storage:link --force && apache2-foreground"]
+CMD ["sh", "-c", "php artisan migrate --force && if [ ! -L public/storage ]; then php artisan storage:link; fi && apache2-foreground"]

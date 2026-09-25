@@ -1401,7 +1401,7 @@ Route::post('/admin/users', function (Request $request, JsonUserStore $users) {
 
 	$validated = $request->validate([
 		'name' => ['nullable', 'string', 'max:80'],
-		'username' => ['nullable', 'string', 'min:3', 'max:24', 'regex:/^[A-Za-z0-9_.]+$/'],
+		'username' => ['nullable', 'string', 'min:3', 'max:64', 'regex:/^[A-Za-z0-9_.]+$/'],
 		'password' => ['nullable', 'string', 'min:6', 'max:72'],
 		'role' => 'required|in:user,admin',
 		'random_username' => 'nullable|in:1',
@@ -1459,7 +1459,7 @@ Route::post('/admin/users/password', function (Request $request, JsonUserStore $
 	}
 
 	$validated = $request->validate([
-		'username' => ['required', 'string', 'min:3', 'max:24', 'regex:/^[A-Za-z0-9_.]+$/'],
+		'username' => ['required', 'string', 'min:3', 'max:64', 'regex:/^[A-Za-z0-9_.]+$/'],
 		'new_password' => 'required|string|min:6|max:72',
 	]);
 
@@ -1483,7 +1483,7 @@ Route::post('/admin/users/deactivate', function (Request $request, JsonUserStore
 	}
 
 	$validated = $request->validate([
-		'username' => ['required', 'string', 'min:3', 'max:24', 'regex:/^[A-Za-z0-9_.]+$/'],
+		'username' => ['required', 'string', 'min:3', 'max:64', 'regex:/^[A-Za-z0-9_.]+$/'],
 	]);
 
 	try {
@@ -1511,7 +1511,7 @@ Route::post('/admin/users/activate', function (Request $request, JsonUserStore $
 	}
 
 	$validated = $request->validate([
-		'username' => ['required', 'string', 'min:3', 'max:24', 'regex:/^[A-Za-z0-9_.]+$/'],
+		'username' => ['required', 'string', 'min:3', 'max:64', 'regex:/^[A-Za-z0-9_.]+$/'],
 	]);
 
 	try {
@@ -1530,7 +1530,7 @@ Route::post('/admin/users/delete', function (Request $request, JsonUserStore $us
 	}
 
 	$validated = $request->validate([
-		'username' => ['required', 'string', 'min:3', 'max:24', 'regex:/^[A-Za-z0-9_.]+$/'],
+		'username' => ['required', 'string', 'min:3', 'max:64', 'regex:/^[A-Za-z0-9_.]+$/'],
 	]);
 
 	try {

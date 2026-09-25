@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\DatabaseUserStore;
+use App\Services\JsonUserStore;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -15,7 +17,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if (!$this->app->environment('testing')) {
+            $this->app->bind(JsonUserStore::class, DatabaseUserStore::class);
+        }
     }
 
     /**

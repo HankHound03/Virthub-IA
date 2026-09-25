@@ -73,7 +73,7 @@ Requisitos: Docker Desktop con Compose habilitado.
 docker compose up -d --build
 ```
 
-La aplicación quedará disponible en `http://localhost:8080`. `app` y `mariadb` comparten la red virtual `virthub`; por eso la aplicación usa `DB_HOST=mariadb` y no `localhost`.
+La aplicación quedará disponible en `http://localhost:8000`. `app` y `mariadb` comparten la red virtual `virthub`; por eso la aplicación usa `DB_HOST=mariadb` y no `localhost`.
 
 Para ver los registros:
 

@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${APP_PORT:-8080}:80"
+      - "${APP_PORT:-8000}:80"
     env_file:
       - .env
     environment:
