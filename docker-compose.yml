@@ -1,9 +1,36 @@
 services:
+  # ---------------------------------------------------------------------------
+  # Puerta de entrada unica
+  # ---------------------------------------------------------------------------
+  # Caddy es el unico servicio que escucha en internet. Antes de entregar un
+  # escritorio pregunta a la aplicacion si ese escritorio es del usuario, asi
+  # que conocer la URL de un contenedor no sirve de nada sin sesion.
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      # Caddy resuelve app y ct0..ct7 por nombre dentro de la red interna.
+      CADDY_INGRESS_NETWORKS: virthub
+    networks:
+      - virthub
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    # La aplicacion sigue accesible en este puerto, para no romper el despliegue
+    # actual. Caddy la alcanza por la red interna en `app:80`.
+    #
+    # Cuando confirmes que Caddy sirve bien el dominio, puedes comentar esta
+    # linea para que la unica puerta sea Caddy (recomendado en produccion).
     ports:
       - "${APP_PORT:-8000}:80"
     env_file:
@@ -18,8 +45,6 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
-    # Si Apache deja de responder, Docker reinicia el contenedor en lugar de
-    # dejarlo en pie sirviendo errores.
     healthcheck:
       test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1/up\") === false ? 1 : 0);'"]
       interval: 30s
@@ -49,10 +74,42 @@ services:
     networks:
       - virthub
 
+  # ---------------------------------------------------------------------------
+  # Escritorios Webtop
+  # ---------------------------------------------------------------------------
+  # Ejemplo de un escritorio. Copia este bloque para ct2..ct7.
+  #
+  # Lo importante:
+  #   - NO publica puertos: sin `ports`, el contenedor no es alcanzable desde
+  #     fuera de la red interna. Ese es el cierre del acceso directo.
+  #   - Va en la misma red que Caddy, que es quien media.
+  #   - Sin CUSTOM_USER ni PASSWORD (KasmVNC no autentica por si mismo). Caddy
+  #     es la unica puerta.
+  ct0:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: ${TZ:-America/Mexico_City}
+      TITLE: "Escritorio ct0"
+    networks:
+      - virthub
+
 volumes:
   app_storage:
   mariadb_data:
+  caddy_data:
+  caddy_config:
 
 networks:
   virthub:
     driver: bridge
+    # Caddy necesita salida a internet para emitir los certificados TLS, asi que
+    # la red NO se marca como `internal`. El aislamiento se consigue no
+    # publicando puertos: sin `ports` no hay forma de llegar desde fuera.
+    #
+    # Si emites los certificados en otro sitio (por ejemplo con Cloudflare
+    # Tunnel), puedes marcar `internal: true` y entonces la red no tendra salida
+    # alguna: aislamiento total.
