@@ -965,7 +965,7 @@
 
                         @if (!empty($post['image_path']))
                             @if (\App\Support\AttachmentStorage::exists($post['image_path']))
-                                <img class="forum-post-image" src="{{ asset($post['image_path']) }}" alt="Imagen de publicacion de {{ $post['author'] ?? 'usuario' }}" loading="lazy">
+                                <img class="forum-post-image" src="{{ \App\Support\AttachmentStorage::url($post['image_path']) }}" alt="Imagen de publicacion de {{ $post['author'] ?? 'usuario' }}" loading="lazy">
                             @else
                                 <p class="attachment-missing">Imagen no disponible (el archivo ya no esta en el servidor).</p>
                             @endif
@@ -982,12 +982,12 @@
                                 @if (!$attachmentAvailable)
                                     <p class="attachment-missing">{{ $attachment['name'] ?? 'Archivo adjunto' }} — ya no esta en el servidor</p>
                                 @elseif (($attachment['type'] ?? '') === 'photo')
-                                    <img class="forum-post-image" src="{{ asset($attachment['path']) }}" alt="{{ $attachment['name'] ?? 'Imagen adjunta' }}" loading="lazy">
+                                    <img class="forum-post-image" src="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}" alt="{{ $attachment['name'] ?? 'Imagen adjunta' }}" loading="lazy">
                                 @elseif (($attachment['type'] ?? '') === 'video')
-                                    <video class="forum-post-image" controls preload="metadata"><source src="{{ asset($attachment['path']) }}" type="{{ $attachment['mime'] ?? 'video/mp4' }}"></video>
+                                    <video class="forum-post-image" controls preload="metadata"><source src="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}" type="{{ $attachment['mime'] ?? 'video/mp4' }}"></video>
                                 @else
                                     <p>
-                                        <a href="{{ asset($attachment['path']) }}" target="_blank" rel="noopener">
+                                        <a href="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}" target="_blank" rel="noopener">
                                             {{ $attachment['name'] ?? 'Abrir archivo adjunto' }}
                                             @if ($size = \App\Support\AttachmentStorage::humanSize($attachment['path'] ?? null, (int) ($attachment['size'] ?? 0)))
                                                 <span class="attachment-size">({{ $size }})</span>

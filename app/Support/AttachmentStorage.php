@@ -32,6 +32,12 @@ class AttachmentStorage
             return null;
         }
 
+        // Las rutas pueden venir con o sin el prefijo 'storage/'; en disco ambas
+        // apuntan al mismo sitio.
+        if (str_starts_with($normalized, 'storage/')) {
+            $normalized = substr($normalized, strlen('storage/'));
+        }
+
         return storage_path('app/public/' . $normalized);
     }
 
@@ -41,6 +47,33 @@ class AttachmentStorage
         $path = self::path($relativePath);
 
         return $path !== null && is_file($path);
+    }
+
+    /**
+     * URL publica de un adjunto.
+     *
+     * Los archivos viven en storage/app/public, que no esta dentro del
+     * document root de Apache: se sirven a traves del enlace
+     * public/storage -> storage/app/public. Por eso la URL lleva el prefijo
+     * 'storage/'. Sin el, asset() genera /uploads/... y el servidor responde 404.
+     */
+    public static function url(?string $relativePath): string
+    {
+        $relativePath = trim((string) $relativePath);
+
+        if ($relativePath === '') {
+            return '';
+        }
+
+        $normalized = ltrim(str_replace('\\', '/', $relativePath), '/');
+
+        // Compatibilidad: las rutas guardadas antes del cambio a almacenamiento
+        // persistente ya incluian el prefijo.
+        if (str_starts_with($normalized, 'storage/')) {
+            return asset($normalized);
+        }
+
+        return asset('storage/' . $normalized);
     }
 
     /** Tamano legible del archivo, o null si no existe. */

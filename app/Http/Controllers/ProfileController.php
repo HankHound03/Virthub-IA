@@ -148,6 +148,7 @@ class ProfileController extends Controller
             }
         }
 
+        // La ruta guardada se resuelve contra el enlace public/storage.
         return 'uploads/profiles/' . $filename;
     }
 }

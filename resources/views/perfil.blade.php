@@ -204,7 +204,7 @@
                     {{-- Solo se pinta la imagen si el archivo sigue existiendo. Si no,
                          el navegador mostraria el texto alternativo y se veria roto. --}}
                     @if ($profileImage !== '' && \App\Support\AttachmentStorage::exists($profileImage))
-                        <img src="{{ asset($profileImage) }}" alt="Foto de perfil de {{ $profile['username'] }}" loading="lazy">
+                        <img src="{{ \App\Support\AttachmentStorage::url($profileImage) }}" alt="Foto de perfil de {{ $profile['username'] }}" loading="lazy">
                     @else
                         <span>{{ $userInitial }}</span>
                     @endif
@@ -261,7 +261,7 @@
                             <p class="profile-post-content">{{ $post['content'] }}</p>
                             @if (!empty($post['image_path']))
                                 @if (\App\Support\AttachmentStorage::exists($post['image_path']))
-                                    <div class="profile-post-media"><img src="{{ asset($post['image_path']) }}" alt="Imagen de publicacion" loading="lazy"></div>
+                                    <div class="profile-post-media"><img src="{{ \App\Support\AttachmentStorage::url($post['image_path']) }}" alt="Imagen de publicacion" loading="lazy"></div>
                                 @else
                                     <p class="attachment-missing">Imagen no disponible (el archivo ya no esta en el servidor).</p>
                                 @endif
@@ -273,11 +273,11 @@
                                         @if (!$attachmentAvailable)
                                             <span class="attachment-missing">{{ $attachment['name'] ?? 'Archivo' }} — ya no esta en el servidor</span>
                                         @elseif (($attachment['type'] ?? '') === 'video')
-                                            <video controls preload="metadata"><source src="{{ asset($attachment['path']) }}" type="{{ $attachment['mime'] ?? 'video/mp4' }}"></video>
+                                            <video controls preload="metadata"><source src="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}" type="{{ $attachment['mime'] ?? 'video/mp4' }}"></video>
                                         @elseif (($attachment['type'] ?? '') === 'photo')
-                                            <img src="{{ asset($attachment['path']) }}" alt="{{ $attachment['name'] ?? 'Imagen adjunta' }}" loading="lazy">
+                                            <img src="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}" alt="{{ $attachment['name'] ?? 'Imagen adjunta' }}" loading="lazy">
                                         @else
-                                            <a href="{{ asset($attachment['path']) }}" target="_blank" rel="noopener">
+                                            <a href="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}" target="_blank" rel="noopener">
                                                 {{ $attachment['name'] ?? 'Abrir archivo' }}
                                                 @if ($size = \App\Support\AttachmentStorage::humanSize($attachment['path'] ?? null, (int) ($attachment['size'] ?? 0)))
                                                     <span class="attachment-size">({{ $size }})</span>

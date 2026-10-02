@@ -27,7 +27,7 @@
                     {{-- Si el archivo del avatar ya no existe se muestra la inicial,
                          no un icono de imagen rota. --}}
                     @if ($profileImage !== '' && \App\Support\AttachmentStorage::exists($profileImage))
-                        <img src="{{ asset($profileImage) }}" alt="Foto de perfil de {{ $currentUser['username'] }}" loading="lazy">
+                        <img src="{{ \App\Support\AttachmentStorage::url($profileImage) }}" alt="Foto de perfil de {{ $currentUser['username'] }}" loading="lazy">
                     @else
                         <span>{{ $userInitial }}</span>
                     @endif

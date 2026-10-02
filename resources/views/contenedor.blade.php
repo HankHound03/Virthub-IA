@@ -616,8 +616,14 @@
 
             const imagePath = (profile && profile.profile_image_path) ? String(profile.profile_image_path) : '';
             if (imagePath) {
+                // Los adjuntos se sirven por el enlace public/storage; sin este
+                // prefijo la URL da 404 porque el archivo no esta en la raiz web.
+                const prefijada = imagePath.indexOf('storage/') === 0
+                    ? imagePath
+                    : 'storage/' + imagePath.replace(/^\/+/, '');
+
                 const img = document.createElement('img');
-                img.src = imagePath.charAt(0) === '/' ? imagePath : '/' + imagePath;
+                img.src = '/' + prefijada;
                 img.alt = 'avatar';
                 img.loading = 'lazy';
 
