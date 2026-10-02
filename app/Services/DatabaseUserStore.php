@@ -15,9 +15,16 @@ class DatabaseUserStore extends JsonUserStore
             return;
         }
 
-        $username = (string) env('ADMIN_USERNAME', 'admin');
+        $username = (string) config('virthub.admin.username', 'admin');
+        $password = (string) config('virthub.admin.password', '');
+
+        // Sin password explicita no se crea un admin implicito.
+        if ($password === '' || $password === config('virthub.admin.default_password')) {
+            return;
+        }
+
         if (!User::where('username', $username)->exists()) {
-            $this->createUser($username, (string) env('ADMIN_PASSWORD', 'ChangeMeNow123!'), 'admin');
+            $this->createUser($username, $password, 'admin');
         }
     }
 

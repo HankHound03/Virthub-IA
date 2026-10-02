@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\DatabaseUserStore;
 use App\Services\JsonUserStore;
+use App\Services\UserStore;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -17,9 +18,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if (!$this->app->environment('testing')) {
-            $this->app->bind(JsonUserStore::class, DatabaseUserStore::class);
-        }
+        // La aplicacion depende de la interfaz UserStore, nunca de una
+        // implementacion concreta. En produccion se usa la base de datos; la
+        // suite de pruebas usa el almacen JSON por velocidad y aislamiento.
+        //
+        // Las clases concretas NO se enlazan entre si: asi los tests pueden
+        // pedir DatabaseUserStore de forma explicita y ejercitar el codigo que
+        // atiende a los usuarios reales.
+        $this->app->bind(UserStore::class, $this->app->environment('testing')
+            ? JsonUserStore::class
+            : DatabaseUserStore::class);
     }
 
     /**
@@ -31,17 +39,52 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->ip() ?: 'unknown');
         });
 
-        if (! app()->runningInConsole()) {
-            $appUrl = (string) config('app.url');
-            $request = request();
+        // El acceso de invitado reserva un escritorio compartido y no exige
+        // credenciales, asi que se limita con dureza por IP.
+        RateLimiter::for('guest-login', function (Request $request): Limit {
+            return Limit::perMinutes(10, 3)->by($request->ip() ?: 'unknown');
+        });
 
-            if (
-                str_starts_with($appUrl, 'https://')
-                || $request->isSecure()
-                || $request->headers->get('x-forwarded-proto') === 'https'
-            ) {
-                URL::forceScheme('https');
-            }
+        // Evita que una cuenta inunde el chat (y el puente hacia Ollama).
+        RateLimiter::for('chat-send', function (Request $request): Limit {
+            return Limit::perMinute(30)->by((string) optional($request->user())->getAuthIdentifier() ?: ($request->ip() ?: 'unknown'));
+        });
+
+        // Un archivo de 5 GB en trozos de 8 MB son ~640 peticiones, asi que el
+        // limite debe ser holgado pero acotado: frena un bucle descontrolado sin
+        // estorbar a una subida legitima.
+        RateLimiter::for('upload-chunk', function (Request $request): Limit {
+            $perMinute = max(60, (int) config('virthub.uploads.chunk_rate_limit', 2400));
+
+            return Limit::perMinute($perMinute)->by($request->ip() ?: 'unknown');
+        });
+
+        if (! app()->runningInConsole()) {
+            $this->configureUrlScheme(request());
+        }
+    }
+
+    /**
+     * Decide el esquema de las URLs generadas.
+     *
+     * Antes bastaba con que APP_URL empezara por https:// para forzar https en
+     * todas las URLs, y eso ocurria incluso sirviendo por http plano: el
+     * navegador pedia los CSS por https contra un puerto sin TLS y la pagina se
+     * quedaba sin estilos.
+     *
+     * Reglas ahora:
+     *   - Si ya hay evidencia de https (peticion segura o cabecera de proxy),
+     *     se respeta.
+     *   - Si no, solo se fuerza con FORCE_HTTPS=true, que es lo correcto cuando
+     *     hay un proxy TLS delante.
+     */
+    private function configureUrlScheme(Request $request): void
+    {
+        $hasSecureEvidence = $request->isSecure()
+            || $request->headers->get('x-forwarded-proto') === 'https';
+
+        if ($hasSecureEvidence || config('virthub.force_https')) {
+            URL::forceScheme('https');
         }
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use RuntimeException;
 
-class JsonUserStore
+class JsonUserStore implements UserStore
 {
     private string $filePath;
 
@@ -21,8 +21,14 @@ class JsonUserStore
             return;
         }
 
-        $adminUsername = (string) env('ADMIN_USERNAME', 'admin');
-        $adminPassword = (string) env('ADMIN_PASSWORD', 'ChangeMeNow123!');
+        $adminUsername = (string) config('virthub.admin.username', 'admin');
+        $adminPassword = (string) config('virthub.admin.password', '');
+
+        // Sin password explicita no se crea un admin implicito: evita el
+        // clasico despliegue con credenciales por defecto.
+        if ($adminPassword === '' || $adminPassword === config('virthub.admin.default_password')) {
+            return;
+        }
 
 		$this->updateUsers(function (array &$users) use ($adminUsername, $adminPassword): void {
 			foreach ($users as $user) {
