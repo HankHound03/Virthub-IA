@@ -35,6 +35,8 @@ RUN apt-get update \
 
 WORKDIR /var/www/html
 
+COPY docker/php.ini /usr/local/etc/php/conf.d/zz-virthub.ini
+
 COPY --from=vendor /var/www/html/vendor ./vendor
 COPY . .
 COPY --from=assets /var/www/html/public/build ./public/build
@@ -42,9 +44,9 @@ COPY --from=assets /var/www/html/public/build ./public/build
 RUN rm -f bootstrap/cache/*.php \
     && php artisan package:discover --ansi
 
-RUN mkdir -p storage/app/data storage/app/private storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
+RUN mkdir -p storage/app/data storage/app/chunked storage/app/private storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
     && chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 80
 
-CMD ["sh", "-c", "php artisan migrate --force && if [ ! -L public/storage ]; then php artisan storage:link; fi && apache2-foreground"]
+CMD ["sh", "-c", "php artisan migrate --force && rm -rf public/storage && php artisan storage:link && apache2-foreground"]
