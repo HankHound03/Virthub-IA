@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('url');
+            // Cuantos escritorios puede atender este contenedor. null = sin
+            // limite declarado. Es distinto de cpu_limit, que es la cuota de
+            // recursos de la maquina: mezclarlos obligaba a trucos.
+            $table->unsignedInteger('capacity')->nullable();
             $table->string('status')->default('unknown')->index();
             $table->unsignedInteger('cpu_limit')->nullable();
             $table->unsignedInteger('memory_limit_mb')->nullable();
@@ -24,12 +28,17 @@ return new class extends Migration
 
         Schema::create('workspace_assignments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('webtop_container_id')->constrained()->cascadeOnDelete();
             $table->string('status')->default('assigned')->index();
             $table->timestamp('assigned_at')->useCurrent();
             $table->timestamp('released_at')->nullable();
             $table->timestamps();
+
+            // NO se pone unico sobre user_id: impide volver a asignarle un
+            // escritorio despues de liberarlo. La regla de "una sola asignacion
+            // activa" la garantiza el asignador al consultar released_at.
+            $table->index(['user_id', 'released_at']);
         });
 
         Schema::create('user_workspace_states', function (Blueprint $table) {

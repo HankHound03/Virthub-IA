@@ -2,14 +2,24 @@
 
 namespace App\Support;
 
+use App\Services\WebtopAllocator;
+
 /**
  * Decide a que contenedor Webtop pertenece cada usuario.
  *
- * Sustituye a la funcion global virthub_get_container_url() para que la regla
- * de asignacion viva en un solo lugar y sea testeable.
+ * La asignacion real vive en la base de datos (workspace_assignments), con un
+ * indice unico sobre user_id: cada usuario tiene su propio escritorio y no se
+ * comparte con nadie.
+ *
+ * El reparto por hash se conserva SOLO como respaldo para cuando no hay
+ * contenedores declarados en la base de datos (una instalacion que aun no ha
+ * sincronizado la infraestructura) o no queda capacidad. Asi una instalacion
+ * existente sigue funcionando mientras se migra.
  */
 class ContainerResolver
 {
+    public function __construct(private readonly WebtopAllocator $allocator) {}
+
     /**
      * @param  array<string, mixed>|null  $user
      */
@@ -26,12 +36,40 @@ class ContainerResolver
         }
 
         $username = (string) ($user['username'] ?? '');
+        $userId = $this->resolveUserId($user);
 
+        // El contenedor asignado tiene prioridad: es el que garantiza el
+        // aislamiento entre usuarios.
+        if ($userId !== null) {
+            $container = $this->allocator->containerFor($userId);
+
+            if ($container !== null && trim((string) $container->url) !== '') {
+                return (string) $container->url;
+            }
+        }
+
+        // Respaldo: reparto determinista sobre la lista de configuracion.
         if ($this->isPrivilegedContainerUser($username)) {
             return $this->urlForIndex(0);
         }
 
         return $this->urlForIndex($this->poolIndexFor($username));
+    }
+
+    /**
+     * Contenedor asignado al usuario, si tiene uno.
+     */
+    public function assignedContainerFor(array $user): ?string
+    {
+        $userId = $this->resolveUserId($user);
+
+        if ($userId === null) {
+            return null;
+        }
+
+        $container = $this->allocator->currentContainer($userId);
+
+        return $container?->url;
     }
 
     public function urlForIndex(int $index): string
@@ -47,8 +85,10 @@ class ContainerResolver
     }
 
     /**
-     * Reparto determinista: el mismo usuario cae siempre en el mismo contenedor
-     * del grupo, de modo que su escritorio conserva el estado entre sesiones.
+     * Reparto determinista de respaldo.
+     *
+     * Se usa solo cuando no hay asignacion posible, de modo que el usuario
+     * conserva el mismo escritorio entre sesiones.
      */
     public function poolIndexFor(string $username): int
     {
@@ -65,6 +105,23 @@ class ContainerResolver
         $adminUsers = (array) config('virthub.containers.admin_users', []);
 
         return in_array($username, $adminUsers, true);
+    }
+
+    /**
+     * El id del usuario es necesario para la asignacion. Si no viene en el
+     * array (sesiones antiguas) no se puede asignar y se usa el respaldo.
+     *
+     * @param  array<string, mixed>  $user
+     */
+    private function resolveUserId(array $user): ?int
+    {
+        $id = $user['id'] ?? null;
+
+        if ($id === null || $id === '' || ! is_numeric($id)) {
+            return null;
+        }
+
+        return (int) $id;
     }
 
     /**

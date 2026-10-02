@@ -27,6 +27,25 @@ return [
     'containers' => [
         'indices' => [0, 2, 3, 4, 5, 6, 7],
 
+        /*
+        | Capacidad y limites de cada contenedor.
+        |
+        | Cada usuario recibe un escritorio EXCLUSIVO, guardado en la base de
+        | datos, de modo que nadie comparte el de otro. Estos valores deciden
+        | cuantos usuarios caben antes de que la asignacion se rechace.
+        |
+        | instances_per_container: cuantos escritorios puede atender un
+        | contenedor. Ponlo a 1 para aislamiento total (un contenedor por
+        | persona); subelo solo si el contenedor esta preparado para varios.
+        |
+        | cpu_limit y memory_limit_mb se guardan como metadatos de la maquina
+        | para futuras cuotas. null significa sin limite declarado.
+        */
+
+        'instances_per_container' => (int) env('CONTAINER_INSTANCES', 1),
+        'cpu_limit' => env('CONTAINER_CPU_LIMIT') === null ? null : (int) env('CONTAINER_CPU_LIMIT'),
+        'memory_limit_mb' => env('CONTAINER_MEMORY_MB') === null ? null : (int) env('CONTAINER_MEMORY_MB'),
+
         'urls' => array_combine(
             [0, 2, 3, 4, 5, 6, 7],
             array_map(

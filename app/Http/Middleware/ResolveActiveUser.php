@@ -81,6 +81,9 @@ class ResolveActiveUser
         }
 
         return [
+            // El id se propaga porque la asignacion de escritorios lo necesita:
+            // workspace_assignments referencia users.id, no el username.
+            'id' => (string) ($user['id'] ?? ''),
             'name' => (string) ($user['name'] ?? $user['username'] ?? ''),
             'username' => (string) $user['username'],
             'role' => (string) ($user['role'] ?? 'user'),
