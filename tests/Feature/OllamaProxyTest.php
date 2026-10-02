@@ -8,30 +8,38 @@ use Tests\TestCase;
 
 class OllamaProxyTest extends TestCase
 {
-    private function setEnvValue(string $key, ?string $value): void
+    /**
+     * Configura Ollama mediante config(), que es lo que lee OllamaClient. Los
+     * tests ya no dependen de env() y por tanto siguen siendo validos con la
+     * configuracion cacheada en produccion.
+     */
+    private function configureOllama(string $baseUrl, string $model = 'llama3.1'): void
     {
-        if ($value === null) {
-            putenv($key);
-            unset($_ENV[$key], $_SERVER[$key]);
-            return;
-        }
+        config([
+            'virthub.ollama.base_url' => $baseUrl,
+            'virthub.ollama.model' => $model,
+            'virthub.ollama.system_prompt' => 'Responde en español, de forma clara, breve y útil.',
+        ]);
+    }
 
-        putenv($key . '=' . $value);
-        $_ENV[$key] = $value;
-        $_SERVER[$key] = $value;
+    /**
+     * Crea la cuenta admin igual que lo hace el instalador. No se usa
+     * bootstrapAdminFromEnv(): esa via exige una ADMIN_PASSWORD explicita y no
+     * acepta credenciales por defecto.
+     */
+    private function createAdmin(string $username = 'admin'): void
+    {
+        app(JsonUserStore::class)->createOrUpdateAdmin($username, 'P@ssword123!');
     }
 
     public function test_ollama_proxy_returns_503_when_not_configured(): void
     {
-        $this->setEnvValue('OLLAMA_BASE_URL', '');
-        $this->setEnvValue('OLLAMA_MODEL', 'llama3.1');
-        $this->setEnvValue('OLLAMA_SYSTEM_PROMPT', 'Responde en español, de forma clara, breve y útil.');
-
-        app(JsonUserStore::class)->bootstrapAdminFromEnv();
+        $this->configureOllama('');
+        $this->createAdmin();
 
         $response = $this->withSession([
             'auth_user' => [
-                'username' => env('ADMIN_USERNAME', 'admin'),
+                'username' => 'admin',
                 'role' => 'admin',
             ],
         ])->postJson('/ai/ollama', [
@@ -46,12 +54,10 @@ class OllamaProxyTest extends TestCase
 
     public function test_ollama_proxy_denies_non_admin_users(): void
     {
-        $this->setEnvValue('OLLAMA_BASE_URL', 'http://ollama.test');
-        $this->setEnvValue('OLLAMA_MODEL', 'llama3.1');
-        $this->setEnvValue('OLLAMA_SYSTEM_PROMPT', 'Responde en español, de forma clara, breve y útil.');
+        $this->configureOllama('http://ollama.test');
 
         $users = app(JsonUserStore::class);
-        $users->bootstrapAdminFromEnv();
+        $this->createAdmin();
         $username = 'user_' . uniqid('', true);
         $users->createUser($username, 'Password123!', 'user');
 
@@ -72,11 +78,9 @@ class OllamaProxyTest extends TestCase
 
     public function test_ollama_proxy_forwards_prompt_to_ollama(): void
     {
-        $this->setEnvValue('OLLAMA_BASE_URL', 'http://ollama.test');
-        $this->setEnvValue('OLLAMA_MODEL', 'llama3.1');
-        $this->setEnvValue('OLLAMA_SYSTEM_PROMPT', 'Responde en español, de forma clara, breve y útil.');
+        $this->configureOllama('http://ollama.test');
 
-        app(JsonUserStore::class)->bootstrapAdminFromEnv();
+        $this->createAdmin();
 
         Http::fake([
             'http://ollama.test/api/generate' => Http::response([
@@ -86,7 +90,7 @@ class OllamaProxyTest extends TestCase
 
         $response = $this->withSession([
             'auth_user' => [
-                'username' => env('ADMIN_USERNAME', 'admin'),
+                'username' => 'admin',
                 'role' => 'admin',
             ],
         ])->postJson('/ai/ollama', [
@@ -109,12 +113,10 @@ class OllamaProxyTest extends TestCase
 
     public function test_admin_ollama_chat_persists_history(): void
     {
-        $this->setEnvValue('OLLAMA_BASE_URL', 'http://ollama.test');
-        $this->setEnvValue('OLLAMA_MODEL', 'llama3.1');
-        $this->setEnvValue('OLLAMA_SYSTEM_PROMPT', 'Responde en español, de forma clara, breve y útil.');
+        $this->configureOllama('http://ollama.test');
 
         $users = app(JsonUserStore::class);
-        $users->bootstrapAdminFromEnv();
+        $this->createAdmin();
 
         Http::fake([
             'http://ollama.test/api/chat' => Http::response([
@@ -126,7 +128,7 @@ class OllamaProxyTest extends TestCase
 
         $response = $this->withSession([
             'auth_user' => [
-                'username' => env('ADMIN_USERNAME', 'admin'),
+                'username' => 'admin',
                 'role' => 'admin',
             ],
         ])->postJson('/chat/conversation/ollama', [
@@ -140,7 +142,7 @@ class OllamaProxyTest extends TestCase
 
         $history = $this->withSession([
             'auth_user' => [
-                'username' => env('ADMIN_USERNAME', 'admin'),
+                'username' => 'admin',
                 'role' => 'admin',
             ],
         ])->getJson('/chat/conversation/ollama');
@@ -148,7 +150,7 @@ class OllamaProxyTest extends TestCase
         $history->assertOk();
         $messages = $history->json('messages');
 
-        $this->assertTrue(collect($messages)->contains(fn (array $message): bool => ($message['from'] ?? '') === env('ADMIN_USERNAME', 'admin') && ($message['message'] ?? '') === 'Hola IA'));
+        $this->assertTrue(collect($messages)->contains(fn (array $message): bool => ($message['from'] ?? '') === 'admin' && ($message['message'] ?? '') === 'Hola IA'));
         $this->assertTrue(collect($messages)->contains(fn (array $message): bool => ($message['from'] ?? '') === 'ollama' && ($message['message'] ?? '') === 'Respuesta del chat de IA'));
 
         Http::assertSent(function ($request): bool {
