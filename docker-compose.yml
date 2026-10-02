@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: unless-stopped
     ports:
       - "${APP_PORT:-8000}:80"
     env_file:
@@ -17,6 +18,14 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+    # Si Apache deja de responder, Docker reinicia el contenedor en lugar de
+    # dejarlo en pie sirviendo errores.
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1/up\") === false ? 1 : 0);'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     volumes:
       - app_storage:/var/www/html/storage
     networks:
@@ -24,6 +33,7 @@ services:
 
   mariadb:
     image: mariadb:11.4
+    restart: unless-stopped
     environment:
       MARIADB_DATABASE: ${DB_DATABASE:-virthub}
       MARIADB_USER: ${DB_USERNAME:-virthub}

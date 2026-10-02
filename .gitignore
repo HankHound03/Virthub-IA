@@ -3,6 +3,12 @@
 .env
 .env.backup
 .env.production
+# Entornos de prueba locales y respaldos: nunca deben subirse.
+.env.test
+.env.*.local
+respaldo-*.tgz
+respaldo-*.sql
+*.dump
 .phpactor.json
 .phpunit.result.cache
 /.cursor/
@@ -15,10 +21,17 @@
 /node_modules
 /public/build
 /public/hot
+# public/storage debe ser un enlace simbolico que crea `php artisan storage:link`,
+# nunca un directorio de verdad: si existe como carpeta, el enlace no se crea y
+# los adjuntos quedan en la capa efimera del contenedor.
 /public/storage
 /public/uploads
 /storage/*.key
 /storage/app/data
+# Subidas de usuario: viven en el volumen persistente de Docker.
+/storage/app/public
+# Trozos temporales de las subidas grandes.
+/storage/app/chunked
 /storage/pail
 /vendor
 _ide_helper.php

@@ -1,79 +1,36 @@
-<<<<<<< HEAD
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Virthub
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
-```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-=======
-# Virthub-IA
-
-Este Proyecto esta en desarrollo
+Plataforma de acceso remoto a escritorios virtualizados (Webtop) pensada para
+que personas con equipos de bajos recursos puedan trabajar desde un servidor
+propio. Proyecto de hobby en desarrollo.
 
 ## Ejecutar con Docker
 
 Requisitos: Docker Desktop con Compose habilitado.
 
-1. Crea el archivo de entorno a partir de `.env.example` y cambia `APP_KEY`, `INSTALL_KEY` y las contraseñas.
+1. Crea el archivo de entorno a partir de `.env.example` y cambia `APP_KEY`,
+   `INSTALL_KEY`, `ADMIN_PASSWORD` y las contraseñas de la base de datos.
+
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
 2. Construye y levanta la aplicación junto con MariaDB:
 
-```bash
-docker compose up -d --build
-```
+   ```bash
+   docker compose up -d --build
+   ```
 
-La aplicación quedará disponible en `http://localhost:8000`. `app` y `mariadb` comparten la red virtual `virthub`; por eso la aplicación usa `DB_HOST=mariadb` y no `localhost`.
+La aplicación queda disponible en `http://localhost:8000`. `app` y `mariadb`
+comparten la red virtual `virthub`; por eso la aplicación usa `DB_HOST=mariadb`
+y no `localhost`.
+
+3. Abre el instalador con la clave privada y crea la cuenta administradora:
+
+   ```
+   http://localhost:8000/install?key=TU_INSTALL_KEY
+   ```
 
 Para ver los registros:
 
@@ -87,23 +44,73 @@ Para detener los contenedores sin borrar los datos:
 docker compose down
 ```
 
-Los datos de MariaDB y el contenido de `storage` se conservan en volúmenes Docker. Para eliminar también esos datos usa `docker compose down -v`.
+Los datos de MariaDB y el contenido de `storage` se conservan en volúmenes
+Docker. Para eliminar también esos datos usa `docker compose down -v`.
 
-- ¿Que se espera que contega el proyecto?
-    * Un Acceso a contenedores incluyendo un instalador via web para la terminal de Linux o Windows
-    * Una IA con API's Gratuitas donde cada usuario seleccionara su IA preferida
-    * Un codigo más puro sin depedencias de la IA
-    * Usar un FrameWork pero que sea compatible con mi CSS (Soy Hater de Python DJango)
+## Desarrollo local
 
+```bash
+composer install
+npm install
+composer run dev
+```
 
-## Whoami?
+## Pruebas
 
-Soy un estudiante Universitario, Curso la Ingenieria en Ciberseguridad, mi fuerte nunca a sido la Programación, pero busco ofrecer una solucion para tus amigos, conocidos, que no tienen una gran computadora
+```bash
+composer test
+# o directamente
+php artisan test
+```
 
-Mi sueño es tener un servidor para un homelab y montar un servidor de contenedores donde mis amigos que no tengan buenas computadoras puedan usar mi servidor como su compu y puedan hacer sus tareas y trabajos de la Escuela
+## Estructura del código
 
-Porque hago esto por Hobby
+La lógica vive en controladores, no en el archivo de rutas.
 
-Firma
-HankMon03/FrankMon03
-<!-- >>>>>>>> 94e3946fcacc2857955e0eb0a49a193034aaabfe -->
+| Ruta | Responsabilidad |
+| --- | --- |
+| `routes/web.php` | Solo declara rutas, middleware y nombres |
+| `app/Http/Controllers` | Un controlador por dominio (auth, foro, chat, admin…) |
+| `app/Http/Middleware` | `ResolveActiveUser`, `EnsureRegisteredUser`, `EnsureAdmin` |
+| `app/Support` | Servicios pequeños: contenedores, auditoría, Ollama, estado |
+| `app/Services` | Persistencia (usuarios, foro, chat, amistades, perfil) |
+| `config/virthub.php` | Toda la configuración del proyecto |
+
+### Configuración
+
+El proyecto **nunca** lee `env()` fuera de `config/`. Con
+`php artisan config:cache` los valores de `env()` pasan a ser `null` en tiempo
+de ejecución, así que toda la configuración propia vive en `config/virthub.php`
+y se consume con `config('virthub.*')`.
+
+### Almacén de usuarios
+
+`App\Services\UserStore` es la interfaz que usa la aplicación.
+`DatabaseUserStore` es la implementación de producción y `JsonUserStore` queda
+como almacén heredado (y para el importador `importLegacyJson`). La suite de
+pruebas cubre ambas.
+
+## Seguridad
+
+- Autenticación con contraseña y segundo factor TOTP opcional, con códigos de
+  recuperación almacenados como hash.
+- Bloqueo temporal tras intentos fallidos de inicio de sesión, más límite por IP.
+- El acceso de invitado está limitado por IP porque reserva un escritorio
+  compartido sin exigir credenciales.
+- El instalador exige `INSTALL_KEY`. La vía sin clave solo se abre con
+  `INSTALL_ALLOW_LOCALHOST=true` y desde el propio host.
+- No se crean cuentas administradoras con contraseñas por defecto: si
+  `ADMIN_PASSWORD` está vacía o es la del ejemplo, la creación se rechaza.
+- Eventos de acceso y actividad en un canal de log dedicado (`security`).
+
+## Objetivos
+
+El detalle de los objetivos académicos del proyecto está en
+[OBJETIVOS_PROYECTO.md](OBJETIVOS_PROYECTO.md).
+
+## Autor
+
+Estudiante de Ingeniería en Ciberseguridad. Proyecto de hobby para montar un
+homelab con contenedores que mis amigos puedan usar como su propia computadora.
+
+Firma: HankMon03 / FrankMon03
