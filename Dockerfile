@@ -49,4 +49,10 @@ RUN mkdir -p storage/app/data storage/app/chunked storage/app/private storage/ap
 
 EXPOSE 80
 
-CMD ["sh", "-c", "php artisan migrate --force && rm -rf public/storage && php artisan storage:link && apache2-foreground"]
+# Los adjuntos viven en storage/app/public, que es el volumen persistente. Hay
+# que crear sus subdirectorios con el propietario correcto ANTES de que corran
+# los procesos de arranque como root: si los crea root, www-data no puede
+# escribir dentro y subir un avatar o adjunto falla con "Permission denied".
+# Se hace en el arranque y no solo en el build porque el volumen puede
+# reemplazar el contenido de la imagen.
+CMD ["sh", "-c", "mkdir -p storage/app/data storage/app/chunked storage/app/public/uploads/profiles storage/app/public/uploads/forum/photos storage/app/public/uploads/forum/videos storage/app/public/uploads/forum/files && chown -R www-data:www-data storage && php artisan migrate --force && rm -rf public/storage && php artisan storage:link && apache2-foreground"]
