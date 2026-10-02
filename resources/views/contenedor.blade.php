@@ -620,6 +620,13 @@
                 img.src = imagePath.charAt(0) === '/' ? imagePath : '/' + imagePath;
                 img.alt = 'avatar';
                 img.loading = 'lazy';
+
+                // Si el archivo del avatar ya no existe, se cae a la inicial en
+                // lugar de dejar un icono de imagen rota.
+                img.addEventListener('error', () => {
+                    avatar.textContent = userInitial(profile && profile.username ? profile.username : 'U');
+                });
+
                 avatar.appendChild(img);
                 return avatar;
             }

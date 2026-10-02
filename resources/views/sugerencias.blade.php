@@ -187,7 +187,7 @@
                 <p class="feedback-msg">{{ session('success') }}</p>
             @endif
 
-            @if ($errors->any())
+            @if (isset($errors) && $errors->any())
                 <p class="feedback-msg error">Revisa el formulario e intenta de nuevo.</p>
             @endif
 

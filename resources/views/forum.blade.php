@@ -227,6 +227,88 @@
             font-size: 11px;
         }
 
+        .forum-attachment-status.is-error {
+            color: #ff8f8f;
+        }
+
+        .forum-attachment-status.is-ok {
+            color: #8fe3a8;
+        }
+
+        /* Barra de progreso real de la subida (alimentada por XHR). */
+        .forum-upload-progress {
+            margin: 0 0 10px;
+        }
+
+        .forum-upload-progress[hidden] {
+            display: none;
+        }
+
+        .forum-upload-bar {
+            position: relative;
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+        }
+
+        .forum-upload-bar > span {
+            display: block;
+            width: 0;
+            height: 100%;
+            border-radius: 999px;
+            background: var(--vh-accent, #6ea8ff);
+            transition: width 0.15s linear;
+        }
+
+        .forum-upload-label {
+            margin: 6px 0 0;
+            color: var(--vh-text-soft);
+            font-size: 11px;
+        }
+
+        /* Lista de adjuntos ya subidos, con opcion de quitarlos antes de publicar. */
+        .forum-uploaded-list {
+            margin: 0 0 10px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .forum-uploaded-list:empty {
+            display: none;
+        }
+
+        .forum-uploaded-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 4px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--vh-text-soft);
+            font-size: 11px;
+        }
+
+        .forum-uploaded-item > span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .forum-uploaded-item > button {
+            flex: 0 0 auto;
+            margin: 0;
+            padding: 0 6px;
+            border: 0;
+            background: transparent;
+            color: #ff8f8f;
+            font-size: 15px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
         #forumPollBuilder[hidden] {
             display: none;
         }
@@ -380,6 +462,24 @@
             border: 1px solid var(--vh-border);
             margin: 8px 0;
             background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Adjunto cuyo archivo ya no existe: se avisa en lugar de mostrar un
+           icono de imagen rota. */
+        .attachment-missing {
+            display: block;
+            margin: 8px 0;
+            padding: 8px 10px;
+            border: 1px dashed var(--vh-border);
+            border-radius: 6px;
+            background-color: rgba(0, 0, 0, 0.15);
+            color: var(--vh-text-soft);
+            font-size: 11px;
+        }
+
+        .attachment-size {
+            color: var(--vh-text-soft);
+            font-size: 10px;
         }
 
         .forum-post-actions {
@@ -755,7 +855,28 @@
                             <input type="file" id="forumVideos" name="videos[]" accept="video/mp4,video/webm,video/quicktime,video/x-msvideo" multiple>
                             <input type="file" id="forumFiles" name="files[]" multiple>
                         </div>
-                        <p class="forum-attachment-status" id="forumAttachmentStatus">Puedes adjuntar archivos de hasta 5 GB cada uno.</p>
+
+                        {{-- Estado de los adjuntos: lista los archivos elegidos, avisa de los
+                             que superan el limite y muestra el progreso real de la subida. --}}
+                        <p class="forum-attachment-status" id="forumAttachmentStatus"
+                           data-max-bytes="{{ $chunkedMaxBytes }}"
+                           data-fast-path-bytes="{{ $attachmentMaxBytes }}"
+                           data-max-label="{{ $chunkedMaxLabel }}"
+                           data-fast-path-label="{{ $attachmentMaxLabel }}"
+                           data-max-files="{{ $maxFilesPerPost }}">
+                            Adjuntos de hasta {{ $chunkedMaxLabel }} cada uno. Los archivos grandes se suben por trozos.
+                        </p>
+
+                        <div class="forum-upload-progress" id="forumUploadProgress" hidden>
+                            <div class="forum-upload-bar">
+                                <span id="forumUploadBarFill"></span>
+                            </div>
+                            <p class="forum-upload-label" id="forumUploadLabel">Subiendo…</p>
+                        </div>
+
+                        <ul class="forum-uploaded-list" id="forumUploadedList"></ul>
+
+                        <ul class="forum-uploaded-list" id="forumUploadedList"></ul>
 
                         <div class="poll-builder" id="forumPollBuilder" hidden>
                             <h4>Encuesta (opcional)</h4>
@@ -843,17 +964,36 @@
                         <div>{!! nl2br(e($post['content'] ?? '')) !!}</div>
 
                         @if (!empty($post['image_path']))
-                            <img class="forum-post-image" src="{{ asset($post['image_path']) }}" alt="Imagen de publicacion de {{ $post['author'] ?? 'usuario' }}" loading="lazy">
+                            @if (\App\Support\AttachmentStorage::exists($post['image_path']))
+                                <img class="forum-post-image" src="{{ asset($post['image_path']) }}" alt="Imagen de publicacion de {{ $post['author'] ?? 'usuario' }}" loading="lazy">
+                            @else
+                                <p class="attachment-missing">Imagen no disponible (el archivo ya no esta en el servidor).</p>
+                            @endif
                         @endif
 
                         @if (!empty($post['attachments']) && is_array($post['attachments']))
                             @foreach ($post['attachments'] as $attachment)
-                                @if (($attachment['type'] ?? '') === 'photo')
-                                    <img class="forum-post-image" src="{{ asset($attachment['path']) }}" alt="Imagen adjunta" loading="lazy">
+                                @php
+                                    // La forma @php(...) solo admite expresiones simples;
+                                    // con un ternario y un cast se compila mal y rompe el
+                                    // resto de la plantilla.
+                                    $attachmentAvailable = \App\Support\AttachmentStorage::exists($attachment['path'] ?? null);
+                                @endphp
+                                @if (!$attachmentAvailable)
+                                    <p class="attachment-missing">{{ $attachment['name'] ?? 'Archivo adjunto' }} — ya no esta en el servidor</p>
+                                @elseif (($attachment['type'] ?? '') === 'photo')
+                                    <img class="forum-post-image" src="{{ asset($attachment['path']) }}" alt="{{ $attachment['name'] ?? 'Imagen adjunta' }}" loading="lazy">
                                 @elseif (($attachment['type'] ?? '') === 'video')
                                     <video class="forum-post-image" controls preload="metadata"><source src="{{ asset($attachment['path']) }}" type="{{ $attachment['mime'] ?? 'video/mp4' }}"></video>
                                 @else
-                                    <p><a href="{{ asset($attachment['path']) }}" target="_blank" rel="noopener">{{ $attachment['name'] ?? 'Abrir archivo adjunto' }}</a></p>
+                                    <p>
+                                        <a href="{{ asset($attachment['path']) }}" target="_blank" rel="noopener">
+                                            {{ $attachment['name'] ?? 'Abrir archivo adjunto' }}
+                                            @if ($size = \App\Support\AttachmentStorage::humanSize($attachment['path'] ?? null, (int) ($attachment['size'] ?? 0)))
+                                                <span class="attachment-size">({{ $size }})</span>
+                                            @endif
+                                        </a>
+                                    </p>
                                 @endif
                             @endforeach
                         @endif
@@ -990,6 +1130,9 @@
 
     <footer>Virthub 1.0</footer>
 
+    {{-- Subida por trozos para adjuntos grandes (hasta 5 GB por archivo). --}}
+    <script src="{{ asset('chunked-upload.js') }}?v={{ filemtime(public_path('chunked-upload.js')) }}"></script>
+
     <script>
         function getUserKey() {
             return @json($currentUser['username'] ?? 'guest');
@@ -1117,8 +1260,318 @@
             document.querySelectorAll('[data-file-trigger]').forEach(button => {
                 button.addEventListener('click', () => document.getElementById(button.dataset.fileTrigger)?.click());
             });
+
+            // Retroalimentacion de adjuntos: antes no se mostraba nada al elegir
+            // archivos ni al enviar, de modo que una subida no daba ninguna senal.
+            bindAttachmentFeedback(modal);
+
             document.addEventListener('keydown', event => {
                 if (event.key === 'Escape') close();
+            });
+        }
+
+        function formatBytes(bytes) {
+            if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';
+            if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+            if (bytes >= 1024) return Math.round(bytes / 1024) + ' KB';
+            return bytes + ' B';
+        }
+
+        function formatDuration(seconds) {
+            if (!isFinite(seconds) || seconds <= 0) return '—';
+            if (seconds < 60) return Math.round(seconds) + ' s';
+            if (seconds < 3600) return Math.round(seconds / 60) + ' min';
+            return Math.floor(seconds / 3600) + ' h ' + Math.round((seconds % 3600) / 60) + ' min';
+        }
+
+        /**
+         * Retroalimentacion de adjuntos.
+         *
+         * Los archivos grandes (hasta 5 GB) se suben por trozos mediante
+         * public/chunked-upload.js: el navegador los parte en pedazos de 8 MB y
+         * el servidor los ensambla. Los pequeños siguen el camino directo del
+         * formulario. En ambos casos el usuario ve que esta pasando.
+         */
+        function bindAttachmentFeedback(modal) {
+            const form = modal.querySelector('form.forum-form');
+            const status = modal.querySelector('#forumAttachmentStatus');
+            const progress = modal.querySelector('#forumUploadProgress');
+            const barFill = modal.querySelector('#forumUploadBarFill');
+            const progressLabel = modal.querySelector('#forumUploadLabel');
+            const uploadedList = modal.querySelector('#forumUploadedList');
+            const submitButton = form?.querySelector('button[type="submit"]');
+
+            if (!form || !status) return;
+
+            const maxBytes = parseInt(status.dataset.maxBytes || '0', 10);
+            const fastPathBytes = parseInt(status.dataset.fastPathBytes || '5242880', 10);
+            const maxLabel = status.dataset.maxLabel || '5 GB';
+            const fastPathLabel = status.dataset.fastPathLabel || '5 MB';
+            const maxFiles = parseInt(status.dataset.maxFiles || '10', 10);
+            const defaultMessage = status.textContent.trim();
+
+            const fileInputs = [
+                modal.querySelector('#forumPhotos'),
+                modal.querySelector('#forumVideos'),
+                modal.querySelector('#forumFiles'),
+            ].filter(Boolean);
+
+            const state = {
+                uploaded: [],      // [{ upload_id, name, size, path }]
+                rejected: [],      // nombres que superan el maximo
+                uploading: false,
+                controller: null,
+            };
+
+            const setStatus = (message, kind) => {
+                status.textContent = message;
+                status.classList.toggle('is-error', kind === 'error');
+                status.classList.toggle('is-ok', kind === 'ok');
+            };
+
+            const setBar = (percent) => {
+                if (barFill) barFill.style.width = Math.max(0, Math.min(100, percent)) + '%';
+            };
+
+            const showProgress = (visible) => {
+                if (progress) progress.hidden = !visible;
+            };
+
+            const setBusy = (busy, label) => {
+                state.uploading = busy;
+                if (!submitButton) return;
+                submitButton.disabled = busy;
+                submitButton.textContent = busy ? (label || 'Subiendo…') : 'Publicar';
+            };
+
+            /** Pinta la lista de archivos ya subidos, con opcion de quitarlos. */
+            const renderUploaded = () => {
+                if (!uploadedList) return;
+                uploadedList.innerHTML = '';
+
+                state.uploaded.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'forum-uploaded-item';
+
+                    const label = document.createElement('span');
+                    label.textContent = item.name + ' (' + formatBytes(item.size) + ')';
+
+                    const remove = document.createElement('button');
+                    remove.type = 'button';
+                    remove.textContent = '×';
+                    remove.title = 'Quitar este adjunto';
+                    remove.addEventListener('click', () => {
+                        state.uploaded.splice(index, 1);
+                        renderUploaded();
+                        refreshStatus();
+                    });
+
+                    li.appendChild(label);
+                    li.appendChild(remove);
+                    uploadedList.appendChild(li);
+                });
+            };
+
+            const refreshStatus = () => {
+                if (state.uploading) return;
+
+                const names = state.uploaded.map(item => item.name + ' (' + formatBytes(item.size) + ')');
+
+                if (state.rejected.length > 0) {
+                    setStatus(
+                        'Superan el limite de ' + maxLabel + ': ' + state.rejected.join(', ') +
+                        '. Quitalos del selector para poder publicar.',
+                        'error'
+                    );
+                    return;
+                }
+
+                if (names.length === 0) {
+                    setStatus(defaultMessage, 'idle');
+                    return;
+                }
+
+                setStatus('Adjuntos listos: ' + names.join(', '), 'ok');
+            };
+
+            /** Envia los archivos elegidos en el selector, uno detras de otro. */
+            const uploadSelected = async (input) => {
+                const files = Array.from(input.files || []);
+                input.value = '';
+                if (files.length === 0) return;
+
+                state.controller = new AbortController();
+                showProgress(true);
+                setBar(0);
+                setBusy(true, 'Subiendo…');
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const prefix = files.length > 1 ? 'Archivo ' + (i + 1) + ' de ' + files.length + ': ' : '';
+
+                    if (state.uploaded.length + 1 > maxFiles) {
+                        state.rejected.push(file.name);
+                        setStatus('Ya alcanzaste el maximo de ' + maxFiles + ' adjuntos.', 'error');
+                        break;
+                    }
+
+                    if (file.size > maxBytes) {
+                        state.rejected.push(file.name);
+                        refreshStatus();
+                        continue;
+                    }
+
+                    // Los archivos pequeños caben en una sola peticion.
+                    if (file.size <= fastPathBytes) {
+                        if (state.uploaded.length + 1 > maxFiles) {
+                            state.rejected.push(file.name);
+                            continue;
+                        }
+
+                        state.uploaded.push({ upload_id: null, name: file.name, size: file.size, path: null });
+                        state.uploaded[state.uploaded.length - 1]._file = file;
+                        setBar(Math.round(((i + 1) / files.length) * 100));
+                        continue;
+                    }
+
+                    // Los grandes se trocean.
+                    try {
+                        const result = await window.VirthubChunkedUpload.upload(file, {
+                            signal: state.controller.signal,
+                            onStatus: (message) => setStatus(prefix + message, 'idle'),
+                            onProgress: (info) => {
+                                setBar(info.percent);
+                                progressLabel.textContent =
+                                    prefix + info.percent + '% — ' +
+                                    formatBytes(info.uploadedBytes) + ' de ' + formatBytes(info.totalBytes) +
+                                    ' · trozo ' + info.chunkIndex + '/' + info.totalChunks +
+                                    ' · ' + formatBytes(info.bytesPerSecond) + '/s' +
+                                    ' · quedan ' + formatDuration(info.remainingSeconds);
+                            },
+                        });
+
+                        state.uploaded.push({
+                            upload_id: result.upload_id,
+                            name: result.attachment.name,
+                            size: result.attachment.size,
+                            path: result.attachment.path,
+                        });
+
+                        setBar(100);
+                    } catch (error) {
+                        state.rejected.push(file.name + ' (' + error.message + ')');
+                    }
+                }
+
+                state.controller = null;
+                setBusy(false);
+                showProgress(false);
+                renderUploaded();
+                refreshStatus();
+            };
+
+            fileInputs.forEach(input => {
+                input.addEventListener('change', () => { uploadSelected(input); });
+            });
+
+            // Cancelar una subida en curso al cerrar el modal o salir de la pagina.
+            modal.querySelectorAll('.forum-compose-close').forEach(button => {
+                button.addEventListener('click', () => {
+                    if (state.controller) state.controller.abort();
+                });
+            });
+
+            window.addEventListener('beforeunload', (event) => {
+                if (!state.uploading) return;
+                event.preventDefault();
+                event.returnValue = '';
+            });
+
+            form.addEventListener('submit', (event) => {
+                if (state.uploading) {
+                    event.preventDefault();
+                    setStatus('Espera a que terminen las subidas en curso.', 'error');
+                    return;
+                }
+
+                if (state.rejected.length > 0) {
+                    event.preventDefault();
+                    setStatus('Hay adjuntos que superan el limite. Quitalos antes de publicar.', 'error');
+                    return;
+                }
+
+                // Los adjuntos grandes ya estan en el servidor: se envian como
+                // recibos. Los pequeños viajan como archivos, pero en un
+                // FormData nuevo, porque el formulario no los conserva tras
+                // vaciar los selectores.
+                form.querySelectorAll('input[name="upload_ids[]"]').forEach(node => node.remove());
+
+                state.uploaded
+                    .filter(item => item.upload_id)
+                    .forEach(item => {
+                        const hidden = document.createElement('input');
+                        hidden.type = 'hidden';
+                        hidden.name = 'upload_ids[]';
+                        hidden.value = item.upload_id;
+                        form.appendChild(hidden);
+                    });
+
+                const data = new FormData();
+                form.querySelectorAll('input, textarea, select').forEach(node => {
+                    if (!node.name) return;
+                    if (node.type === 'file') return;
+                    if (node.type === 'checkbox' || node.type === 'radio') {
+                        if (node.checked) data.append(node.name, node.value);
+                        return;
+                    }
+                    if (node.type === 'hidden' && node.name === '_token') {
+                        data.append(node.name, node.value);
+                        return;
+                    }
+                    if (node.type === 'hidden' && node.name === 'upload_ids[]') {
+                        data.append(node.name, node.value);
+                        return;
+                    }
+                    data.append(node.name, node.value);
+                });
+
+                state.uploaded.forEach(item => {
+                    if (item._file) data.append('files[]', item._file, item._file.name);
+                });
+
+                if (typeof XMLHttpRequest === 'undefined') return;
+
+                event.preventDefault();
+                showProgress(true);
+                setBar(90);
+                progressLabel.textContent = 'Publicando…';
+                setStatus('Publicando la entrada…', 'idle');
+
+                const request = new XMLHttpRequest();
+
+                request.addEventListener('load', () => {
+                    const location = request.responseURL || request.getResponseHeader('Location') || form.action;
+
+                    if (request.status >= 200 && request.status < 400) {
+                        setBar(100);
+                        window.location.href = location;
+                        return;
+                    }
+
+                    showProgress(false);
+                    setBusy(false);
+                    setStatus('El servidor rechazo la publicacion (codigo ' + request.status + ').', 'error');
+                });
+
+                request.addEventListener('error', () => {
+                    showProgress(false);
+                    setBusy(false);
+                    setStatus('No se pudo publicar. Revisa tu conexion.', 'error');
+                });
+
+                request.open('POST', form.action, true);
+                request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                request.send(data);
             });
         }
 

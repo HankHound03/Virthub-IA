@@ -24,7 +24,9 @@
             @endphp
             <div class="header-profile-dock toggleable-profile-menu" onclick="toggleProfileMenu(event)" title="Menu de perfil" aria-label="Menu de perfil">
                 <div class="profile-aero-frame profile-aero-frame-sm" style="--profile-frame-color: {{ $frameColor }};">
-                    @if ($profileImage !== '')
+                    {{-- Si el archivo del avatar ya no existe se muestra la inicial,
+                         no un icono de imagen rota. --}}
+                    @if ($profileImage !== '' && \App\Support\AttachmentStorage::exists($profileImage))
                         <img src="{{ asset($profileImage) }}" alt="Foto de perfil de {{ $currentUser['username'] }}" loading="lazy">
                     @else
                         <span>{{ $userInitial }}</span>
@@ -55,7 +57,9 @@
                     @if (session('error'))
                         <p class="auth-message auth-error" role="alert">{{ session('error') }}</p>
                     @endif
-                    @if ($errors->any())
+                    {{-- $errors lo inyecta ShareErrorsFromSession; se comprueba por si
+                         la vista se renderiza sin ese middleware. --}}
+                    @if (isset($errors) && $errors->any())
                         <p class="auth-message auth-error" role="alert">{{ $errors->first() }}</p>
                     @endif
                     @if (session('two_factor_pending_username'))
@@ -127,7 +131,7 @@
         const openButton = document.getElementById('openLoginModal');
         const closeButton = document.getElementById('closeLoginModal');
         if (!modal || !openButton) return;
-        const shouldOpen = @json((bool) (session('two_factor_pending_username') || session('error') || $errors->any()));
+        const shouldOpen = @json((bool) (session('two_factor_pending_username') || session('error') || (isset($errors) && $errors->any())));
         const card = modal.querySelector('.header-login-card');
 
         const getErrorMessage = payload => {

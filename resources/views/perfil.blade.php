@@ -140,6 +140,24 @@
             border: 1px solid var(--vh-border);
         }
 
+        /* Adjunto cuyo archivo ya no existe: se avisa en lugar de mostrar un
+           icono de imagen rota. */
+        .attachment-missing {
+            display: block;
+            margin-top: 8px;
+            padding: 8px 10px;
+            border: 1px dashed var(--vh-border);
+            border-radius: 6px;
+            background-color: rgba(0, 0, 0, 0.15);
+            color: var(--vh-text-soft);
+            font-size: 11px;
+        }
+
+        .attachment-size {
+            color: var(--vh-text-soft);
+            font-size: 10px;
+        }
+
         .profile-status {
             margin: 0 0 12px;
             padding: 10px;
@@ -183,7 +201,9 @@
 
             <div class="profile-hero">
                 <div class="profile-aero-frame" style="--profile-frame-color: {{ $frameColor }};">
-                    @if ($profileImage !== '')
+                    {{-- Solo se pinta la imagen si el archivo sigue existiendo. Si no,
+                         el navegador mostraria el texto alternativo y se veria roto. --}}
+                    @if ($profileImage !== '' && \App\Support\AttachmentStorage::exists($profileImage))
                         <img src="{{ asset($profileImage) }}" alt="Foto de perfil de {{ $profile['username'] }}" loading="lazy">
                     @else
                         <span>{{ $userInitial }}</span>
@@ -240,15 +260,29 @@
                             @endif
                             <p class="profile-post-content">{{ $post['content'] }}</p>
                             @if (!empty($post['image_path']))
-                                <div class="profile-post-media"><img src="{{ asset($post['image_path']) }}" alt="Imagen de publicacion" loading="lazy"></div>
+                                @if (\App\Support\AttachmentStorage::exists($post['image_path']))
+                                    <div class="profile-post-media"><img src="{{ asset($post['image_path']) }}" alt="Imagen de publicacion" loading="lazy"></div>
+                                @else
+                                    <p class="attachment-missing">Imagen no disponible (el archivo ya no esta en el servidor).</p>
+                                @endif
                             @endif
                             @if (!empty($post['attachments']) && is_array($post['attachments']))
                                 <div class="profile-post-media">
                                     @foreach ($post['attachments'] as $attachment)
-                                        @if (($attachment['type'] ?? '') === 'video')
+                                        @php($attachmentAvailable = \App\Support\AttachmentStorage::exists($attachment['path'] ?? null))
+                                        @if (!$attachmentAvailable)
+                                            <span class="attachment-missing">{{ $attachment['name'] ?? 'Archivo' }} — ya no esta en el servidor</span>
+                                        @elseif (($attachment['type'] ?? '') === 'video')
                                             <video controls preload="metadata"><source src="{{ asset($attachment['path']) }}" type="{{ $attachment['mime'] ?? 'video/mp4' }}"></video>
+                                        @elseif (($attachment['type'] ?? '') === 'photo')
+                                            <img src="{{ asset($attachment['path']) }}" alt="{{ $attachment['name'] ?? 'Imagen adjunta' }}" loading="lazy">
                                         @else
-                                            <a href="{{ asset($attachment['path']) }}" target="_blank" rel="noopener">{{ $attachment['name'] ?? 'Abrir archivo' }}</a>
+                                            <a href="{{ asset($attachment['path']) }}" target="_blank" rel="noopener">
+                                                {{ $attachment['name'] ?? 'Abrir archivo' }}
+                                                @if ($size = \App\Support\AttachmentStorage::humanSize($attachment['path'] ?? null, (int) ($attachment['size'] ?? 0)))
+                                                    <span class="attachment-size">({{ $size }})</span>
+                                                @endif
+                                            </a>
                                         @endif
                                     @endforeach
                                 </div>
