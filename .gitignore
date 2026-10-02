@@ -8,6 +8,8 @@
 .env.*.local
 respaldo-*.tgz
 respaldo-*.sql
+respaldo*.env
+respaldo.env
 *.dump
 .phpactor.json
 .phpunit.result.cache
