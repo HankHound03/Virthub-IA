@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Services\WebtopAllocator;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Decide a que contenedor Webtop pertenece cada usuario.
@@ -108,8 +109,12 @@ class ContainerResolver
     }
 
     /**
-     * El id del usuario es necesario para la asignacion. Si no viene en el
-     * array (sesiones antiguas) no se puede asignar y se usa el respaldo.
+     * El id del usuario es necesario para la asignacion de escritorios.
+     *
+     * Debe ser un entero porque workspace_assignments.user_id es una clave
+     * foranea a users.id. El almacen JSON genera UUIDs como id, asi que un UUID
+     * no sirve: en ese caso se consulta la tabla de usuarios por username, y si
+     * tampoco esta alli se devuelve null y se usa el respaldo por hash.
      *
      * @param  array<string, mixed>  $user
      */
@@ -117,11 +122,25 @@ class ContainerResolver
     {
         $id = $user['id'] ?? null;
 
-        if ($id === null || $id === '' || ! is_numeric($id)) {
+        if ($id !== null && $id !== '' && is_numeric($id)) {
+            return (int) $id;
+        }
+
+        // El id no es utilizable (ausente o UUID): se busca la fila real.
+        $username = trim((string) ($user['username'] ?? ''));
+
+        if ($username === '') {
             return null;
         }
 
-        return (int) $id;
+        try {
+            $row = DB::table('users')->where('username', $username)->value('id');
+
+            return $row === null ? null : (int) $row;
+        } catch (\Throwable $e) {
+            // Sin base de datos disponible no hay asignacion posible.
+            return null;
+        }
     }
 
     /**

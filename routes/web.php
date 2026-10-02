@@ -11,6 +11,7 @@ use App\Http\Controllers\FriendController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProxyAuthController;
 use App\Http\Controllers\SuggestionController;
 use App\Http\Controllers\SystemController;
 use App\Http\Middleware\EnsureAdmin;
@@ -82,6 +83,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/contenedor', [ContainerController::class, 'show'])->name('container.show');
 Route::get('/contenedor/launch', [ContainerController::class, 'launch'])->name('container.launch');
+
+// ---------------------------------------------------------------------------
+// Control de acceso para el proxy inverso
+// ---------------------------------------------------------------------------
+//
+// El proxy pregunta aqui antes de entregar un escritorio. Responde 200 o 403,
+// nunca un redirect, asi que no puede ir bajo el middleware que redirige.
+// La ruta solo debe ser alcanzable desde la red interna.
+
+Route::get('/internal/proxy-auth', ProxyAuthController::class)
+    ->middleware('throttle:proxy-auth')
+    ->name('internal.proxy-auth');
 
 // ---------------------------------------------------------------------------
 // Requiere cuenta registrada

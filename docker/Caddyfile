@@ -1,0 +1,116 @@
+# =============================================================================
+# Caddy como puerta de entrada a Virthub
+# =============================================================================
+#
+# Resuelve dos problemas a la vez:
+#
+#   1. Los escritorios se sirven por TU dominio, asi que el navegador ya no
+#      apunta a ct2.virthub.dpdns.org y el inspector no muestra el contenedor.
+#
+#   2. Los contenedores dejan de estar publicos: solo Caddy los alcanza, y antes
+#      de entregar uno pregunta a la aplicacion si ese escritorio es del usuario.
+#
+# Uso:
+#   caddy run --config Caddyfile
+#
+# Antes de usarlo, en el .env de la aplicacion:
+#   SESSION_DOMAIN=.virthub.dpdns.org
+# para que la cookie de sesion valga en todos los subdominios.
+
+{
+	email admin@virthub.dpdns.org
+}
+
+# -----------------------------------------------------------------------------
+# Sitio principal: la aplicacion
+# -----------------------------------------------------------------------------
+
+virthub.dpdns.org {
+	encode zstd gzip
+
+	# El proxy pregunta a la aplicacion por cada peticion de escritorio.
+	# Responde 200 si el usuario puede entrar y 403 si no.
+	handle /internal/proxy-auth* {
+		# Nunca debe ser alcanzable desde fuera.
+		respond "Not found" 404
+	}
+
+	handle {
+		reverse_proxy app:80 {
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
+	header {
+		# Higiene: la aplicacion no debe poder embeberse en otro sitio.
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+		-Server
+	}
+}
+
+# -----------------------------------------------------------------------------
+# Escritorios: un bloque por contenedor
+# -----------------------------------------------------------------------------
+#
+# Cada contenedor se sirve por un subdominio propio, pero TODAS las peticiones
+# pasan por la comprobacion de acceso. Sin sesion valida y sin ser el propietario
+# del escritorio, la respuesta es 403 y el contenedor nunca se entrega.
+#
+# Cambia `app:80` por el nombre del servicio de la aplicacion en tu compose, y
+# `ct2:3000` por el del contenedor correspondiente. El puerto por defecto de
+# Webtop es 3000.
+
+ct0.virthub.dpdns.org {
+	import webtop_proxy ct0 ct0:3000
+}
+
+ct2.virthub.dpdns.org {
+	import webtop_proxy ct2 ct2:3000
+}
+
+ct3.virthub.dpdns.org {
+	import webtop_proxy ct3 ct3:3000
+}
+
+ct4.virthub.dpdns.org {
+	import webtop_proxy ct4 ct4:3000
+}
+
+ct5.virthub.dpdns.org {
+	import webtop_proxy ct5 ct5:3000
+}
+
+ct6.virthub.dpdns.org {
+	import webtop_proxy ct6 ct6:3000
+}
+
+ct7.virthub.dpdns.org {
+	import webtop_proxy ct7 ct7:3000
+}
+
+# -----------------------------------------------------------------------------
+# Fragmento compartido
+# -----------------------------------------------------------------------------
+
+(webtop_proxy) {
+	# forward_auth manda una subpeticion a la aplicacion conservando la cookie de
+	# sesion. Si responde 2xx, la peticion sigue; si responde otra cosa, esa
+	# respuesta se devuelve tal cual.
+	forward_auth app:80 {
+		uri /internal/proxy-auth
+
+		# El destino lo pone Caddy, no el cliente: asi nadie puede pedir el
+		# escritorio de otro cambiando una cabecera.
+		header_up X-Container {args[0]}
+
+		# La respuesta de la aplicacion no debe filtrar detalles internos.
+		copy_headers X-Virthub-User X-Virthub-Container
+	}
+
+	reverse_proxy {args[1]} {
+		# Webtop usa WebSocket para noVNC; hay que permitir el upgrade.
+		header_up X-Real-IP {remote_host}
+	}
+}

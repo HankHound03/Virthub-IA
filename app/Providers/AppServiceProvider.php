@@ -59,6 +59,12 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute($perMinute)->by($request->ip() ?: 'unknown');
         });
 
+        // El proxy pregunta por cada peticion del escritorio, incluidas las de
+        // WebSocket. El limite debe ser alto para no cortar una sesion normal.
+        RateLimiter::for('proxy-auth', function (Request $request): Limit {
+            return Limit::perMinute(6000)->by($request->ip() ?: 'unknown');
+        });
+
         if (! app()->runningInConsole()) {
             $this->configureUrlScheme(request());
         }
