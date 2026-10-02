@@ -166,8 +166,10 @@
                 <p class="config-note">Puedes subir una nueva foto y ajustar el color del marco estilo Aero.</p>
                 <div class="profile-area-card">
                     <div class="profile-aero-frame" id="profileFramePreview" style="--profile-frame-color: {{ $frameColor }};">
-                        @if ($profileImage !== '')
-                            <img src="{{ asset($profileImage) }}" alt="Foto de perfil de {{ $currentUser['username'] }}" loading="lazy">
+                        {{-- La URL se genera por el enlace public/storage y solo se
+                             pinta si el archivo existe; si no, se muestra la inicial. --}}
+                        @if ($profileImage !== '' && \App\Support\AttachmentStorage::exists($profileImage))
+                            <img src="{{ \App\Support\AttachmentStorage::url($profileImage) }}" alt="Foto de perfil de {{ $currentUser['username'] }}" loading="lazy">
                         @else
                             <span>{{ $userInitial }}</span>
                         @endif

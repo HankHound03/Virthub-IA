@@ -177,15 +177,20 @@
         avatar.className = 'chat-notification-avatar';
         
         if (senderProfile && senderProfile.profile_image_path) {
-            const img = document.createElement('img');
-            img.src = senderProfile.profile_image_path.charAt(0) === '/' ? 
-                      senderProfile.profile_image_path : 
-                      '/' + senderProfile.profile_image_path;
-            img.alt = sender;
-            img.style.width = '100%';
-            img.style.height = '100%';
-            img.style.borderRadius = '50%';
-            img.style.objectFit = 'cover';
+            const img = avatarImage(senderProfile, sender, {
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                objectFit: 'cover',
+            });
+
+            // Si el archivo no existe, se cae a la inicial en lugar de dejar el
+            // hueco de una imagen rota.
+            img.addEventListener('error', () => {
+                img.remove();
+                avatar.textContent = (sender || 'U').charAt(0).toUpperCase();
+            });
+
             avatar.appendChild(img);
         } else {
             avatar.textContent = (sender || 'U').charAt(0).toUpperCase();
@@ -263,16 +268,54 @@
         return userProfiles[username] || { username, profile_image_path: null, is_active: false };
     }
 
+    /**
+     * Construye la URL publica de un avatar.
+     *
+     * Los adjuntos viven en storage/app/public y se sirven por el enlace
+     * public/storage, asi que la URL necesita el prefijo 'storage/'. Sin el, el
+     * navegador pide /uploads/... y el servidor responde 404.
+     */
+    function avatarUrl(imagePath) {
+        const path = String(imagePath || '').replace(/^\/+/, '');
+
+        if (!path) return '';
+
+        return '/' + (path.indexOf('storage/') === 0 ? path : 'storage/' + path);
+    }
+
+    /**
+     * Crea una imagen de avatar con repliegue a la inicial.
+     *
+     * Si el archivo ya no existe, el navegador dispara 'error' y se sustituye
+     * por la inicial en lugar de dejar un icono de imagen rota.
+     */
+    function avatarImage(profile, nameFallback, style) {
+        const img = document.createElement('img');
+        img.src = avatarUrl(profile && profile.profile_image_path);
+        img.alt = 'avatar';
+        img.loading = 'lazy';
+
+        if (style) {
+            Object.assign(img.style, style);
+        }
+
+        return img;
+    }
+
     function buildAvatarNode(profile, className) {
         const avatar = document.createElement('span');
         avatar.className = className;
 
         const imagePath = (profile && profile.profile_image_path) ? String(profile.profile_image_path) : '';
         if (imagePath) {
-            const img = document.createElement('img');
-            img.src = imagePath.charAt(0) === '/' ? imagePath : '/' + imagePath;
-            img.alt = 'avatar';
-            img.loading = 'lazy';
+            const img = avatarImage(profile);
+            const initial = userInitial(profile && profile.username ? profile.username : 'U');
+
+            img.addEventListener('error', () => {
+                img.remove();
+                avatar.textContent = initial;
+            });
+
             avatar.appendChild(img);
             return avatar;
         }
