@@ -1,103 +1,64 @@
 # =============================================================================
-# Caddy como puerta de entrada a Virthub
+# Caddy como puerta de entrada unica a Virthub
 # =============================================================================
 #
-# Resuelve dos problemas a la vez:
+# Escenario: Cloudflare Tunnel. El tunel apunta TODOS los nombres a este Caddy
+# y Caddy decide a donde va cada uno, despues de comprobar el acceso.
 #
-#   1. Los escritorios se sirven por TU dominio, asi que el navegador ya no
-#      apunta a ct2.virthub.dpdns.org y el inspector no muestra el contenedor.
+# Por que importa: si el tunel apunta directamente a los escritorios (como
+# estaba antes: ct0 -> 127.0.0.1:8006), se salta esta comprobacion y cualquiera
+# con la URL entra al escritorio.
 #
-#   2. Los contenedores dejan de estar publicos: solo Caddy los alcanza, y antes
-#      de entregar uno pregunta a la aplicacion si ese escritorio es del usuario.
-#
-# Uso:
-#   caddy run --config Caddyfile
+# Escucha en 8080 en http porque el tunel ya termina el TLS: no hacen falta
+# certificados aqui, y asi Caddy no necesita salida a internet.
 #
 # Antes de usarlo, en el .env de la aplicacion:
 #   SESSION_DOMAIN=.virthub.dpdns.org
-# para que la cookie de sesion valga en todos los subdominios.
-
+# para que la cookie de sesion valga tambien en los subdominios.
 {
-	email admin@virthub.dpdns.org
+	# Sin TLS propio: el tunel ya cifra.
+	auto_https off
+
+	# Caddy corre como usuario sin privilegios dentro del contenedor.
+	admin off
 }
 
 # -----------------------------------------------------------------------------
 # Sitio principal: la aplicacion
 # -----------------------------------------------------------------------------
 
-virthub.dpdns.org {
+http://virthub.dpdns.org:8080 {
 	encode zstd gzip
 
-	# El proxy pregunta a la aplicacion por cada peticion de escritorio.
-	# Responde 200 si el usuario puede entrar y 403 si no.
-	handle /internal/proxy-auth* {
-		# Nunca debe ser alcanzable desde fuera.
+	# El punto de control del proxy NUNCA debe ser alcanzable desde fuera. Solo
+	# lo llama Caddy internamente a traves de forward_auth.
+	@interno path /internal/proxy-auth*
+	handle @interno {
 		respond "Not found" 404
 	}
 
 	handle {
 		reverse_proxy app:80 {
-			header_up X-Real-IP {remote_host}
+			header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+
+			# El tunel entrega en http porque ya termino el TLS. Sin esta cabecera
+			# la aplicacion creeria que el usuario navega por http y generaria
+			# enlaces http://, lo que rompe recursos y redirecciones.
+			header_up X-Forwarded-Proto https
 		}
 	}
-
-	header {
-		# Higiene: la aplicacion no debe poder embeberse en otro sitio.
-		X-Frame-Options "SAMEORIGIN"
-		X-Content-Type-Options "nosniff"
-		Referrer-Policy "same-origin"
-		-Server
-	}
-}
-
-# -----------------------------------------------------------------------------
-# Escritorios: un bloque por contenedor
-# -----------------------------------------------------------------------------
-#
-# Cada contenedor se sirve por un subdominio propio, pero TODAS las peticiones
-# pasan por la comprobacion de acceso. Sin sesion valida y sin ser el propietario
-# del escritorio, la respuesta es 403 y el contenedor nunca se entrega.
-#
-# Cambia `app:80` por el nombre del servicio de la aplicacion en tu compose, y
-# `ct2:3000` por el del contenedor correspondiente. El puerto por defecto de
-# Webtop es 3000.
-
-ct0.virthub.dpdns.org {
-	import webtop_proxy ct0 ct0:3000
-}
-
-ct2.virthub.dpdns.org {
-	import webtop_proxy ct2 ct2:3000
-}
-
-ct3.virthub.dpdns.org {
-	import webtop_proxy ct3 ct3:3000
-}
-
-ct4.virthub.dpdns.org {
-	import webtop_proxy ct4 ct4:3000
-}
-
-ct5.virthub.dpdns.org {
-	import webtop_proxy ct5 ct5:3000
-}
-
-ct6.virthub.dpdns.org {
-	import webtop_proxy ct6 ct6:3000
-}
-
-ct7.virthub.dpdns.org {
-	import webtop_proxy ct7 ct7:3000
 }
 
 # -----------------------------------------------------------------------------
 # Fragmento compartido
 # -----------------------------------------------------------------------------
+#
+# Debe estar DEFINIDO antes de usarse: Caddy lee el archivo de arriba abajo.
 
 (webtop_proxy) {
 	# forward_auth manda una subpeticion a la aplicacion conservando la cookie de
-	# sesion. Si responde 2xx, la peticion sigue; si responde otra cosa, esa
-	# respuesta se devuelve tal cual.
+	# sesion. Si responde 2xx, la peticion continua; si responde otra cosa, esa
+	# respuesta se devuelve tal cual (403 sin sesion o con escritorio ajeno).
 	forward_auth app:80 {
 		uri /internal/proxy-auth
 
@@ -105,12 +66,53 @@ ct7.virthub.dpdns.org {
 		# escritorio de otro cambiando una cabecera.
 		header_up X-Container {args[0]}
 
-		# La respuesta de la aplicacion no debe filtrar detalles internos.
+		# La respuesta no debe filtrar detalles internos.
 		copy_headers X-Virthub-User X-Virthub-Container
 	}
 
 	reverse_proxy {args[1]} {
-		# Webtop usa WebSocket para noVNC; hay que permitir el upgrade.
-		header_up X-Real-IP {remote_host}
+		# Webtop usa WebSocket para noVNC. Caddy gestiona el upgrade, pero el
+		# tunel tambien tiene que permitir WebSocket.
+		header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+		header_up X-Forwarded-Proto https
 	}
+}
+
+# -----------------------------------------------------------------------------
+# Escritorios: un bloque por contenedor
+# -----------------------------------------------------------------------------
+#
+# Todos pasan por la comprobacion de acceso. Sin sesion valida, o pidiendo el
+# escritorio de otro, la respuesta es 403 y el contenedor nunca se entrega.
+#
+# Los nombres (ct0:3000) son los del servicio en docker-compose.yml. El puerto
+# interno de Webtop es 3000; el 8006 que usabas era el mapeo al host, que ya no
+# hace falta porque el contenedor no publica puertos.
+
+http://ct0.virthub.dpdns.org:8080 {
+	import webtop_proxy ct0 ct0:3000
+}
+
+http://ct2.virthub.dpdns.org:8080 {
+	import webtop_proxy ct2 ct2:3000
+}
+
+http://ct3.virthub.dpdns.org:8080 {
+	import webtop_proxy ct3 ct3:3000
+}
+
+http://ct4.virthub.dpdns.org:8080 {
+	import webtop_proxy ct4 ct4:3000
+}
+
+http://ct5.virthub.dpdns.org:8080 {
+	import webtop_proxy ct5 ct5:3000
+}
+
+http://ct6.virthub.dpdns.org:8080 {
+	import webtop_proxy ct6 ct6:3000
+}
+
+http://ct7.virthub.dpdns.org:8080 {
+	import webtop_proxy ct7 ct7:3000
 }

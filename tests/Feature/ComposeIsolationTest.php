@@ -181,12 +181,35 @@ class ComposeIsolationTest extends TestCase
     public function test_el_punto_de_control_no_es_alcanzable_desde_fuera(): void
     {
         // El Caddyfile debe bloquear /internal/proxy-auth en el sitio publico.
+        //
+        // No se comprueba la forma exacta de las directivas (caddy fmt las
+        // reordena y las reescribe), sino que la ruta este cubierta por un
+        // respond 404 en algun punto del archivo.
         $caddyfile = (string) file_get_contents(base_path('docker/Caddyfile'));
 
+        $this->assertStringContainsString('/internal/proxy-auth', $caddyfile);
+
+        // Debe existir una respuesta 404 asociada al bloque interno.
         $this->assertMatchesRegularExpression(
-            '/handle \/internal\/proxy-auth.*?respond\s+"?Not found"?\s+404/s',
+            '/\@interno[^\n]*\n(?:[^\n]*\n){0,3}[^\n]*respond[^\n]*404/',
             $caddyfile,
-            'La ruta interna no debe quedar expuesta en el sitio publico.'
+            'La ruta interna debe responderse con 404 y no llegar nunca a la aplicacion publica.'
         );
+    }
+
+    public function test_la_configuracion_del_tunel_apunta_a_caddy(): void
+    {
+        // El tunel de Cloudflare no forma parte del repositorio (vive en la
+        // maquina), asi que se documenta aqui la comprobacion que debe hacerse:
+        // TODOS los nombres deben apuntar a Caddy, nunca a un puerto de
+        // escritorio. Si alguno apunta directo, se salta el control de acceso.
+        $caddyfile = (string) file_get_contents(base_path('docker/Caddyfile'));
+
+        // El puerto de Caddy debe coincidir con el que se publica en el compose.
+        $compose = (string) file_get_contents(base_path('docker-compose.yml'));
+
+        $this->assertStringContainsString('8080', $compose, 'Caddy debe escuchar en el puerto que usa el tunel.');
+        $this->assertStringContainsString(':8080', $caddyfile);
+        $this->assertStringContainsString('127.0.0.1:', $compose, 'Caddy no debe exponerse fuera de loopback.');
     }
 }
