@@ -10,6 +10,7 @@ respaldo-*.tgz
 respaldo-*.sql
 respaldo*.env
 respaldo.env
+respaldo-tunnel-config.yml
 *.dump
 .phpactor.json
 .phpunit.result.cache

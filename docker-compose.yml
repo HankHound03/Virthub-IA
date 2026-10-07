@@ -95,6 +95,10 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct0"
+    volumes:
+      # Conserva los datos del escritorio que antes tenia webtop-test.
+      # Es la carpeta /config de la imagen, que guarda el home del usuario.
+      - C:\webtop\test:/config
     networks:
       - virthub
 
