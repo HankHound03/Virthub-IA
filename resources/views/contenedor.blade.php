@@ -106,7 +106,18 @@
                 <button type="button" class="container-load-btn" onclick="loadInIframe(true)">Recargar Contenedor</button>
                 <button type="button" class="container-load-btn" id="fullscreenToggle" onclick="toggleFullscreen()" title="Entrar en pantalla completa" aria-label="Alternar pantalla completa" aria-pressed="false">Pantalla Completa</button>
             </div>
-            <iframe id="viewer" allow="microphone *"></iframe>
+            {{--
+                sandbox sin 'allow-top-navigation': el escritorio no puede salirse
+                del marco. Sin esto, KasmVNC puede navegar al nivel superior y el
+                usuario acaba en una pestana suelta con la URL del contenedor a la
+                vista, fuera de la aplicacion.
+
+                Se conservan los permisos que el escritorio necesita: scripts,
+                mismo origen (para su propio almacenamiento), formularios,
+                ventanas emergentes y descargas.
+            --}}
+            <iframe id="viewer" allow="microphone *"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals"></iframe>
         </div>
     </div>
 
