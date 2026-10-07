@@ -37,6 +37,33 @@ http://virthub.dpdns.org:8080 {
 		respond "Not found" 404
 	}
 
+	# -------------------------------------------------------------------------
+	# Escritorio servido por el MISMO dominio, bajo /escritorio/
+	# -------------------------------------------------------------------------
+	#
+	# Asi el navegador nunca conecta al dominio del contenedor: en el inspector
+	# aparece virthub.dpdns.org/escritorio/ y no ct0.virthub.dpdns.org.
+	#
+	# handle_path quita el prefijo antes de reenviar, de modo que el contenedor
+	# recibe / y sus rutas relativas resuelven. Esta comprobado que KasmVNC
+	# deriva el prefijo de la propia URL, asi que su WebSocket va a
+	# /escritorio/websockets y tambien pasa por aqui.
+	@escritorio path /escritorio/*
+	handle @escritorio {
+		forward_auth app:80 {
+			uri /internal/proxy-auth
+			header_up X-Container ct0
+			copy_headers X-Virthub-User X-Virthub-Container
+		}
+
+		handle_path /escritorio/* {
+			reverse_proxy ct0:3000 {
+				header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+				header_up X-Forwarded-Proto https
+			}
+		}
+	}
+
 	handle {
 		reverse_proxy app:80 {
 			header_up X-Real-IP {http.request.header.CF-Connecting-IP}

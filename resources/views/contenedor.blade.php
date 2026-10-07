@@ -466,7 +466,10 @@
             if (!iframe) return;
 
             if (force || !iframe.src) {
-                iframe.src = '/contenedor/launch';
+                // Ruta del MISMO dominio, no la URL del contenedor: asi el
+                // navegador nunca conecta a ct0.virthub.dpdns.org y el
+                // inspector solo muestra virthub.dpdns.org/escritorio/.
+                iframe.src = '/escritorio/';
             }
         }
 
