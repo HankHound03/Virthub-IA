@@ -95,15 +95,17 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct0"
-      # Autenticacion propia del contenedor (nginx basic auth).
+      # Autenticacion propia del contenedor: DESACTIVADA.
       #
-      # Caddy ya comprueba la sesion antes de entregar nada; esto es una segunda
-      # capa por si alguien llegara al contenedor por otra via. El navegador pide
-      # las credenciales UNA vez dentro del iframe y las reutiliza para todo,
-      # incluido el WebSocket de noVNC.
+      # Se probo y funciona (401 sin credenciales, 101 en el WebSocket), pero el
+      # navegador dibuja el dialogo de autenticacion basica sobre TODA la pagina,
+      # no dentro del iframe, asi que tapa la interfaz de la aplicacion.
       #
-      # Se leen del .env para no dejarlas escritas aqui. Si se dejan vacias, el
-      # contenedor no pide credenciales (comportamiento anterior).
+      # La proteccion real la hace Caddy antes de entregar nada: sin sesion
+      # valida responde 403 y el contenedor ni se toca. Ademas los escritorios no
+      # publican puertos, asi que no hay otra via de entrada.
+      #
+      # Para volver a activarla, rellena CONTAINER_CT0_PASSWORD en el .env.
       CUSTOM_USER: ${CONTAINER_CT0_USER:-}
       PASSWORD: ${CONTAINER_CT0_PASSWORD:-}
     volumes:
