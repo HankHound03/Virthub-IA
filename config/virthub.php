@@ -68,17 +68,20 @@ return [
         'cpu_limit' => env('CONTAINER_CPU_LIMIT') === null ? null : (int) env('CONTAINER_CPU_LIMIT'),
         'memory_limit_mb' => env('CONTAINER_MEMORY_MB') === null ? null : (int) env('CONTAINER_MEMORY_MB'),
 
-        // Identificador de cada escritorio. Se deriva de 'indices' para que no
-        // puedan desincronizarse: si un indice no tiene servicio en el compose,
-        // no debe aparecer aqui.
+        // URL publica de cada escritorio.
         //
-        // El valor es el nombre del servicio (ct0, ct2...), no una URL publica:
-        // los escritorios se sirven por el dominio principal, porque un
-        // subdominio propio permitia saltarse la comprobacion de acceso (la
-        // cookie de sesion viajaba alli tambien y autenticaba la peticion sola).
+        // Cada uno tiene su propio subdominio, que el tunel de Cloudflare enruta
+        // a Caddy. El valor se puede sobreescribir con CONTAINER_CT<n> en el
+        // .env (util si el dominio cambia).
+        //
+        // AVISO: la cookie de sesion vive en el dominio principal, asi que
+        // viaja tambien a estos subdominios. Sin sesion no se entra (Caddy
+        // responde 403), pero el propio usuario con sesion abierta si puede
+        // abrirlos directamente.
         'urls' => (static function (): array {
-            // Mismo cuidado que arriba: array_filter sin criterio descartaria el
-            // indice 0 por ser falsy.
+            // PELIGRO: no usar array_filter sin criterio. El indice 0 (el
+            // escritorio de administradores) es falsy en PHP y se perderia sin
+            // aviso, dejando a los administradores sin escritorio.
             $indices = array_map(
                 'intval',
                 array_filter(
@@ -87,10 +90,15 @@ return [
                 )
             );
 
+            $base = (string) env('CONTAINER_DOMAIN', 'virthub.dpdns.org');
+
             $urls = [];
 
             foreach ($indices as $index) {
-                $urls[$index] = (string) env('CONTAINER_CT' . $index, 'ct' . $index);
+                $urls[$index] = (string) env(
+                    'CONTAINER_CT' . $index,
+                    'https://ct' . $index . '.' . $base . '/'
+                );
             }
 
             return $urls;

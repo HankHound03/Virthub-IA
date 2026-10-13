@@ -466,10 +466,10 @@
             if (!iframe) return;
 
             if (force || !iframe.src) {
-                // Ruta del MISMO dominio, no la URL del contenedor: asi el
-                // navegador nunca conecta a ct0.virthub.dpdns.org y el
-                // inspector solo muestra virthub.dpdns.org/escritorio/.
-                iframe.src = '/escritorio/';
+                // La aplicacion decide el escritorio del usuario y redirige a su
+                // subdominio (ct0, ct2...), donde Caddy comprueba la sesion otra
+                // vez antes de entregarlo.
+                iframe.src = '/contenedor/launch';
             }
         }
 

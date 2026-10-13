@@ -34,7 +34,7 @@
 #   header_up Authorization "Basic <base64 usuario:contrasena>"
 #
 # Ventajas:
-#   - El navegador nunca muestra el dialogo: para el, /escritorio/ no pide nada.
+#   - El navegador nunca muestra el dialogo: para el, el subdominio no pide nada.
 #   - El contenedor sigue protegido: sin esa cabecera responde 401, y como no
 #     publica puertos ni tiene subdominio, no hay forma de llegar a el sin pasar
 #     por aqui.
@@ -63,74 +63,6 @@ http://virthub.dpdns.org:8080 {
 	}
 
 	# -------------------------------------------------------------------------
-	# Escritorios servidos por el MISMO dominio, uno por ruta
-	# -------------------------------------------------------------------------
-	#
-	# Asi el navegador nunca conecta al dominio del contenedor: en el inspector
-	# aparece virthub.dpdns.org/escritorio/ y no ct0.virthub.dpdns.org.
-	#
-	# handle_path quita el prefijo antes de reenviar, de modo que el contenedor
-	# recibe / y sus rutas relativas resuelven. Esta comprobado que KasmVNC
-	# deriva el prefijo de la propia URL, asi que su WebSocket va a
-	# /escritorio/websockets y tambien pasa por aqui.
-	#
-	# Cada escritorio necesita su propio bloque: handle_path solo quita UN prefijo
-	# y KasmVNC deriva el suyo de la URL completa, asi que una ruta comodin
-	# (/escritorio/*/ ) no funcionaria.
-	#
-	# Para anadir un escritorio: una linea como las de abajo. El identificador
-	# debe coincidir con el nombre del servicio en docker-compose.yml y con el
-	# valor de CONTAINER_CT<n> en el .env.
-
-	# UNA sola ruta para todos los escritorios.
-	#
-	# El escritorio de esta ruta se declara en los DOS sitios, y deben coincidir:
-	#
-	#   - en X-Container, que es lo que la aplicacion valida contra el escritorio
-	#     asignado al usuario;
-	#   - en el reverse_proxy, que es a donde se envia de verdad.
-	#
-	# No se puede tomar el destino de la respuesta de forward_auth: esa cabecera
-	# no se propaga al reverse_proxy (ver la nota del bloque de abajo).
-	#
-	# Para servir otro escritorio, duplica este bloque con su ruta: /escritorio/ct2/
-	# apuntando a ct2:3000, y asi. La aplicacion comprobara en cada caso que el
-	# escritorio sea del usuario.
-	@escritorio path /escritorio/*
-	handle @escritorio {
-		forward_auth app:80 {
-			uri /internal/proxy-auth
-
-			# El escritorio que se sirve por esta ruta. La aplicacion comprueba
-			# que sea el del usuario: si no coincide, responde 403 y no se
-			# entrega nada.
-			header_up X-Container ct0
-
-			# La respuesta trae el contenedor elegido; Caddy lo usa arriba.
-			copy_headers X-Virthub-User X-Virthub-Container
-		}
-
-		handle_path /escritorio/* {
-			# {http.request.header.X-Virthub-Container} lo puso forward_auth.
-			# Destino ESTATICO, no dinamico.
-			#
-			# Se intento tomar el contenedor de la cabecera que devuelve
-			# forward_auth, pero esa cabecera NO se propaga al reverse_proxy:
-			# el destino llegaba vacio y Caddy intentaba conectar a :3000
-			# ("dial tcp :3000: connect: connection refused" -> 502).
-			#
-			# Para servir otro escritorio, anade otra ruta con su @matcher y su
-			# bloque, como se hace aqui.
-			reverse_proxy ct0:3000 {
-				# Presenta las credenciales del escritorio: el navegador no las
-				# ve ni las pide, pero el contenedor si las recibe.
-				import escritorio_auth
-
-				header_up X-Real-IP {http.request.header.CF-Connecting-IP}
-				header_up X-Forwarded-Proto https
-			}
-		}
-	}
 	handle {
 		reverse_proxy app:80 {
 			header_up X-Real-IP {http.request.header.CF-Connecting-IP}
@@ -173,32 +105,49 @@ http://virthub.dpdns.org:8080 {
 }
 
 # -----------------------------------------------------------------------------
-# Los subdominios ct* QUEDAN DESHABILITADOS a proposito
+# Escritorios: un subdominio por contenedor
 # -----------------------------------------------------------------------------
 #
-# Antes existia un bloque por contenedor (ct0.virthub.dpdns.org -> ct0:3000).
-# Se elimino porque permitia saltarse la aplicacion:
+# Cada escritorio tiene su propio nombre (ct0.virthub.dpdns.org) y todos pasan
+# por la comprobacion de acceso del fragmento (webtop_proxy):
+#
+#   - Sin sesion valida -> 403, el contenedor no se entrega.
+#   - Con sesion pero pidiendo el escritorio de otro -> 403.
+#   - Con sesion y siendo el suyo -> se entrega.
+#
+# El escritorio exige ademas credenciales propias, pero las presenta Caddy con
+# la cabecera Authorization (fragmento escritorio_auth), asi que el navegador no
+# muestra ningun dialogo.
+#
+# AVISO IMPORTANTE sobre el aislamiento:
 #
 #   La cookie de sesion vive en .virthub.dpdns.org, asi que el navegador la
-#   envia TAMBIEN a ct0.virthub.dpdns.org. Caddy la veia valida y entregaba el
-#   escritorio por esa direccion, sin pasar por /escritorio/ ni por la pagina
-#   que lo aloja. Cualquier usuario con sesion abierta podia entrar por ahi.
+#   envia TAMBIEN a ct0.virthub.dpdns.org. Eso significa que un usuario con
+#   sesion abierta puede entrar por el subdominio sin pasar por la aplicacion:
+#   la comprobacion se autentica sola con su propia sesion.
 #
-# El escritorio se sirve ahora SOLO por /escritorio/ del dominio principal (ver
-# el bloque de arriba), de modo que no existe una segunda puerta.
-#
-# Si en el futuro se quiere un escritorio por subdominio, hay que impedir que la
-# cookie de la aplicacion viaje a ese subdominio (por ejemplo con un dominio
-# distinto para los escritorios) o la comprobacion de acceso volvera a ser
-# inutil, porque se autenticaria sola con la sesion del usuario.
+#   No es un agujero para terceros (sin sesion recibe 403), pero SI es una
+#   segunda puerta para el propio usuario. Si se quiere cerrar, hay que servir
+#   los escritorios desde un dominio distinto al de la aplicacion, para que la
+#   cookie no viaje hasta ellos.
+
+http://ct0.virthub.dpdns.org:8080 {
+	import webtop_proxy ct0 ct0:3000
+}
+
+http://ct2.virthub.dpdns.org:8080 {
+	import webtop_proxy ct2 ct2:3000
+}
+
+http://ct3.virthub.dpdns.org:8080 {
+	import webtop_proxy ct3 ct3:3000
+}
 
 # -----------------------------------------------------------------------------
 # Cualquier otro nombre: no existe
 # -----------------------------------------------------------------------------
 #
-# Red de seguridad para no dejar puertas abiertas. Si queda algun registro DNS
-# apuntando a este Caddy (los ct* del tunel, por ejemplo) responde 404 en lugar
-# de entregar un escritorio o la aplicacion.
+# Red de seguridad: un registro DNS huerfano no debe acabar entregando nada.
 
 http://:8080 {
 	respond "Not found" 404

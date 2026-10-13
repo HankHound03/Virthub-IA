@@ -234,18 +234,22 @@ class ProxyAuthTest extends TestCase
         $this->authAs($ana, $asignado->name)->assertStatus(200);
     }
 
-    public function test_el_escritorio_se_sirve_por_el_dominio_principal(): void
+    public function test_cada_escritorio_tiene_su_propio_subdominio(): void
     {
-        // No debe quedar ninguna URL de subdominio en la configuracion: esos
-        // subdominios permitian saltarse la comprobacion de acceso.
+        // Esquema en uso: un subdominio por escritorio, enrutado por el tunel de
+        // Cloudflare hacia Caddy. La aplicacion redirige ahi y Caddy vuelve a
+        // comprobar la sesion antes de entregar nada.
         foreach (config('virthub.containers.urls', []) as $index => $url) {
-            $this->assertStringNotContainsString(
-                'virthub.dpdns.org',
+            $this->assertMatchesRegularExpression(
+                '#^https://ct\d+\.#',
                 (string) $url,
-                "El contenedor [$index] apunta a un subdominio publico."
+                "El contenedor [$index] no apunta a su subdominio publico."
             );
         }
 
-        $this->assertSame('/escritorio/', config('virthub.containers.desktop_path'));
+        // 0 es el escritorio de administradores: no debe perderse al filtrar,
+        // porque es falsy en PHP.
+        $this->assertArrayHasKey(0, config('virthub.containers.urls'));
+        $this->assertSame(0, app(\App\Support\ContainerResolver::class)->adminIndex());
     }
 }

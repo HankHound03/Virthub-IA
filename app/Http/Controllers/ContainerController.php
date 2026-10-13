@@ -56,9 +56,9 @@ class ContainerController extends Controller
 
         $this->audit->log($request, 'webtop.launch', $currentUser, ['container_url' => $url]);
 
-        // Redireccion interna, no al dominio del escritorio: este ya no vive en
-        // un subdominio propio. Se usa redirect() y no redirect()->away() para
-        // que la navegacion siga siendo del mismo dominio.
-        return redirect($this->resolver->desktopPath());
+        // Cada escritorio vive en su propio subdominio. Redireccion externa
+        // (away) porque el destino es otro dominio: la aplicacion comprueba la
+        // sesion y Caddy la vuelve a comprobar antes de entregar el escritorio.
+        return redirect()->away($url);
     }
 }
