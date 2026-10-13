@@ -98,8 +98,10 @@ http://virthub.dpdns.org:8080 {
 		forward_auth app:80 {
 			uri /internal/proxy-auth
 
-			# Vacio: que la aplicacion elija el escritorio del usuario.
-			header_up X-Container ""
+			# El escritorio que se sirve por esta ruta. La aplicacion comprueba
+			# que sea el del usuario: si no coincide, responde 403 y no se
+			# entrega nada.
+			header_up X-Container ct0
 
 			# La respuesta trae el contenedor elegido; Caddy lo usa arriba.
 			copy_headers X-Virthub-User X-Virthub-Container
@@ -107,7 +109,16 @@ http://virthub.dpdns.org:8080 {
 
 		handle_path /escritorio/* {
 			# {http.request.header.X-Virthub-Container} lo puso forward_auth.
-			reverse_proxy {http.request.header.X-Virthub-Container}:3000 {
+			# Destino ESTATICO, no dinamico.
+			#
+			# Se intento tomar el contenedor de la cabecera que devuelve
+			# forward_auth, pero esa cabecera NO se propaga al reverse_proxy:
+			# el destino llegaba vacio y Caddy intentaba conectar a :3000
+			# ("dial tcp :3000: connect: connection refused" -> 502).
+			#
+			# Para servir otro escritorio, anade otra ruta con su @matcher y su
+			# bloque, como se hace aqui.
+			reverse_proxy ct0:3000 {
 				# Presenta las credenciales del escritorio: el navegador no las
 				# ve ni las pide, pero el contenedor si las recibe.
 				import escritorio_auth
