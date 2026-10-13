@@ -19,7 +19,8 @@ class SyncWebtopContainers extends Command
 {
     protected $signature = 'virthub:sync-containers
                             {--limit= : Plazas por contenedor (por defecto, lo que diga la configuracion)}
-                            {--release-all : Libera todas las asignaciones antes de sincronizar}';
+                            {--release-all : Libera todas las asignaciones antes de sincronizar}
+                            {--prune : Elimina los contenedores que ya no estan declarados en la configuracion}';
 
     protected $description = 'Registra en la base de datos los contenedores Webtop de la configuracion';
 
@@ -57,6 +58,34 @@ class SyncWebtopContainers extends Command
         $synced = $allocator->syncDefinitions($definitions);
 
         $this->info("Contenedores sincronizados: {$synced}");
+
+        // Los contenedores que ya no se declaran se quedan registrados y el
+        // reparto por hash podria mandar a alguien a un escritorio que no existe
+        // (un 404 en el iframe). Con --prune se retiran.
+        if ($this->option('prune')) {
+            $declarados = array_column($definitions, 'name');
+
+            $sobrantes = WebtopContainer::query()
+                ->whereNotIn('name', $declarados)
+                ->get();
+
+            if ($sobrantes->isEmpty()) {
+                $this->line('Nada que eliminar: no hay contenedores sobrantes.');
+            }
+
+            foreach ($sobrantes as $sobrante) {
+                $activas = $sobrante->activeAssignments()->count();
+
+                if ($activas > 0) {
+                    $this->warn("Se conserva {$sobrante->name}: tiene {$activas} asignacion(es) activa(s).");
+
+                    continue;
+                }
+
+                $sobrante->delete();
+                $this->warn("Eliminado {$sobrante->name}: ya no esta en la configuracion.");
+            }
+        }
 
         $this->newLine();
         $this->line(sprintf('%-8s %-42s %-12s %s', 'NOMBRE', 'URL', 'CAPACIDAD', 'ASIGNADOS'));

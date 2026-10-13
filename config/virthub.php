@@ -29,7 +29,25 @@ return [
     */
 
     'containers' => [
-        'indices' => [0, 2, 3, 4, 5, 6, 7],
+        // Solo los escritorios que existen como servicio en docker-compose.yml.
+        //
+        // Cada indice debe tener su servicio `ct<n>` y su bloque en
+        // docker/Caddyfile. Si se declara uno que no existe, el reparto puede
+        // mandar a un usuario a un escritorio que no responde (404 en el iframe).
+        //
+        // Al anadir uno: crea el servicio, su bloque en el Caddyfile, define
+        // CONTAINER_CT<n> en el .env y anade el indice aqui. Despues ejecuta
+        // `php artisan virthub:sync-containers --prune`.
+        // PELIGRO: no usar array_filter() a secas sobre los indices. El indice 0
+        // (el escritorio de administradores) es falsy en PHP y array_filter lo
+        // descartaria sin avisar, dejando a los administradores sin escritorio.
+        'indices' => array_values(array_map(
+            'intval',
+            array_filter(
+                explode(',', (string) env('CONTAINER_INDICES', '0,2,3')),
+                static fn (string $v): bool => trim($v) !== ''
+            )
+        )),
 
         /*
         | Capacidad y limites de cada contenedor.
@@ -50,21 +68,33 @@ return [
         'cpu_limit' => env('CONTAINER_CPU_LIMIT') === null ? null : (int) env('CONTAINER_CPU_LIMIT'),
         'memory_limit_mb' => env('CONTAINER_MEMORY_MB') === null ? null : (int) env('CONTAINER_MEMORY_MB'),
 
-        'urls' => array_combine(
-            [0, 2, 3, 4, 5, 6, 7],
-            array_map(
-                // Identificador del servicio en docker-compose. Ya no es un
-                // subdominio publico: los escritorios se sirven por el dominio
-                // principal, porque un subdominio propio permitia saltarse la
-                // comprobacion de acceso (la cookie de sesion viajaba alli
-                // tambien y autenticaba la peticion sola).
-                static fn (int $index): string => (string) env(
-                    'CONTAINER_CT' . $index,
-                    'ct' . $index
-                ),
-                [0, 2, 3, 4, 5, 6, 7]
-            )
-        ),
+        // Identificador de cada escritorio. Se deriva de 'indices' para que no
+        // puedan desincronizarse: si un indice no tiene servicio en el compose,
+        // no debe aparecer aqui.
+        //
+        // El valor es el nombre del servicio (ct0, ct2...), no una URL publica:
+        // los escritorios se sirven por el dominio principal, porque un
+        // subdominio propio permitia saltarse la comprobacion de acceso (la
+        // cookie de sesion viajaba alli tambien y autenticaba la peticion sola).
+        'urls' => (static function (): array {
+            // Mismo cuidado que arriba: array_filter sin criterio descartaria el
+            // indice 0 por ser falsy.
+            $indices = array_map(
+                'intval',
+                array_filter(
+                    explode(',', (string) env('CONTAINER_INDICES', '0,2,3')),
+                    static fn (string $v): bool => trim($v) !== ''
+                )
+            );
+
+            $urls = [];
+
+            foreach ($indices as $index) {
+                $urls[$index] = (string) env('CONTAINER_CT' . $index, 'ct' . $index);
+            }
+
+            return $urls;
+        })(),
 
         // Ruta del dominio principal por la que se sirve el escritorio.
         // Es la unica puerta: no hay subdominios de escritorio.
