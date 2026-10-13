@@ -56,6 +56,9 @@ class ContainerController extends Controller
 
         $this->audit->log($request, 'webtop.launch', $currentUser, ['container_url' => $url]);
 
-        return redirect()->away($url);
+        // Redireccion interna, no al dominio del escritorio: este ya no vive en
+        // un subdominio propio. Se usa redirect() y no redirect()->away() para
+        // que la navegacion siga siendo del mismo dominio.
+        return redirect($this->resolver->desktopPath());
     }
 }

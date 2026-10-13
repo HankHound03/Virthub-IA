@@ -18,9 +18,13 @@ return [
     | Contenedores Webtop
     |--------------------------------------------------------------------------
     |
-    | Indices soportados: 0 y 2..7 (ct1 esta reservado). Cada entrada define la
-    | URL publica del contenedor y su etiqueta. La asignacion efectiva por
-    | usuario la resuelve App\Support\ContainerResolver.
+    | Indices soportados: 0 y 2..7 (ct1 esta reservado). Cada entrada define el
+    | IDENTIFICADOR del servicio en docker-compose (no una URL publica): los
+    | escritorios se sirven por el dominio principal, porque un subdominio propio
+    | permitia saltarse la comprobacion de acceso, ya que la cookie de sesion
+    | viajaba alli tambien y autenticaba la peticion sola.
+    |
+    | La asignacion efectiva por usuario la resuelve App\Support\ContainerResolver.
     |
     */
 
@@ -49,13 +53,22 @@ return [
         'urls' => array_combine(
             [0, 2, 3, 4, 5, 6, 7],
             array_map(
+                // Identificador del servicio en docker-compose. Ya no es un
+                // subdominio publico: los escritorios se sirven por el dominio
+                // principal, porque un subdominio propio permitia saltarse la
+                // comprobacion de acceso (la cookie de sesion viajaba alli
+                // tambien y autenticaba la peticion sola).
                 static fn (int $index): string => (string) env(
                     'CONTAINER_CT' . $index,
-                    'https://ct' . $index . '.virthub.dpdns.org/'
+                    'ct' . $index
                 ),
                 [0, 2, 3, 4, 5, 6, 7]
             )
         ),
+
+        // Ruta del dominio principal por la que se sirve el escritorio.
+        // Es la unica puerta: no hay subdominios de escritorio.
+        'desktop_path' => (string) env('CONTAINER_DESKTOP_PATH', '/escritorio/'),
 
         // Contenedor que recibe a los usuarios invitados.
         'guest_index' => 7,

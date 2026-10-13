@@ -24,6 +24,31 @@
 }
 
 # -----------------------------------------------------------------------------
+# Credenciales de los escritorios, inyectadas por el proxy
+# -----------------------------------------------------------------------------
+#
+# El contenedor Webtop puede exigir autenticacion propia (nginx basic auth). En
+# lugar de que el navegador la pida --lo que dibujaria un dialogo del sistema
+# sobre TODA la aplicacion, no dentro del iframe--, es Caddy quien la presenta:
+#
+#   header_up Authorization "Basic <base64 usuario:contrasena>"
+#
+# Ventajas:
+#   - El navegador nunca muestra el dialogo: para el, /escritorio/ no pide nada.
+#   - El contenedor sigue protegido: sin esa cabecera responde 401, y como no
+#     publica puertos ni tiene subdominio, no hay forma de llegar a el sin pasar
+#     por aqui.
+#   - El WebSocket tambien la recibe, porque forward_auth y reverse_proxy la
+#     aplican a todas las peticiones de la ruta.
+#
+# El valor se calcula en docker/caddy-entrypoint.sh a partir de
+# CONTAINER_AUTH_USER y CONTAINER_AUTH_PASSWORD del .env. Si no hay contrasena,
+# la cabecera va vacia y el contenedor no pide nada.
+(escritorio_auth) {
+	header_up Authorization "{env.CADDY_BASIC_AUTH}"
+}
+
+# -----------------------------------------------------------------------------
 # Sitio principal: la aplicacion
 # -----------------------------------------------------------------------------
 
@@ -38,7 +63,7 @@ http://virthub.dpdns.org:8080 {
 	}
 
 	# -------------------------------------------------------------------------
-	# Escritorio servido por el MISMO dominio, bajo /escritorio/
+	# Escritorios servidos por el MISMO dominio, uno por ruta
 	# -------------------------------------------------------------------------
 	#
 	# Asi el navegador nunca conecta al dominio del contenedor: en el inspector
@@ -48,8 +73,18 @@ http://virthub.dpdns.org:8080 {
 	# recibe / y sus rutas relativas resuelven. Esta comprobado que KasmVNC
 	# deriva el prefijo de la propia URL, asi que su WebSocket va a
 	# /escritorio/websockets y tambien pasa por aqui.
-	@escritorio path /escritorio/*
-	handle @escritorio {
+	#
+	# Cada escritorio necesita su propio bloque: handle_path solo quita UN prefijo
+	# y KasmVNC deriva el suyo de la URL completa, asi que una ruta comodin
+	# (/escritorio/*/ ) no funcionaria.
+	#
+	# Para anadir un escritorio: una linea como las de abajo. El identificador
+	# debe coincidir con el nombre del servicio en docker-compose.yml y con el
+	# valor de CONTAINER_CT<n> en el .env.
+
+	# --- ct0 (usuarios administradores) ---
+	@escritorio_ct0 path /escritorio/*
+	handle @escritorio_ct0 {
 		forward_auth app:80 {
 			uri /internal/proxy-auth
 			header_up X-Container ct0
@@ -58,6 +93,46 @@ http://virthub.dpdns.org:8080 {
 
 		handle_path /escritorio/* {
 			reverse_proxy ct0:3000 {
+				# Presenta las credenciales del escritorio: el navegador no las
+				# ve ni las pide, pero el contenedor si las recibe.
+				import escritorio_auth
+
+				header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+				header_up X-Forwarded-Proto https
+			}
+		}
+	}
+
+	# --- ct2 ---
+	@escritorio_ct2 path /escritorio/ct2/*
+	handle @escritorio_ct2 {
+		forward_auth app:80 {
+			uri /internal/proxy-auth
+			header_up X-Container ct2
+			copy_headers X-Virthub-User X-Virthub-Container
+		}
+
+		handle_path /escritorio/ct2/* {
+			reverse_proxy ct2:3000 {
+				import escritorio_auth
+				header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+				header_up X-Forwarded-Proto https
+			}
+		}
+	}
+
+	# --- ct3 ---
+	@escritorio_ct3 path /escritorio/ct3/*
+	handle @escritorio_ct3 {
+		forward_auth app:80 {
+			uri /internal/proxy-auth
+			header_up X-Container ct3
+			copy_headers X-Virthub-User X-Virthub-Container
+		}
+
+		handle_path /escritorio/ct3/* {
+			reverse_proxy ct3:3000 {
+				import escritorio_auth
 				header_up X-Real-IP {http.request.header.CF-Connecting-IP}
 				header_up X-Forwarded-Proto https
 			}

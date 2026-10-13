@@ -77,7 +77,9 @@ class ContainerResolver
     {
         $urls = (array) config('virthub.containers.urls', []);
 
-        return (string) ($urls[$index] ?? 'https://ct' . $index . '.virthub.dpdns.org/');
+        // El respaldo es la ruta del dominio principal, no un subdominio: los
+        // subdominios permitian saltarse la comprobacion de acceso.
+        return (string) ($urls[$index] ?? $this->desktopPath());
     }
 
     public function guestIndex(): int
@@ -106,6 +108,53 @@ class ContainerResolver
         $adminUsers = (array) config('virthub.containers.admin_users', []);
 
         return in_array($username, $adminUsers, true);
+    }
+
+    /**
+     * Ruta con la que se sirve un escritorio en el dominio principal.
+     *
+     * El escritorio ya no se abre en un subdominio propio (eso permitia saltarse
+     * la comprobacion de acceso, porque la cookie de sesion viajaba tambien al
+     * subdominio). Ahora se sirve por el mismo dominio, y esta ruta es la unica
+     * puerta.
+     */
+    public function desktopPath(): string
+    {
+        return (string) config('virthub.containers.desktop_path', '/escritorio/');
+    }
+
+    /**
+     * Nombre del contenedor a partir de su URL o su identificador.
+     *
+     * Acepta las dos formas que hay en uso, para no romper asignaciones ya
+     * guardadas en la base de datos:
+     *
+     *   "ct2"                              -> ct2   (servicio del compose)
+     *   "https://ct2.virthub.dpdns.org/"   -> ct2   (formato antiguo)
+     */
+    public function containerNameFromUrl(?string $url): ?string
+    {
+        $url = trim((string) $url);
+
+        if ($url === '') {
+            return null;
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+
+        // Una URL completa (con esquema o con punto) se identifica por la primera
+        // etiqueta de su host: ct2.virthub... -> ct2
+        if (is_string($host) && $host !== '') {
+            $label = explode('.', $host)[0] ?? '';
+
+            return $label !== '' ? $label : null;
+        }
+
+        // Un nombre seco ("ct2") o una ruta ("/escritorio/") ya son el nombre del
+        // servicio, asi que se devuelven tal cual.
+        $name = ltrim($url, '/');
+
+        return $name !== '' ? $name : null;
     }
 
     /**

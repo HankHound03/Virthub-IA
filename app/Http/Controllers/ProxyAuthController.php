@@ -79,36 +79,13 @@ class ProxyAuthController extends Controller
             $url = $this->resolver->urlFor($user);
         }
 
-        $name = $this->containerNameFromUrl($url);
+        $name = $this->resolver->containerNameFromUrl($url);
 
         if ($name === null) {
             return null;
         }
 
         return ['name' => $name, 'url' => $url];
-    }
-
-    /**
-     * Extrae "ct2" de "https://ct2.virthub.dpdns.org/".
-     */
-    private function containerNameFromUrl(?string $url): ?string
-    {
-        $url = trim((string) $url);
-
-        if ($url === '') {
-            return null;
-        }
-
-        $host = parse_url($url, PHP_URL_HOST);
-
-        if (! is_string($host) || $host === '') {
-            return null;
-        }
-
-        // Se queda con la primera etiqueta del host: ct2.virthub... -> ct2
-        $label = explode('.', $host)[0] ?? '';
-
-        return $label !== '' ? $label : null;
     }
 
     /**

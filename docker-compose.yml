@@ -17,8 +17,16 @@ services:
       - "127.0.0.1:${CADDY_PORT:-8080}:8080"
     volumes:
       - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Script de arranque: codifica las credenciales en base64 y arranca Caddy.
+      - ./docker/caddy-entrypoint.sh:/usr/local/bin/escritorio-auth.sh:ro
       - caddy_data:/data
       - caddy_config:/config
+    entrypoint: ["sh", "/usr/local/bin/escritorio-auth.sh"]
+    environment:
+      # Credenciales del escritorio. El script de arranque las codifica; aqui
+      # solo viajan en claro dentro del contenedor, que es el que las presenta.
+      CONTAINER_AUTH_USER: ${CONTAINER_AUTH_USER:-virthub}
+      CONTAINER_AUTH_PASSWORD: ${CONTAINER_AUTH_PASSWORD:-virthub}
     networks:
       - virthub
 
@@ -78,14 +86,20 @@ services:
   # ---------------------------------------------------------------------------
   # Escritorios Webtop
   # ---------------------------------------------------------------------------
-  # Ejemplo de un escritorio. Copia este bloque para ct2..ct7.
-  #
-  # Lo importante:
-  #   - NO publica puertos: sin `ports`, el contenedor no es alcanzable desde
-  #     fuera de la red interna. Ese es el cierre del acceso directo.
+  # Escritorios Webtop
+  # ---------------------------------------------------------------------------
+  # Cada escritorio:
+  #   - NO publica puertos: sin `ports` no es alcanzable desde fuera de la red.
+  #     Ese es el cierre del acceso directo.
   #   - Va en la misma red que Caddy, que es quien media.
-  #   - Sin CUSTOM_USER ni PASSWORD (KasmVNC no autentica por si mismo). Caddy
-  #     es la unica puerta.
+  #   - Lleva credenciales propias, pero las presenta Caddy, asi que el navegador
+  #     no muestra ningun dialogo.
+  #
+  # Compose no permite generar servicios por iteracion (la clave `range` solo
+  # admite valores DENTRO de un servicio, no nombres de servicio), asi que cada
+  # escritorio se declara una vez. Para anadir uno: copia un bloque, cambia el
+  # nombre/su carpeta, y anade su ruta en docker/Caddyfile.
+
   ct0:
     image: lscr.io/linuxserver/webtop:ubuntu-xfce
     restart: unless-stopped
@@ -95,23 +109,43 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct0"
-      # Autenticacion propia del contenedor: DESACTIVADA.
-      #
-      # Se probo y funciona (401 sin credenciales, 101 en el WebSocket), pero el
-      # navegador dibuja el dialogo de autenticacion basica sobre TODA la pagina,
-      # no dentro del iframe, asi que tapa la interfaz de la aplicacion.
-      #
-      # La proteccion real la hace Caddy antes de entregar nada: sin sesion
-      # valida responde 403 y el contenedor ni se toca. Ademas los escritorios no
-      # publican puertos, asi que no hay otra via de entrada.
-      #
-      # Para volver a activarla, rellena CONTAINER_CT0_PASSWORD en el .env.
-      CUSTOM_USER: ${CONTAINER_CT0_USER:-}
-      PASSWORD: ${CONTAINER_CT0_PASSWORD:-}
+      CUSTOM_USER: ${CONTAINER_AUTH_USER:-virthub}
+      PASSWORD: ${CONTAINER_AUTH_PASSWORD:-virthub}
     volumes:
-      # Conserva los datos del escritorio que antes tenia webtop-test.
-      # Es la carpeta /config de la imagen, que guarda el home del usuario.
-      - C:\webtop\test:/config
+      # 647 archivos con el escritorio que ya tenias (antes en C:\webtop\test).
+      - ${CONTAINER_DATA_DIR:-C:\webtop}\ct0:/config
+    networks:
+      - virthub
+
+  ct2:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: ${TZ:-America/Mexico_City}
+      TITLE: "Escritorio ct2"
+      CUSTOM_USER: ${CONTAINER_AUTH_USER:-virthub}
+      PASSWORD: ${CONTAINER_AUTH_PASSWORD:-virthub}
+    volumes:
+      - ${CONTAINER_DATA_DIR:-C:\webtop}\ct2:/config
+    networks:
+      - virthub
+
+  ct3:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: ${TZ:-America/Mexico_City}
+      TITLE: "Escritorio ct3"
+      CUSTOM_USER: ${CONTAINER_AUTH_USER:-virthub}
+      PASSWORD: ${CONTAINER_AUTH_PASSWORD:-virthub}
+    volumes:
+      - ${CONTAINER_DATA_DIR:-C:\webtop}\ct3:/config
     networks:
       - virthub
 

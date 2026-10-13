@@ -73,6 +73,27 @@ class ProxyAuthTest extends TestCase
 
     private function containers(): void
     {
+        // Formato actual: el identificador del servicio en docker-compose.
+        // Los escritorios ya no viven en un subdominio propio.
+        foreach (['ct0', 'ct2', 'ct3'] as $name) {
+            WebtopContainer::create([
+                'name' => $name,
+                'url' => $name,
+                'status' => WebtopContainer::STATUS_AVAILABLE,
+                'capacity' => 1,
+            ]);
+        }
+    }
+
+    /**
+     * Contenedores con el formato ANTIGUO (URL de subdominio).
+     *
+     * Se conserva la compatibilidad para no romper asignaciones que ya existian
+     * en la base de datos antes de servir los escritorios por el dominio
+     * principal.
+     */
+    private function containersConUrlAntigua(): void
+    {
         foreach (['ct0', 'ct2', 'ct3'] as $name) {
             WebtopContainer::create([
                 'name' => $name,
@@ -183,5 +204,48 @@ class ProxyAuthTest extends TestCase
             'webtop_container_id' => $asignado->id,
             'status' => WorkspaceAssignment::STATUS_ASSIGNED,
         ]);
+    }
+
+    /**
+     * Al pasar de subdominios a rutas del mismo dominio, la comparacion entre el
+     * nombre esperado y el pedido era lo mas fragil del cambio: si no coinciden,
+     * el usuario legitimo recibe 403 y no puede abrir su propio escritorio.
+     */
+    public function test_el_formato_de_identificador_no_produce_403_falsos(): void
+    {
+        $this->containers();
+
+        $ana = $this->user('ana');
+        $asignado = app(WebtopAllocator::class)->containerFor($ana['id']);
+
+        // El usuario abre su escritorio sin token ni cabecera rara.
+        $this->authAs($ana, $asignado->name)->assertStatus(200);
+    }
+
+    public function test_una_url_antigua_de_subdominio_sigue_resolviendo_el_nombre(): void
+    {
+        $this->containersConUrlAntigua();
+
+        $ana = $this->user('ana');
+        $asignado = app(WebtopAllocator::class)->containerFor($ana['id']);
+
+        // La asignacion guarda la URL antigua; el proxy debe reconocer el nombre
+        // y no devolver 403 a quien tiene derecho a ese escritorio.
+        $this->authAs($ana, $asignado->name)->assertStatus(200);
+    }
+
+    public function test_el_escritorio_se_sirve_por_el_dominio_principal(): void
+    {
+        // No debe quedar ninguna URL de subdominio en la configuracion: esos
+        // subdominios permitian saltarse la comprobacion de acceso.
+        foreach (config('virthub.containers.urls', []) as $index => $url) {
+            $this->assertStringNotContainsString(
+                'virthub.dpdns.org',
+                (string) $url,
+                "El contenedor [$index] apunta a un subdominio publico."
+            );
+        }
+
+        $this->assertSame('/escritorio/', config('virthub.containers.desktop_path'));
     }
 }
