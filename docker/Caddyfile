@@ -106,40 +106,33 @@ http://virthub.dpdns.org:8080 {
 }
 
 # -----------------------------------------------------------------------------
-# Escritorios: un bloque por contenedor
+# Los subdominios ct* QUEDAN DESHABILITADOS a proposito
 # -----------------------------------------------------------------------------
 #
-# Todos pasan por la comprobacion de acceso. Sin sesion valida, o pidiendo el
-# escritorio de otro, la respuesta es 403 y el contenedor nunca se entrega.
+# Antes existia un bloque por contenedor (ct0.virthub.dpdns.org -> ct0:3000).
+# Se elimino porque permitia saltarse la aplicacion:
 #
-# Los nombres (ct0:3000) son los del servicio en docker-compose.yml. El puerto
-# interno de Webtop es 3000; el 8006 que usabas era el mapeo al host, que ya no
-# hace falta porque el contenedor no publica puertos.
+#   La cookie de sesion vive en .virthub.dpdns.org, asi que el navegador la
+#   envia TAMBIEN a ct0.virthub.dpdns.org. Caddy la veia valida y entregaba el
+#   escritorio por esa direccion, sin pasar por /escritorio/ ni por la pagina
+#   que lo aloja. Cualquier usuario con sesion abierta podia entrar por ahi.
+#
+# El escritorio se sirve ahora SOLO por /escritorio/ del dominio principal (ver
+# el bloque de arriba), de modo que no existe una segunda puerta.
+#
+# Si en el futuro se quiere un escritorio por subdominio, hay que impedir que la
+# cookie de la aplicacion viaje a ese subdominio (por ejemplo con un dominio
+# distinto para los escritorios) o la comprobacion de acceso volvera a ser
+# inutil, porque se autenticaria sola con la sesion del usuario.
 
-http://ct0.virthub.dpdns.org:8080 {
-	import webtop_proxy ct0 ct0:3000
-}
+# -----------------------------------------------------------------------------
+# Cualquier otro nombre: no existe
+# -----------------------------------------------------------------------------
+#
+# Red de seguridad para no dejar puertas abiertas. Si queda algun registro DNS
+# apuntando a este Caddy (los ct* del tunel, por ejemplo) responde 404 en lugar
+# de entregar un escritorio o la aplicacion.
 
-http://ct2.virthub.dpdns.org:8080 {
-	import webtop_proxy ct2 ct2:3000
-}
-
-http://ct3.virthub.dpdns.org:8080 {
-	import webtop_proxy ct3 ct3:3000
-}
-
-http://ct4.virthub.dpdns.org:8080 {
-	import webtop_proxy ct4 ct4:3000
-}
-
-http://ct5.virthub.dpdns.org:8080 {
-	import webtop_proxy ct5 ct5:3000
-}
-
-http://ct6.virthub.dpdns.org:8080 {
-	import webtop_proxy ct6 ct6:3000
-}
-
-http://ct7.virthub.dpdns.org:8080 {
-	import webtop_proxy ct7 ct7:3000
+http://:8080 {
+	respond "Not found" 404
 }
