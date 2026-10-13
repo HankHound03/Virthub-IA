@@ -84,15 +84,18 @@ http://virthub.dpdns.org:8080 {
 
 	# UNA sola ruta para todos los escritorios.
 	#
-	# El contenedor NO se fija aqui: la aplicacion decide cual le toca a cada
-	# usuario y lo devuelve en la cabecera X-Virthub-Container, que Caddy usa
-	# como destino. Fijarlo en la configuracion era un fallo: ct0 es solo para
-	# administradores, asi que cualquier otro usuario recibia un 403 al abrir su
-	# propio escritorio, y con varios escritorios ninguno habria podido entrar.
+	# El escritorio de esta ruta se declara en los DOS sitios, y deben coincidir:
 	#
-	# Se envia X-Container vacio a proposito: eso hace que la aplicacion resuelva
-	# el escritorio por la asignacion del usuario, que es la comprobacion que
-	# garantiza el aislamiento entre usuarios.
+	#   - en X-Container, que es lo que la aplicacion valida contra el escritorio
+	#     asignado al usuario;
+	#   - en el reverse_proxy, que es a donde se envia de verdad.
+	#
+	# No se puede tomar el destino de la respuesta de forward_auth: esa cabecera
+	# no se propaga al reverse_proxy (ver la nota del bloque de abajo).
+	#
+	# Para servir otro escritorio, duplica este bloque con su ruta: /escritorio/ct2/
+	# apuntando a ct2:3000, y asi. La aplicacion comprobara en cada caso que el
+	# escritorio sea del usuario.
 	@escritorio path /escritorio/*
 	handle @escritorio {
 		forward_auth app:80 {
