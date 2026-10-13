@@ -95,6 +95,17 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct0"
+      # Autenticacion propia del contenedor (nginx basic auth).
+      #
+      # Caddy ya comprueba la sesion antes de entregar nada; esto es una segunda
+      # capa por si alguien llegara al contenedor por otra via. El navegador pide
+      # las credenciales UNA vez dentro del iframe y las reutiliza para todo,
+      # incluido el WebSocket de noVNC.
+      #
+      # Se leen del .env para no dejarlas escritas aqui. Si se dejan vacias, el
+      # contenedor no pide credenciales (comportamiento anterior).
+      CUSTOM_USER: ${CONTAINER_CT0_USER:-}
+      PASSWORD: ${CONTAINER_CT0_PASSWORD:-}
     volumes:
       # Conserva los datos del escritorio que antes tenia webtop-test.
       # Es la carpeta /config de la imagen, que guarda el home del usuario.
