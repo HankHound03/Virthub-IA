@@ -82,17 +82,32 @@ http://virthub.dpdns.org:8080 {
 	# debe coincidir con el nombre del servicio en docker-compose.yml y con el
 	# valor de CONTAINER_CT<n> en el .env.
 
-	# --- ct0 (usuarios administradores) ---
-	@escritorio_ct0 path /escritorio/*
-	handle @escritorio_ct0 {
+	# UNA sola ruta para todos los escritorios.
+	#
+	# El contenedor NO se fija aqui: la aplicacion decide cual le toca a cada
+	# usuario y lo devuelve en la cabecera X-Virthub-Container, que Caddy usa
+	# como destino. Fijarlo en la configuracion era un fallo: ct0 es solo para
+	# administradores, asi que cualquier otro usuario recibia un 403 al abrir su
+	# propio escritorio, y con varios escritorios ninguno habria podido entrar.
+	#
+	# Se envia X-Container vacio a proposito: eso hace que la aplicacion resuelva
+	# el escritorio por la asignacion del usuario, que es la comprobacion que
+	# garantiza el aislamiento entre usuarios.
+	@escritorio path /escritorio/*
+	handle @escritorio {
 		forward_auth app:80 {
 			uri /internal/proxy-auth
-			header_up X-Container ct0
+
+			# Vacio: que la aplicacion elija el escritorio del usuario.
+			header_up X-Container ""
+
+			# La respuesta trae el contenedor elegido; Caddy lo usa arriba.
 			copy_headers X-Virthub-User X-Virthub-Container
 		}
 
 		handle_path /escritorio/* {
-			reverse_proxy ct0:3000 {
+			# {http.request.header.X-Virthub-Container} lo puso forward_auth.
+			reverse_proxy {http.request.header.X-Virthub-Container}:3000 {
 				# Presenta las credenciales del escritorio: el navegador no las
 				# ve ni las pide, pero el contenedor si las recibe.
 				import escritorio_auth
@@ -102,43 +117,6 @@ http://virthub.dpdns.org:8080 {
 			}
 		}
 	}
-
-	# --- ct2 ---
-	@escritorio_ct2 path /escritorio/ct2/*
-	handle @escritorio_ct2 {
-		forward_auth app:80 {
-			uri /internal/proxy-auth
-			header_up X-Container ct2
-			copy_headers X-Virthub-User X-Virthub-Container
-		}
-
-		handle_path /escritorio/ct2/* {
-			reverse_proxy ct2:3000 {
-				import escritorio_auth
-				header_up X-Real-IP {http.request.header.CF-Connecting-IP}
-				header_up X-Forwarded-Proto https
-			}
-		}
-	}
-
-	# --- ct3 ---
-	@escritorio_ct3 path /escritorio/ct3/*
-	handle @escritorio_ct3 {
-		forward_auth app:80 {
-			uri /internal/proxy-auth
-			header_up X-Container ct3
-			copy_headers X-Virthub-User X-Virthub-Container
-		}
-
-		handle_path /escritorio/ct3/* {
-			reverse_proxy ct3:3000 {
-				import escritorio_auth
-				header_up X-Real-IP {http.request.header.CF-Connecting-IP}
-				header_up X-Forwarded-Proto https
-			}
-		}
-	}
-
 	handle {
 		reverse_proxy app:80 {
 			header_up X-Real-IP {http.request.header.CF-Connecting-IP}

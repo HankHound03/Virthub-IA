@@ -37,6 +37,16 @@ class ContainerResolver
         }
 
         $username = (string) ($user['username'] ?? '');
+
+        // La regla de administradores va PRIMERO. Antes se consultaba la
+        // asignacion de la base de datos antes que esto, asi que un administrador
+        // con una asignacion previa (por ejemplo de antes de existir esta regla)
+        // acababa en el escritorio comun y un usuario normal podia acabar en el
+        // de administradores. La regla existia, pero era inalcanzable.
+        if ($this->isPrivilegedContainerUser($username)) {
+            return $this->urlForIndex($this->adminIndex());
+        }
+
         $userId = $this->resolveUserId($user);
 
         // El contenedor asignado tiene prioridad: es el que garantiza el
@@ -49,11 +59,7 @@ class ContainerResolver
             }
         }
 
-        // Respaldo: reparto determinista sobre la lista de configuracion.
-        if ($this->isPrivilegedContainerUser($username)) {
-            return $this->urlForIndex(0);
-        }
-
+        // Respaldo: reparto determinista sobre los contenedores declarados.
         return $this->urlForIndex($this->poolIndexFor($username));
     }
 
@@ -92,14 +98,52 @@ class ContainerResolver
      *
      * Se usa solo cuando no hay asignacion posible, de modo que el usuario
      * conserva el mismo escritorio entre sesiones.
+     *
+     * El rango NO es fijo (2..6): se calcula sobre los indices que existen de
+     * verdad. Antes era fijo y un usuario podia caer en un indice sin contenedor
+     * (un 404 en el iframe).
      */
     public function poolIndexFor(string $username): int
     {
-        $start = (int) config('virthub.containers.pool_start', 2);
-        $end = (int) config('virthub.containers.pool_end', 6);
-        $size = max(1, ($end - $start) + 1);
+        $pool = $this->poolIndices();
 
-        return ($this->stableHash($username) % $size) + $start;
+        if ($pool === []) {
+            return $this->adminIndex();
+        }
+
+        $size = count($pool);
+
+        return $pool[$this->stableHash($username) % $size];
+    }
+
+    /**
+     * Indices disponibles para el reparto comun: todos menos el de
+     * administradores.
+     *
+     * @return list<int>
+     */
+    public function poolIndices(): array
+    {
+        /** @var list<int> $indices */
+        $indices = array_values((array) config('virthub.containers.indices', []));
+        $admin = $this->adminIndex();
+
+        $pool = array_values(array_filter(
+            $indices,
+            static fn (int $index): bool => $index !== $admin
+        ));
+
+        // Si solo hay el de administradores, se usa ese antes que dejar a alguien
+        // sin escritorio.
+        return $pool !== [] ? $pool : [$admin];
+    }
+
+    /**
+     * Indice del escritorio de administradores.
+     */
+    public function adminIndex(): int
+    {
+        return (int) config('virthub.containers.admin_index', 0);
     }
 
     public function isPrivilegedContainerUser(string $username): bool
