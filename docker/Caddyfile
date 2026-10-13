@@ -24,29 +24,23 @@
 }
 
 # -----------------------------------------------------------------------------
-# Credenciales de los escritorios, inyectadas por el proxy
+# Sobre la autenticacion de los escritorios
 # -----------------------------------------------------------------------------
 #
-# El contenedor Webtop puede exigir autenticacion propia (nginx basic auth). En
-# lugar de que el navegador la pida --lo que dibujaria un dialogo del sistema
-# sobre TODA la aplicacion, no dentro del iframe--, es Caddy quien la presenta:
+# Los escritorios NO piden credenciales propias. La proteccion es la comprobacion
+# de sesion que hace la aplicacion a traves de forward_auth:
 #
-#   header_up Authorization "Basic <base64 usuario:contrasena>"
+#   - Sin sesion valida -> 403, y el contenedor ni se toca.
+#   - Con sesion pero pidiendo el escritorio de otro -> 403.
 #
-# Ventajas:
-#   - El navegador nunca muestra el dialogo: para el, el subdominio no pide nada.
-#   - El contenedor sigue protegido: sin esa cabecera responde 401, y como no
-#     publica puertos ni tiene subdominio, no hay forma de llegar a el sin pasar
-#     por aqui.
-#   - El WebSocket tambien la recibe, porque forward_auth y reverse_proxy la
-#     aplican a todas las peticiones de la ruta.
+# Se probo a añadir autenticacion propia al contenedor (nginx basic auth) y
+# funciona, pero terminaba pidiendo usuario y contrasena en cada acceso y no
+# aportaba nada frente a la comprobacion de sesion, que ya deja el contenedor
+# inalcanzable desde fuera: no publica puertos y el tunel no lo conoce.
 #
-# El valor se calcula en docker/caddy-entrypoint.sh a partir de
-# CONTAINER_AUTH_USER y CONTAINER_AUTH_PASSWORD del .env. Si no hay contrasena,
-# la cabecera va vacia y el contenedor no pide nada.
-(escritorio_auth) {
-	header_up Authorization "{env.CADDY_BASIC_AUTH}"
-}
+# Si algun dia se quiere reactivar: define CUSTOM_USER y PASSWORD en el servicio
+# del escritorio (docker-compose.yml). Caddy debera presentar entonces la
+# cabecera Authorization, porque el dialogo del navegador taparia la aplicacion.
 
 # -----------------------------------------------------------------------------
 # Sitio principal: la aplicacion
@@ -116,8 +110,8 @@ http://virthub.dpdns.org:8080 {
 #   - Con sesion y siendo el suyo -> se entrega.
 #
 # El escritorio exige ademas credenciales propias, pero las presenta Caddy con
-# la cabecera Authorization (fragmento escritorio_auth), asi que el navegador no
-# muestra ningun dialogo.
+# ninguna credencial, porque el contenedor ya no pide.
+# Si se reactivara, habria que presentarla desde Caddy.
 #
 # AVISO IMPORTANTE sobre el aislamiento:
 #

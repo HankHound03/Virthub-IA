@@ -17,16 +17,8 @@ services:
       - "127.0.0.1:${CADDY_PORT:-8080}:8080"
     volumes:
       - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
-      # Script de arranque: codifica las credenciales en base64 y arranca Caddy.
-      - ./docker/caddy-entrypoint.sh:/usr/local/bin/escritorio-auth.sh:ro
       - caddy_data:/data
       - caddy_config:/config
-    entrypoint: ["sh", "/usr/local/bin/escritorio-auth.sh"]
-    environment:
-      # Credenciales del escritorio. El script de arranque las codifica; aqui
-      # solo viajan en claro dentro del contenedor, que es el que las presenta.
-      CONTAINER_AUTH_USER: ${CONTAINER_AUTH_USER:-virthub}
-      CONTAINER_AUTH_PASSWORD: ${CONTAINER_AUTH_PASSWORD:-virthub}
     networks:
       - virthub
 
@@ -109,8 +101,6 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct0"
-      CUSTOM_USER: ${CONTAINER_AUTH_USER:-virthub}
-      PASSWORD: ${CONTAINER_AUTH_PASSWORD:-virthub}
     volumes:
       # 647 archivos con el escritorio que ya tenias (antes en C:\webtop\test).
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct0:/config
@@ -126,8 +116,6 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct2"
-      CUSTOM_USER: ${CONTAINER_AUTH_USER:-virthub}
-      PASSWORD: ${CONTAINER_AUTH_PASSWORD:-virthub}
     volumes:
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct2:/config
     networks:
@@ -142,8 +130,6 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct3"
-      CUSTOM_USER: ${CONTAINER_AUTH_USER:-virthub}
-      PASSWORD: ${CONTAINER_AUTH_PASSWORD:-virthub}
     volumes:
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct3:/config
     networks:
