@@ -16,6 +16,7 @@ class WebtopContainer extends Model
     protected $fillable = [
         'name',
         'url',
+        'internal_port',
         'capacity',
         'status',
         'cpu_limit',
@@ -27,6 +28,7 @@ class WebtopContainer extends Model
     {
         return [
             'capacity' => 'integer',
+            'internal_port' => 'integer',
             'cpu_limit' => 'integer',
             'memory_limit_mb' => 'integer',
             'last_checked_at' => 'datetime',

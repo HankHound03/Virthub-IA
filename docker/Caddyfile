@@ -109,9 +109,9 @@ http://virthub.dpdns.org:8080 {
 #   - Con sesion pero pidiendo el escritorio de otro -> 403.
 #   - Con sesion y siendo el suyo -> se entrega.
 #
-# El escritorio exige ademas credenciales propias, pero las presenta Caddy con
-# ninguna credencial, porque el contenedor ya no pide.
-# Si se reactivara, habria que presentarla desde Caddy.
+# El escritorio NO pide credenciales propias: la proteccion es esta comprobacion
+# de sesion. Si algun dia se le anadieran, habria que presentarlas desde Caddy
+# (el dialogo del navegador taparia la aplicacion).
 #
 # AVISO IMPORTANTE sobre el aislamiento:
 #
@@ -135,6 +135,28 @@ http://ct2.virthub.dpdns.org:8080 {
 
 http://ct3.virthub.dpdns.org:8080 {
 	import webtop_proxy ct3 ct3:3000
+}
+
+# --- ct4: maquina virtual con Windows 7 (dockurr/windows) ---
+#
+# Mismo control de acceso que los Webtop, pero OJO con dos diferencias:
+#
+#   1. Va por el puerto 8006 (la interfaz web de la VM), no por el 3000.
+#   2. El contenedor NO tiene autenticacion propia: quien llega a el, controla
+#      el Windows. Aqui la comprobacion de sesion de Caddy no es una capa mas,
+#      es la UNICA puerta. Antes estaba accesible en el puerto 8008 del host sin
+#      pedir nada, para cualquiera en la red local.
+#
+# El contenedor se llama `windows7` y se conecta a esta red con el alias `ct4`:
+#
+#   docker network connect --alias ct4 virthub_virthub windows7
+#
+# Se hace asi porque el contenedor ya existia y renombrarlo obligaria a
+# recrearlo. Si algun dia lo recreas, hazlo desde docker/windows7.yml (o anade
+# el alias en su configuracion) para no perder el control de acceso.
+
+http://ct4.virthub.dpdns.org:8080 {
+	import webtop_proxy ct4 windows7:8006
 }
 
 # -----------------------------------------------------------------------------

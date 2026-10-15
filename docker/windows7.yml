@@ -1,0 +1,67 @@
+# =============================================================================
+# ct4: maquina virtual con Windows 7 (dockurr/windows)
+# =============================================================================
+#
+# NO forma parte de docker-compose.yml a proposito: es un servicio autonomo, con
+# su propio ciclo de vida y un disco de 64 GB. Se levanta aparte:
+#
+#   docker compose -f docker/windows7.yml -p windows7 up -d
+#
+# Por que existe este archivo:
+#
+#   El contenedor original se creo a mano, en la red `bridge` por defecto y
+#   publicando el puerto 8008 del host. Eso lo dejaba ABIERTO y sin
+#   autenticacion para cualquiera en la red local: la interfaz web de la VM da
+#   control total del Windows.
+#
+#   Ahora vive en la red de Caddy, sin publicar puertos, y todo el acceso pasa
+#   por la comprobacion de sesion de la aplicacion (ver docker/Caddyfile).
+#
+# El disco del sistema NO se toca: sigue en el volumen `windows7-data`. Si ya
+# tienes la VM en marcha, no lo levantes desde aqui a ciegas: comprueba primero
+# que no haya dos contenedores usando el mismo volumen a la vez.
+
+services:
+  windows7:
+    image: dockurr/windows
+    container_name: windows7
+    restart: unless-stopped
+    # Sin `ports`: no se publica nada en el host. Unico acceso, por Caddy.
+    environment:
+      # Valores tomados del contenedor que ya tenias en marcha. No inventados:
+      # si cambias VERSION, la VM pediria otra instalacion y no arrancaria la que
+      # ya esta hecha en el volumen.
+      VERSION: "7u"
+      RAM_SIZE: "4G"
+      CPU_CORES: "2"
+      DISK_SIZE: "64G"
+      # Sin aceleracion por hardware: en Docker Desktop para Windows no existe
+      # /dev/kvm. Con KVM=Y el contenedor no arranca.
+      KVM: "N"
+    devices:
+      # Solo la interfaz de red virtual. NO se anade /dev/kvm por lo de arriba.
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      # Disco del sistema: aqui vive el Windows instalado.
+      - windows7-data:/storage
+      # Carpeta compartida con el host (C:\Users\Frank\shared -> /shared).
+      - C:\Users\Frank\shared:/shared
+    networks:
+      virthub_virthub:
+        # El alias es lo que permite que Caddy y la aplicacion lo llamen `ct4`,
+        # que es como esta registrado. Sin el, el nombre del servicio
+        # (`windows7`) no coincidiria con la asignacion del escritorio.
+        aliases:
+          - ct4
+
+volumes:
+  # Volumen ya existente: se declara como externo para NO recrearlo y no perder
+  # el Windows instalado.
+  windows7-data:
+    external: true
+
+networks:
+  virthub_virthub:
+    external: true

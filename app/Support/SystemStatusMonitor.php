@@ -196,7 +196,7 @@ class SystemStatusMonitor
         $targets = [];
 
         foreach ($containers as $name => $container) {
-            $targets[$name] = $this->probeUrl($name, (string) $container['url']);
+            $targets[$name] = $this->probeUrl($name, (string) $container['url'], $container['port']);
         }
 
         $online = [];
@@ -280,6 +280,7 @@ class SystemStatusMonitor
 
             $containers[$name] = [
                 'url' => (string) $row->url,
+                'port' => $row->internal_port === null ? null : (int) $row->internal_port,
                 'capacity' => $row->capacity === null ? null : (int) $row->capacity,
             ];
         }
@@ -293,10 +294,13 @@ class SystemStatusMonitor
      * Se prefiere la red interna de Docker (http://ct0:3000), que es la via real
      * por la que Caddy lo alcanza. La URL publica solo se usa como respaldo, por
      * si el escritorio vive en otra maquina.
+     *
+     * El puerto sale del propio contenedor: los Webtop usan 3000, pero la maquina
+     * virtual con Windows usa 8006. Darlo por hecho dejaba a Windows como caido.
      */
-    private function probeUrl(string $name, string $publicUrl): string
+    private function probeUrl(string $name, string $publicUrl, ?int $port): string
     {
-        $port = (int) config('virthub.containers.internal_port', 3000);
+        $port = $port ?? (int) config('virthub.containers.internal_port', 3000);
 
         if ($name !== '' && $port > 0) {
             return sprintf('http://%s:%d/', $name, $port);
