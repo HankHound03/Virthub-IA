@@ -476,15 +476,19 @@
 
                         <article class="system-metric-card system-metric-card-compact">
                             <header><h4>Contenedores</h4><strong id="sys_containers_count">-</strong></header>
-                            <div id="sys_containers_list" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px;">
-                                <div class="system-state-pill" id="container_0" title="ct0: Verde=Activo, Rojo=Caído">ct0</div>
-                                <div class="system-state-pill" id="container_2" title="ct2: Verde=Activo, Rojo=Caído">ct2</div>
-                                <div class="system-state-pill" id="container_3" title="ct3: Verde=Activo, Rojo=Caído">ct3</div>
-                                <div class="system-state-pill" id="container_4" title="ct4: Verde=Activo, Rojo=Caído">ct4</div>
-                                <div class="system-state-pill" id="container_5" title="ct5: Verde=Activo, Rojo=Caído">ct5</div>
-                                <div class="system-state-pill" id="container_6" title="ct6: Verde=Activo, Rojo=Caído">ct6</div>
-                                <div class="system-state-pill" id="container_7" title="ct7: Verde=Activo, Rojo=Caído">ct7</div>
-                            </div>
+                            {{--
+                                Las pildoras se generan desde los datos que devuelve
+                                el servidor (status.container_status), que a su vez
+                                sale de los escritorios registrados en la base de
+                                datos. Asi el panel crece solo al anadir escritorios:
+                                antes habia siete pildoras escritas a mano y el
+                                contador decia siempre "/7", aunque existieran menos.
+                            --}}
+                            <div id="sys_containers_list" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px;"></div>
+                            <p id="sys_containers_empty" style="display: none; margin: 10px 0 0; opacity: .7; font-size: .85rem;">
+                                No hay escritorios registrados. Anadelos con
+                                <code>php artisan virthub:sync-containers</code>.
+                            </p>
                         </article>
 
                     </div>
@@ -1600,23 +1604,39 @@
                 document.getElementById('sys_disk').textContent = status.disk_used_percent != null ? `${status.disk_used_percent}%` : '-';
                 updateLocalTimezoneLabels();
 
-                // Actualizar estado de contenedores
+                // Estado de los escritorios.
+                //
+                // La lista viene del servidor (los escritorios registrados en la
+                // base de datos), asi que el panel crece solo: antes habia siete
+                // indices escritos aqui y el contador decia siempre "/7".
                 const containerStatus = status.container_status || {};
-                let containersOnline = 0;
-                const containerIds = [0, 2, 3, 4, 5, 6, 7]; // Sin ct1
-                containerIds.forEach(i => {
-                    const isOnline = !!containerStatus[i];
-                    const pill = document.getElementById(`container_${i}`);
-                    if (pill) {
-                        pill.textContent = `ct${i}`;
-                        pill.classList.toggle('is-online', isOnline);
-                        pill.classList.toggle('is-offline', !isOnline);
-                    }
-                    if (isOnline) containersOnline++;
-                });
+                const listEl = document.getElementById('sys_containers_list');
+                const emptyEl = document.getElementById('sys_containers_empty');
+                const entries = Object.values(containerStatus);
+
+                if (listEl) {
+                    listEl.innerHTML = '';
+
+                    entries.forEach(c => {
+                        const pill = document.createElement('div');
+                        pill.className = 'system-state-pill ' + (c.online ? 'is-online' : 'is-offline');
+                        pill.id = 'container_' + c.name;
+                        pill.textContent = c.name;
+                        pill.title = `${c.name}: ${c.online ? 'activo' : 'caido'}`;
+                        listEl.appendChild(pill);
+                    });
+                }
+
+                if (emptyEl) {
+                    emptyEl.style.display = entries.length === 0 ? 'block' : 'none';
+                }
+
+                const containersOnline = entries.filter(c => c.online).length;
+
                 const countEl = document.getElementById('sys_containers_count');
                 if (countEl) {
-                    countEl.textContent = `${containersOnline}/7`;
+                    // El total sale de los datos, no de un numero fijo.
+                    countEl.textContent = `${containersOnline}/${entries.length}`;
                 }
 
                 updateSystemCharts(status);

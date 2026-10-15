@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\WebtopContainer;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -163,53 +164,145 @@ class SystemStatusMonitor
     }
 
     /**
-     * @return array<int, bool>
+     * Estado de cada escritorio registrado.
+     *
+     * La lista sale de la BASE DE DATOS, no de una lista fija: cuando se anade un
+     * escritorio y se registra con `virthub:sync-containers`, el panel lo muestra
+     * solo. Antes habia siete indices escritos en el codigo y el panel no podia
+     * crecer ni encogerse.
+     *
+     * El sondeo se hace por la red interna de Docker (http://ct0:3000), no por la
+     * URL publica, por dos motivos:
+     *
+     *   1. La URL publica pasa por Caddy, que responde 403 sin sesion. Un
+     *      escritorio perfectamente sano aparecia como caido.
+     *   2. No depende de que el tunel este levantado para saber si el contenedor
+     *      responde.
+     *
+     * Un escritorio esta VIVO si contesta, aunque sea con 401 o 403: eso significa
+     * que esta en pie y rechazando la peticion por falta de credenciales. Solo se
+     * considera caido si no hay respuesta o el servidor falla con un error.
+     *
+     * @return array<string, array{name: string, url: string, online: bool, capacity: int|null}>
      */
     private function containerStatuses(int $timeout): array
     {
-        /** @var array<int, int> $indices */
-        $indices = (array) config('virthub.containers.indices', []);
-        $urls = (array) config('virthub.containers.urls', []);
+        $containers = $this->registeredContainers();
+
+        if ($containers === []) {
+            return [];
+        }
 
         $targets = [];
-        foreach ($indices as $index) {
-            $index = (int) $index;
-            $url = (string) ($urls[$index] ?? '');
 
-            if ($url !== '') {
-                $targets[$index] = $url;
-            }
+        foreach ($containers as $name => $container) {
+            $targets[$name] = $this->probeUrl($name, (string) $container['url']);
         }
 
-        $statuses = array_fill_keys(array_map('intval', $indices), false);
-
-        if ($targets === []) {
-            return $statuses;
-        }
+        $online = [];
 
         try {
             $responses = Http::pool(function (Pool $pool) use ($targets, $timeout): array {
                 $pending = [];
 
-                foreach ($targets as $index => $url) {
-                    $pending[] = $pool->as((string) $index)->timeout($timeout)->get($url);
+                foreach ($targets as $name => $url) {
+                    // Un 403 o un 401 no es un fallo de transporte: el escritorio
+                    // esta vivo. No se deja que Lance la excepcion.
+                    $pending[] = $pool->as((string) $name)
+                        ->timeout($timeout)
+                        ->withOptions(['http_errors' => false])
+                        ->get($url);
                 }
 
                 return $pending;
             });
 
-            foreach (array_keys($targets) as $index) {
-                $response = $responses[(string) $index] ?? null;
+            foreach (array_keys($targets) as $name) {
+                $response = $responses[(string) $name] ?? null;
 
-                if ($response instanceof \Illuminate\Http\Client\Response) {
-                    $statuses[$index] = $response->successful();
-                }
+                $online[$name] = $response instanceof \Illuminate\Http\Client\Response
+                    && $this->isAlive($response->status());
             }
         } catch (Throwable) {
-            // Un fallo del pool deja todos los contenedores como no disponibles.
+            // Si el pool entero falla, se deja todo como caido.
+        }
+
+        $statuses = [];
+
+        foreach ($containers as $name => $container) {
+            $statuses[$name] = [
+                'name' => $name,
+                'url' => (string) $container['url'],
+                'online' => $online[$name] ?? false,
+                'capacity' => $container['capacity'],
+            ];
         }
 
         return $statuses;
+    }
+
+    /**
+     * Un escritorio que contesta esta vivo, aunque rechace la peticion.
+     *
+     * 401 y 403 significan "estoy en pie, pero no te dejo pasar sin credenciales".
+     * Contarlos como caidos era el error que dejaba el panel en rojo.
+     */
+    private function isAlive(int $status): bool
+    {
+        if ($status === 401 || $status === 403) {
+            return true;
+        }
+
+        return $status >= 200 && $status < 400;
+    }
+
+    /**
+     * Escritorios registrados, en orden de nombre.
+     *
+     * @return array<string, array{url: string, capacity: int|null}>
+     */
+    private function registeredContainers(): array
+    {
+        try {
+            $rows = WebtopContainer::query()->orderBy('name')->get();
+        } catch (Throwable) {
+            return [];
+        }
+
+        $containers = [];
+
+        foreach ($rows as $row) {
+            $name = trim((string) $row->name);
+
+            if ($name === '') {
+                continue;
+            }
+
+            $containers[$name] = [
+                'url' => (string) $row->url,
+                'capacity' => $row->capacity === null ? null : (int) $row->capacity,
+            ];
+        }
+
+        return $containers;
+    }
+
+    /**
+     * Direccion que se sondea para un escritorio.
+     *
+     * Se prefiere la red interna de Docker (http://ct0:3000), que es la via real
+     * por la que Caddy lo alcanza. La URL publica solo se usa como respaldo, por
+     * si el escritorio vive en otra maquina.
+     */
+    private function probeUrl(string $name, string $publicUrl): string
+    {
+        $port = (int) config('virthub.containers.internal_port', 3000);
+
+        if ($name !== '' && $port > 0) {
+            return sprintf('http://%s:%d/', $name, $port);
+        }
+
+        return $publicUrl;
     }
 
     private function runCommand(string $command): string

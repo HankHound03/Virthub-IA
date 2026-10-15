@@ -108,6 +108,12 @@ return [
         // Es la unica puerta: no hay subdominios de escritorio.
         'desktop_path' => (string) env('CONTAINER_DESKTOP_PATH', '/escritorio/'),
 
+        // Puerto interno de Webtop. El panel de estado sondea cada escritorio por
+        // la red de Docker (http://ct0:3000) en lugar de por su URL publica: la
+        // publica pasa por Caddy y responde 403 sin sesion, lo que hacia aparecer
+        // como caidos escritorios que estaban perfectamente.
+        'internal_port' => (int) env('CONTAINER_INTERNAL_PORT', 3000),
+
         // Contenedor que recibe a los usuarios invitados.
         'guest_index' => 7,
 
