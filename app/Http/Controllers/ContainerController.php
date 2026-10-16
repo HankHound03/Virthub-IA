@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Support\ActiveUser;
 use App\Support\ContainerResolver;
+use App\Support\DesktopPass;
 use App\Support\OllamaClient;
 use App\Support\SecurityAudit;
 use Illuminate\Http\RedirectResponse;
@@ -19,6 +20,7 @@ class ContainerController extends Controller
         private readonly ContainerResolver $resolver,
         private readonly OllamaClient $ollama,
         private readonly SecurityAudit $audit,
+        private readonly DesktopPass $pase,
     ) {}
 
     public function show(Request $request): View|RedirectResponse
@@ -54,11 +56,27 @@ class ContainerController extends Controller
 
         $url = $this->resolver->urlFor($currentUser);
 
-        $this->audit->log($request, 'webtop.launch', $currentUser, ['container_url' => $url]);
+        // El enlace lleva un pase firmado.
+        //
+        // Motivo: Caddy comprueba el acceso ANTES de entregar el escritorio, pero
+        // la cookie de sesion no siempre viaja al subdominio. El pase resuelve eso
+        // de raiz, porque no depende de cookies: va en la propia direccion.
+        //
+        // Es un enlace firmado con la clave de la aplicacion y con caducidad, y va
+        // atado al usuario y a su escritorio. Copiarlo y abrirlo en otro navegador
+        // no sirve: caduca, y ademas la aplicacion comprueba que el escritorio sea
+        // el suyo.
+        $contenedor = $this->resolver->containerNameFromUrl($url);
+        $pase = $this->pase->para((string) $currentUser['username'], (string) $contenedor);
 
-        // Cada escritorio vive en su propio subdominio. Redireccion externa
-        // (away) porque el destino es otro dominio: la aplicacion comprueba la
-        // sesion y Caddy la vuelve a comprobar antes de entregar el escritorio.
-        return redirect()->away($url);
+        $destino = $url . (str_contains($url, '?') ? '&' : '?') . 'pase=' . urlencode($pase);
+
+        $this->audit->log($request, 'webtop.launch', $currentUser, [
+            'container_url' => $url,
+            'con_pase' => $pase !== '',
+        ]);
+
+        // Cada escritorio vive en su propio subdominio: redireccion externa.
+        return redirect()->away($destino);
     }
 }

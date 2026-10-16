@@ -85,6 +85,19 @@ Route::get('/contenedor', [ContainerController::class, 'show'])->name('container
 Route::get('/contenedor/launch', [ContainerController::class, 'launch'])->name('container.launch');
 
 // ---------------------------------------------------------------------------
+// Pase de acceso a un escritorio
+// ---------------------------------------------------------------------------
+//
+// Ruta firmada: Laravel valida la firma y la caducidad. No entrega nada por si
+// sola; existe para que el punto de control del proxy pueda comprobar que el
+// enlace lo emitio esta aplicacion.
+//
+// Se registra con nombre porque DesktopPass construye la direccion firmada a
+// partir de el.
+
+Route::get('/escritorio/pase', static fn (): string => 'ok')->name('escritorio.pase');
+
+// ---------------------------------------------------------------------------
 // Control de acceso para el proxy inverso
 // ---------------------------------------------------------------------------
 //

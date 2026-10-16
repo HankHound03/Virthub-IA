@@ -77,8 +77,15 @@ http://virthub.dpdns.org:8080 {
 
 (webtop_proxy) {
 	# forward_auth manda una subpeticion a la aplicacion conservando la cookie de
-	# sesion. Si responde 2xx, la peticion continua; si responde otra cosa, esa
-	# respuesta se devuelve tal cual (403 sin sesion o con escritorio ajeno).
+	# sesion y los parametros de la direccion. Si responde 2xx, la peticion
+	# continua; si responde otra cosa, esa respuesta se devuelve tal cual.
+	#
+	# La aplicacion acepta DOS formas de identificarse:
+	#   - la cookie de sesion, si llego;
+	#   - el pase firmado que va en la direccion (parametro "pase").
+	#
+	# El pase es necesario porque la cookie no siempre viaja al subdominio del
+	# escritorio: sin el, el usuario recibia 403 en su propio escritorio.
 	forward_auth app:80 {
 		uri /internal/proxy-auth
 

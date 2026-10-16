@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Support\ActiveUser;
 use App\Support\ContainerResolver;
+use App\Services\UserStore;
+use App\Support\DesktopPass;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -18,24 +20,38 @@ use Illuminate\Http\Response;
  *
  * Nunca devuelve un redirect ni un cuerpo util: el proxy solo mira el codigo.
  *
- * La comprobacion importante no es "esta autenticado" sino "este escritorio es
- * el suyo": cada usuario tiene un contenedor asignado y no debe poder abrir el
- * de otro aunque conozca la ruta.
+ * Se comprueban dos cosas:
+ *
+ *   1. Que el escritorio pedido sea el suyo (no el de otro usuario). El nombre lo
+ *      pone Caddy en X-Container, no el cliente, asi que no se puede falsear.
+ *   2. Que haya una sesion valida O un pase firmado emitido por la aplicacion.
+ *
+ * El pase existe porque la cookie de sesion no siempre viaja al subdominio del
+ * escritorio: sin el, un usuario con sesion abierta recibia 403 al abrir su
+ * propio escritorio. El pase viaja en la direccion, asi que no depende de
+ * cookies, y ademas aporta algo que la cookie no daba: sin un pase emitido por la
+ * aplicacion no se entra, ni siquiera copiando la direccion.
  */
 class ProxyAuthController extends Controller
 {
-    public function __construct(private readonly ContainerResolver $resolver) {}
+    public function __construct(
+        private readonly ContainerResolver $resolver,
+        private readonly DesktopPass $pase,
+        private readonly UserStore $users,
+    ) {}
 
     public function __invoke(Request $request): Response
     {
-        $user = ActiveUser::from($request);
-
-        if (! ActiveUser::isRegistered($user)) {
-            return $this->deny('Sin sesion activa.');
-        }
-
-        // El proxy envia en X-Container el sufijo solicitado (por ejemplo "ct2").
+        // El nombre del escritorio lo pone Caddy en X-Container.
         $requested = trim((string) $request->header('X-Container', ''));
+
+        // Primero se resuelve a quien pertenece: por sesion si la hay, y si no
+        // por el pase firmado, que identifica al usuario sin depender de cookies.
+        $user = $this->usuarioDeLaPeticion($request);
+
+        if ($user === null) {
+            return $this->deny('Sin sesion activa ni pase valido.');
+        }
 
         if ($requested === '') {
             // Sin destino declarado solo se autoriza el paso si hay usuario
@@ -46,6 +62,7 @@ class ProxyAuthController extends Controller
         $allowed = $this->resolveAllowedContainer($user);
 
         if ($allowed === null) {
+
             return $this->deny('No tienes un escritorio asignado.');
         }
 
@@ -57,10 +74,61 @@ class ProxyAuthController extends Controller
         // Los invitados van a un contenedor compartido: se permite solo si es
         // exactamente el que les corresponde.
         if (! $coincide) {
+
             return $this->deny('Ese escritorio no te pertenece.');
         }
 
+        // Con sesion no hace falta nada mas: el usuario ya esta identificado. El
+        // pase solo se exige cuando la sesion no llego (que es el caso habitual
+        // en el subdominio del escritorio).
+        if (ActiveUser::isRegistered(ActiveUser::from($request))) {
+            return $this->allow($user, $esperado);
+        }
+
+        if (! $this->pase->valido($request, ActiveUser::username($user), $esperado)) {
+
+            return $this->deny('Falta un pase de acceso valido.');
+        }
+
         return $this->allow($user, $esperado);
+    }
+
+    /**
+     * Usuario de la peticion: por sesion, o por el pase firmado.
+     *
+     * El pase es una direccion firmada que incluye el nombre de usuario, asi que
+     * permite identificarlo sin depender de la cookie de sesion.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function usuarioDeLaPeticion(Request $request): ?array
+    {
+        $sesion = ActiveUser::from($request);
+
+        if (ActiveUser::isRegistered($sesion)) {
+            return $sesion;
+        }
+
+        $usuario = $this->pase->usuario($request);
+
+        if ($usuario === null) {
+            return null;
+        }
+
+        // Se revalida contra el almacen: la cuenta debe seguir existiendo y
+        // activa, igual que con la sesion.
+        $encontrado = $this->users->findByUsername($usuario);
+
+        if (! is_array($encontrado) || ! ($encontrado['is_active'] ?? true)) {
+            return null;
+        }
+
+        return [
+            'id' => (string) ($encontrado['id'] ?? ''),
+            'username' => (string) $encontrado['username'],
+            'role' => (string) ($encontrado['role'] ?? 'user'),
+            'name' => (string) ($encontrado['name'] ?? $encontrado['username']),
+        ];
     }
 
     /**
