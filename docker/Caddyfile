@@ -194,6 +194,10 @@ http://ct10.virthub.dpdns.org:8080 {
 	import webtop_proxy ct10 192.168.1.9:3200
 }
 
+http://ct11.virthub.dpdns.org:8080 {
+	import webtop_proxy ct11 192.168.1.9:3300
+}
+
 # --- ct4: maquina virtual con Windows 7 (dockurr/windows) ---
 #
 # Mismo control de acceso que los Webtop, pero OJO con dos diferencias:
