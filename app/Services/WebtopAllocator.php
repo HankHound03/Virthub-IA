@@ -104,11 +104,18 @@ class WebtopAllocator
      * sirve de nada. Se ordena por carga y, a igualdad de carga, por la
      * asignacion mas antigua, de modo que los contenedores sin usar entren
      * primero y el reparto se mantenga equilibrado.
+     *
+     * El escritorio de administradores queda EXCLUIDO: es exclusivo de ellos. Sin
+     * esta exclusion un usuario normal podia acabar en ct0 y, a la inversa, al
+     * administrador se le denegaba su propio escritorio por estar ocupado.
      */
     public function pickAvailableContainer(): ?WebtopContainer
     {
+        $reservados = $this->reservedNames();
+
         $candidates = WebtopContainer::query()
             ->where('status', '!=', WebtopContainer::STATUS_OFFLINE)
+            ->when($reservados !== [], fn ($query) => $query->whereNotIn('name', $reservados))
             ->withCount('activeAssignments')
             ->withMax('activeAssignments as last_assigned_at', 'assigned_at')
             ->orderBy('active_assignments_count')
@@ -124,6 +131,46 @@ class WebtopAllocator
         }
 
         return null;
+    }
+
+    /**
+     * Nombres de escritorio reservados, que no entran en el reparto comun.
+     *
+     * Se declaran en CONTAINER_RESERVED (separados por comas). Por defecto se
+     * reserva el escritorio de administradores, que se deduce del indice
+     * configurado para ellos.
+     *
+     * @return list<string>
+     */
+    public function reservedNames(): array
+    {
+        $configurados = (string) env('CONTAINER_RESERVED', '');
+
+        $nombres = array_values(array_filter(
+            array_map('trim', explode(',', $configurados)),
+            static fn (string $n): bool => $n !== ''
+        ));
+
+        if ($nombres !== []) {
+            return $nombres;
+        }
+
+        // Respaldo: el escritorio del indice de administradores.
+        $urls = (array) config('virthub.containers.urls', []);
+        $indice = (int) config('virthub.containers.admin_index', 0);
+        $url = (string) ($urls[$indice] ?? '');
+
+        if ($url === '') {
+            return [];
+        }
+
+        // Puede ser un nombre ("ct0") o una URL completa.
+        $host = parse_url($url, PHP_URL_HOST);
+        $nombre = is_string($host) && $host !== ''
+            ? (explode('.', $host)[0] ?? '')
+            : ltrim($url, '/');
+
+        return $nombre !== '' ? [$nombre] : [];
     }
 
     /**
