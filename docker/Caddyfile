@@ -144,6 +144,56 @@ http://ct3.virthub.dpdns.org:8080 {
 	import webtop_proxy ct3 ct3:3000
 }
 
+http://ct5.virthub.dpdns.org:8080 {
+	import webtop_proxy ct5 ct5:3000
+}
+
+http://ct6.virthub.dpdns.org:8080 {
+	import webtop_proxy ct6 ct6:3000
+}
+
+http://ct7.virthub.dpdns.org:8080 {
+	import webtop_proxy ct7 ct7:3000
+}
+
+# --- ct8, ct9, ct10: escritorios del EQUIPO 2 (192.168.1.9) ---
+#
+# Estan en la misma red local, asi que se alcanzan por su IP y su puerto. No hace
+# falta un segundo tunel: el de este equipo llega a ellos.
+#
+# Cada uno publica un puerto distinto en esa maquina:
+#
+#   ct8 -> 192.168.1.9:3000
+#   ct9 -> 192.168.1.9:3100
+#   ct10 -> 192.168.1.9:3200
+#
+# OJO: su Selkies es DISTINTO al de los locales, y la ruta del WebSocket tambien.
+# Comprobado con peticiones de upgrade reales:
+#
+#   locales   ->  /websockets       (101 Switching Protocols)
+#   equipo 2  ->  /api/websockets   (101 Switching Protocols)
+#
+# El equipo 2 tambien expone /api/ws, pero es la senalizacion de WebRTC y responde
+# 409 ("WebRTC mode is inactive") porque corre en modo websockets. No es la ruta
+# del escritorio: no confundirlas si algo deja de cargar.
+#
+# Caddy reenvia la ruta tal cual, asi que cada uno encuentra la suya sin
+# configuracion adicional.
+#
+# Si su IP cambia, hay que actualizarla aqui: conviene fijarla por DHCP.
+
+http://ct8.virthub.dpdns.org:8080 {
+	import webtop_proxy ct8 192.168.1.9:3000
+}
+
+http://ct9.virthub.dpdns.org:8080 {
+	import webtop_proxy ct9 192.168.1.9:3100
+}
+
+http://ct10.virthub.dpdns.org:8080 {
+	import webtop_proxy ct10 192.168.1.9:3200
+}
+
 # --- ct4: maquina virtual con Windows 7 (dockurr/windows) ---
 #
 # Mismo control de acceso que los Webtop, pero OJO con dos diferencias:

@@ -135,6 +135,57 @@ services:
     networks:
       - virthub
 
+  # --- ct5, ct6, ct7 ---------------------------------------------------------
+  # Clones de los anteriores: mismo bloque, otra carpeta de datos.
+  #
+  # Cada uno necesita su PROPIA carpeta (/config): si compartieran una, los dos
+  # escribirian sobre el mismo home y se pisarian.
+  #
+  # Para anadir otro: copia un bloque, cambia el nombre y la carpeta, y anade su
+  # ruta en docker/Caddyfile.
+
+  ct5:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: ${TZ:-America/Mexico_City}
+      TITLE: "Escritorio ct5"
+    volumes:
+      - ${CONTAINER_DATA_DIR:-C:\webtop}\ct5:/config
+    networks:
+      - virthub
+
+  ct6:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: ${TZ:-America/Mexico_City}
+      TITLE: "Escritorio ct6"
+    volumes:
+      - ${CONTAINER_DATA_DIR:-C:\webtop}\ct6:/config
+    networks:
+      - virthub
+
+  ct7:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: ${TZ:-America/Mexico_City}
+      TITLE: "Escritorio ct7"
+    volumes:
+      - ${CONTAINER_DATA_DIR:-C:\webtop}\ct7:/config
+    networks:
+      - virthub
+
 volumes:
   app_storage:
   mariadb_data:
