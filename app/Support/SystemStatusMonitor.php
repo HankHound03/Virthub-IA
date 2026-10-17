@@ -196,7 +196,7 @@ class SystemStatusMonitor
         $targets = [];
 
         foreach ($containers as $name => $container) {
-            $targets[$name] = $this->probeUrl($name, (string) $container['url'], $container['port']);
+            $targets[$name] = $this->probeUrl($name, (string) $container['url'], $container['host'], $container['port']);
         }
 
         $online = [];
@@ -259,7 +259,7 @@ class SystemStatusMonitor
     /**
      * Escritorios registrados, en orden de nombre.
      *
-     * @return array<string, array{url: string, capacity: int|null}>
+     * @return array<string, array{url: string, host: string|null, port: int|null, capacity: int|null}>
      */
     private function registeredContainers(): array
     {
@@ -278,8 +278,11 @@ class SystemStatusMonitor
                 continue;
             }
 
+            $host = trim((string) ($row->internal_host ?? ''));
+
             $containers[$name] = [
                 'url' => (string) $row->url,
+                'host' => $host !== '' ? $host : null,
                 'port' => $row->internal_port === null ? null : (int) $row->internal_port,
                 'capacity' => $row->capacity === null ? null : (int) $row->capacity,
             ];
@@ -291,19 +294,27 @@ class SystemStatusMonitor
     /**
      * Direccion que se sondea para un escritorio.
      *
-     * Se prefiere la red interna de Docker (http://ct0:3000), que es la via real
-     * por la que Caddy lo alcanza. La URL publica solo se usa como respaldo, por
-     * si el escritorio vive en otra maquina.
+     * Se prefiere la red interna, porque es la via real por la que Caddy lo
+     * alcanza: http://ct0:3000 para los que corren en este equipo.
      *
-     * El puerto sale del propio contenedor: los Webtop usan 3000, pero la maquina
-     * virtual con Windows usa 8006. Darlo por hecho dejaba a Windows como caido.
+     * Los escritorios que viven en OTRA maquina declaran su host en
+     * 'internal_host' (por ejemplo 192.168.1.9). Antes se sondeaban por nombre
+     * (http://ct8:3000), que no resuelve fuera de la red de Docker, y aparecian
+     * como caidos aunque estuvieran funcionando.
+     *
+     * El puerto tambien sale del propio contenedor: los Webtop usan 3000, la
+     * maquina virtual con Windows 8006, y los del segundo equipo 3000, 3100,
+     * 3200 y 3300.
      */
-    private function probeUrl(string $name, string $publicUrl, ?int $port): string
+    private function probeUrl(string $name, string $publicUrl, ?string $host, ?int $port): string
     {
         $port = $port ?? (int) config('virthub.containers.internal_port', 3000);
 
-        if ($name !== '' && $port > 0) {
-            return sprintf('http://%s:%d/', $name, $port);
+        // El host declarado manda; si no hay, el nombre del contenedor.
+        $destino = $host !== null && $host !== '' ? $host : $name;
+
+        if ($destino !== '' && $port > 0) {
+            return sprintf('http://%s:%d/', $destino, $port);
         }
 
         return $publicUrl;

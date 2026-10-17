@@ -17,6 +17,7 @@ class WebtopContainer extends Model
         'name',
         'url',
         'internal_port',
+        'internal_host',
         'capacity',
         'status',
         'cpu_limit',
