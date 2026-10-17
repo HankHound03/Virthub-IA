@@ -167,18 +167,19 @@ http://ct7.virthub.dpdns.org:8080 {
 #   ct9 -> 192.168.1.9:3100
 #   ct10 -> 192.168.1.9:3200
 #
-# OJO: su Selkies es DISTINTO al de los locales, y la ruta del WebSocket tambien.
-# Comprobado con peticiones de upgrade reales:
+# OJO: la ruta del WebSocket depende de la version de Selkies de cada imagen, y ya
+# conviven dos. Comprobado con peticiones de upgrade reales:
 #
-#   locales   ->  /websockets       (101 Switching Protocols)
-#   equipo 2  ->  /api/websockets   (101 Switching Protocols)
+#   ubuntu-xfce (Selkies antiguo)  ->  /websockets
+#   ubuntu-mate (Selkies 2.0)      ->  /api/websockets
+#   equipo 2 (192.168.1.9)         ->  /api/websockets
 #
-# El equipo 2 tambien expone /api/ws, pero es la senalizacion de WebRTC y responde
-# 409 ("WebRTC mode is inactive") porque corre en modo websockets. No es la ruta
-# del escritorio: no confundirlas si algo deja de cargar.
+# Ninguna usa /api/ws: esa es la senalizacion de WebRTC y responde 409 ("WebRTC
+# mode is inactive") porque corren en modo websockets. No confundirlas si algo
+# deja de cargar.
 #
-# Caddy reenvia la ruta tal cual, asi que cada uno encuentra la suya sin
-# configuracion adicional.
+# Caddy reenvia la ruta tal cual, asi que cada escritorio encuentra la suya sin
+# configuracion adicional: solo hay que saber cual es al diagnosticar.
 #
 # Si su IP cambia, hay que actualizarla aqui: conviene fijarla por DHCP.
 

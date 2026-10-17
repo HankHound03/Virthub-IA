@@ -93,7 +93,8 @@ services:
   # nombre/su carpeta, y anade su ruta en docker/Caddyfile.
 
   ct0:
-    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    # Cambiado a Ubuntu Mate (antes ubuntu-xfce).
+    image: lscr.io/linuxserver/webtop:ubuntu-mate
     restart: unless-stopped
     shm_size: "1gb"
     environment:
