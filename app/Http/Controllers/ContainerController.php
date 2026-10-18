@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\WebtopContainer;
 use App\Support\ActiveUser;
 use App\Support\ContainerResolver;
 use App\Support\DesktopPass;
@@ -10,6 +11,7 @@ use App\Support\SecurityAudit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Throwable;
 
 /**
  * Acceso a los escritorios Webtop virtualizados.
@@ -37,13 +39,56 @@ class ContainerController extends Controller
             $guestRemainingSeconds = max(0, (int) $request->session()->get('guest_expires_at', 0) - time());
         }
 
+        // Solo el administrador recibe la lista de escritorios para probarlos.
+        // El resto de la vista no la necesita y no debe verla.
+        $esAdmin = ActiveUser::isAdmin($currentUser);
+
         return view('contenedor', [
             'currentUser' => $currentUser,
             'guestRemainingSeconds' => $guestRemainingSeconds,
             'ollamaEnabled' => $this->ollama->isEnabled(),
             'ollamaModel' => $this->ollama->model(),
-            'ollamaVisible' => ActiveUser::isAdmin($currentUser),
+            'ollamaVisible' => $esAdmin,
+            'adminDesktops' => $esAdmin ? $this->escritoriosParaAdmin() : [],
+            'currentDesktop' => $esAdmin
+                ? $this->resolver->containerNameFromUrl($this->resolver->urlFor($currentUser))
+                : null,
         ]);
+    }
+
+    /**
+     * Escritorios registrados, para el selector del administrador.
+     *
+     * Se ordena por nombre para que la lista sea estable entre cargas.
+     *
+     * @return list<array{name: string, host: string|null}>
+     */
+    private function escritoriosParaAdmin(): array
+    {
+        try {
+            $filas = WebtopContainer::query()->orderBy('name')->get();
+        } catch (Throwable) {
+            return [];
+        }
+
+        $lista = [];
+
+        foreach ($filas as $fila) {
+            $nombre = trim((string) $fila->name);
+
+            if ($nombre === '') {
+                continue;
+            }
+
+            $lista[] = [
+                'name' => $nombre,
+                'host' => $fila->internal_host !== null && trim((string) $fila->internal_host) !== ''
+                    ? (string) $fila->internal_host
+                    : null,
+            ];
+        }
+
+        return $lista;
     }
 
     public function launch(Request $request): RedirectResponse
@@ -67,6 +112,22 @@ class ContainerController extends Controller
         // no sirve: caduca, y ademas la aplicacion comprueba que el escritorio sea
         // el suyo.
         $contenedor = $this->resolver->containerNameFromUrl($url);
+
+        // El administrador puede pedir CUALQUIER escritorio por su nombre, para
+        // probarlos todos sin crear una cuenta por cada uno. A cualquier otro
+        // usuario se le ignora el parametro: sigue viendo solo el suyo.
+        $pedido = trim((string) $request->query('contenedor', ''));
+
+        if ($pedido !== '' && ActiveUser::isAdmin($currentUser)) {
+            $destino = WebtopContainer::query()->where('name', $pedido)->first();
+
+            // Se comprueba que exista: si no, se mantiene el suyo en lugar de
+            // emitir un pase hacia un escritorio fantasma.
+            if ($destino !== null) {
+                $url = (string) $destino->url;
+                $contenedor = $pedido;
+            }
+        }
         $pase = $this->pase->para((string) $currentUser['username'], (string) $contenedor);
 
         $destino = $url . (str_contains($url, '?') ? '&' : '?') . 'pase=' . urlencode($pase);

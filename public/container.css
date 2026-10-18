@@ -301,6 +301,52 @@ iframe {
   gap: 8px;
 }
 
+/*
+ * Selector de escritorios para administradores.
+ *
+ * Permite probar los once escritorios sin cambiar de cuenta. Solo lo ve el
+ * administrador; el permiso real lo comprueba el proxy en el servidor, asi que
+ * ocultarlo aqui es comodidad, no seguridad.
+ */
+.admin-desktop-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px 10px;
+  flex-shrink: 0;
+}
+
+.admin-desktop-picker-label {
+  font-family: Monocraft Nerd Font, monospace;
+  font-size: 12px;
+  color: var(--vh-text-muted, rgba(226, 240, 255, 0.7));
+  margin-right: 2px;
+}
+
+.admin-desktop-btn {
+  padding: 5px 11px;
+  border: 1px solid var(--vh-border);
+  border-radius: 8px;
+  background-color: var(--vh-button-bg);
+  color: var(--vh-text);
+  font-family: Monocraft Nerd Font, monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-desktop-btn:hover {
+  background-color: var(--vh-button-hover);
+}
+
+/* El que esta abierto ahora mismo. */
+.admin-desktop-btn.is-current {
+  border-color: rgba(117, 225, 160, 0.75);
+  background-color: rgba(117, 225, 160, 0.18);
+  color: #ffffff;
+}
+
 .ollama-card {
   margin: 10px 10px 0 10px;
   padding: 14px;

@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Support\ActiveUser;
 use App\Support\ContainerResolver;
+use App\Models\WebtopContainer;
 use App\Services\UserStore;
 use App\Support\DesktopPass;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Throwable;
 
 /**
  * Punto de control de acceso para el proxy inverso.
@@ -74,8 +76,23 @@ class ProxyAuthController extends Controller
         // Los invitados van a un contenedor compartido: se permite solo si es
         // exactamente el que les corresponde.
         if (! $coincide) {
+            // El administrador puede abrir CUALQUIER escritorio: es lo que usa
+            // para probarlos todos desde el selector de la pagina de contenedor.
+            //
+            // Aun asi se comprueba que el escritorio exista de verdad, para no
+            // emitir permiso hacia un nombre inventado. Un usuario normal sigue
+            // recibiendo 403 aqui, aunque manipule la peticion.
+            if (! ActiveUser::isAdmin($user)) {
+                return $this->deny('Ese escritorio no te pertenece.');
+            }
 
-            return $this->deny('Ese escritorio no te pertenece.');
+            if (! $this->escritorioExiste($requested)) {
+                return $this->deny('Ese escritorio no existe.');
+            }
+
+            // A partir de aqui el escritorio pedido pasa a ser el esperado: asi el
+            // pase se valida contra el que el administrador eligio.
+            $esperado = $requested;
         }
 
         // Con sesion no hace falta nada mas: el usuario ya esta identificado. El
@@ -91,6 +108,26 @@ class ProxyAuthController extends Controller
         }
 
         return $this->allow($user, $esperado);
+    }
+
+    /**
+     * Indica si un escritorio con ese nombre esta registrado.
+     *
+     * Se usa para el administrador: puede abrir cualquiera, pero solo si existe.
+     */
+    private function escritorioExiste(string $nombre): bool
+    {
+        $nombre = trim($nombre);
+
+        if ($nombre === '') {
+            return false;
+        }
+
+        try {
+            return WebtopContainer::query()->where('name', $nombre)->exists();
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     /**

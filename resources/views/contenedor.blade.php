@@ -106,6 +106,33 @@
                 <button type="button" class="container-load-btn" onclick="loadInIframe(true)">Recargar Contenedor</button>
                 <button type="button" class="container-load-btn" id="fullscreenToggle" onclick="toggleFullscreen()" title="Entrar en pantalla completa" aria-label="Alternar pantalla completa" aria-pressed="false">Pantalla Completa</button>
             </div>
+
+            {{--
+                Selector de escritorios, SOLO para administradores.
+
+                Sirve para probar los once escritorios sin tener que crear once
+                cuentas ni cambiar de sesion: al pulsar uno, se carga en el iframe
+                con un pase emitido para ese escritorio.
+
+                Un usuario normal no ve esto, y aunque forzara la peticion, el
+                control de acceso del proxy le devuelve 403: el permiso se
+                comprueba en el servidor, no aqui.
+            --}}
+            @if (($currentUser['role'] ?? 'user') === 'admin')
+                <div class="admin-desktop-picker">
+                    <span class="admin-desktop-picker-label">Probar escritorio:</span>
+
+                    @foreach (($adminDesktops ?? []) as $desktop)
+                        <button type="button"
+                                class="admin-desktop-btn{{ $desktop['name'] === ($currentDesktop ?? '') ? ' is-current' : '' }}"
+                                data-container="{{ $desktop['name'] }}"
+                                onclick="loadAdminDesktop('{{ $desktop['name'] }}')"
+                                title="Abrir {{ $desktop['name'] }}{{ $desktop['host'] ? ' (' . $desktop['host'] . ')' : '' }}">
+                            {{ $desktop['name'] }}
+                        </button>
+                    @endforeach
+                </div>
+            @endif
             {{--
                 sandbox sin 'allow-top-navigation': el escritorio no puede salirse
                 del marco. Sin esto, KasmVNC puede navegar al nivel superior y el
@@ -471,6 +498,25 @@
                 // vez antes de entregarlo.
                 iframe.src = '/contenedor/launch';
             }
+        }
+
+        /**
+         * Solo administradores: carga el escritorio indicado en el iframe.
+         *
+         * El nombre viaja como parametro y el servidor comprueba que sea admin
+         * antes de emitir el pase. Aqui no se decide nada: si un usuario normal
+         * llamara a esta funcion, el proxy responderia 403.
+         */
+        function loadAdminDesktop(nombre) {
+            const iframe = document.getElementById('viewer');
+            if (!iframe || !nombre) return;
+
+            iframe.src = '/contenedor/launch?contenedor=' + encodeURIComponent(nombre);
+
+            // Marcar cual esta abierto.
+            document.querySelectorAll('.admin-desktop-btn').forEach(btn => {
+                btn.classList.toggle('is-current', btn.dataset.container === nombre);
+            });
         }
 
         function getFullscreenElement() {
