@@ -199,7 +199,7 @@ http://ct11.virthub.dpdns.org:8080 {
 	import webtop_proxy ct11 192.168.1.9:3300
 }
 
-# --- ct4: maquina virtual con Windows 7 (dockurr/windows) ---
+# --- ct4: ahora es un escritorio Webtop mas (clon de ct0) ---
 #
 # Mismo control de acceso que los Webtop, pero OJO con dos diferencias:
 #
@@ -218,7 +218,7 @@ http://ct11.virthub.dpdns.org:8080 {
 # el alias en su configuracion) para no perder el control de acceso.
 
 http://ct4.virthub.dpdns.org:8080 {
-	import webtop_proxy ct4 windows7:8006
+	import webtop_proxy ct4 ct4:3000
 }
 
 # -----------------------------------------------------------------------------

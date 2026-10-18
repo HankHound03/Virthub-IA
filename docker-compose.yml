@@ -109,7 +109,7 @@ services:
       - virthub
 
   ct2:
-    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    image: virthub-desktop:clon
     restart: unless-stopped
     shm_size: "1gb"
     environment:
@@ -123,7 +123,7 @@ services:
       - virthub
 
   ct3:
-    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    image: virthub-desktop:clon
     restart: unless-stopped
     shm_size: "1gb"
     environment:
@@ -133,6 +133,23 @@ services:
       TITLE: "Escritorio ct3"
     volumes:
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct3:/config
+    networks:
+      - virthub
+
+  # ct4 era la maquina virtual con Windows (dockurr/windows). Ahora es un
+  # escritorio Webtop mas, clon de ct0. La VM de Windows se puede recuperar
+  # aparte con docker/windows7.yml si fuera necesaria.
+  ct4:
+    image: virthub-desktop:clon
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: ${TZ:-America/Mexico_City}
+      TITLE: "Escritorio ct4"
+    volumes:
+      - ${CONTAINER_DATA_DIR:-C:\webtop}\ct4:/config
     networks:
       - virthub
 
@@ -146,7 +163,7 @@ services:
   # ruta en docker/Caddyfile.
 
   ct5:
-    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    image: virthub-desktop:clon
     restart: unless-stopped
     shm_size: "1gb"
     environment:
@@ -160,7 +177,7 @@ services:
       - virthub
 
   ct6:
-    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    image: virthub-desktop:clon
     restart: unless-stopped
     shm_size: "1gb"
     environment:
@@ -174,7 +191,7 @@ services:
       - virthub
 
   ct7:
-    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    image: virthub-desktop:clon
     restart: unless-stopped
     shm_size: "1gb"
     environment:
