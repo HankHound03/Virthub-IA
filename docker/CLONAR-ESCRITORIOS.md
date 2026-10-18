@@ -46,28 +46,46 @@ puede entrar**: el 404 esta en `/api/websockets`, no en la pagina.
 
 ### El arreglo
 
-Basta con devolver la propiedad a las carpetas que lo necesitan. **Tarda menos de
-un segundo:**
+Devolver **todo** `/config` al usuario. Se hace en segundo plano y en paralelo en
+todos los contenedores a la vez:
 
 ```powershell
-docker exec virthub-ct2-1 sh -c "chown -R abc:abc /config/.config/pulse /config/.config/dconf /config/.dbus; chmod 700 /config/.config/pulse"
-docker restart virthub-ct2-1
+foreach ($c in @('ct2','ct5','ct6','ct7')) {
+    # -d: se ejecuta dentro del contenedor sin bloquear esta terminal
+    docker exec -d "virthub-$c-1" sh -c "chown -R abc:abc /config; touch /tmp/chown-hecho"
+}
+
+# Comprobar cuando termina
+docker exec virthub-ct2-1 test -f /tmp/chown-hecho && echo listo
+
+# Reiniciar para que los servicios arranquen con la propiedad correcta
+docker restart virthub-ct2-1 virthub-ct5-1 virthub-ct6-1 virthub-ct7-1
 ```
 
-No hace falta `chown -R /config` completo: son 158.000 archivos y tarda unos
-**12 minutos por contenedor** en un bind mount de Windows.
+Tarda unos **9 minutos** para cuatro contenedores en paralelo (158.000 archivos
+por contenedor sobre un bind mount de Windows). Uno solo tarda unos 12 minutos.
+
+**No basta con arreglar solo `/config/.config/pulse`.** Eso hace arrancar a
+Selkies y el WebSocket responde 101, pero luego las aplicaciones fallan una a una
+con errores del tipo:
+
+```
+The path for the directory containing caja settings need read and write
+permissions: /config/.config/caja
+```
+
+Caja (el gestor de archivos de MATE) es la primera que se queja, pero cualquier
+aplicacion que escriba en su carpeta de `/config/.config` dara un error parecido.
 
 ### Comprobar si un escritorio esta bien
 
 ```powershell
-# 101 = funciona. 404 = Selkies no arranco (propiedad mal).
-curl -s -o /dev/null -w '%{http_code}' --max-time 10 `
-  -H "Connection: Upgrade" -H "Upgrade: websocket" `
-  -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" `
-  http://localhost:8000/...   # o desde dentro de la red de Docker
+# 1. WebSocket: 101 = funciona. 404 = Selkies no arranco.
+# 2. Propiedad: no debe quedar nada de root.
+docker exec virthub-ct2-1 sh -c "find /config -maxdepth 2 -user root | wc -l"   # debe dar 0
 ```
 
-Y para ver el motivo:
+Y para ver el motivo de un fallo:
 
 ```powershell
 docker exec virthub-ct2-1 sh -c "s6-svstat /run/service/svc-pulseaudio"   # up / down
