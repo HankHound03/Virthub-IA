@@ -98,7 +98,13 @@ class ProxyAuthController extends Controller
         // Con sesion no hace falta nada mas: el usuario ya esta identificado. El
         // pase solo se exige cuando la sesion no llego (que es el caso habitual
         // en el subdominio del escritorio).
-        if (ActiveUser::isRegistered(ActiveUser::from($request))) {
+        //
+        // Los invitados tambien entran por aqui: si no, las peticiones del
+        // escritorio que no llevan el pase en la direccion (scripts, imagenes,
+        // websocket) se quedarian en 403 y el escritorio no cargaria.
+        $sesion = ActiveUser::from($request);
+
+        if (ActiveUser::isRegistered($sesion) || ActiveUser::isGuest($sesion)) {
             return $this->allow($user, $esperado);
         }
 
@@ -142,7 +148,18 @@ class ProxyAuthController extends Controller
     {
         $sesion = ActiveUser::from($request);
 
-        if (ActiveUser::isRegistered($sesion)) {
+        /*
+         * El invitado tambien cuenta.
+         *
+         * Antes solo se aceptaba al usuario "registrado", asi que un invitado
+         * nunca se identificaba por sesion. Y su pase tampoco servia, porque se
+         * revalidaba contra el almacen de usuarios, donde un invitado no existe:
+         * su cuenta es de sesion. Resultado: 403 en el escritorio del invitado.
+         *
+         * La caducidad ya la comprueba ResolveActiveUser al resolver la sesion,
+         * asi que un invitado caducado llega aqui como null.
+         */
+        if (ActiveUser::isRegistered($sesion) || ActiveUser::isGuest($sesion)) {
             return $sesion;
         }
 
@@ -150,6 +167,18 @@ class ProxyAuthController extends Controller
 
         if ($usuario === null) {
             return null;
+        }
+
+        // Invitado identificado por el pase. No se busca en el almacen porque no
+        // esta: la cuenta de invitado se crea en la sesion. El pase viene firmado
+        // con la clave de la aplicacion, asi que el nombre es fiable.
+        if ($this->esNombreDeInvitado($usuario)) {
+            return [
+                'id' => '',
+                'username' => $usuario,
+                'role' => 'guest',
+                'name' => $usuario,
+            ];
         }
 
         // Se revalida contra el almacen: la cuenta debe seguir existiendo y
@@ -166,6 +195,14 @@ class ProxyAuthController extends Controller
             'role' => (string) ($encontrado['role'] ?? 'user'),
             'name' => (string) ($encontrado['name'] ?? $encontrado['username']),
         ];
+    }
+
+    /**
+     * Nombre con la forma que genera AuthController::guestLogin: guest_ + 6 hex.
+     */
+    private function esNombreDeInvitado(string $usuario): bool
+    {
+        return (bool) preg_match('/^guest_[a-f0-9]{6}$/', $usuario);
     }
 
     /**
