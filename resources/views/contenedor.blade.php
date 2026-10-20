@@ -107,21 +107,21 @@
                 <button type="button" class="container-load-btn" id="fullscreenToggle" onclick="toggleFullscreen()" title="Entrar en pantalla completa" aria-label="Alternar pantalla completa" aria-pressed="false">Pantalla Completa</button>
 
                 {{--
-                    Abrir el escritorio en una pestana nueva.
+                    Abrir el escritorio en una ventana aparte.
 
-                    Apunta a /contenedor/launch, la misma ruta que usa el iframe:
-                    el servidor emite el pase y redirige al subdominio del
-                    escritorio que corresponda (ct0, ct2...). Asi el enlace no
-                    lleva ninguna direccion escrita a mano y siempre abre el que
-                    el usuario tiene asignado.
+                    No se abre el subdominio directamente: se abre una pagina
+                    nuestra (/contenedor/ventana) que pinta el escritorio dentro.
+                    Asi la barra de direcciones muestra virthub.dpdns.org y nunca
+                    ctX.virthub.dpdns.org.
 
-                    rel="noopener" para que la pestana nueva no pueda manipular
-                    esta (window.opener).
+                    El href se conserva como respaldo por si el navegador bloquea
+                    las ventanas emergentes: en ese caso se abre en una pestana.
                 --}}
-                <a class="container-load-btn" id="openNewTab"
-                   href="{{ url('/contenedor/launch') }}{{ ($currentUser['role'] ?? 'user') === 'admin' && !empty($currentDesktop) ? '?contenedor=' . urlencode((string) $currentDesktop) : '' }}"
+                <a class="container-load-btn" id="openWindow"
+                   href="{{ url('/contenedor/ventana') }}{{ ($currentUser['role'] ?? 'user') === 'admin' && !empty($currentDesktop) ? '?contenedor=' . urlencode((string) $currentDesktop) : '' }}"
                    target="_blank" rel="noopener"
-                   title="Abrir el escritorio en una pestana nueva">Pestana Nueva</a>
+                   onclick="return abrirVentanaEscritorio(event)"
+                   title="Abrir el escritorio en una ventana aparte">Ventana Nueva</a>
             </div>
 
             {{--
@@ -555,12 +555,50 @@
                 lista.value = nombre;
             }
 
-            // El boton de pestana nueva debe abrir el MISMO escritorio que se
+            // El boton de ventana nueva debe abrir el MISMO escritorio que se
             // esta viendo, no el que el usuario tenga asignado por defecto.
-            const abrir = document.getElementById('openNewTab');
+            const abrir = document.getElementById('openWindow');
             if (abrir) {
-                abrir.href = '/contenedor/launch?contenedor=' + encodeURIComponent(nombre);
+                abrir.href = '/contenedor/ventana?contenedor=' + encodeURIComponent(nombre);
             }
+        }
+
+        /**
+         * Abre el escritorio en una ventana aparte.
+         *
+         * Se usa una ventana con tamano fijo y sin barra de herramientas, para
+         * que se parezca a una aplicacion y no a una pestana mas. El navegador
+         * decide que marco muestra; la direccion visible sera la nuestra, porque
+         * la pagina que se abre vive en este mismo dominio.
+         *
+         * Devuelve false para que el enlace no navegue ademas en esta pestana.
+         */
+        function abrirVentanaEscritorio(evento) {
+            const enlace = document.getElementById('openWindow');
+            if (!enlace) return true;
+
+            const ancho = Math.min(1500, Math.max(900, Math.round(window.screen.availWidth * 0.9)));
+            const alto = Math.min(950, Math.max(600, Math.round(window.screen.availHeight * 0.9)));
+            const izquierda = Math.max(0, Math.round((window.screen.availWidth - ancho) / 2));
+            const arriba = Math.max(0, Math.round((window.screen.availHeight - alto) / 2));
+
+            // Un nombre fijo hace que se reutilice la MISMA ventana en vez de
+            // abrir una nueva cada vez que se pulsa.
+            const ventana = window.open(
+                enlace.href,
+                'virthub_escritorio',
+                `popup=yes,width=${ancho},height=${alto},left=${izquierda},top=${arriba},noopener`
+            );
+
+            if (ventana) {
+                if (evento) evento.preventDefault();
+                ventana.focus();
+                return false;
+            }
+
+            // Bloqueada por el navegador: se deja que el enlace siga su curso
+            // (se abrira como pestana normal).
+            return true;
         }
 
         function getFullscreenElement() {

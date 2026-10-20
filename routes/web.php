@@ -86,6 +86,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/contenedor', [ContainerController::class, 'show'])->name('container.show');
 Route::get('/contenedor/launch', [ContainerController::class, 'launch'])->name('container.launch');
 
+// Ventana aparte con el escritorio dentro. Vive en nuestro dominio para que la
+// direccion del contenedor no aparezca en la barra del navegador.
+Route::get('/contenedor/ventana', [ContainerController::class, 'ventana'])->name('container.ventana');
+
 // Limpieza del escritorio de invitado al terminar su tiempo. Solo borra la
 // informacion personal; las aplicaciones y la configuracion se conservan.
 // Cambio de contrasena obligatorio (cuenta creada con contrasena al azar).

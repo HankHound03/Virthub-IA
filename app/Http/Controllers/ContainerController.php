@@ -139,4 +139,47 @@ class ContainerController extends Controller
         // Cada escritorio vive en su propio subdominio: redireccion externa.
         return redirect()->away($destino);
     }
+
+    /**
+     * Ventana aparte con el escritorio dentro.
+     *
+     * Existe para no tener que enseñar el subdominio del contenedor.
+     *
+     * El navegador no deja abrir una ventana sin barra de direcciones (es una
+     * proteccion suya, no algo que la aplicacion pueda saltarse). Lo que si se
+     * puede es que esa barra muestre NUESTRO dominio: esta pagina vive en
+     * virthub.dpdns.org y pinta el escritorio en un marco a pantalla completa,
+     * asi que la direccion del contenedor no aparece en ningun momento.
+     *
+     * El marco lleva el mismo sandbox que el de la pagina normal, de modo que el
+     * escritorio tampoco puede navegar fuera por su cuenta.
+     */
+    public function ventana(Request $request): View|RedirectResponse
+    {
+        $currentUser = ActiveUser::from($request);
+
+        if ($currentUser === null) {
+            return redirect('/');
+        }
+
+        // Se reutiliza el mismo criterio que launch(): el administrador puede
+        // pedir un escritorio concreto y al resto se le entrega el suyo.
+        $contenedor = $this->resolver->containerNameFromUrl($this->resolver->urlFor($currentUser));
+        $pedido = trim((string) $request->query('contenedor', ''));
+
+        if ($pedido !== '' && ActiveUser::isAdmin($currentUser)) {
+            $existe = WebtopContainer::query()->where('name', $pedido)->exists();
+
+            if ($existe) {
+                $contenedor = $pedido;
+            }
+        }
+
+        return view('contenedor-ventana', [
+            'currentUser' => $currentUser,
+            'contenedor' => $contenedor,
+            'launchUrl' => url('/contenedor/launch')
+                . ($contenedor !== null && $contenedor !== '' ? '?contenedor=' . urlencode($contenedor) : ''),
+        ]);
+    }
 }
