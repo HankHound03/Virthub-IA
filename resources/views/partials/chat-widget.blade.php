@@ -284,10 +284,16 @@
             cursor: pointer;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 768px),
+               (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
+            /*
+             * El pie es fijo y ocupa la franja inferior de la pantalla, asi que
+             * el boton del chat se sube por encima de el. Antes ambos estaban a
+             * 8 px del borde y se dibujaban uno sobre otro.
+             */
             .global-chat-widget {
-                right: 8px;
-                bottom: 8px;
+                right: 10px;
+                bottom: 50px;
             }
 
             .global-chat-widget .chat-toggle {
@@ -308,11 +314,12 @@
                 font-size: 12px;
             }
 
+            /* El panel tambien necesita dejar libre la franja del pie. */
             .global-chat-widget .chat-panel.is-open {
                 width: min(92vw, 360px);
-                height: min(460px, calc(100vh - 110px));
-                min-height: 320px;
-                max-height: calc(100vh - 110px);
+                height: min(460px, calc(100vh - 170px));
+                min-height: 260px;
+                max-height: calc(100vh - 170px);
             }
 
             .chat-friend-request-item {

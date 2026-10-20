@@ -1554,6 +1554,13 @@ header h1 {
         gap: 8px;
         margin: 0 0 6px;
         padding: 10px 12px;
+        /*
+         * En un telefono el header deja de ser fijo. Ademas de comerse altura de
+         * forma permanente, al ser sticky tapaba la barra de acciones del
+         * escritorio (que queda debajo) y solo se veia el boton del chat, porque
+         * ese si lleva z-index propio.
+         */
+        position: static;
     }
 
     header .header-controls {

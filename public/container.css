@@ -748,6 +748,14 @@ body.dark-mode iframe {
   .container-toolbar .chat-toggle {
     flex: 0 0 auto;
     min-width: 46px;
+    /*
+     * El .chat-toggle general lleva z-index 1001 para flotar sobre la pagina (lo
+     * necesita el widget global). Dentro de esta barra no debe flotar: se pintaba
+     * por encima del header mientras los otros dos botones quedaban detras, y por
+     * eso solo se veia el del chat.
+     */
+    position: relative;
+    z-index: auto;
   }
 }
 

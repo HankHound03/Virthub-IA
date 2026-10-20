@@ -741,10 +741,79 @@
                 display: none !important;
             }
 
+            /*
+             * Tablas como tarjetas.
+             *
+             * Antes se les ponia min-width: 760px y habia que desplazar la
+             * pagina a lo ancho para ver la ultima columna (la fecha quedaba
+             * cortada). Ahora cada fila es una tarjeta y cada celda lleva su
+             * etiqueta arriba, tomada del atributo data-label: cabe todo sin
+             * desplazamiento horizontal.
+             */
+            .table-scroll {
+                overflow-x: visible;
+            }
+
             .users-table,
             .reports-table,
             .suggestions-table {
-                min-width: 760px;
+                display: block;
+                width: 100%;
+                min-width: 0;
+                font-size: 13px;
+            }
+
+            .users-table thead,
+            .reports-table thead,
+            .suggestions-table thead {
+                display: none;
+            }
+
+            .users-table tbody,
+            .reports-table tbody,
+            .suggestions-table tbody {
+                display: block;
+            }
+
+            .users-table tr,
+            .reports-table tr,
+            .suggestions-table tr {
+                display: block;
+                margin-bottom: 10px;
+                padding: 10px 12px;
+                border: 1px solid var(--vh-border);
+                border-radius: 10px;
+                background-color: rgba(0, 0, 0, 0.16);
+            }
+
+            .users-table td,
+            .reports-table td,
+            .suggestions-table td {
+                display: block;
+                padding: 4px 0;
+                border-bottom: none;
+                text-align: left;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
+            .users-table td::before,
+            .reports-table td::before,
+            .suggestions-table td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 1px;
+                color: var(--vh-text-soft);
+                font-size: 10px;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+
+            /* Los botones de cada tarjeta, uno al lado del otro y sin cortarse. */
+            .user-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
             }
 
             .admin-link-btn,
@@ -926,17 +995,17 @@
                 <tbody>
                     @forelse ($users as $user)
                         <tr>
-                            <td>{{ $user['username'] }}</td>
-                            <td>{{ $user['role'] }}</td>
-                            <td>{{ $user['last_login_at'] ?? 'Nunca' }}</td>
-                            <td>
+                            <td data-label="Username">{{ $user['username'] }}</td>
+                            <td data-label="Rol">{{ $user['role'] }}</td>
+                            <td data-label="Ultima conexion">{{ $user['last_login_at'] ?? 'Nunca' }}</td>
+                            <td data-label="Estado">
                                 @if ($user['is_active'])
                                     <span class="user-status status-active">✓ Activo</span>
                                 @else
                                     <span class="user-status status-inactive">✗ Desactivado</span>
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="Acciones">
                                 <div class="user-actions">
                                     @if ($user['is_active'])
                                         <button type="button" class="btn-deactivate" onclick="openConfirmation('deactivate', '{{ $user['username'] }}')">🔒 Desactivar</button>
@@ -949,7 +1018,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">No hay usuarios aun.</td>
+                            <td colspan="5" data-label="Usuarios">No hay usuarios aun.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -988,15 +1057,15 @@
                     <tbody>
                         @foreach ($forumReports as $report)
                             <tr>
-                                <td>{{ $report['reported_at'] ?: '-' }}</td>
-                                <td>{{ $report['reporter'] ?: '-' }}</td>
-                                <td class="report-reason">{{ $report['reason'] ?: 'Sin detalle' }}</td>
-                                <td>
+                                <td data-label="Fecha reporte">{{ $report['reported_at'] ?: '-' }}</td>
+                                <td data-label="Reportado por">{{ $report['reporter'] ?: '-' }}</td>
+                                <td data-label="Motivo" class="report-reason">{{ $report['reason'] ?: 'Sin detalle' }}</td>
+                                <td data-label="Post">
                                     <div><strong>{{ $report['post_title'] ?: 'Publicacion sin titulo' }}</strong></div>
                                     <div class="report-post-snippet">{{ \Illuminate\Support\Str::limit($report['post_content'] ?: '', 180) }}</div>
                                 </td>
-                                <td>{{ $report['post_author'] ?: '-' }}</td>
-                                <td>
+                                <td data-label="Autor post">{{ $report['post_author'] ?: '-' }}</td>
+                                <td data-label="Accion">
                                     <a class="admin-link-btn" href="{{ url('/foro') }}">Ir al foro</a>
                                     <form class="report-delete-form" method="POST" action="{{ url('/admin/forum-reports/delete') }}">
                                         @csrf
@@ -1042,10 +1111,10 @@
                     <tbody>
                         @foreach (($suggestions ?? []) as $suggestion)
                             <tr>
-                                <td>{{ $suggestion['created_at'] ?? '-' }}</td>
-                                <td>{{ ($suggestion['author_mode'] ?? 'anonymous') === 'identified' ? 'Identificado' : 'Anonimo' }}</td>
-                                <td>{{ $suggestion['author'] ?? 'Anonimo' }}</td>
-                                <td class="suggestion-text">{{ $suggestion['message'] ?? '' }}</td>
+                                <td data-label="Fecha">{{ $suggestion['created_at'] ?? '-' }}</td>
+                                <td data-label="Modo">{{ ($suggestion['author_mode'] ?? 'anonymous') === 'identified' ? 'Identificado' : 'Anonimo' }}</td>
+                                <td data-label="Autor">{{ $suggestion['author'] ?? 'Anonimo' }}</td>
+                                <td data-label="Sugerencia" class="suggestion-text">{{ $suggestion['message'] ?? '' }}</td>
                             </tr>
                         @endforeach
                     </tbody>
