@@ -127,7 +127,7 @@
                                 class="admin-desktop-btn{{ $desktop['name'] === ($currentDesktop ?? '') ? ' is-current' : '' }}"
                                 data-container="{{ $desktop['name'] }}"
                                 onclick="loadAdminDesktop('{{ $desktop['name'] }}')"
-                                title="Abrir {{ $desktop['name'] }}{{ $desktop['host'] ? ' (' . $desktop['host'] . ')' : '' }}">
+                                title="Abrir {{ $desktop['name'] }}">
                             {{ $desktop['name'] }}
                         </button>
                     @endforeach

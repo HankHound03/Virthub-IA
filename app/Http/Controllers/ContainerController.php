@@ -61,7 +61,11 @@ class ContainerController extends Controller
      *
      * Se ordena por nombre para que la lista sea estable entre cargas.
      *
-     * @return list<array{name: string, host: string|null}>
+     * Solo se envia el nombre. La direccion interna de cada escritorio no sale
+     * del servidor: al navegador no le aporta nada y no conviene publicar la red
+     * local en la pagina.
+     *
+     * @return list<array{name: string}>
      */
     private function escritoriosParaAdmin(): array
     {
@@ -80,12 +84,7 @@ class ContainerController extends Controller
                 continue;
             }
 
-            $lista[] = [
-                'name' => $nombre,
-                'host' => $fila->internal_host !== null && trim((string) $fila->internal_host) !== ''
-                    ? (string) $fila->internal_host
-                    : null,
-            ];
+            $lista[] = ['name' => $nombre];
         }
 
         return $lista;

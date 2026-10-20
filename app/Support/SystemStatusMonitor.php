@@ -193,25 +193,41 @@ class SystemStatusMonitor
             return [];
         }
 
+        // Los escritorios de otra maquina necesitan mas margen que los locales.
+        //
+        // Los locales viven en la red de Docker y contestan en milisegundos; los
+        // remotos cruzan la red local, y se ha medido hasta 2,6 s solo para que el
+        // sistema rechace una conexion. Con el mismo margen de 3 s que los locales
+        // se marcaban como caidos estando perfectamente activos.
+        $timeoutRemoto = max(
+            $timeout,
+            (int) config('virthub.status.probe_timeout_remote_seconds', 8)
+        );
+
         $targets = [];
 
         foreach ($containers as $name => $container) {
-            $targets[$name] = $this->probeUrl($name, (string) $container['url'], $container['host'], $container['port']);
+            $esRemoto = $container['host'] !== null && $container['host'] !== '';
+
+            $targets[$name] = [
+                'url' => $this->probeUrl($name, (string) $container['url'], $container['host'], $container['port']),
+                'timeout' => $esRemoto ? $timeoutRemoto : $timeout,
+            ];
         }
 
         $online = [];
 
         try {
-            $responses = Http::pool(function (Pool $pool) use ($targets, $timeout): array {
+            $responses = Http::pool(function (Pool $pool) use ($targets): array {
                 $pending = [];
 
-                foreach ($targets as $name => $url) {
+                foreach ($targets as $name => $target) {
                     // Un 403 o un 401 no es un fallo de transporte: el escritorio
                     // esta vivo. No se deja que Lance la excepcion.
                     $pending[] = $pool->as((string) $name)
-                        ->timeout($timeout)
+                        ->timeout($target['timeout'])
                         ->withOptions(['http_errors' => false])
-                        ->get($url);
+                        ->get($target['url']);
                 }
 
                 return $pending;

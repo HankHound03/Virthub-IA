@@ -287,6 +287,11 @@ return [
     'status' => [
         'cache_seconds' => (int) env('STATUS_CACHE_SECONDS', 15),
         'probe_timeout_seconds' => (int) env('STATUS_PROBE_TIMEOUT', 3),
+
+            // Los escritorios de otra maquina necesitan mas margen: cruzar la red
+            // local es mas lento que la red interna de Docker. Con el mismo
+            // margen que los locales se marcaban caidos estando activos.
+            'probe_timeout_remote_seconds' => (int) env('STATUS_PROBE_TIMEOUT_REMOTE', 8),
     ],
 
     /*

@@ -162,4 +162,31 @@ class AdminDesktopPickerTest extends TestCase
         );
         $this->assertStringNotContainsString($otro . '.virthub', $destino);
     }
+
+    public function test_la_pagina_no_expone_la_direccion_interna_de_los_escritorios(): void
+    {
+        // Los escritorios del segundo equipo declaran su IP en internal_host.
+        // Esa direccion no debe llegar nunca al navegador: no aporta nada al
+        // usuario y publica la red local.
+        WebtopContainer::create([
+            'name' => 'ct8',
+            'url' => 'https://ct8.virthub.dpdns.org/',
+            'internal_host' => '192.168.1.9',
+            'internal_port' => 3000,
+            'status' => WebtopContainer::STATUS_AVAILABLE,
+            'capacity' => 1,
+        ]);
+
+        $this->containers();
+        $this->user('admin', 'admin');
+
+        $html = $this->withSession(['auth_user' => ['username' => 'admin', 'role' => 'admin']])
+            ->get('/contenedor')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('ct8', $html, 'El boton del escritorio debe aparecer.');
+        $this->assertStringNotContainsString('192.168.1.9', $html, 'La IP interna no debe salir al navegador.');
+        $this->assertStringNotContainsString('internal_host', $html);
+    }
 }
