@@ -165,7 +165,8 @@
             color: var(--vh-panel-text);
         }
 
-        @media (max-width: 760px) {
+        @media (max-width: 760px),
+        (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
             .profile-page {
                 grid-template-columns: 1fr;
                 gap: 10px;

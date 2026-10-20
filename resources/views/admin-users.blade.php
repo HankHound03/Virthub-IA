@@ -690,7 +690,8 @@
             background-color: rgba(222, 102, 102, 0.95);
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 900px),
+        (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
             .admin-wrapper {
                 grid-template-columns: 1fr;
                 min-height: auto;

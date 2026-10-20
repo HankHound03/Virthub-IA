@@ -1513,7 +1513,16 @@ header h1 {
     box-sizing: border-box;
 }
 
-@media (max-width: 768px) {
+/*
+ * Movil y tableta, en vertical y en horizontal.
+ *
+ * Solo con max-width no bastaba: un telefono en horizontal mide unos 912 px de
+ * ancho, se pasa del corte de 768 y recibia el diseno de escritorio, que no cabe
+ * (el menu se apilaba en vertical). Por eso tambien se mira la altura: una
+ * pantalla baja con poco alto es un telefono, no un monitor.
+ */
+@media (max-width: 768px),
+       (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
     /*
      * El pie y el boton de chat son fijos: sin este margen la ultima tarjeta
      * quedaba tapada por ellos (se veia cortada en el telefono).
@@ -1790,6 +1799,36 @@ header h1 {
 
     .login-screen input {
         width: 72%;
+    }
+}
+
+/*
+ * Refinamiento para telefono en horizontal.
+ *
+ * Aqui el recurso escaso es la ALTURA: el header de tres filas se comia un tercio
+ * de la pantalla. Como de ancho va sobrado, el buscador sube a la primera fila y
+ * el header se queda en dos.
+ */
+@media (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
+    header {
+        grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+        padding: 8px 10px;
+        gap: 8px;
+    }
+
+    header .header-friend-search {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    header .header-login-button {
+        grid-column: 2;
+        grid-row: 1;
+        width: auto;
+    }
+
+    header .navbar {
+        grid-row: 2;
     }
 }
 

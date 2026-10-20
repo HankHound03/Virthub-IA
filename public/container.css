@@ -628,7 +628,8 @@ body.dark-mode iframe {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px),
+       (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
   .container-wrapper {
     flex-direction: column;
     height: auto;
@@ -942,7 +943,8 @@ body.dark-mode iframe {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px),
+       (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
   .chat-notification-item {
     width: calc(100vw - 36px);
     max-width: 320px;
