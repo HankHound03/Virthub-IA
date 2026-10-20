@@ -585,6 +585,7 @@
             if (!label) return;
 
             let remaining = Number(label.dataset.guestRemaining || 0);
+            let avisadoUnMinuto = false;
 
             function render() {
                 const minutes = Math.floor(remaining / 60);
@@ -600,11 +601,61 @@
                 remaining = Math.max(0, remaining - 1);
                 render();
 
+                // Aviso al minuto: se muestra una sola vez. Se comprueba con
+                // <= 60 y > 0 para no repetirlo en cada tic.
+                if (!avisadoUnMinuto && remaining <= 60 && remaining > 0) {
+                    avisadoUnMinuto = true;
+                    mostrarAvisoInvitado('La sesion esta por terminar', 'Te queda 1 minuto. Cuando llegue a cero, este escritorio se cerrara y se borrara su informacion personal.');
+                }
+
                 if (remaining <= 0) {
                     clearInterval(timer);
-                    label.textContent = 'Tiempo de invitado expirado. Recarga para continuar.';
+                    label.textContent = 'Tiempo de invitado expirado.';
+                    mostrarAvisoInvitado('Sesion finalizada', 'Tu tiempo como invitado termino y se borro la informacion personal de este escritorio.');
+                    limpiarEscritorioInvitado();
                 }
             }, 1000);
+        }
+
+        /* Aviso flotante para el invitado (mismo estilo de tarjeta que el resto). */
+        function mostrarAvisoInvitado(titulo, texto) {
+            const modal = document.getElementById('guestWarningModal');
+            if (!modal) return;
+
+            const h = document.getElementById('guestWarningTitle');
+            const p = document.getElementById('guestWarningText');
+            if (h) h.textContent = titulo;
+            if (p) p.textContent = texto;
+
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function cerrarAvisoInvitado() {
+            const modal = document.getElementById('guestWarningModal');
+            if (!modal) return;
+
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        /*
+         * Pide al servidor que borre la informacion personal del escritorio de
+         * invitado. Si falla no se avisa al usuario: es una limpieza, no una
+         * accion que el necesite saber.
+         */
+        async function limpiarEscritorioInvitado() {
+            try {
+                await fetch('/invitado/limpiar', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json',
+                    },
+                });
+            } catch (error) {
+                // Sin ruido: la limpieza se reintenta en el siguiente acceso.
+            }
         }
 
         function toggleChat() {
@@ -1137,5 +1188,20 @@
         document.addEventListener('webkitfullscreenchange', syncFullscreenButtonState);
         document.addEventListener('MSFullscreenChange', syncFullscreenButtonState);
     </script>
+    {{--
+        Aviso del invitado.
+
+        Aparece cuando queda un minuto y tambien al llegar a cero. Solo es un
+        mensaje con un boton para cerrarlo, sin formularios.
+    --}}
+    @if (($currentUser['role'] ?? 'user') === 'guest')
+        <div class="guest-warning-modal" id="guestWarningModal" aria-hidden="true">
+            <div class="guest-warning-card" role="dialog" aria-modal="true" aria-labelledby="guestWarningTitle">
+                <h3 id="guestWarningTitle">La sesion esta por terminar</h3>
+                <p id="guestWarningText">Te queda 1 minuto.</p>
+                <button type="button" class="guest-warning-close" onclick="cerrarAvisoInvitado()">Entendido</button>
+            </div>
+        </div>
+    @endif
 </body>
 </html>

@@ -54,6 +54,10 @@ services:
       start_period: 40s
     volumes:
       - app_storage:/var/www/html/storage
+      # Carpeta del escritorio de invitado, montada para poder borrar su
+      # informacion personal al terminar la sesion. La aplicacion corre en otro
+      # contenedor y sin este montaje no alcanza esos archivos.
+      - ${GUEST_DATA_DIR:-C:\webtop\ct7}:/guest-data
     networks:
       - virthub
 

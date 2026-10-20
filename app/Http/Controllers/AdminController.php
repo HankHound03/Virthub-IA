@@ -68,7 +68,15 @@ class AdminController extends Controller
         }
 
         try {
-            $created = $this->users->createUser($username, $password, $role, (string) ($validated['name'] ?? ''));
+            $created = $this->users->createUser(
+            $username,
+            $password,
+            $role,
+            (string) ($validated['name'] ?? ''),
+            // Si la contrasena la genero el sistema, quien creo la cuenta la
+            // conoce: se le pedira al dueño que ponga una suya al entrar.
+            $useRandomPassword,
+        );
 
             $message = "Usuario creado: {$created['username']} ({$created['role']})";
 

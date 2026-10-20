@@ -8,7 +8,9 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ContainerController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\FriendController;
+use App\Http\Controllers\GuestWorkspaceController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PasswordChangeController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProxyAuthController;
@@ -83,6 +85,15 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/contenedor', [ContainerController::class, 'show'])->name('container.show');
 Route::get('/contenedor/launch', [ContainerController::class, 'launch'])->name('container.launch');
+
+// Limpieza del escritorio de invitado al terminar su tiempo. Solo borra la
+// informacion personal; las aplicaciones y la configuracion se conservan.
+// Cambio de contrasena obligatorio (cuenta creada con contrasena al azar).
+Route::get('/cambiar-password', [PasswordChangeController::class, 'show'])->name('password.change');
+Route::post('/cambiar-password', [PasswordChangeController::class, 'update'])->name('password.change.update');
+Route::post('/invitado/limpiar', [GuestWorkspaceController::class, 'limpiar'])
+    ->middleware('throttle:20,1')
+    ->name('invitado.limpiar');
 
 // ---------------------------------------------------------------------------
 // Pase de acceso a un escritorio

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\TwoFactorService;
 use App\Services\UserStore;
 use App\Support\ActiveUser;
+use App\Support\GuestWorkspace;
 use App\Support\SecurityAudit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -143,6 +144,21 @@ class AuthController extends Controller
 
         $guestName = 'guest_' . substr(bin2hex(random_bytes(3)), 0, 6);
         $minutes = max(1, (int) config('virthub.guests.session_minutes', 30));
+
+        /*
+         * Cada invitado empieza con el escritorio limpio.
+         *
+         * Todos comparten el mismo contenedor, asi que si el anterior se fue sin
+         * que su tiempo expirara (cerro el navegador, por ejemplo) sus archivos
+         * seguirian ahi. Limpiar al entrar garantiza que nadie vea lo del
+         * anterior, sin depender de que la limpieza por tiempo llegara a correr.
+         */
+        try {
+            app(GuestWorkspace::class)->limpiar();
+        } catch (Throwable $e) {
+            // Nunca debe impedir que el invitado entre.
+            logger()->warning('No se pudo limpiar el escritorio de invitado al entrar: ' . $e->getMessage());
+        }
 
         $request->session()->put('auth_user', [
             'username' => $guestName,
@@ -431,8 +447,28 @@ class AuthController extends Controller
         $this->users->recordLogin((string) $authUser['username']);
         $this->audit->log($request, $auditEvent, $authUser);
 
-        return $request->expectsJson()
-            ? response()->json(['authenticated' => true])
-            : redirect('/')->with('success', $successMessage);
+        /*
+         * Si la cuenta se creo con contrasena generada al azar, la conoce quien
+         * la creo. Antes de dejar trabajar se le pide al dueño que ponga una
+         * suya. Solo pasa en ese caso: si el administrador escribio la contrasena
+         * a mano, se respeta tal cual.
+         */
+        $debeCambiar = (bool) \App\Models\User::query()
+            ->where('username', (string) $authUser['username'])
+            ->value('must_change_password');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'authenticated' => true,
+                'must_change_password' => $debeCambiar,
+            ]);
+        }
+
+        if ($debeCambiar) {
+            return redirect('/cambiar-password')
+                ->with('success', 'Entraste con una contrasena generada. Elige una nueva para continuar.');
+        }
+
+        return redirect('/')->with('success', $successMessage);
     }
 }

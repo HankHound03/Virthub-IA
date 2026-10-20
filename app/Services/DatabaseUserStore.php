@@ -108,7 +108,13 @@ class DatabaseUserStore extends JsonUserStore
         $this->requireUser($username)->update(['last_seen_at' => now()]);
     }
 
-    public function createUser(string $username, string $password, string $role = 'user', ?string $name = null): array
+    public function createUser(
+        string $username,
+        string $password,
+        string $role = 'user',
+        ?string $name = null,
+        bool $mustChangePassword = false,
+    ): array
     {
         $username = trim($username);
         if ($username === '' || $password === '') {
@@ -125,6 +131,9 @@ class DatabaseUserStore extends JsonUserStore
             'password' => $password,
             'role' => $role === 'admin' ? 'admin' : 'user',
             'is_active' => true,
+            // Solo se marca cuando la contrasena la genero el sistema: en ese
+            // caso la conoce quien creo la cuenta y debe cambiarla al entrar.
+            'must_change_password' => $mustChangePassword,
             'profile_frame_color' => '#6ea8ff',
         ]);
 

@@ -968,3 +968,74 @@ body.dark-mode iframe {
     right: 8px;
   }
 }
+
+/*
+ * Aviso del invitado.
+ *
+ * Se muestra cuando queda un minuto y al expirar la sesion. Va centrado y por
+ * encima de todo, incluido el escritorio remoto, que es un iframe.
+ */
+.guest-warning-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background-color: rgba(4, 10, 18, 0.62);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.24s ease, visibility 0.24s ease;
+  /* Por encima del iframe del escritorio y del chat. */
+  z-index: 3000;
+}
+
+.guest-warning-modal.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.guest-warning-card {
+  width: min(94vw, 420px);
+  box-sizing: border-box;
+  padding: 20px;
+  border: 1px solid rgba(255, 196, 92, 0.55);
+  border-radius: 14px;
+  background-color: var(--vh-surface, #10202c);
+  color: var(--vh-text, #eaf4ff);
+  font-family: Monocraft Nerd Font, monospace;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.guest-warning-card h3 {
+  margin: 0 0 10px;
+  font-size: 17px;
+  color: #ffd88a;
+}
+
+.guest-warning-card p {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--vh-panel-text, #cfe4f5);
+}
+
+.guest-warning-close {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--vh-border, rgba(255, 255, 255, 0.18));
+  border-radius: 10px;
+  background-color: var(--vh-button-bg, rgba(255, 255, 255, 0.08));
+  color: var(--vh-text, #eaf4ff);
+  font-family: Monocraft Nerd Font, monospace;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.guest-warning-close:hover {
+  background-color: var(--vh-button-hover, rgba(255, 255, 255, 0.16));
+}
