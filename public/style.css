@@ -1514,52 +1514,124 @@ header h1 {
 }
 
 @media (max-width: 768px) {
+    /*
+     * El pie y el boton de chat son fijos: sin este margen la ultima tarjeta
+     * quedaba tapada por ellos (se veia cortada en el telefono).
+     */
     body {
         padding-left: 3%;
         padding-right: 3%;
+        padding-bottom: 104px;
         overflow-x: hidden;
     }
 
+    /*
+     * Header en movil: tres filas compactas en vez de cinco.
+     *
+     * Antes cada pieza caia en su propia fila (avatar, iconos, buscador, logo y
+     * menu), lo que ocupaba media pantalla antes de llegar al contenido. Ahora:
+     *
+     *   fila 1: logo a la izquierda, iconos y avatar a la derecha
+     *   fila 2: buscador a todo el ancho
+     *   fila 3: menu de navegacion
+     *
+     * Se usa display:contents en .header-controls para que sus hijos entren
+     * directamente en la rejilla del header, sin cambiar el HTML.
+     */
     header {
-        margin: 0 0 5px;
-        padding: 12px 10px;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: auto 1fr auto auto auto;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 6px;
+        padding: 10px 12px;
     }
 
     header .header-controls {
-        display: grid;
-        grid-template-columns: repeat(2, 44px);
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-        margin: 0;
-        order: -1;
+        display: contents;
+    }
+
+    header h1 {
+        grid-column: 1;
+        grid-row: 1;
+        justify-self: start;
+        width: auto;
+        overflow-wrap: normal;
+        text-align: left;
+    }
+
+    .brand-mark a {
+        height: 44px;
+        justify-content: flex-start;
+    }
+
+    .brand-logo {
+        width: 104px;
+        height: 44px;
+    }
+
+    header .theme-toggle {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    header .retro-toggle {
+        grid-column: 4;
+        grid-row: 1;
+        display: inline-flex;
     }
 
     header .header-profile-dock {
-        grid-column: 1 / -1;
+        grid-column: 5;
         grid-row: 1;
-        justify-self: center;
-        order: -1;
+    }
+
+    /* El avatar del header mide 76 px, que en un telefono es desproporcionado. */
+    header .header-profile-dock .profile-aero-frame {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+    }
+
+    header .profile-aero-frame span {
+        font-size: 17px;
     }
 
     header .header-friend-search {
         grid-column: 1 / -1;
-        grid-row: 3;
+        grid-row: 2;
         width: 100%;
+        gap: 6px;
     }
 
     header .header-friend-search input {
-        width: 100%;
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    /* La lupa quedaba como un cuadro suelto de 8 px; se le da area de toque. */
+    header .header-friend-search button {
+        flex: 0 0 auto;
+        padding: 9px 14px;
+        font-size: 15px;
+        line-height: 1;
     }
 
     header .header-login-button {
         grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+    }
+
+    header .navbar {
+        grid-column: 1 / -1;
         grid-row: 3;
         width: 100%;
+        padding: 0;
+        justify-content: center;
+        gap: 8px;
     }
 
     .header-login-modal {
@@ -1572,44 +1644,6 @@ header h1 {
         overflow-y: auto;
         padding: 18px;
         box-sizing: border-box;
-    }
-
-    header h1 {
-        order: 0;
-        width: 100%;
-        overflow-wrap: anywhere;
-        text-align: center;
-    }
-
-    .brand-mark a {
-        justify-content: center;
-    }
-
-    .brand-logo {
-        width: 150px;
-        height: 64px;
-    }
-
-    .navbar {
-        order: 1;
-        width: 100%;
-        padding: 0;
-        justify-content: center;
-    }
-
-    .header-controls {
-        order: -1;
-    }
-
-    .retro-toggle {
-        grid-column: 2;
-        grid-row: 2;
-        display: inline-flex;
-    }
-
-    .theme-toggle {
-        grid-column: 1;
-        grid-row: 2;
     }
 
     .welcome-gadget {
@@ -1666,6 +1700,9 @@ header h1 {
     footer {
         left: 3%;
         right: 3%;
+        bottom: 6px;
+        padding: 7px 0;
+        font-size: 12px;
     }
 
     .gadget,
