@@ -105,6 +105,23 @@
 
                 <button type="button" class="container-load-btn" onclick="loadInIframe(true)">Recargar Contenedor</button>
                 <button type="button" class="container-load-btn" id="fullscreenToggle" onclick="toggleFullscreen()" title="Entrar en pantalla completa" aria-label="Alternar pantalla completa" aria-pressed="false">Pantalla Completa</button>
+
+                {{--
+                    Abrir el escritorio en una pestana nueva.
+
+                    Apunta a /contenedor/launch, la misma ruta que usa el iframe:
+                    el servidor emite el pase y redirige al subdominio del
+                    escritorio que corresponda (ct0, ct2...). Asi el enlace no
+                    lleva ninguna direccion escrita a mano y siempre abre el que
+                    el usuario tiene asignado.
+
+                    rel="noopener" para que la pestana nueva no pueda manipular
+                    esta (window.opener).
+                --}}
+                <a class="container-load-btn" id="openNewTab"
+                   href="{{ url('/contenedor/launch') }}{{ ($currentUser['role'] ?? 'user') === 'admin' && !empty($currentDesktop) ? '?contenedor=' . urlencode((string) $currentDesktop) : '' }}"
+                   target="_blank" rel="noopener"
+                   title="Abrir el escritorio en una pestana nueva">Pestana Nueva</a>
             </div>
 
             {{--
@@ -536,6 +553,13 @@
             const lista = document.querySelector('.admin-desktop-select');
             if (lista) {
                 lista.value = nombre;
+            }
+
+            // El boton de pestana nueva debe abrir el MISMO escritorio que se
+            // esta viendo, no el que el usuario tenga asignado por defecto.
+            const abrir = document.getElementById('openNewTab');
+            if (abrir) {
+                abrir.href = '/contenedor/launch?contenedor=' + encodeURIComponent(nombre);
             }
         }
 

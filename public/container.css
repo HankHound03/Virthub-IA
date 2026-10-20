@@ -1039,3 +1039,23 @@ body.dark-mode iframe {
 .guest-warning-close:hover {
   background-color: var(--vh-button-hover, rgba(255, 255, 255, 0.16));
 }
+/*
+ * El boton de pestana nueva es un enlace, no un boton.
+ *
+ * Sin esto quedaria como texto con relleno: en linea, sin centrar y con el
+ * subrayado del enlace. Se iguala a los demas botones de la barra.
+ */
+a.container-load-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-decoration: none;
+}
+
+a.container-load-btn:visited,
+a.container-load-btn:hover,
+a.container-load-btn:active {
+  color: var(--vh-text);
+  text-decoration: none;
+}
