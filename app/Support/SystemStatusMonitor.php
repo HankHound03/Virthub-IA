@@ -314,7 +314,7 @@ class SystemStatusMonitor
      * alcanza: http://ct0:3000 para los que corren en este equipo.
      *
      * Los escritorios que viven en OTRA maquina declaran su host en
-     * 'internal_host' (por ejemplo 192.168.1.9). Antes se sondeaban por nombre
+     * 'internal_host' (por ejemplo 192.168.1.100). Antes se sondeaban por nombre
      * (http://ct8:3000), que no resuelve fuera de la red de Docker, y aparecian
      * como caidos aunque estuvieran funcionando.
      *

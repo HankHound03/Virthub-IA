@@ -156,23 +156,23 @@ http://ct7.virthub.dpdns.org:8080 {
 	import webtop_proxy ct7 ct7:3000
 }
 
-# --- ct8, ct9, ct10: escritorios del EQUIPO 2 (192.168.1.9) ---
+# --- ct8, ct9, ct10: escritorios del EQUIPO 2 (192.168.1.100) ---
 #
 # Estan en la misma red local, asi que se alcanzan por su IP y su puerto. No hace
 # falta un segundo tunel: el de este equipo llega a ellos.
 #
 # Cada uno publica un puerto distinto en esa maquina:
 #
-#   ct8 -> 192.168.1.9:3000
-#   ct9 -> 192.168.1.9:3100
-#   ct10 -> 192.168.1.9:3200
+#   ct8 -> 192.168.1.100:3000
+#   ct9 -> 192.168.1.100:3100
+#   ct10 -> 192.168.1.100:3200
 #
 # OJO: la ruta del WebSocket depende de la version de Selkies de cada imagen, y ya
 # conviven dos. Comprobado con peticiones de upgrade reales:
 #
 #   ubuntu-xfce (Selkies antiguo)  ->  /websockets
 #   ubuntu-mate (Selkies 2.0)      ->  /api/websockets
-#   equipo 2 (192.168.1.9)         ->  /api/websockets
+#   equipo 2 (192.168.1.100)         ->  /api/websockets
 #
 # Ninguna usa /api/ws: esa es la senalizacion de WebRTC y responde 409 ("WebRTC
 # mode is inactive") porque corren en modo websockets. No confundirlas si algo
@@ -184,19 +184,19 @@ http://ct7.virthub.dpdns.org:8080 {
 # Si su IP cambia, hay que actualizarla aqui: conviene fijarla por DHCP.
 
 http://ct8.virthub.dpdns.org:8080 {
-	import webtop_proxy ct8 192.168.1.9:3000
+	import webtop_proxy ct8 192.168.1.100:3000
 }
 
 http://ct9.virthub.dpdns.org:8080 {
-	import webtop_proxy ct9 192.168.1.9:3100
+	import webtop_proxy ct9 192.168.1.100:3100
 }
 
 http://ct10.virthub.dpdns.org:8080 {
-	import webtop_proxy ct10 192.168.1.9:3200
+	import webtop_proxy ct10 192.168.1.100:3200
 }
 
 http://ct11.virthub.dpdns.org:8080 {
-	import webtop_proxy ct11 192.168.1.9:3300
+	import webtop_proxy ct11 192.168.1.100:3300
 }
 
 # --- ct4: ahora es un escritorio Webtop mas (clon de ct0) ---
