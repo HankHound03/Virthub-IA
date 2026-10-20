@@ -285,13 +285,17 @@ return [
     */
 
     'status' => [
-        'cache_seconds' => (int) env('STATUS_CACHE_SECONDS', 15),
-        'probe_timeout_seconds' => (int) env('STATUS_PROBE_TIMEOUT', 3),
+        'cache_seconds' => (int) env('STATUS_CACHE_SECONDS', 60),
+        'probe_timeout_seconds' => (int) env('STATUS_PROBE_TIMEOUT', 2),
 
             // Los escritorios de otra maquina necesitan mas margen: cruzar la red
             // local es mas lento que la red interna de Docker. Con el mismo
             // margen que los locales se marcaban caidos estando activos.
             'probe_timeout_remote_seconds' => (int) env('STATUS_PROBE_TIMEOUT_REMOTE', 8),
+
+            // Cuanto se recuerda un escritorio caido antes de volver a probarlo.
+            // Su nombre no resuelve y cada intento cuesta unos 4 s de espera.
+            'probe_down_seconds' => (int) env('STATUS_PROBE_DOWN_SECONDS', 180),
     ],
 
     /*

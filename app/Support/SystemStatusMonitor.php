@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\WebtopContainer;
 use Illuminate\Http\Client\Pool;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
@@ -157,7 +158,7 @@ class SystemStatusMonitor
         }
 
         try {
-            return Http::timeout($timeout)->get($url)->successful();
+            return Http::connectTimeout(min(2, $timeout))->timeout($timeout)->get($url)->successful();
         } catch (Throwable) {
             return false;
         }
@@ -205,8 +206,28 @@ class SystemStatusMonitor
         );
 
         $targets = [];
+        $caidosDeAntes = [];
+
+        /*
+         * Memoria de escritorios caidos.
+         *
+         * Cuando un contenedor esta PARADO su nombre deja de resolver, y Docker
+         * tarda unos 4 s en contestar que no existe (medido: 0 ms si esta arriba,
+         * 4000 ms si esta parado). Con cuatro parados, el sondeo se iba a 8 s y la
+         * pagina de inicio del administrador se quedaba esperando.
+         *
+         * Recordando quien acaba de fallar se evita volver a resolverlo en cada
+         * sondeo: se le sigue mostrando como caido, pero sin pagar la espera.
+         */
+        $segundosCaido = max(0, (int) config('virthub.status.probe_down_seconds', 180));
 
         foreach ($containers as $name => $container) {
+            if ($segundosCaido > 0 && Cache::get($this->claveCaido($name)) !== null) {
+                $caidosDeAntes[$name] = true;
+
+                continue;
+            }
+
             $esRemoto = $container['host'] !== null && $container['host'] !== '';
 
             $targets[$name] = [
@@ -224,7 +245,15 @@ class SystemStatusMonitor
                 foreach ($targets as $name => $target) {
                     // Un 403 o un 401 no es un fallo de transporte: el escritorio
                     // esta vivo. No se deja que Lance la excepcion.
+                    //
+                    // connectTimeout ademas del timeout: cuando un escritorio esta
+                    // PARADO, su nombre deja de resolver y Docker tarda unos 8 s en
+                    // contestar que no existe. El timeout normal no cubre esa
+                    // resolucion, asi que la pagina se quedaba esperando. Con un
+                    // limite de conexion se corta mucho antes; un escritorio sano
+                    // conecta en milisegundos.
                     $pending[] = $pool->as((string) $name)
+                        ->connectTimeout(min(2, $target['timeout']))
                         ->timeout($target['timeout'])
                         ->withOptions(['http_errors' => false])
                         ->get($target['url']);
@@ -243,6 +272,18 @@ class SystemStatusMonitor
             // Si el pool entero falla, se deja todo como caido.
         }
 
+        // Se anota quien fallo y se olvida a quien volvio: asi el proximo sondeo
+        // no vuelve a pagar la resolucion de un nombre que no existe.
+        if ($segundosCaido > 0) {
+            foreach (array_keys($targets) as $name) {
+                if ($online[$name] ?? false) {
+                    Cache::forget($this->claveCaido($name));
+                } else {
+                    Cache::put($this->claveCaido($name), true, now()->addSeconds($segundosCaido));
+                }
+            }
+        }
+
         $statuses = [];
 
         foreach ($containers as $name => $container) {
@@ -255,6 +296,14 @@ class SystemStatusMonitor
         }
 
         return $statuses;
+    }
+
+    /**
+     * Clave de cache que marca un escritorio como caido hace poco.
+     */
+    private function claveCaido(string $nombre): string
+    {
+        return 'virthub.probe_down.' . $nombre;
     }
 
     /**

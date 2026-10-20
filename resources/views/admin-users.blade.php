@@ -463,6 +463,22 @@
             background-color: rgba(255, 100, 100, 0.95);
         }
 
+        /*
+         * Boton no disponible (la cuenta admin principal).
+         *
+         * Se apaga y se atenua para que se vea de un vistazo que esa accion no
+         * esta permitida, en vez de dejar pulsarla y responder con un error.
+         */
+        .user-actions button:disabled,
+        .user-actions button:disabled:hover {
+            background-color: rgba(140, 150, 165, 0.28);
+            color: rgba(240, 246, 255, 0.55);
+            cursor: not-allowed;
+            filter: grayscale(1);
+            opacity: 0.75;
+            box-shadow: none;
+        }
+
         body:not(.dark-mode) .admin-card {
             background-color: var(--vh-surface-strong);
             border-color: var(--vh-border);
@@ -1007,12 +1023,29 @@
                             </td>
                             <td data-label="Acciones">
                                 <div class="user-actions">
-                                    @if ($user['is_active'])
+                                    @php
+                                        // La cuenta 'admin' es la principal: el servidor
+                                        // no deja desactivarla ni eliminarla. Se marca
+                                        // como no disponible en vez de dejar que el
+                                        // usuario pulse y reciba un error.
+                                        $esCuentaPrincipal = strtolower((string) $user['username']) === 'admin';
+                                    @endphp
+
+                                    @if ($esCuentaPrincipal)
+                                        <button type="button" class="btn-deactivate" disabled
+                                                title="La cuenta admin principal no se puede desactivar">🔒 Desactivar</button>
+                                    @elseif ($user['is_active'])
                                         <button type="button" class="btn-deactivate" onclick="openConfirmation('deactivate', '{{ $user['username'] }}')">🔒 Desactivar</button>
                                     @else
                                         <button type="button" class="btn-activate" onclick="openConfirmation('activate', '{{ $user['username'] }}')">▶ Activar</button>
                                     @endif
-                                    <button type="button" class="btn-delete" onclick="openConfirmation('delete', '{{ $user['username'] }}')">🗑️ Eliminar</button>
+
+                                    @if ($esCuentaPrincipal)
+                                        <button type="button" class="btn-delete" disabled
+                                                title="La cuenta admin principal no se puede eliminar">🗑️ Eliminar</button>
+                                    @else
+                                        <button type="button" class="btn-delete" onclick="openConfirmation('delete', '{{ $user['username'] }}')">🗑️ Eliminar</button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
