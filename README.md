@@ -8,6 +8,10 @@ propio. Proyecto de hobby en desarrollo.
 
 Requisitos: Docker Desktop con Compose habilitado.
 
+La guía completa está en **[docker/DESPLIEGUE.md](docker/DESPLIEGUE.md)**:
+incluye Caddy, los escritorios Webtop, el túnel de Cloudflare, cómo registrar los
+escritorios y los problemas típicos. Aquí va lo mínimo:
+
 1. Crea el archivo de entorno a partir de `.env.example` y cambia `APP_KEY`,
    `INSTALL_KEY`, `ADMIN_PASSWORD` y las contraseñas de la base de datos.
 
