@@ -730,6 +730,16 @@
                 justify-content: flex-end;
             }
 
+            /*
+             * En un telefono no hay raton: no se puede arrastrar el gadget ni
+             * cambiar su tamano, asi que esos dos botones solo ocupan sitio.
+             * Se ocultan y queda unicamente el de contraer.
+             */
+            .drag-chip,
+            .gadget-size-btn {
+                display: none !important;
+            }
+
             .users-table,
             .reports-table,
             .suggestions-table {

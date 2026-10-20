@@ -122,6 +122,20 @@
                 <div class="admin-desktop-picker">
                     <span class="admin-desktop-picker-label">Probar escritorio:</span>
 
+                    {{--
+                        En un telefono once botones ocupan varias filas y empujan
+                        el escritorio hacia abajo, asi que en pantalla estrecha se
+                        usa una lista desplegable. Los botones se ocultan por CSS
+                        (no se duplica la logica: ambos llaman a loadAdminDesktop).
+                    --}}
+                    <select class="admin-desktop-select"
+                            onchange="loadAdminDesktop(this.value)"
+                            aria-label="Probar escritorio">
+                        @foreach (($adminDesktops ?? []) as $desktop)
+                            <option value="{{ $desktop['name'] }}"{{ $desktop['name'] === ($currentDesktop ?? '') ? ' selected' : '' }}>{{ $desktop['name'] }}</option>
+                        @endforeach
+                    </select>
+
                     @foreach (($adminDesktops ?? []) as $desktop)
                         <button type="button"
                                 class="admin-desktop-btn{{ $desktop['name'] === ($currentDesktop ?? '') ? ' is-current' : '' }}"
@@ -513,10 +527,16 @@
 
             iframe.src = '/contenedor/launch?contenedor=' + encodeURIComponent(nombre);
 
-            // Marcar cual esta abierto.
+            // Marcar cual esta abierto: los botones en escritorio y la lista
+            // desplegable en movil.
             document.querySelectorAll('.admin-desktop-btn').forEach(btn => {
                 btn.classList.toggle('is-current', btn.dataset.container === nombre);
             });
+
+            const lista = document.querySelector('.admin-desktop-select');
+            if (lista) {
+                lista.value = nombre;
+            }
         }
 
         function getFullscreenElement() {

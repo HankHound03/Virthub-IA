@@ -168,11 +168,75 @@
         @media (max-width: 760px) {
             .profile-page {
                 grid-template-columns: 1fr;
+                gap: 10px;
+                margin: 0;
             }
 
+            /*
+             * El hero se centraba y ocupaba casi media pantalla: avatar grande,
+             * nombre y tres lineas de datos apiladas. Se deja en fila, con el
+             * avatar a un lado y los datos al otro. Se lee mejor y deja sitio a
+             * las publicaciones, que es lo que se viene a ver.
+             */
             .profile-hero {
-                flex-direction: column;
-                text-align: center;
+                flex-direction: row;
+                align-items: center;
+                text-align: left;
+                gap: 12px;
+                margin-bottom: 10px;
+            }
+
+            .profile-hero .profile-aero-frame {
+                width: 62px;
+                height: 62px;
+                border-radius: 18px;
+            }
+
+            .profile-hero .profile-aero-frame span {
+                font-size: 24px;
+            }
+
+            .profile-hero h2 {
+                margin: 0 0 4px;
+                font-size: 19px;
+                line-height: 1.2;
+                overflow-wrap: anywhere;
+            }
+
+            .profile-identity {
+                margin: 1px 0;
+                font-size: 12px;
+            }
+
+            .profile-page-panel {
+                padding: 12px;
+            }
+
+            .profile-page-panel h3 {
+                margin-bottom: 8px;
+                font-size: 16px;
+            }
+
+            .profile-posts {
+                gap: 8px;
+            }
+
+            .profile-post {
+                padding: 12px;
+            }
+
+            .profile-post h3 {
+                font-size: 13px;
+            }
+
+            /* Textarea comodo de usar con el pulgar. */
+            .profile-post-form textarea {
+                min-height: 96px;
+            }
+
+            .profile-post-form button {
+                width: 100%;
+                padding: 10px 12px;
             }
         }
     </style>

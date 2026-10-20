@@ -347,6 +347,18 @@ iframe {
   color: #ffffff;
 }
 
+/*
+ * Lista desplegable de escritorios (solo movil).
+ *
+ * En un telefono once botones ocupan tres filas y empujan el escritorio hacia
+ * abajo; con la lista se queda en una sola linea. En escritorio se oculta y se
+ * usan los botones.
+ */
+.admin-desktop-select {
+  display: none;
+  box-sizing: border-box;
+}
+
 .ollama-card {
   margin: 10px 10px 0 10px;
   padding: 14px;
@@ -685,6 +697,56 @@ body.dark-mode iframe {
 
   .container-main {
     min-height: 65vh;
+  }
+
+  /*
+   * Selector de escritorios del administrador en pantalla estrecha.
+   *
+   * Los once botones se cambian por una lista desplegable: ocupan una linea en
+   * vez de tres filas y dejan mas alto al escritorio.
+   */
+  .admin-desktop-picker {
+    padding: 0 8px 8px;
+    gap: 8px;
+  }
+
+  .admin-desktop-btn {
+    display: none;
+  }
+
+  .admin-desktop-select {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--vh-border);
+    border-radius: 10px;
+    background-color: var(--vh-button-bg);
+    color: var(--vh-text);
+    font-family: Monocraft Nerd Font, monospace;
+    font-size: 13px;
+    /* Sin esto el texto sale gris sobre gris en algunos navegadores moviles. */
+    color-scheme: dark;
+  }
+
+  /* La barra de acciones queda en una fila pareja, sin botones sueltos. */
+  .container-toolbar {
+    padding: 8px;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .container-toolbar .container-load-btn {
+    flex: 1 1 auto;
+    padding: 9px 10px;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .container-toolbar .chat-toggle {
+    flex: 0 0 auto;
+    min-width: 46px;
   }
 }
 
