@@ -119,7 +119,6 @@
                 --}}
                 <a class="container-load-btn" id="openWindow"
                    href="{{ url('/contenedor/ventana') }}{{ ($currentUser['role'] ?? 'user') === 'admin' && !empty($currentDesktop) ? '?contenedor=' . urlencode((string) $currentDesktop) : '' }}"
-                   target="_blank" rel="noopener"
                    onclick="return abrirVentanaEscritorio(event)"
                    title="Abrir el escritorio en una ventana aparte">Ventana Nueva</a>
             </div>
@@ -577,6 +576,11 @@
             const enlace = document.getElementById('openWindow');
             if (!enlace) return true;
 
+            // Siempre se cancela la navegacion del enlace. Si no, y la ventana
+            // llega a abrirse, el enlace ademas abriria una pestana: pasaba justo
+            // por el 'noopener' de abajo, que hace que window.open devuelva null.
+            if (evento) evento.preventDefault();
+
             const ancho = Math.min(1500, Math.max(900, Math.round(window.screen.availWidth * 0.9)));
             const alto = Math.min(950, Math.max(600, Math.round(window.screen.availHeight * 0.9)));
             const izquierda = Math.max(0, Math.round((window.screen.availWidth - ancho) / 2));
@@ -584,21 +588,28 @@
 
             // Un nombre fijo hace que se reutilice la MISMA ventana en vez de
             // abrir una nueva cada vez que se pulsa.
+            //
+            // Sin 'noopener' en las opciones: con el, window.open devuelve null y
+            // no se puede saber si la ventana se abrio. El aislamiento se
+            // consigue igual anulando opener a mano justo despues.
             const ventana = window.open(
                 enlace.href,
                 'virthub_escritorio',
-                `popup=yes,width=${ancho},height=${alto},left=${izquierda},top=${arriba},noopener`
+                `popup=yes,width=${ancho},height=${alto},left=${izquierda},top=${arriba}`
             );
 
             if (ventana) {
-                if (evento) evento.preventDefault();
+                // La ventana nueva no debe poder tocar esta por window.opener.
+                try { ventana.opener = null; } catch (error) { /* da igual */ }
                 ventana.focus();
-                return false;
+            } else {
+                // El navegador bloqueo la ventana emergente. En vez de dejar el
+                // boton sin hacer nada (o abrir una pestana mas), se carga la
+                // misma pagina en esta ventana.
+                window.location.href = enlace.href;
             }
 
-            // Bloqueada por el navegador: se deja que el enlace siga su curso
-            // (se abrira como pestana normal).
-            return true;
+            return false;
         }
 
         function getFullscreenElement() {
