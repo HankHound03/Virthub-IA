@@ -1005,16 +1005,18 @@
 
             @if (session('success'))
                 <div class="admin-message admin-success" id="successMessage">{{ session('success') }}</div>
+            @endif
 
-                {{--
-                    Credenciales generadas.
+            {{--
+                Credenciales generadas.
 
-                    Antes esto era un desplegable: habia que abrirlo y elegir una
-                    opcion para poder copiar, asi que era facil crear el usuario y
-                    quedarse sin ver la contrasena. Ahora se muestran el usuario y
-                    la contrasena por separado, cada uno con su boton de copiar.
-                --}}
-                <div class="credentials-box" id="credentialsBox" hidden>
+                Se pintan aqui, no dentro del aviso: el aviso flash puede
+                perderse si hay una peticion intermedia, y entonces el
+                administrador crearia el usuario sin ver nunca la contrasena.
+                Estos datos vienen de la sesion y se borran al mostrarse.
+            --}}
+            @if (!empty($credenciales))
+                <div class="credentials-box" id="credentialsBox">
                     <h4>Credenciales generadas</h4>
                     <p class="credentials-hint">
                         Guardalas ahora: la contrasena no se vuelve a mostrar.
@@ -1022,15 +1024,17 @@
 
                     <div class="credentials-row">
                         <span class="credentials-label">Usuario</span>
-                        <code id="credUsername"></code>
+                        <code id="credUsername">{{ $credenciales['username'] }}</code>
                         <button type="button" onclick="copiarCredencial('credUsername')">Copiar</button>
                     </div>
 
-                    <div class="credentials-row">
-                        <span class="credentials-label">Contrasena</span>
-                        <code id="credPassword"></code>
-                        <button type="button" onclick="copiarCredencial('credPassword')">Copiar</button>
-                    </div>
+                    @if (!empty($credenciales['password']))
+                        <div class="credentials-row">
+                            <span class="credentials-label">Contrasena</span>
+                            <code id="credPassword">{{ $credenciales['password'] }}</code>
+                            <button type="button" onclick="copiarCredencial('credPassword')">Copiar</button>
+                        </div>
+                    @endif
                 </div>
             @endif
 
@@ -1610,27 +1614,16 @@
         }
 
         /*
-         * Rellena el cuadro de credenciales a partir del mensaje de confirmacion
-         * y lo baja a la vista, para que no se quede fuera de pantalla.
+         * Baja el cuadro de credenciales a la vista.
+         *
+         * El contenido ya viene pintado desde el servidor: aqui solo se asegura
+         * de que el administrador lo vea sin tener que buscarlo.
          */
-        function parseCredentials() {
-            const successMsg = document.getElementById('successMessage');
+        function mostrarCredenciales() {
             const caja = document.getElementById('credentialsBox');
 
-            if (!successMsg || !caja) return;
+            if (!caja) return;
 
-            const text = successMsg.textContent;
-            const usernameMatch = text.match(/Usuario creado: ([^\s(]+)/);
-            const passwordMatch = text.match(/Password: (\S+)/);
-
-            // Solo se muestra si de verdad hay contrasena: cuando el
-            // administrador la escribe a mano no se repite aqui.
-            if (!usernameMatch || !passwordMatch) return;
-
-            document.getElementById('credUsername').textContent = usernameMatch[1];
-            document.getElementById('credPassword').textContent = passwordMatch[1];
-
-            caja.hidden = false;
             caja.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
@@ -1675,7 +1668,7 @@
             }, 2000);
         }
 
-        window.addEventListener('DOMContentLoaded', parseCredentials);
+        window.addEventListener('DOMContentLoaded', mostrarCredenciales);
 
         let currentAction = null;
         let currentUsername = null;

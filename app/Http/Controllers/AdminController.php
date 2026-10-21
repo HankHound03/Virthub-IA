@@ -24,11 +24,29 @@ class AdminController extends Controller
 
     public function users(): View
     {
+        /*
+         * Las credenciales recien generadas se guardan en la SESION, no como
+         * aviso flash.
+         *
+         * Motivo: el aviso flash se consume con la siguiente peticion que reciba
+         * la cookie. En un navegador normal eso es la propia pagina, pero
+         * cualquier peticion intermedia (una recarga, el favicon si pasa por el
+         * enrutador, una pestana abierta) se lo come y el administrador crea el
+         * usuario sin llegar a ver nunca la contrasena.
+         *
+         * Con una clave normal de sesion el dato sobrevive, y se borra en cuanto
+         * se muestra una vez (pull).
+         */
+        $credenciales = session()->pull('credenciales_nuevas');
+
         return view('admin-users', [
             'currentUser' => ActiveUser::from(request()),
             'users' => $this->users->allPublicUsers(),
             'forumReports' => $this->forumReports(),
             'suggestions' => $this->suggestions(),
+            'credenciales' => is_array($credenciales) && ! empty($credenciales['username'])
+                ? $credenciales
+                : null,
         ]);
     }
 
@@ -83,6 +101,13 @@ class AdminController extends Controller
             if ($useRandomPassword) {
                 $message .= " | Password: {$password}";
             }
+
+            // Se guarda aparte del aviso flash, para que la contrasena se vea
+            // aunque el aviso se pierda por una peticion intermedia.
+            request()->session()->put('credenciales_nuevas', [
+                'username' => (string) $created['username'],
+                'password' => $useRandomPassword ? (string) $password : null,
+            ]);
 
             return redirect('/admin/users')->with('success', $message);
         } catch (RuntimeException $e) {

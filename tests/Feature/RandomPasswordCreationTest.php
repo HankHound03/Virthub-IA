@@ -93,52 +93,67 @@ class RandomPasswordCreationTest extends TestCase
     public function test_la_pagina_muestra_la_contrasena_generada(): void
     {
         // Contrasena con caracteres especiales, que es lo que genera el sistema
-        // y lo que podria romper el HTML o la expresion regular del desplegable.
-        $mensaje = 'Usuario creado: virt_abc123 (user) | Password: aB3$k&9Lm!n';
-
+        // y lo que podria romper el HTML.
         $html = $this->withSession([
             'auth_user' => ['username' => 'admin', 'role' => 'admin'],
-            'success' => $mensaje,
+            'credenciales_nuevas' => [
+                'username' => 'virt_abc123',
+                'password' => 'aB3$k&9Lm!n',
+            ],
         ])->get('/admin/users')->assertOk()->getContent();
 
-        $this->assertStringContainsString('successMessage', $html);
-        $this->assertStringContainsString('aB3$k', $html, 'La contrasena debe llegar a la pagina.');
         $this->assertStringContainsString('credentialsBox', $html);
+        $this->assertStringContainsString('virt_abc123', $html);
+        $this->assertStringContainsString('aB3$k', $html, 'La contrasena debe llegar a la pagina.');
     }
 
-    public function test_la_contrasena_generada_sirve_para_entrar(): void
+    public function test_las_credenciales_se_muestran_una_sola_vez(): void
     {
-        $this->withSession(['auth_user' => ['username' => 'admin', 'role' => 'admin']])
+        $html = $this->withSession([
+            'auth_user' => ['username' => 'admin', 'role' => 'admin'],
+            'credenciales_nuevas' => [
+                'username' => 'virt_unica',
+                'password' => 'ClaveUnica123',
+            ],
+        ])->get('/admin/users')->assertOk()->getContent();
+
+        $this->assertStringContainsString('ClaveUnica123', $html, 'Se ven al cargar la pagina.');
+
+        // Y quedan borradas de la sesion: no deben seguir ahi para el siguiente
+        // que abra la pagina.
+        $this->assertNull(
+            session('credenciales_nuevas'),
+            'Tras mostrarlas deben borrarse de la sesion.'
+        );
+    }
+
+    /**
+     * Recorrido REAL: enviar el formulario y seguir la redireccion.
+     *
+     * Esto es lo que hace el navegador al crear un usuario.
+     */
+    public function test_la_contrasena_se_ve_tras_crear_el_usuario(): void
+    {
+        $respuesta = $this->withSession(['auth_user' => ['username' => 'admin', 'role' => 'admin']])
+            ->followingRedirects()
             ->post('/admin/users', [
-                'name' => 'Prueba Login',
-                'username' => 'prueba_login',
+                'name' => 'Prueba Redirect',
+                'username' => 'prueba_redirect',
                 'role' => 'user',
                 'random_password' => '1',
             ]);
 
-        // Se extrae igual que lo hace la vista: "Password: X".
-        $mensaje = (string) session('success');
-        preg_match('/Password: (\S+)/', $mensaje, $m);
-        $password = $m[1] ?? '';
+        $respuesta->assertOk();
+        $html = $respuesta->getContent();
 
-        $this->assertNotSame('', $password, 'Debe poder extraerse la contrasena del mensaje.');
-
-        // Y esa contrasena tiene que abrir la cuenta de verdad.
-        $respuesta = $this->post('/login', [
-            'username' => 'prueba_login',
-            'password' => $password,
-        ]);
-
-        $this->assertTrue(
-            session('auth_user') !== null
-                || $respuesta->headers->get('Location') !== null,
-            'La contrasena generada debe permitir iniciar sesion.'
+        $this->assertStringContainsString(
+            'credentialsBox',
+            $html,
+            'Tras crear el usuario debe aparecer el cuadro de credenciales.'
         );
 
-        $this->assertArrayNotHasKey(
-            'login_fail_count',
-            session()->all(),
-            'No debe contarse como intento fallido.'
-        );
+        // Y la contrasena tiene que estar de verdad, no solo el titulo.
+        $this->assertStringContainsString('prueba_redirect', $html);
+        $this->assertMatchesRegularExpression('/id="credPassword">\S+</', $html);
     }
 }
