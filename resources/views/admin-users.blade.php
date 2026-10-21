@@ -345,6 +345,14 @@
 
         .credentials-row button {
             flex: 0 0 auto;
+            /*
+             * La regla general de la tarjeta (.admin-card button) pone
+             * width: 100% y margin-top. Sin deshacerlo, el boton de copiar se
+             * comia la fila entera y el valor quedaba estrujado a una letra por
+             * linea.
+             */
+            width: auto;
+            margin-top: 0;
             padding: 7px 11px;
             border: none;
             border-radius: 7px;
@@ -353,6 +361,7 @@
             font-family: Monocraft Nerd Font, monospace;
             font-size: 11px;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .credentials-row button:hover {
@@ -366,6 +375,12 @@
 
             .credentials-label {
                 flex: 0 0 100%;
+            }
+
+            /* En pantalla estrecha el valor ocupa su propia linea y el boton
+               pasa debajo, a todo el ancho. */
+            .credentials-row code {
+                flex: 1 0 100%;
             }
 
             .credentials-row button {
