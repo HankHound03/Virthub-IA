@@ -281,6 +281,98 @@
             background-color: rgba(255, 193, 7, 0.95);
         }
 
+        /*
+         * Cuadro de credenciales generadas.
+         *
+         * Sustituye al desplegable anterior: usuario y contrasena visibles a la
+         * primera, cada uno en su linea y con su boton de copiar.
+         */
+        .credentials-box {
+            margin-top: 12px;
+            padding: 14px;
+            background-color: rgba(117, 225, 160, 0.15);
+            border: 1px solid rgba(117, 225, 160, 0.4);
+            border-radius: 10px;
+        }
+
+        .credentials-box[hidden] {
+            display: none;
+        }
+
+        .credentials-box h4 {
+            margin: 0 0 4px;
+            font-size: 14px;
+            color: #d7ffea;
+        }
+
+        .credentials-hint {
+            margin: 0 0 10px;
+            font-size: 11px;
+            color: rgba(220, 255, 238, 0.75);
+        }
+
+        .credentials-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .credentials-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .credentials-label {
+            flex: 0 0 84px;
+            font-size: 11px;
+            color: rgba(220, 255, 238, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .credentials-row code {
+            flex: 1 1 auto;
+            min-width: 0;
+            padding: 7px 9px;
+            border-radius: 7px;
+            background-color: rgba(0, 0, 0, 0.28);
+            color: #ffffff;
+            font-family: Consolas, Monocraft Nerd Font, monospace;
+            font-size: 13px;
+            /* Una contrasena larga no debe salirse del cuadro. */
+            overflow-wrap: anywhere;
+        }
+
+        .credentials-row button {
+            flex: 0 0 auto;
+            padding: 7px 11px;
+            border: none;
+            border-radius: 7px;
+            background-color: rgba(255, 193, 7, 0.75);
+            color: #0b1b2d;
+            font-family: Monocraft Nerd Font, monospace;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .credentials-row button:hover {
+            background-color: rgba(255, 193, 7, 0.95);
+        }
+
+        @media (max-width: 560px) {
+            .credentials-row {
+                flex-wrap: wrap;
+            }
+
+            .credentials-label {
+                flex: 0 0 100%;
+            }
+
+            .credentials-row button {
+                width: 100%;
+            }
+        }
+
         .copy-notification {
             display: none;
             position: fixed;
@@ -913,14 +1005,32 @@
 
             @if (session('success'))
                 <div class="admin-message admin-success" id="successMessage">{{ session('success') }}</div>
-                <div class="credentials-dropdown" id="credentialsDropdown">
-                    <label>
-                        Credenciales Generadas
-                        <select id="credentialsSelect">
-                            <option value="">-- Selecciona para copiar --</option>
-                        </select>
-                    </label>
-                    <button type="button" onclick="copySelected()">📋 Copiar al Portapapeles</button>
+
+                {{--
+                    Credenciales generadas.
+
+                    Antes esto era un desplegable: habia que abrirlo y elegir una
+                    opcion para poder copiar, asi que era facil crear el usuario y
+                    quedarse sin ver la contrasena. Ahora se muestran el usuario y
+                    la contrasena por separado, cada uno con su boton de copiar.
+                --}}
+                <div class="credentials-box" id="credentialsBox" hidden>
+                    <h4>Credenciales generadas</h4>
+                    <p class="credentials-hint">
+                        Guardalas ahora: la contrasena no se vuelve a mostrar.
+                    </p>
+
+                    <div class="credentials-row">
+                        <span class="credentials-label">Usuario</span>
+                        <code id="credUsername"></code>
+                        <button type="button" onclick="copiarCredencial('credUsername')">Copiar</button>
+                    </div>
+
+                    <div class="credentials-row">
+                        <span class="credentials-label">Contrasena</span>
+                        <code id="credPassword"></code>
+                        <button type="button" onclick="copiarCredencial('credPassword')">Copiar</button>
+                    </div>
                 </div>
             @endif
 
@@ -1499,48 +1609,56 @@
             randomPassword.parentElement.style.opacity = isAdminRole ? '0.55' : '1';
         }
 
+        /*
+         * Rellena el cuadro de credenciales a partir del mensaje de confirmacion
+         * y lo baja a la vista, para que no se quede fuera de pantalla.
+         */
         function parseCredentials() {
             const successMsg = document.getElementById('successMessage');
-            const dropdown = document.getElementById('credentialsDropdown');
-            const select = document.getElementById('credentialsSelect');
+            const caja = document.getElementById('credentialsBox');
 
-            if (!successMsg) return;
+            if (!successMsg || !caja) return;
 
             const text = successMsg.textContent;
             const usernameMatch = text.match(/Usuario creado: ([^\s(]+)/);
-            const passwordMatch = text.match(/Password: ([^\s]+)/);
+            const passwordMatch = text.match(/Password: (\S+)/);
 
-            if (usernameMatch && passwordMatch) {
-                const username = usernameMatch[1];
-                const password = passwordMatch[1];
-                const fullCred = username + ':' + password;
+            // Solo se muestra si de verdad hay contrasena: cuando el
+            // administrador la escribe a mano no se repite aqui.
+            if (!usernameMatch || !passwordMatch) return;
 
-                select.innerHTML = `
-                    <option value="">-- Selecciona para copiar --</option>
-                    <option value="${fullCred}">Username: ${username}</option>
-                    <option value="${password}">Password: ${password}</option>
-                    <option value="${fullCred}">Ambas: ${username}:${password}</option>
-                `;
+            document.getElementById('credUsername').textContent = usernameMatch[1];
+            document.getElementById('credPassword').textContent = passwordMatch[1];
 
-                dropdown.classList.add('show');
-            }
+            caja.hidden = false;
+            caja.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        function copySelected() {
-            const select = document.getElementById('credentialsSelect');
-            const value = select.value;
+        function copiarCredencial(id) {
+            const elemento = document.getElementById(id);
+            const valor = elemento ? elemento.textContent : '';
 
-            if (!value) {
-                showNotification('⚠️ Selecciona una opción primero');
+            if (!valor) return;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(valor)
+                    .then(() => showNotification('✅ Copiado'))
+                    .catch(() => showNotification('❌ No se pudo copiar'));
                 return;
             }
 
-            navigator.clipboard.writeText(value).then(() => {
-                showNotification('✅ Copiado al portapapeles');
-                select.value = '';
-            }).catch(() => {
-                showNotification('❌ Error al copiar');
-            });
+            // Respaldo para navegadores o contextos sin portapapeles.
+            const area = document.createElement('textarea');
+            area.value = valor;
+            document.body.appendChild(area);
+            area.select();
+            try {
+                document.execCommand('copy');
+                showNotification('✅ Copiado');
+            } catch (error) {
+                showNotification('❌ No se pudo copiar');
+            }
+            area.remove();
         }
 
         function showNotification(message) {
