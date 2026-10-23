@@ -202,7 +202,10 @@ return [
         // ejecutaria o interpretaria, no lo que el usuario quiera guardar.
         'allowed_extensions' => [
             // Imagenes
-            'jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'svg', 'ico', 'heic', 'tiff',
+            // 'svg' fuera: un SVG puede contener scripts y se serviria desde nuestro
+            // dominio, lo que permitiria inyectarlos (XSS). Los iconos de la
+            // aplicacion no pasan por esta lista.
+            'jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'ico', 'heic', 'tiff',
             // Video
             'mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', 'mpg', 'mpeg', 'wmv', 'flv',
             // Audio
@@ -216,9 +219,15 @@ return [
             'iso', 'img', 'bin', 'vhd', 'vdi', 'qcow2', 'dmg',
             // Datos y registros
             'log', 'dat', 'db', 'sqlite', 'bak', 'dump', 'torrent',
-            // Codigo y texto plano
-            'php', 'js', 'css', 'html', 'htm', 'py', 'java', 'c', 'cpp', 'h', 'sh',
-            'sql', 'rb', 'go', 'rs', 'ts', 'jsx', 'tsx', 'vue', 'lua', 'pl',
+            // Codigo y texto plano.
+            //
+            // OJO: aqui NO van 'php', 'phtml', 'phar' ni nada que el servidor web
+            // pueda ejecutar: los adjuntos se publican bajo el docroot y un .php
+            // subido se ejecutaria en el servidor. Tampoco 'html', 'htm' ni 'svg',
+            // que son contenido activo y permitirian inyectar scripts desde el
+            // propio dominio.
+            'js', 'css', 'py', 'java', 'c', 'cpp', 'h', 'sh',
+            'sql', 'rb', 'go', 'rs', 'ts', 'jsx', 'tsx', 'vue', 'lua',
             // Modelos 3D y diseno
             'stl', 'obj', 'blend', 'psd', 'ai', 'fig', 'sketch',
         ],

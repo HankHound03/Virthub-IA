@@ -195,7 +195,31 @@ class ForumController extends Controller
             'videos' => 'nullable|array|max:5',
             'videos.*' => 'file|mimes:mp4,webm,mov,avi|max:' . self::ATTACHMENT_MAX_BYTES,
             'files' => 'nullable|array|max:10',
-            'files.*' => 'file|max:' . self::ATTACHMENT_MAX_BYTES,
+            'files.*' => [
+                'file',
+                'max:' . self::ATTACHMENT_MAX_BYTES,
+                /*
+                 * Solo las extensiones de la lista blanca.
+                 *
+                 * Antes se aceptaba cualquier archivo. Como los adjuntos se
+                 * publican bajo el docroot (public/storage), subir un .php
+                 * significaba ejecutar codigo en el servidor. La misma lista que
+                 * usa la subida por trozos, para que las dos vias coincidan.
+                 */
+                function (string $atributo, $archivo, \Closure $fallar): void {
+                    $permitidas = (array) config('virthub.uploads.allowed_extensions', []);
+
+                    if ($permitidas === [] || ! is_object($archivo)) {
+                        return;
+                    }
+
+                    $extension = strtolower((string) $archivo->getClientOriginalExtension());
+
+                    if ($extension === '' || ! in_array($extension, $permitidas, true)) {
+                        $fallar('El tipo de archivo .' . ($extension !== '' ? $extension : '?') . ' no esta permitido.');
+                    }
+                },
+            ],
             'poll_question' => 'nullable|string|max:180',
             'poll_options' => 'nullable|array|max:10',
             'poll_options.*' => 'nullable|string|max:120',

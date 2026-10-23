@@ -33,6 +33,35 @@ RUN apt-get update \
     && sed -ri "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/000-default.conf /etc/apache2/apache2.conf \
     && rm -rf /var/lib/apt/lists/*
 
+# ---------------------------------------------------------------------------
+# Los adjuntos subidos NUNCA deben ejecutarse
+# ---------------------------------------------------------------------------
+# Los archivos de los usuarios viven en storage/app/public, que se publica a
+# traves del enlace public/storage. Sin esta proteccion, un archivo .php subido
+# al foro se sirve bajo el docroot y Apache lo EJECUTA: cualquier usuario
+# registrado podria ejecutar codigo en el servidor.
+#
+# La validacion por extension (config/virthub.php) no basta: esta es la red de
+# seguridad que actua aunque algo se cuele.
+RUN printf '%s\n' \
+        '<Directory /var/www/html/storage/app/public>' \
+        '    # Nada de lo que se sube se interpreta como programa.' \
+        '    php_admin_flag engine off' \
+        '    Options -ExecCGI -Indexes' \
+        '    <FilesMatch "(?i)\.(php|php[0-9]|phtml|phps|phar|inc|cgi|pl|py|sh|htaccess|htpasswd)$">' \
+        '        Require all denied' \
+        '    </FilesMatch>' \
+        '</Directory>' \
+        '<Directory /var/www/html/public/storage>' \
+        '    php_admin_flag engine off' \
+        '    Options -ExecCGI -Indexes' \
+        '    <FilesMatch "(?i)\.(php|php[0-9]|phtml|phps|phar|inc|cgi|pl|py|sh|htaccess|htpasswd)$">' \
+        '        Require all denied' \
+        '    </FilesMatch>' \
+        '</Directory>' \
+    > /etc/apache2/conf-available/virthub-uploads.conf \
+    && a2enconf virthub-uploads
+
 WORKDIR /var/www/html
 
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-virthub.ini
