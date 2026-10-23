@@ -1997,3 +1997,26 @@ body .chat-users-panel {
 .container-load-btn {
     flex-shrink: 0;
 }
+/*
+ * Avisos de validacion en cualquier pagina (ver partials/header).
+ *
+ * Se separan del contenido para que no queden pegados a la cabecera y se lean
+ * como un aviso, no como parte del diseno.
+ */
+.page-errors {
+    max-width: 900px;
+    margin: 10px auto 0;
+    padding: 0 6px;
+}
+
+.page-errors .auth-message {
+    margin: 0 0 8px;
+}
+
+@media (max-width: 768px),
+       (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
+    .page-errors {
+        margin: 8px 0 0;
+        padding: 0 3%;
+    }
+}

@@ -49,6 +49,24 @@
     </div>
 </header>
 
+{{--
+    Errores de validacion en cualquier pagina, para usuarios con sesion.
+
+    Antes solo se pintaban dentro del modal de inicio de sesion, que solo existe
+    para invitados: un usuario registrado enviaba un formulario no valido (un
+    username repetido, un archivo con extension no permitida, uno rechazado por el
+    antivirus...) y no veia absolutamente nada.
+
+    Los invitados no lo necesitan: ya lo ven dentro de su modal.
+--}}
+@if (!empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest') && isset($errors) && $errors->any())
+    <div class="page-errors" role="alert">
+        @foreach ($errors->all() as $error)
+            <p class="auth-message auth-error">{{ $error }}</p>
+        @endforeach
+    </div>
+@endif
+
         @if (empty($currentUser) || (($currentUser['role'] ?? 'guest') === 'guest'))
             <div class="header-login-modal" id="headerLoginModal" aria-hidden="true">
                 <div class="header-login-card" role="dialog" aria-modal="true" aria-labelledby="headerLoginTitle" onclick="event.stopPropagation()">
