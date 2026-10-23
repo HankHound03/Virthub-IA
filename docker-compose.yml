@@ -32,8 +32,12 @@ services:
     #
     # Cuando confirmes que Caddy sirve bien el dominio, puedes comentar esta
     # linea para que la unica puerta sea Caddy (recomendado en produccion).
+    #
+    # Se limita a loopback por el mismo motivo que Caddy: sin el 127.0.0.1 queda
+    # accesible desde toda la red local en el puerto 8000, saltandose Caddy y sus
+    # cabeceras. Es solo para diagnostico desde el propio equipo.
     ports:
-      - "${APP_PORT:-8000}:80"
+      - "127.0.0.1:${APP_PORT:-8000}:80"
     env_file:
       - .env
     environment:

@@ -90,6 +90,20 @@ class ForumController extends Controller
             Aviso::poner('error', $e->getMessage());
 
             return redirect('/foro');
+        } catch (\Throwable $e) {
+            /*
+             * Red de seguridad: cualquier fallo inesperado (un archivo que
+             * desaparece, un limite del sistema) se registra y se le cuenta al
+             * usuario, en vez de devolverle una pagina de error 500 sin
+             * explicacion y sin saber si su publicacion se creo.
+             */
+            logger()->error('Error al publicar en el foro: ' . $e->getMessage(), [
+                'excepcion' => $e::class,
+            ]);
+
+            Aviso::poner('error', 'No se pudo publicar por un error inesperado. Intentalo de nuevo.');
+
+            return redirect('/foro');
         }
 
         Aviso::poner('success', 'Publicacion creada en el foro.');
@@ -356,12 +370,30 @@ class ForumController extends Controller
                 $extension = strtolower((string) $uploaded->getClientOriginalExtension()) ?: 'bin';
                 $filename = bin2hex(random_bytes(8)) . '_' . time() . '.' . $extension;
 
+                /*
+                 * El tipo MIME se calcula ANTES de mover.
+                 *
+                 * getMimeType() lee el archivo del disco, y despues de move() el
+                 * temporal ya no existe: Symfony lanzaba
+                 * «The "/tmp/phpXXXX" file does not exist or is not readable» y la
+                 * publicacion se perdia con un error 500 en lugar de guardarse.
+                 *
+                 * Si el navegador envio un tipo, se usa ese como respaldo.
+                 */
+                $mime = '';
+
+                try {
+                    $mime = (string) $uploaded->getMimeType();
+                } catch (\Throwable) {
+                    $mime = (string) $uploaded->getClientMimeType();
+                }
+
                 $uploaded->move($dir, $filename);
 
                 $attachments[] = [
                     'type' => $type,
                     'name' => (string) $uploaded->getClientOriginalName(),
-                    'mime' => (string) $uploaded->getMimeType(),
+                    'mime' => $mime,
                     'path' => 'uploads/forum/' . $type . 's/' . $filename,
                 ];
             }

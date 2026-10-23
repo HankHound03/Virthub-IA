@@ -497,7 +497,7 @@
         @endif
     </div>
 
-    <footer>Virthub 1.0</footer>
+    <footer>Virthub {{ config('virthub.version') }}</footer>
     <script>
         function getUserKey() {
             return @json($currentUser['username'] ?? 'guest');

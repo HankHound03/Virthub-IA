@@ -49,6 +49,25 @@
 http://virthub.dpdns.org:8080 {
 	encode zstd gzip
 
+	# Cabeceras de seguridad.
+	#
+	# El escritorio se muestra dentro de un marco de ESTE dominio, asi que aqui
+	# SAMEORIGIN es correcto: la aplicacion no debe poder enmarcarse desde otro
+	# sitio (clickjacking).
+	#
+	# HSTS va con un año de margen pero sin includeSubDomains: los subdominios
+	# quedan cubiertos aparte, y asi un error de configuracion en un escritorio no
+	# arrastra a todo el dominio.
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "geolocation=(), payment=()"
+		Strict-Transport-Security "max-age=31536000"
+		# No revelar con que servidor se sirve.
+		-Server
+	}
+
 	# El punto de control del proxy NUNCA debe ser alcanzable desde fuera. Solo
 	# lo llama Caddy internamente a traves de forward_auth.
 	@interno path /internal/proxy-auth*
@@ -76,6 +95,19 @@ http://virthub.dpdns.org:8080 {
 # Debe estar DEFINIDO antes de usarse: Caddy lee el archivo de arriba abajo.
 
 (webtop_proxy) {
+	# Cabeceras de seguridad del escritorio.
+	#
+	# OJO: aqui NO se pone X-Frame-Options. El escritorio se muestra dentro de un
+	# marco de la aplicacion (otro subdominio), asi que SAMEORIGIN o DENY lo
+	# romperian. Se usa CSP frame-ancestors, que permite el nuestro y ninguno mas.
+	header {
+		X-Content-Type-Options nosniff
+		Content-Security-Policy "frame-ancestors 'self' https://virthub.dpdns.org"
+		Referrer-Policy no-referrer
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
 	# forward_auth manda una subpeticion a la aplicacion conservando la cookie de
 	# sesion y los parametros de la direccion. Si responde 2xx, la peticion
 	# continua; si responde otra cosa, esa respuesta se devuelve tal cual.

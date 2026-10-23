@@ -107,7 +107,7 @@
             @endif
         </section>
     </main>
-    <footer>Virthub 1.0</footer>
+    <footer>Virthub {{ config('virthub.version') }}</footer>
     <script>
         function toggleTheme() { document.body.classList.toggle('dark-mode'); }
         function toggleProfileMenu(event) { event?.stopPropagation(); document.querySelector('.toggleable-profile-menu')?.classList.toggle('is-open'); }

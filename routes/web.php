@@ -40,8 +40,14 @@ use Illuminate\Support\Facades\Route;
 // Publico
 // ---------------------------------------------------------------------------
 
-Route::get('/install', [InstallController::class, 'show'])->name('install.show');
-Route::post('/install', [InstallController::class, 'store'])->name('install.store');
+// El instalador pide INSTALL_KEY: se limita el numero de intentos para que no se
+// pueda probar claves a fuerza bruta.
+Route::get('/install', [InstallController::class, 'show'])
+    ->middleware('throttle:15,1')
+    ->name('install.show');
+Route::post('/install', [InstallController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('install.store');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 

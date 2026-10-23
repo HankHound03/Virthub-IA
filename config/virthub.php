@@ -15,6 +15,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Version de la aplicacion
+    |--------------------------------------------------------------------------
+    |
+    | Se muestra en el pie de todas las paginas. Vive aqui y no escrita en cada
+    | vista para que al subirla no haya que tocar nueve archivos y no acaben
+    | quedando numeros distintos en cada uno.
+    |
+    */
+
+    'version' => env('VIRTHUB_VERSION', '1.5'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Contenedores Webtop
     |--------------------------------------------------------------------------
     |

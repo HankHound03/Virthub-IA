@@ -267,6 +267,10 @@ Los escritorios **no** están en volúmenes Docker: sus datos viven en
 
 ```bash
 git pull
+
+# --pull es importante: si no, Docker reutiliza la imagen base que tenga en
+# caché y los parches de seguridad de PHP NO se aplican.
+docker compose -p virthub --env-file .env build --pull app
 docker compose -p virthub --env-file .env up -d --build app caddy
 docker compose -p virthub exec -u www-data app php artisan virthub:sync-containers
 ```
@@ -275,7 +279,72 @@ Las migraciones nuevas se aplican solas al recrear `app`.
 
 ---
 
-## 11. Resumen de comandos
+## 11. Seguridad
+
+### Actualizar PHP
+
+El compose usa la etiqueta flotante `php:8.4-apache`, así que una reconstrucción
+normal **puede reutilizar una imagen vieja de la caché** y dejarte con una versión
+vulnerable sin darte cuenta. Para recibir parches:
+
+```bash
+docker compose -p virthub --env-file .env build --pull app
+docker compose -p virthub --env-file .env up -d app
+```
+
+Comprueba la versión que está corriendo:
+
+```bash
+docker compose -p virthub exec app php -r 'echo PHP_VERSION, PHP_EOL;'
+```
+
+### Valores obligatorios en el `.env`
+
+```ini
+APP_ENV=production
+APP_DEBUG=false          # true muestra rutas, consultas y variables internas
+SESSION_SECURE_COOKIE=true
+FORCE_HTTPS=true
+```
+
+`APP_DEBUG=true` en producción enseña al visitante las rutas del servidor y
+fragmentos del código cuando algo falla. Es de lo primero que hay que apagar.
+
+### Lo que ya viene protegido
+
+| Riesgo | Protección |
+|---|---|
+| Subir un `.php` y que se ejecute en el servidor | `virthub-uploads.conf` de Apache: PHP desactivado en la carpeta de adjuntos |
+| Archivos con virus | ClamAV local, antes de guardarlos (foro, trozos y avatares) |
+| Extensiones peligrosas | Lista blanca en `config/virthub.php` (sin `php`, `html`, `svg`…) |
+| Escritorios accesibles por URL directa | Caddy con `forward_auth`; los contenedores no publican puertos |
+| Escritorios incrustados en otra web (clickjacking) | `Content-Security-Policy: frame-ancestors` |
+| Puertos expuestos a la red local | Caddy y la app se publican solo en `127.0.0.1` |
+| Fuerza bruta en `/install` | Límite de intentos (15 lectura / 10 envío por minuto) |
+
+### Comprobaciones rápidas
+
+```bash
+# Debe decir 1.5 y la versión de PHP correcta
+curl -s https://TU-DOMINIO/ | grep -o '<footer>[^<]*</footer>'
+docker compose -p virthub exec app php -r 'echo PHP_VERSION;'
+
+# Cabeceras de seguridad
+curl -sI https://TU-DOMINIO/ | grep -Ei 'x-frame|x-content|referrer|strict-transport'
+
+# Un archivo .php subido no debe ejecutarse: debe dar 403
+# Súbelo al foro y pide https://TU-DOMINIO/storage/uploads/forum/files/EL-ARCHIVO.php
+
+# Dependencias sin vulnerabilidades conocidas
+composer audit
+```
+
+> Los escritorios en `ct*.TU-DOMINIO` **no** llevan `X-Frame-Options`: usan
+> `frame-ancestors`, porque tienen que poder mostrarse dentro de la aplicación.
+
+---
+
+## 12. Resumen de comandos
 
 ```bash
 # Preparar
