@@ -817,6 +817,13 @@
 
     @include('partials.chat-widget')
 
+    @php
+        // Aviso pendiente de la ultima accion. Se lee una sola vez y se pinta en
+        // dos sitios: arriba del foro y junto al boton de publicar, para que no
+        // haya forma de perdérselo.
+        $aviso = \App\Support\Aviso::tomar();
+    @endphp
+
     <div class="forum-shell">
         @if (session('error'))
             <p class="auth-message auth-error">{{ session('error') }}</p>
@@ -829,6 +836,17 @@
         <div class="forum-layout">
             <section class="forum-card">
                 <h3>Publicar</h3>
+
+                {{--
+                    El aviso se pinta aqui, junto al formulario, y no arriba del
+                    todo: es donde el usuario esta mirando despues de publicar.
+                    Ademas la pagina baja sola hasta el (ver partials/header).
+                --}}
+                @if ($aviso)
+                    <p class="auth-message {{ $aviso['tipo'] === 'success' ? 'auth-success' : 'auth-error' }}" id="avisoPublicar">
+                        {{ $aviso['texto'] }}
+                    </p>
+                @endif
 
                 @if ($canPost)
                     <button type="button" class="forum-compose-launcher" id="openForumComposer">¿Que quieres compartir?</button>

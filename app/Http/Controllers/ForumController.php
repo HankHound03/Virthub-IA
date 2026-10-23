@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Services\ChunkedUploadService;
 use App\Services\ForumStore;
 use App\Support\ActiveUser;
+use App\Support\Aviso;
 use App\Support\VirusScanner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use RuntimeException;
 
@@ -53,7 +55,16 @@ class ForumController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $this->validatePost($request);
+        // Los errores de validacion se convierten en aviso de sesion: si se
+        // dejaran como error de validacion (que tambien viaja como flash), una
+        // peticion intermedia podria consumirlo y el usuario no veria nada.
+        try {
+            $validated = $this->validatePost($request);
+        } catch (ValidationException $e) {
+            Aviso::poner('error', (string) ($e->validator->errors()->first() ?: 'Revisa los datos del formulario.'));
+
+            return redirect('/foro')->withInput();
+        }
 
         $poll = $this->buildPoll($validated);
 
@@ -75,10 +86,15 @@ class ForumController extends Controller
                 $attachments
             );
         } catch (RuntimeException $e) {
-            return redirect('/foro')->with('error', $e->getMessage());
+            // Aqui cae, entre otros, el rechazo del antivirus.
+            Aviso::poner('error', $e->getMessage());
+
+            return redirect('/foro');
         }
 
-        return redirect('/foro')->with('success', 'Publicacion creada en el foro.');
+        Aviso::poner('success', 'Publicacion creada en el foro.');
+
+        return redirect('/foro');
     }
 
     public function vote(Request $request, string $postId): RedirectResponse

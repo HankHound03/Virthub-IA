@@ -255,6 +255,9 @@ class ChunkedUploadEndpointTest extends TestCase
                 'upload_ids' => [$session['upload_id']],
             ])
             ->assertRedirect('/foro')
-            ->assertSessionHas('error');
+            // El rechazo se avisa con App\Support\Aviso (clave de sesion propia),
+            // no con el flash 'error': el flash puede consumirlo una peticion
+            // intermedia y el usuario se quedaria sin ver el motivo.
+            ->assertSessionHas('virthub_aviso');
     }
 }

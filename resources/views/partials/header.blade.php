@@ -309,7 +309,7 @@
     --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const aviso = document.querySelector('.page-errors .auth-error, .forum-shell .auth-error');
+            const aviso = document.getElementById('avisoPublicar') || document.querySelector('.page-errors .auth-error, .forum-shell .auth-error');
 
             if (aviso) {
                 aviso.scrollIntoView({ behavior: 'smooth', block: 'center' });
