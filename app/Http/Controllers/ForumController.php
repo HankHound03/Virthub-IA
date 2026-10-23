@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\ChunkedUploadService;
 use App\Services\ForumStore;
 use App\Support\ActiveUser;
+use App\Support\VirusScanner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -26,6 +27,7 @@ class ForumController extends Controller
     public function __construct(
         private readonly ForumStore $forum,
         private readonly ChunkedUploadService $uploads,
+        private readonly VirusScanner $antivirus,
     ) {}
 
     public function index(Request $request): View
@@ -254,6 +256,33 @@ class ForumController extends Controller
     }
 
     /**
+     * Pasa un archivo subido por el antivirus.
+     *
+     * Lanza RuntimeException con un mensaje entendible; el metodo que llama ya
+     * la convierte en el aviso de error del foro.
+     */
+    private function verificarArchivo(\Illuminate\Http\UploadedFile $archivo): void
+    {
+        $analisis = $this->antivirus->escanear((string) $archivo->getRealPath());
+
+        if ($analisis['limpio']) {
+            return;
+        }
+
+        $nombre = (string) $archivo->getClientOriginalName();
+
+        if ($analisis['virus'] !== null) {
+            throw new RuntimeException(
+                "El archivo «{$nombre}» contiene un virus ({$analisis['virus']}) y no se guardo."
+            );
+        }
+
+        throw new RuntimeException(
+            "No se pudo analizar «{$nombre}»: " . ($analisis['error'] ?? 'antivirus no disponible') . '.'
+        );
+    }
+
+    /**
      * @param  array<string, mixed>  $validated
      * @return array{question: string, options: array<int, string>}|RedirectResponse|null
      */
@@ -296,6 +325,10 @@ class ForumController extends Controller
 
         foreach (['photos' => 'photo', 'videos' => 'video', 'files' => 'file'] as $inputName => $type) {
             foreach ($request->file($inputName, []) as $uploaded) {
+                // Antivirus ANTES de mover nada: si esta infectado no llega a
+                // tocar el disco del servidor.
+                $this->verificarArchivo($uploaded);
+
                 // storage/app/public vive en el volumen persistente de Docker;
                 // public/uploads se perderia al reconstruir el contenedor.
                 $dir = storage_path('app/public/uploads/forum/' . $type . 's');

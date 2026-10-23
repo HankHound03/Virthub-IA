@@ -239,6 +239,34 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Antivirus de los adjuntos
+    |--------------------------------------------------------------------------
+    |
+    | ClamAV local (servicio `clamav` del compose). Se consulta por socket TCP
+    | antes de guardar cada archivo: foro, subida por trozos y avatares.
+    |
+    | Se hace en local y no con un servicio externo por dos razones: los archivos
+    | de los usuarios no salen del servidor, y no hay limite de tamano ni de
+    | peticiones (los adjuntos pueden llegar a 5 GB por trozos).
+    |
+    | 'fail_open': que hacer si el antivirus no responde.
+    |   true  -> se permite la subida y se registra un aviso. Asi el foro no se
+    |            queda sin poder subir nada mientras ClamAV reinicia.
+    |   false -> se rechaza la subida. Mas estricto, pero un fallo del antivirus
+    |            bloquea todas las subidas.
+    |
+    */
+
+    'antivirus' => [
+        'enabled' => (bool) env('CLAMAV_ENABLED', true),
+        'host' => (string) env('CLAMAV_HOST', 'clamav'),
+        'port' => (int) env('CLAMAV_PORT', 3310),
+        'timeout' => (int) env('CLAMAV_TIMEOUT', 60),
+        'fail_open' => (bool) env('CLAMAV_FAIL_OPEN', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Esquema de las URLs generadas
     |--------------------------------------------------------------------------
     |

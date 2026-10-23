@@ -80,16 +80,36 @@ services:
       - virthub
 
   # ---------------------------------------------------------------------------
-  # Escritorios Webtop
+  # Antivirus de los adjuntos
   # ---------------------------------------------------------------------------
-  # Escritorios Webtop
-  # ---------------------------------------------------------------------------
-  # Cada escritorio:
-  #   - NO publica puertos: sin `ports` no es alcanzable desde fuera de la red.
-  #     Ese es el cierre del acceso directo.
-  #   - Va en la misma red que Caddy, que es quien media.
-  #   - Lleva credenciales propias, pero las presenta Caddy, asi que el navegador
-  #     no muestra ningun dialogo.
+  # Escanea todo lo que se sube al foro (y los avatares) ANTES de guardarlo.
+  #
+  # Se usa ClamAV en local, no un servicio externo, por dos razones:
+  #   - los archivos de los usuarios no salen del servidor;
+  #   - no hay limite de tamano ni de peticiones (los foros aceptan archivos de
+  #     hasta 5 GB por trozos, que un servicio en la nube no admitiria).
+  #
+  # Consume entre 1 y 2 GB de RAM, casi todo la base de firmas. Si el equipo va
+  # justo, se puede apagar con CLAMAV_ENABLED=false y el antivirus se salta.
+  clamav:
+    image: clamav/clamav:stable
+    restart: unless-stopped
+    environment:
+      # Solo se escanean archivos; el filtro de correo no hace falta.
+      CLAMAV_NO_MILTERD: "true"
+    volumes:
+      # La base de firmas se conserva: si no, se descargan ~300 MB en cada
+      # arranque.
+      - clamav_db:/var/lib/clamav
+    # Sin `ports`: solo se llega desde la red interna.
+    healthcheck:
+      test: ["CMD-SHELL", "clamdcheck.sh || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    networks:
+      - virthub
   #
   # Compose no permite generar servicios por iteracion (la clave `range` solo
   # admite valores DENTRO de un servicio, no nombres de servicio), asi que cada
@@ -210,6 +230,8 @@ services:
 
 volumes:
   app_storage:
+  # Base de firmas de ClamAV: se conserva para no descargarla en cada arranque.
+  clamav_db:
   mariadb_data:
   caddy_data:
   caddy_config:

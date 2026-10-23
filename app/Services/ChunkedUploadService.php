@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\VirusScanner;
 use RuntimeException;
 
 /**
@@ -24,7 +25,7 @@ class ChunkedUploadService
 {
     private string $baseDir;
 
-    public function __construct()
+    public function __construct(private readonly VirusScanner $antivirus)
     {
         $this->baseDir = storage_path('app/chunked');
     }
@@ -196,6 +197,25 @@ class ChunkedUploadService
         if ($actualSize !== $declaredSize) {
             throw new RuntimeException(
                 'El archivo final mide ' . $actualSize . ' bytes y se esperaban ' . $declaredSize . '.'
+            );
+        }
+
+        /*
+         * Antivirus antes de dar el archivo por bueno.
+         *
+         * Se escanea part.bin: ya esta completo y todavia no se ha movido a la
+         * carpeta publica, asi que si esta infectado no llega a publicarse.
+         */
+        $analisis = $this->antivirus->escanear($partPath);
+
+        if (! $analisis['limpio']) {
+            // Se descarta la subida entera para no dejar un archivo a medias.
+            $this->abort($uploadId, $owner);
+
+            throw new RuntimeException(
+                $analisis['virus'] !== null
+                    ? "El archivo contiene un virus ({$analisis['virus']}) y no se guardo."
+                    : 'No se pudo analizar el archivo: ' . ($analisis['error'] ?? 'antivirus no disponible') . '.'
             );
         }
 

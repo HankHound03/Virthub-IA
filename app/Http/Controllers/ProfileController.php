@@ -7,6 +7,7 @@ use App\Services\FriendStore;
 use App\Services\ProfileStore;
 use App\Services\UserStore;
 use App\Support\ActiveUser;
+use App\Support\VirusScanner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,6 +22,7 @@ class ProfileController extends Controller
         private readonly ProfileStore $profiles,
         private readonly ForumStore $forum,
         private readonly FriendStore $friends,
+        private readonly VirusScanner $antivirus,
     ) {}
 
     public function show(Request $request, string $username): View
@@ -76,7 +78,12 @@ class ProfileController extends Controller
         $newImagePath = null;
 
         if ($request->hasFile('profile_image')) {
-            $newImagePath = $this->storeAvatar($request, (string) ($existingUser['profile_image_path'] ?? ''));
+            try {
+                $newImagePath = $this->storeAvatar($request, (string) ($existingUser['profile_image_path'] ?? ''));
+            } catch (\RuntimeException $e) {
+                // El antivirus rechazo la imagen: se avisa sin romper la pagina.
+                return redirect('/configuracion')->with('error', $e->getMessage());
+            }
         }
 
         $this->users->updateProfileAppearance($username, $newImagePath, (string) $validated['frame_color']);
@@ -136,6 +143,12 @@ class ProfileController extends Controller
 
         $uploaded = $request->file('profile_image');
         $extension = strtolower((string) $uploaded->getClientOriginalExtension()) ?: 'jpg';
+
+        // Antivirus antes de guardar: un avatar tambien es contenido de usuario.
+        if (! $this->antivirus->escanear((string) $uploaded->getRealPath())['limpio']) {
+            throw new \RuntimeException('La imagen de perfil no paso el analisis de seguridad.');
+        }
+
         $filename = bin2hex(random_bytes(8)) . '_' . time() . '.' . $extension;
 
         $uploaded->move($uploadsDir, $filename);
