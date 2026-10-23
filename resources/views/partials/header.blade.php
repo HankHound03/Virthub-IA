@@ -298,3 +298,21 @@
         }, { passive: true });
     })();
 </script>
+
+    {{--
+        Llevar la vista hasta el aviso.
+
+        Los mensajes de error se pintan arriba, pero tras enviar un formulario el
+        navegador suele devolver al usuario a la altura donde estaba: el aviso
+        existia y no se veia. Por ejemplo, al subir un archivo rechazado por el
+        antivirus, el mensaje quedaba fuera de pantalla.
+    --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const aviso = document.querySelector('.page-errors .auth-error, .forum-shell .auth-error');
+
+            if (aviso) {
+                aviso.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    </script>
