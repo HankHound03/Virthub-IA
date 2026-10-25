@@ -34,6 +34,12 @@
     --vh-text: var(--vh-panel-text);
     --vh-text-soft: var(--vh-panel-text);
 
+    /* Superficies interiores (tarjetas de estado, menus, chat). Se sacan del color
+       del panel mezclandolo un poco con el del texto: asi quedan un tono distinto
+       al panel pero dentro de la misma gama, en claro y en oscuro. */
+    --vh-surface: color-mix(in srgb, var(--vh-panel-bg) 82%, var(--vh-panel-text) 18%);
+    --vh-surface-strong: color-mix(in srgb, var(--vh-panel-bg) 70%, var(--vh-panel-text) 30%);
+
     background-color: var(--vh-bg-solid, #0b1220);
     background-image: var(--vh-bg-image);
     background-size: cover;
@@ -1728,4 +1734,42 @@
     background: var(--vh-btn-bg) !important;
     border: 1px solid var(--vh-btn-border) !important;
     color: var(--vh-btn-text) !important;
+}
+
+/* --- Graficos y chips del panel de estado -------------------------------- */
+
+[data-era] body .system-sparkline {
+    background: color-mix(in srgb, var(--vh-panel-bg) 90%, var(--vh-panel-text) 10%) !important;
+    border: 1px solid var(--vh-panel-border) !important;
+    border-radius: var(--vh-panel-radius) !important;
+}
+
+[data-era] body .system-meter {
+    background: color-mix(in srgb, var(--vh-panel-bg) 74%, var(--vh-panel-text) 26%) !important;
+}
+
+[data-era] body .system-state-pill {
+    background: var(--vh-btn-bg) !important;
+    border: 1px solid var(--vh-btn-border) !important;
+    border-radius: var(--vh-btn-radius) !important;
+    color: var(--vh-btn-text) !important;
+    box-shadow: var(--vh-btn-shadow) !important;
+}
+
+/* Verde y rojo legibles segun el fondo del panel de cada epoca. */
+[data-era] body .system-state-pill.is-online {
+    color: var(--vh-alert-ok) !important;
+    border-color: var(--vh-alert-ok) !important;
+}
+
+[data-era] body .system-state-pill.is-offline {
+    color: var(--vh-alert-error) !important;
+    border-color: var(--vh-alert-error) !important;
+}
+
+/* La tarjeta en si: un tono por encima del panel, con su borde. */
+[data-era] body .system-metric-card {
+    background: color-mix(in srgb, var(--vh-panel-bg) 88%, var(--vh-panel-text) 12%) !important;
+    border: 1px solid var(--vh-panel-border) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--vh-panel-text) 12%, transparent) !important;
 }
