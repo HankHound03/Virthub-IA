@@ -29,6 +29,11 @@
    ============================================================================= */
 
 body[data-era] {
+    /* La aplicacion pinta el texto con estas dos; si no se redefinen, queda el
+       verde claro del tema oscuro original y no se lee sobre paneles claros. */
+    --vh-text: var(--vh-panel-text);
+    --vh-text-soft: var(--vh-panel-text);
+
     background-color: var(--vh-bg-solid, #0b1220);
     background-image: var(--vh-bg-image);
     background-size: cover;
@@ -248,6 +253,7 @@ body[data-era] .forum-layout {
    ============================================================================= */
 
 body[data-era="xp"] {
+    --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
     --vh-font: Tahoma, 'Segoe UI', sans-serif;
     --vh-font-head: Tahoma, sans-serif;
     --vh-heading-weight: 700;
@@ -420,6 +426,7 @@ body[data-era="xp"][data-variante="classic"] {
    ============================================================================= */
 
 body[data-era="vista"] {
+    --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
     --vh-font: 'Segoe UI', sans-serif;
     --vh-font-head: 'Segoe UI', sans-serif;
     --vh-heading-weight: 600;
@@ -578,6 +585,7 @@ body[data-era="vista"][data-variante="violet"] {
    ============================================================================= */
 
 body[data-era="win7"] {
+    --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
     --vh-font: 'Segoe UI', sans-serif;
     --vh-font-head: 'Segoe UI', sans-serif;
     --vh-heading-weight: 600;
@@ -742,6 +750,7 @@ body[data-era="win7"][data-variante="landscapes"] {
    ============================================================================= */
 
 body[data-era="win8"] {
+    --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
     --vh-font: 'Segoe UI Light', 'Segoe UI', sans-serif;
     --vh-font-head: 'Segoe UI Light', 'Segoe UI', sans-serif;
     --vh-heading-weight: 300;
@@ -792,6 +801,7 @@ body[data-era="win8"][data-variante="teal"]   { --vh-accent: #00b7c3; --vh-btn-h
    ============================================================================= */
 
 body[data-era="win10"] {
+    --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
     --vh-font: 'Segoe UI', sans-serif;
     --vh-font-head: 'Segoe UI', sans-serif;
     --vh-heading-weight: 600;
@@ -813,6 +823,7 @@ body[data-era="win10"] {
 }
 
 body[data-era="win10"][data-variante="azul-claro"] {
+    --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
     --vh-panel-bg: rgba(248, 248, 248, 0.8);
     --vh-panel-border: rgba(0, 0, 0, 0.1);
     --vh-panel-text: #1a1a1a;
@@ -837,6 +848,7 @@ body[data-era="win10"][data-variante="azul-claro"] {
 }
 
 body[data-era="win10"][data-variante="verde-claro"] {
+    --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
     --vh-panel-bg: rgba(248, 248, 248, 0.8);
     --vh-panel-border: rgba(0, 0, 0, 0.1);
     --vh-panel-text: #1a2a1a;
@@ -861,6 +873,7 @@ body[data-era="win10"][data-variante="verde-claro"] {
 }
 
 body[data-era="win10"][data-variante="grafito-claro"] {
+    --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
     --vh-panel-bg: rgba(244, 244, 244, 0.82);
     --vh-panel-border: rgba(0, 0, 0, 0.12);
     --vh-panel-text: #202020;
@@ -1153,4 +1166,87 @@ body[data-era] .vh-tema-tile.activo {
 /* El boton que abre el carrusel no debe heredar el texto de la barra. */
 body[data-era] .vh-temas-btn {
     text-shadow: none !important;
+}
+
+/* =============================================================================
+   LEGIBILIDAD DEL TEXTO
+   =============================================================================
+   Varios textos de la aplicacion tenian el color fijo del tema oscuro original
+   (blanco o verde claro). Sobre los paneles crema de XP o los blancos de
+   Windows 7 desaparecian. Aqui se atan al color del panel de cada esquema.
+   -------------------------------------------------------------------------- */
+
+/* Guardia general: cualquier texto dentro de un panel usa el color del panel. */
+body[data-era] :is(.gadget, .forum-card, .forum-post, .admin-card, .config-card,
+                   .suggestions-card, .profile-menu, .sidebar, .chat-panel,
+                   .chat-header, .chat-tabs, .chat-input-area, .header-login-card,
+                   .linux-news-panel, .container-card, .profile-area-card,
+                   .login-screen, footer)
+    :is(p, span, li, small, strong, em, b, label, td, th, div,
+        h1, h2, h3, h4, h5, h6, .post-meta, .meta) {
+    color: var(--vh-text);
+}
+
+/* La pantalla de login tenia un color casi transparente. */
+body[data-era] .login-screen {
+    color: var(--vh-text) !important;
+}
+
+/* El panel de acceso forzaba blanco. */
+body[data-era] .access-gadget,
+body[data-era] .access-gadget h3,
+body[data-era] .access-gadget p,
+body[data-era] .access-gadget label,
+body[data-era] .access-gadget div {
+    color: var(--vh-text) !important;
+}
+
+/* La inicial del avatar tambien iba en blanco fijo. */
+body[data-era] .profile-aero-frame span {
+    color: var(--vh-text) !important;
+}
+
+/* Avisos: rojo y verde legibles sobre panel claro y sobre panel oscuro. */
+body[data-era] .auth-error {
+    color: var(--vh-alert-error, #8a1c1c) !important;
+    background-color: rgba(200, 60, 60, 0.16) !important;
+    border-color: rgba(200, 60, 60, 0.35) !important;
+}
+
+body[data-era] .auth-success {
+    color: var(--vh-alert-ok, #1c6b32) !important;
+    background-color: rgba(50, 160, 90, 0.16) !important;
+    border-color: rgba(50, 160, 90, 0.35) !important;
+}
+
+body[data-era] .system-state-pill.is-online {
+    color: var(--vh-alert-ok, #1c6b32) !important;
+}
+
+body[data-era] .system-state-pill.is-offline {
+    color: var(--vh-alert-error, #8a1c1c) !important;
+}
+
+/* Los botones dentro de un panel conservan SU color, no el del texto. */
+body[data-era] :is(.gadget, .forum-card, .admin-card, .config-card,
+                   .suggestions-card, .profile-menu, .sidebar, .chat-panel,
+                   .header-login-card, .container-card, .profile-area-card)
+    :is(button, input[type="submit"]) {
+    color: var(--vh-btn-text) !important;
+}
+
+/* El menu de perfil: sus enlaces se veian lavados sobre el panel claro. */
+body[data-era] .profile-menu a,
+body[data-era] .profile-menu span,
+body[data-era] .profile-menu li {
+    color: var(--vh-text) !important;
+}
+
+/* Los numeros grandes del panel de estado. */
+body[data-era] .gadget strong,
+body[data-era] .gadget b,
+body[data-era] .status-value,
+body[data-era] .metric-value {
+    color: var(--vh-text) !important;
+    font-weight: 700;
 }
