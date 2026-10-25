@@ -1995,3 +1995,33 @@
         margin-left: 0;
     }
 }
+
+/* =============================================================================
+   EL BOTON DE CHAT, IGUAL QUE LOS DEMAS
+   =============================================================================
+   Herdaba --vh-toggle-radius, que en varias epocas es 50% (pensado para el boton
+   redondo que flota en la esquina). Dentro de la barra del contenedor eso lo
+   convertia en una capsula distinta al resto. Aqui recupera la forma de boton de
+   su epoca y el mismo alto que sus vecinos.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .container-toolbar .chat-toggle {
+    border-radius: var(--vh-btn-radius) !important;
+    min-height: 40px !important;
+    height: auto !important;
+}
+
+/* La barra ocupa exactamente el ancho de su columna, con el borde incluido, para
+   que su caja coincida con la del escritorio de abajo. */
+[data-era] body .container-toolbar {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+/* Y el escritorio, con el mismo ancho: sin el borde sumandose por fuera. */
+[data-era] body .container-main > iframe {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
