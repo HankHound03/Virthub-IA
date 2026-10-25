@@ -1373,3 +1373,65 @@ body[data-era] header select {
     background: var(--vh-input-bg) !important;
     border: 1px solid var(--vh-input-border) !important;
 }
+
+/* =============================================================================
+   ANIMACION AL ABRIR EL CHAT
+   =============================================================================
+   En la pagina del contenedor el panel ya tenia transicion (container.css), pero
+   en inicio, foro y demas se abria de golpe: la regla que anima el ancho solo
+   existia alli. Aqui se define para el widget en cualquier pagina.
+
+   Se animan ancho, opacidad y un pequeno desplazamiento, asi que el panel sale
+   deslizandose desde el boton en vez de aparecer de repente.
+   -------------------------------------------------------------------------- */
+
+body[data-era] .global-chat-widget .chat-panel {
+    flex: 0 0 0;
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(14px);
+    transform-origin: bottom right;
+    overflow: hidden;
+    transition:
+        flex-basis 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        max-width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 0.25s ease,
+        visibility 0.3s ease,
+        transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body[data-era] .global-chat-widget .chat-panel.is-open {
+    flex-basis: clamp(300px, 28vw, 390px);
+    width: clamp(300px, 28vw, 390px);
+    max-width: min(390px, calc(100vw - 86px));
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+/* En pantallas estrechas el panel ocupa casi todo el ancho. */
+@media (max-width: 900px), (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
+    body[data-era] .global-chat-widget .chat-panel.is-open {
+        flex-basis: min(92vw, 360px);
+        width: min(92vw, 360px);
+        max-width: min(92vw, 360px);
+    }
+}
+
+/* El boton tambien responde al pasar por encima, para que se note que abre algo. */
+body[data-era] .global-chat-widget .chat-toggle {
+    transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease;
+}
+
+body[data-era] .global-chat-widget .chat-toggle:hover {
+    transform: translateY(-2px) scale(1.04);
+}
+
+/* Al abrir, el icono se inclina un poco: da la sensacion de que responde. */
+body[data-era] .global-chat-widget .chat-panel.is-open ~ .chat-toggle {
+    transform: rotate(0deg);
+}
