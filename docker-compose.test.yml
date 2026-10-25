@@ -14,6 +14,10 @@ services:
   app:
     ports:
       - "8001:80"
+    environment:
+      # Selector de temas de diseno (XP, Vista, 7, 8, 10). Solo aqui: en
+      # produccion la variable no existe y el selector ni se pinta.
+      VIRTHUB_TEMAS: "true"
 
   # En pruebas no hace falta la puerta de entrada.
   caddy:

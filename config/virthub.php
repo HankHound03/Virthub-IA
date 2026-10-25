@@ -28,6 +28,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Temas de diseno (solo pruebas)
+    |--------------------------------------------------------------------------
+    |
+    | Muestra un selector flotante con los estilos historicos de Windows (XP,
+    | Vista, 7, 8 y 10) para comparar disenos.
+    |
+    | Desactivado por defecto: se enciende con VIRTHUB_TEMAS=true, y solo lo hace
+    | docker-compose.test.yml. En produccion no aparece nada.
+    |
+    */
+
+    'temas' => [
+        'enabled' => filter_var(env('VIRTHUB_TEMAS', false), FILTER_VALIDATE_BOOL),
+        'activo' => (string) env('VIRTHUB_TEMA_INICIAL', ''),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Contenedores Webtop
     |--------------------------------------------------------------------------
     |

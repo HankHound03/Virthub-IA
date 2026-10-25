@@ -1,0 +1,643 @@
+/* =============================================================================
+   Temas historicos de Windows para Virthub
+   =============================================================================
+
+   Cinco epocas: XP (Luna), Vista (Aero Glass), 7 (Aero), 8 (Modern UI) y 10
+   (Fluent).
+
+   COMO ESTAN HECHOS
+   ----------------
+   La aplicacion ya usaba variables --vh-* para los colores, asi que cada tema se
+   limita a redefinirlas y luego anade los rasgos propios de su epoca (bordes,
+   degradados, tipografia, radios). Asi no hay que tocar ninguna vista.
+
+   Se activan con una clase en el body: body.tema-xp, body.tema-vista...
+
+   AVISO: esto es material de pruebas de diseno. Se carga solo cuando el entorno
+   lo pide (VIRTHUB_TEMAS=true), no en produccion.
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Windows XP - Luna
+   -----------------------------------------------------------------------------
+   Azul intenso, paneles color crema, bordes marcados y la tipografia Tahoma.
+   El objetivo es que se reconozca al instante: el azul de la barra de titulo, el
+   verde del boton de inicio y las esquinas redondeadas solo arriba.
+   -------------------------------------------------------------------------- */
+
+body.tema-xp {
+    --vh-body-bg: linear-gradient(180deg, #2f6fd0 0%, #4a90e2 42%, #7ab648 100%);
+    --vh-page-overlay: none;
+    --vh-surface: #ece9d8;
+    --vh-surface-strong: #f6f4ea;
+    --vh-border: #0054e3;
+    --vh-icon: #003c74;
+    --vh-text: #000000;
+    --vh-text-soft: #2b2b2b;
+    --vh-button-bg: linear-gradient(180deg, #fdfdfd 0%, #ecebe5 50%, #d9d7cd 100%);
+    --vh-button-hover: linear-gradient(180deg, #fffdf0 0%, #ffe9a8 50%, #ffd24a 100%);
+    --vh-panel-text: #000000;
+    --vh-glass-blur: 0;
+    --vh-glass-sheen: none;
+    --vh-glass-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --vh-glass-drop-shadow: 2px 2px 4px rgba(0, 0, 0, 0.35);
+
+    background: linear-gradient(180deg, #2f6fd0 0%, #4a90e2 45%, #6fb43f 100%) fixed;
+    color: #000000;
+    font-family: Tahoma, 'Segoe UI', sans-serif;
+    font-size: 12px;
+}
+
+body.tema-xp::before,
+body.tema-xp::after {
+    display: none;
+}
+
+/* Barra de titulo: el degradado azul de Luna con el filo claro arriba. */
+body.tema-xp header {
+    background: linear-gradient(180deg, #0058e6 0%, #3a93ff 8%, #0a6cd6 52%, #004bb5 92%, #003c8f 100%) !important;
+    border: 1px solid #003c8f !important;
+    border-radius: 8px 8px 0 0 !important;
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.55) !important;
+    color: #ffffff !important;
+    font-family: Tahoma, sans-serif !important;
+    font-weight: 700;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: none !important;
+}
+
+body.tema-xp header a,
+body.tema-xp header button,
+body.tema-xp .navbar-link {
+    color: #ffffff !important;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Paneles: el crema clasico de XP. */
+body.tema-xp footer,
+body.tema-xp .linux-news-panel,
+body.tema-xp .login-screen,
+body.tema-xp .sidebar,
+body.tema-xp .profile-menu,
+body.tema-xp .toggleable-sidebar,
+body.tema-xp .chat-panel,
+body.tema-xp .chat-header,
+body.tema-xp .chat-tabs,
+body.tema-xp .chat-input-area,
+body.tema-xp .chat-toast,
+body.tema-xp .forum-card,
+body.tema-xp .forum-post,
+body.tema-xp .suggestions-card,
+body.tema-xp .config-card,
+body.tema-xp .admin-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-image: none !important;
+    background-color: #ece9d8 !important;
+    border: 1px solid #0054e3 !important;
+    border-radius: 6px 6px 3px 3px !important;
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9) !important;
+    color: #000000 !important;
+    text-shadow: none !important;
+}
+
+body.tema-xp h1,
+body.tema-xp h2,
+body.tema-xp h3,
+body.tema-xp h4,
+body.tema-xp .forum-card h3,
+body.tema-xp .admin-card h3 {
+    color: #003c74 !important;
+    font-family: Tahoma, sans-serif !important;
+    font-weight: 700 !important;
+    text-shadow: none !important;
+}
+
+/* Botones tipo XP: degradado claro, borde azul y esquinas de 3px. */
+body.tema-xp button,
+body.tema-xp .container-load-btn,
+body.tema-xp .header-login-button,
+body.tema-xp input[type="submit"] {
+    background: linear-gradient(180deg, #fdfdfd 0%, #ecebe5 50%, #d9d7cd 100%) !important;
+    border: 1px solid #003c74 !important;
+    border-radius: 3px !important;
+    box-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+    color: #000000 !important;
+    font-family: Tahoma, sans-serif !important;
+    font-weight: 400 !important;
+    text-shadow: none !important;
+}
+
+body.tema-xp button:hover,
+body.tema-xp .container-load-btn:hover,
+body.tema-xp .header-login-button:hover {
+    background: linear-gradient(180deg, #fffdf0 0%, #ffe9a8 50%, #ffd24a 100%) !important;
+    border-color: #e88b00 !important;
+}
+
+/* Campos de texto: fondo blanco y borde azul grisaceo. */
+body.tema-xp input[type="text"],
+body.tema-xp input[type="email"],
+body.tema-xp input[type="password"],
+body.tema-xp input[type="search"],
+body.tema-xp textarea,
+body.tema-xp select {
+    background: #ffffff !important;
+    border: 1px solid #7f9db9 !important;
+    border-radius: 0 !important;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.18) !important;
+    color: #000000 !important;
+    font-family: Tahoma, sans-serif !important;
+}
+
+/* -----------------------------------------------------------------------------
+   Windows Vista - Aero Glass
+   -----------------------------------------------------------------------------
+   Cristal oscuro y muy translucido, brillos fuertes y texto blanco. La diferencia
+   con Windows 7 esta en que Vista es mas oscuro y "pesado".
+   -------------------------------------------------------------------------- */
+
+body.tema-vista {
+    --vh-body-bg: radial-gradient(circle at 50% 20%, #1b4a63 0%, #0a1b2a 55%, #04090f 100%);
+    --vh-page-overlay: none;
+    --vh-surface: rgba(16, 32, 48, 0.62);
+    --vh-surface-strong: rgba(10, 24, 38, 0.78);
+    --vh-border: rgba(160, 215, 255, 0.34);
+    --vh-icon: #dff2ff;
+    --vh-text: #eaf7ff;
+    --vh-text-soft: #c9e6f7;
+    --vh-button-bg: rgba(38, 78, 110, 0.72);
+    --vh-button-hover: rgba(70, 130, 175, 0.9);
+    --vh-panel-text: #f4fbff;
+    --vh-glass-blur: 22px;
+    --vh-glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.14) 45%, rgba(255, 255, 255, 0) 72%);
+    --vh-glass-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62), inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+    --vh-glass-drop-shadow: 0 18px 44px rgba(0, 0, 0, 0.65);
+
+    background: radial-gradient(circle at 50% 20%, #1b4a63 0%, #0a1b2a 55%, #04090f 100%) fixed;
+    color: #eaf7ff;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body.tema-vista::before,
+body.tema-vista::after {
+    display: none;
+}
+
+body.tema-vista header {
+    background: linear-gradient(180deg, rgba(70, 120, 160, 0.75) 0%, rgba(16, 36, 54, 0.9) 48%, rgba(6, 16, 26, 0.95) 100%) !important;
+    border: 1px solid rgba(160, 215, 255, 0.42) !important;
+    border-radius: 10px 10px 0 0 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 26px rgba(0, 0, 0, 0.6) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+body.tema-vista footer,
+body.tema-vista .linux-news-panel,
+body.tema-vista .login-screen,
+body.tema-vista .sidebar,
+body.tema-vista .profile-menu,
+body.tema-vista .toggleable-sidebar,
+body.tema-vista .chat-panel,
+body.tema-vista .chat-header,
+body.tema-vista .chat-tabs,
+body.tema-vista .chat-input-area,
+body.tema-vista .forum-card,
+body.tema-vista .forum-post,
+body.tema-vista .suggestions-card,
+body.tema-vista .config-card,
+body.tema-vista .admin-card {
+    background-color: rgba(16, 32, 48, 0.62) !important;
+    border: 1px solid rgba(160, 215, 255, 0.34) !important;
+    border-radius: 6px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36), 0 14px 36px rgba(0, 0, 0, 0.55) !important;
+    color: #eaf7ff !important;
+    backdrop-filter: blur(22px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
+}
+
+body.tema-vista button,
+body.tema-vista .container-load-btn,
+body.tema-vista .header-login-button {
+    background: linear-gradient(180deg, rgba(120, 180, 225, 0.9) 0%, rgba(42, 90, 128, 0.92) 50%, rgba(16, 44, 68, 0.95) 100%) !important;
+    border: 1px solid rgba(190, 232, 255, 0.6) !important;
+    border-radius: 6px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75) !important;
+}
+
+body.tema-vista button:hover,
+body.tema-vista .container-load-btn:hover {
+    background: linear-gradient(180deg, rgba(170, 220, 255, 0.95) 0%, rgba(70, 140, 190, 0.95) 50%, rgba(26, 70, 105, 0.98) 100%) !important;
+}
+
+body.tema-vista input[type="text"],
+body.tema-vista input[type="email"],
+body.tema-vista input[type="password"],
+body.tema-vista input[type="search"],
+body.tema-vista textarea,
+body.tema-vista select {
+    background: rgba(6, 18, 30, 0.72) !important;
+    border: 1px solid rgba(160, 215, 255, 0.4) !important;
+    border-radius: 4px !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7) !important;
+    color: #eaf7ff !important;
+}
+
+/* -----------------------------------------------------------------------------
+   Windows 7 - Aero
+   -----------------------------------------------------------------------------
+   El mismo cristal que Vista pero mas claro y limpio. Paneles azul hielo con texto
+   oscuro y la barra superior en cristal grafito.
+   -------------------------------------------------------------------------- */
+
+body.tema-win7 {
+    --vh-body-bg: radial-gradient(circle at 50% 0%, #bfe3f7 0%, #6aa8d0 40%, #1f4a68 100%);
+    --vh-page-overlay: none;
+    --vh-surface: rgba(226, 240, 252, 0.78);
+    --vh-surface-strong: rgba(245, 251, 255, 0.9);
+    --vh-border: rgba(70, 130, 180, 0.55);
+    --vh-icon: #123a5a;
+    --vh-text: #10293f;
+    --vh-text-soft: #23465f;
+    --vh-button-bg: linear-gradient(180deg, #f7fcff 0%, #d9ecfa 48%, #b6d8ef 100%);
+    --vh-button-hover: linear-gradient(180deg, #ffffff 0%, #e8f6ff 48%, #c9e8ff 100%);
+    --vh-panel-text: #0c2438;
+    --vh-glass-blur: 16px;
+    --vh-glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.3) 42%, rgba(255, 255, 255, 0.05) 75%);
+    --vh-glass-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    --vh-glass-drop-shadow: 0 10px 26px rgba(20, 50, 80, 0.35);
+
+    background: radial-gradient(circle at 50% 0%, #bfe3f7 0%, #6aa8d0 40%, #1f4a68 100%) fixed;
+    color: #10293f;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body.tema-win7::before,
+body.tema-win7::after {
+    display: none;
+}
+
+body.tema-win7 header {
+    background: linear-gradient(180deg, rgba(210, 232, 248, 0.92) 0%, rgba(120, 165, 200, 0.95) 45%, rgba(40, 75, 105, 0.98) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    border-radius: 8px 8px 0 0 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 6px 18px rgba(20, 50, 80, 0.35) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(10, 30, 50, 0.9) !important;
+}
+
+body.tema-win7 footer,
+body.tema-win7 .linux-news-panel,
+body.tema-win7 .login-screen,
+body.tema-win7 .sidebar,
+body.tema-win7 .profile-menu,
+body.tema-win7 .toggleable-sidebar,
+body.tema-win7 .chat-panel,
+body.tema-win7 .chat-header,
+body.tema-win7 .chat-tabs,
+body.tema-win7 .chat-input-area,
+body.tema-win7 .forum-card,
+body.tema-win7 .forum-post,
+body.tema-win7 .suggestions-card,
+body.tema-win7 .config-card,
+body.tema-win7 .admin-card {
+    background-color: rgba(226, 240, 252, 0.78) !important;
+    border: 1px solid rgba(255, 255, 255, 0.85) !important;
+    border-radius: 6px !important;
+    box-shadow: inset 0 1px 0 #ffffff, 0 8px 22px rgba(20, 50, 80, 0.28) !important;
+    color: #10293f !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+body.tema-win7 h1,
+body.tema-win7 h2,
+body.tema-win7 h3,
+body.tema-win7 h4 {
+    color: #0d3a5c !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+body.tema-win7 button,
+body.tema-win7 .container-load-btn,
+body.tema-win7 .header-login-button {
+    background: linear-gradient(180deg, #f7fcff 0%, #d9ecfa 48%, #b6d8ef 100%) !important;
+    border: 1px solid rgba(70, 130, 180, 0.75) !important;
+    border-radius: 5px !important;
+    box-shadow: inset 0 1px 0 #ffffff, 0 1px 3px rgba(20, 50, 80, 0.3) !important;
+    color: #10293f !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+body.tema-win7 button:hover,
+body.tema-win7 .container-load-btn:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #e8f6ff 48%, #c9e8ff 100%) !important;
+    border-color: #2f7fb8 !important;
+}
+
+body.tema-win7 input[type="text"],
+body.tema-win7 input[type="email"],
+body.tema-win7 input[type="password"],
+body.tema-win7 input[type="search"],
+body.tema-win7 textarea,
+body.tema-win7 select {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(120, 165, 200, 0.9) !important;
+    border-radius: 3px !important;
+    box-shadow: inset 0 1px 2px rgba(20, 50, 80, 0.2) !important;
+    color: #10293f !important;
+}
+
+/* -----------------------------------------------------------------------------
+   Windows 8 - Modern UI (Metro)
+   -----------------------------------------------------------------------------
+   Lo contrario de Aero: plano, esquinas rectas, sin degradados ni brillos. Color
+   solido y tipografia fina y grande.
+   -------------------------------------------------------------------------- */
+
+body.tema-win8 {
+    --vh-body-bg: #1f1f1f;
+    --vh-page-overlay: none;
+    --vh-surface: #252526;
+    --vh-surface-strong: #2d2d30;
+    --vh-border: #3f3f46;
+    --vh-icon: #ffffff;
+    --vh-text: #f2f2f2;
+    --vh-text-soft: #cfcfcf;
+    --vh-button-bg: #333337;
+    --vh-button-hover: #3f3f46;
+    --vh-panel-text: #ffffff;
+    --vh-glass-blur: 0;
+    --vh-glass-sheen: none;
+    --vh-glass-inner-shadow: none;
+    --vh-glass-drop-shadow: none;
+
+    background: #1f1f1f fixed;
+    color: #f2f2f2;
+    font-family: 'Segoe UI', 'Segoe UI Light', sans-serif;
+}
+
+body.tema-win8::before,
+body.tema-win8::after {
+    display: none;
+}
+
+body.tema-win8 header {
+    background: #1b2a38 !important;
+    border: none !important;
+    border-bottom: 1px solid #3f3f46 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+
+body.tema-win8 footer,
+body.tema-win8 .linux-news-panel,
+body.tema-win8 .login-screen,
+body.tema-win8 .sidebar,
+body.tema-win8 .profile-menu,
+body.tema-win8 .toggleable-sidebar,
+body.tema-win8 .chat-panel,
+body.tema-win8 .chat-header,
+body.tema-win8 .chat-tabs,
+body.tema-win8 .chat-input-area,
+body.tema-win8 .forum-card,
+body.tema-win8 .forum-post,
+body.tema-win8 .suggestions-card,
+body.tema-win8 .config-card,
+body.tema-win8 .admin-card {
+    background-color: #252526 !important;
+    background-image: none !important;
+    border: 1px solid #3f3f46 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #f2f2f2 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.tema-win8 h1,
+body.tema-win8 h2,
+body.tema-win8 h3,
+body.tema-win8 h4 {
+    color: #ffffff !important;
+    font-family: 'Segoe UI Light', 'Segoe UI', sans-serif !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.5px;
+    text-shadow: none !important;
+}
+
+/* Botones: rectangulos planos con el acento al pasar por encima. */
+body.tema-win8 button,
+body.tema-win8 .container-load-btn,
+body.tema-win8 .header-login-button {
+    background: #333337 !important;
+    border: 1px solid #3f3f46 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+    text-transform: none;
+    letter-spacing: 0.3px;
+}
+
+body.tema-win8 button:hover,
+body.tema-win8 .container-load-btn:hover {
+    background: #00a4ef !important;
+    border-color: #00a4ef !important;
+    color: #ffffff !important;
+}
+
+body.tema-win8 input[type="text"],
+body.tema-win8 input[type="email"],
+body.tema-win8 input[type="password"],
+body.tema-win8 input[type="search"],
+body.tema-win8 textarea,
+body.tema-win8 select {
+    background: #1f1f1f !important;
+    border: 1px solid #3f3f46 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+}
+
+/* -----------------------------------------------------------------------------
+   Windows 10 - Fluent
+   -----------------------------------------------------------------------------
+   El punto medio: plano como el 8, pero con profundidad (sombras suaves, esquinas
+   de 4px y el azul de acento de Windows 10).
+   -------------------------------------------------------------------------- */
+
+body.tema-win10 {
+    --vh-body-bg: #202020;
+    --vh-page-overlay: none;
+    --vh-surface: rgba(43, 43, 43, 0.92);
+    --vh-surface-strong: rgba(53, 53, 53, 0.96);
+    --vh-border: #3a3a3a;
+    --vh-icon: #ffffff;
+    --vh-text: #ffffff;
+    --vh-text-soft: #d6d6d6;
+    --vh-button-bg: #333333;
+    --vh-button-hover: #3d3d3d;
+    --vh-panel-text: #ffffff;
+    --vh-glass-blur: 12px;
+    --vh-glass-sheen: none;
+    --vh-glass-inner-shadow: none;
+    --vh-glass-drop-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+
+    background: #202020 fixed;
+    color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body.tema-win10::before,
+body.tema-win10::after {
+    display: none;
+}
+
+body.tema-win10 header {
+    background: rgba(31, 31, 31, 0.96) !important;
+    border: 1px solid #3a3a3a !important;
+    border-bottom: 2px solid #0078d7 !important;
+    border-radius: 4px 4px 0 0 !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+body.tema-win10 footer,
+body.tema-win10 .linux-news-panel,
+body.tema-win10 .login-screen,
+body.tema-win10 .sidebar,
+body.tema-win10 .profile-menu,
+body.tema-win10 .toggleable-sidebar,
+body.tema-win10 .chat-panel,
+body.tema-win10 .chat-header,
+body.tema-win10 .chat-tabs,
+body.tema-win10 .chat-input-area,
+body.tema-win10 .forum-card,
+body.tema-win10 .forum-post,
+body.tema-win10 .suggestions-card,
+body.tema-win10 .config-card,
+body.tema-win10 .admin-card {
+    background-color: rgba(43, 43, 43, 0.92) !important;
+    border: 1px solid #3a3a3a !important;
+    border-radius: 4px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+body.tema-win10 h1,
+body.tema-win10 h2,
+body.tema-win10 h3,
+body.tema-win10 h4 {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    text-shadow: none !important;
+}
+
+/* Botones: planos, pero con un filo de acento abajo al pasar por encima. */
+body.tema-win10 button,
+body.tema-win10 .container-load-btn,
+body.tema-win10 .header-login-button {
+    background: #333333 !important;
+    border: 1px solid #4a4a4a !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+
+body.tema-win10 button:hover,
+body.tema-win10 .container-load-btn:hover {
+    background: #3d3d3d !important;
+    border-color: #0078d7 !important;
+    box-shadow: inset 0 -2px 0 #0078d7 !important;
+}
+
+body.tema-win10 input[type="text"],
+body.tema-win10 input[type="email"],
+body.tema-win10 input[type="password"],
+body.tema-win10 input[type="search"],
+body.tema-win10 textarea,
+body.tema-win10 select {
+    background: #1f1f1f !important;
+    border: 1px solid #4a4a4a !important;
+    border-radius: 2px !important;
+    border-bottom: 2px solid #0078d7 !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+}
+
+/* -----------------------------------------------------------------------------
+   Selector de tema (solo en el entorno de pruebas)
+   -----------------------------------------------------------------------------
+   Barra flotante abajo a la izquierda. No debe estorbar ni tapar el chat (que va
+   abajo a la derecha).
+   -------------------------------------------------------------------------- */
+
+.vh-temas {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    z-index: 100000;
+    display: flex;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(8, 14, 24, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.vh-temas-boton {
+    padding: 6px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #eaf4ff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+}
+
+.vh-temas-boton:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.vh-temas-boton.activo {
+    background: #38bdf8;
+    border-color: #7dd3fc;
+    color: #04121f;
+}
+
+/* En pantallas pequenas el selector se hace compacto para no tapar contenido. */
+@media (max-width: 640px) {
+    .vh-temas {
+        left: 6px;
+        right: 6px;
+        bottom: 6px;
+        padding: 6px;
+        gap: 4px;
+        overflow-x: auto;
+    }
+
+    .vh-temas-boton {
+        padding: 5px 8px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+}

@@ -316,3 +316,74 @@
             }
         });
     </script>
+
+    {{--
+        Selector de temas historicos de Windows (XP, Vista, 7, 8, 10).
+
+        Solo se pinta cuando el entorno lo pide (VIRTHUB_TEMAS=true, que pone
+        docker-compose.test.yml). En produccion no aparece nada.
+
+        El enlace al CSS lo crea este mismo script en el <head>, para no tener que
+        anadir la etiqueta a las nueve vistas. El tema guardado se aplica cuando la
+        hoja termina de cargar, asi no se ve un parpadeo con el estilo anterior.
+    --}}
+    @if (config('virthub.temas.enabled'))
+        <div class="vh-temas" id="vhTemas" role="group" aria-label="Tema de diseno">
+            <button type="button" class="vh-temas-boton" data-tema="">Original</button>
+            <button type="button" class="vh-temas-boton" data-tema="xp">XP</button>
+            <button type="button" class="vh-temas-boton" data-tema="vista">Vista</button>
+            <button type="button" class="vh-temas-boton" data-tema="win7">7</button>
+            <button type="button" class="vh-temas-boton" data-tema="win8">8</button>
+            <button type="button" class="vh-temas-boton" data-tema="win10">10</button>
+        </div>
+
+        <script>
+            (function () {
+                var CLAVE = 'virthub-tema';
+                var CLASES = ['tema-xp', 'tema-vista', 'tema-win7', 'tema-win8', 'tema-win10'];
+
+                function aplicar(tema) {
+                    CLASES.forEach(function (clase) {
+                        document.body.classList.remove(clase);
+                    });
+
+                    if (tema) {
+                        document.body.classList.add('tema-' + tema);
+                    }
+
+                    document.querySelectorAll('.vh-temas-boton').forEach(function (boton) {
+                        boton.classList.toggle('activo', (boton.dataset.tema || '') === (tema || ''));
+                    });
+
+                    try {
+                        localStorage.setItem(CLAVE, tema || '');
+                    } catch (e) {
+                        /* Sin almacenamiento: el tema dura solo esta pagina. */
+                    }
+                }
+
+                document.querySelectorAll('.vh-temas-boton').forEach(function (boton) {
+                    boton.addEventListener('click', function () {
+                        aplicar(boton.dataset.tema);
+                    });
+                });
+
+                var enlace = document.createElement('link');
+                enlace.rel = 'stylesheet';
+                enlace.href = @json(asset('temas.css'));
+                enlace.onload = function () {
+                    var guardado = '';
+
+                    try {
+                        guardado = localStorage.getItem(CLAVE) || '';
+                    } catch (e) {
+                        guardado = '';
+                    }
+
+                    aplicar(guardado);
+                };
+
+                document.head.appendChild(enlace);
+            })();
+        </script>
+    @endif
