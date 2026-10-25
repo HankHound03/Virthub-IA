@@ -172,8 +172,6 @@
 <script>
     (() => {
         const retroStorageKey = 'virthub_retro_mode';
-        const secretSequence = 'win95';
-        let typedSequence = '';
 
         function applyRetroMode(enabled) {
             document.body.classList.toggle('retro-mode', enabled);
@@ -186,18 +184,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             applyRetroMode(localStorage.getItem(retroStorageKey) === '1');
-        });
-
-        document.addEventListener('keydown', event => {
-            if (event.target.matches('input, textarea, select, [contenteditable="true"]')) {
-                return;
-            }
-
-            typedSequence = (typedSequence + event.key.toLowerCase()).slice(-secretSequence.length);
-            if (typedSequence === secretSequence) {
-                window.toggleRetroMode();
-                typedSequence = '';
-            }
         });
     })();
 
