@@ -2189,15 +2189,31 @@ html.vh-ligero body *::after {
 }
 
 /* =============================================================================
-   MOVIL: SIN SELECTOR DE TEMAS
+   MOVIL: LA PASTILLA SE QUEDA, LA FLECHA NO
    =============================================================================
-   En el telefono la barra queda muy justa y el boton de temas ocupaba sitio sin
-   aportar: el tema se elige en el escritorio. Se oculta por completo (tambien su
-   carrusel).
+   En el telefono sobran los botones pequenos: la pastilla sirve para las dos
+   cosas que se hacen ahi...
+     - deslizar sobre ella cambia de tema;
+     - tocarla abre el carrusel para elegir uno concreto.
+   ...asi que la flecha sobra y ocupa sitio en una barra ya de por si justa.
    -------------------------------------------------------------------------- */
 
 @media (max-width: 760px) {
-    [data-era] body .vh-temas {
+    [data-era] body .vh-temas-caret {
         display: none !important;
+    }
+
+    /* Sin la flecha hay mas sitio: se lee entero el nombre del tema. */
+    [data-era] body .vh-temas-btn {
+        max-width: 172px !important;
+        font-size: 11px !important;
+        padding: 5px 8px !important;
+    }
+
+    /* Y se quita el redondeo del lado derecho, que era para unirse a la flecha. */
+    [data-era] body .vh-temas-btn {
+        border-top-right-radius: var(--vh-btn-radius) !important;
+        border-bottom-right-radius: var(--vh-btn-radius) !important;
+        border-right: 1px solid var(--vh-btn-border) !important;
     }
 }
