@@ -161,7 +161,6 @@
                        title="Abrir el escritorio en una ventana aparte">Ventana Nueva</a>
                 </div>
             </div>
-            @endif
             {{--
                 sandbox sin 'allow-top-navigation': el escritorio no puede salirse
                 del marco. Sin esto, KasmVNC puede navegar al nivel superior y el
