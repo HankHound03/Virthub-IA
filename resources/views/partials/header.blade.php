@@ -13,19 +13,53 @@
             </form>
         @endif
         @if (config('virthub.temas.enabled'))
+            @php
+                $vhCatalogo = (array) config('virthub.temas.catalogo', []);
+            @endphp
+
             {{--
-                Entorno de pruebas: en lugar del boton de claro/oscuro, un
-                desplegable con los estilos historicos de Windows. Elegir uno
-                sustituye por completo al tema de la aplicacion.
+                Carrusel de temas: en lugar del boton de claro/oscuro. El boton
+                muestra el estilo actual y abre un panel con una fila deslizable
+                por cada epoca de Windows.
             --}}
-            <select class="vh-tema-select" id="vhTemaSelect" title="Tema de diseno" aria-label="Tema de diseno">
-                <option value="xp">Windows XP</option>
-                <option value="vista">Windows Vista</option>
-                <option value="win7">Windows 7</option>
-                <option value="win8">Windows 8</option>
-                <option value="win10-claro">Windows 10 - claro</option>
-                <option value="win10-oscuro">Windows 10 - oscuro</option>
-            </select>
+            <div class="vh-temas" id="vhTemas">
+                <button type="button" class="vh-temas-btn" id="vhTemasBtn"
+                        aria-expanded="false" aria-controls="vhTemasPanel" title="Cambiar de tema">
+                    <span class="vh-temas-dot" id="vhTemasDot" aria-hidden="true"></span>
+                    <span id="vhTemasNombre">Tema</span>
+                    <span aria-hidden="true">&#9662;</span>
+                </button>
+
+                <div class="vh-temas-panel" id="vhTemasPanel" hidden>
+                    @foreach ($vhCatalogo as $era => $datos)
+                        <div class="vh-temas-era">
+                            <h4>{{ $datos['nombre'] ?? $era }}</h4>
+
+                            <div class="vh-temas-track" data-track="{{ $era }}">
+                                @foreach (($datos['variantes'] ?? []) as $variante => $v)
+                                    <button type="button" class="vh-tema-tile"
+                                            data-era="{{ $era }}"
+                                            data-variante="{{ $variante }}"
+                                            data-nombre="{{ $datos['nombre'] ?? $era }} · {{ $v['nombre'] ?? $variante }}"
+                                            style="--sw-a: {{ $v['a'] ?? '#444' }}; --sw-b: {{ $v['b'] ?? '#888' }};"
+                                            title="{{ $datos['nombre'] ?? $era }} - {{ $v['nombre'] ?? $variante }}">
+                                        <span class="vh-tema-swatch" aria-hidden="true"></span>
+                                        <span class="vh-tema-name">{{ $v['nombre'] ?? $variante }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+
+                    <div class="vh-temas-nav">
+                        <button type="button" data-nav="-1" aria-label="Anterior">&#8249;</button>
+                        <button type="button" data-nav="1" aria-label="Siguiente">&#8250;</button>
+                        <span style="color:#8fb3d9;font:600 10px 'Segoe UI',sans-serif;">
+                            Desliza o usa las flechas
+                        </span>
+                    </div>
+                </div>
+            </div>
         @else
             <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">
                 <span class="theme-icon" aria-hidden="true"></span>
@@ -336,63 +370,141 @@
     </script>
 
 
+
     {{--
-        Selector de temas historicos de Windows (Vista, 7, 8 y 10).
+        Carrusel de temas historicos de Windows.
 
         Solo se pinta cuando el entorno lo pide (VIRTHUB_TEMAS=true, que pone
         docker-compose.test.yml). En produccion no aparece nada: alli sigue el
         boton de claro/oscuro de siempre.
 
-        El enlace al CSS lo crea este mismo script en el <head>, para no tener que
-        anadir la etiqueta a las nueve vistas. El tema guardado se aplica cuando la
-        hoja termina de cargar, asi no se ve un parpadeo con el estilo anterior.
+        El tema se aplica con dos atributos en el body (data-era y data-variante),
+        que es lo que espera public/temas.css. Se guarda en localStorage, y el
+        enlace a la hoja lo crea este script en el <head> para no tener que anadir
+        la etiqueta a las nueve vistas.
     --}}
     @if (config('virthub.temas.enabled'))
         <script>
             (function () {
                 var CLAVE = 'virthub-tema';
-                var POR_DEFECTO = 'vista';
-                var CLASES = ['tema-xp', 'tema-vista', 'tema-win7', 'tema-win8', 'tema-win10-claro', 'tema-win10-oscuro'];
+                var POR_DEFECTO = { era: 'xp', variante: 'luna' };
 
-                var selector = document.getElementById('vhTemaSelect');
+                var boton = document.getElementById('vhTemasBtn');
+                var panel = document.getElementById('vhTemasPanel');
+                var nombre = document.getElementById('vhTemasNombre');
+                var punto = document.getElementById('vhTemasDot');
 
-                function aplicar(valor) {
-                    CLASES.forEach(function (clase) {
-                        document.body.classList.remove(clase);
-                    });
+                if (!boton || !panel) {
+                    return;
+                }
 
-                    document.body.classList.add('tema-' + valor);
+                var fichas = Array.prototype.slice.call(panel.querySelectorAll('.vh-tema-tile'));
 
-                    if (selector) {
-                        selector.value = valor;
+                function buscar(era, variante) {
+                    return fichas.find(function (f) {
+                        return f.dataset.era === era && f.dataset.variante === variante;
+                    }) || null;
+                }
+
+                function aplicar(era, variante) {
+                    var ficha = buscar(era, variante);
+
+                    if (!ficha) {
+                        ficha = buscar(POR_DEFECTO.era, POR_DEFECTO.variante);
+                        era = POR_DEFECTO.era;
+                        variante = POR_DEFECTO.variante;
                     }
 
+                    document.body.dataset.era = era;
+                    document.body.dataset.variante = variante;
+
+                    if (nombre) {
+                        nombre.textContent = ficha ? ficha.dataset.nombre : era;
+                    }
+
+                    if (punto && ficha) {
+                        var estilo = ficha.getAttribute('style') || '';
+                        var a = /--sw-a:\s*([^;]+)/.exec(estilo);
+                        var b = /--sw-b:\s*([^;]+)/.exec(estilo);
+                        punto.style.background = 'linear-gradient(135deg,' + (a ? a[1].trim() : '#666') + ',' + (b ? b[1].trim() : '#999') + ')';
+                    }
+
+                    fichas.forEach(function (f) {
+                        f.classList.toggle('activo', f === ficha);
+                    });
+
                     try {
-                        localStorage.setItem(CLAVE, valor);
+                        localStorage.setItem(CLAVE, JSON.stringify({ era: era, variante: variante }));
                     } catch (e) {
                         /* Sin almacenamiento: el tema dura solo esta pagina. */
                     }
+
+                    /* Deja la ficha elegida a la vista dentro de su fila. */
+                    if (ficha && ficha.parentElement) {
+                        ficha.parentElement.scrollLeft = Math.max(0, ficha.offsetLeft - 24);
+                    }
                 }
 
-                if (selector) {
-                    selector.addEventListener('change', function () {
-                        aplicar(selector.value);
+                fichas.forEach(function (ficha) {
+                    ficha.addEventListener('click', function () {
+                        aplicar(ficha.dataset.era, ficha.dataset.variante);
                     });
-                }
+                });
+
+                /* Abrir y cerrar el panel. */
+                boton.addEventListener('click', function (evento) {
+                    evento.stopPropagation();
+                    var abierto = panel.hidden;
+                    panel.hidden = !abierto;
+                    boton.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+                });
+
+                panel.addEventListener('click', function (evento) {
+                    evento.stopPropagation();
+                });
+
+                document.addEventListener('click', function () {
+                    if (!panel.hidden) {
+                        panel.hidden = true;
+                        boton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                document.addEventListener('keydown', function (evento) {
+                    if (evento.key === 'Escape' && !panel.hidden) {
+                        panel.hidden = true;
+                        boton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                /* Flechas: mueven la fila de la epoca que se esta mirando. */
+                panel.querySelectorAll('[data-nav]').forEach(function (flecha) {
+                    flecha.addEventListener('click', function () {
+                        var paso = parseInt(flecha.dataset.nav, 10) * 200;
+                        var filas = panel.querySelectorAll('.vh-temas-track');
+
+                        filas.forEach(function (fila) {
+                            fila.scrollLeft += paso;
+                        });
+                    });
+                });
 
                 var enlace = document.createElement('link');
                 enlace.rel = 'stylesheet';
                 enlace.href = @json(asset('temas.css'));
                 enlace.onload = function () {
-                    var guardado = '';
+                    var guardado = null;
 
                     try {
-                        guardado = localStorage.getItem(CLAVE) || '';
+                        guardado = JSON.parse(localStorage.getItem(CLAVE) || 'null');
                     } catch (e) {
-                        guardado = '';
+                        guardado = null;
                     }
 
-                    aplicar(CLASES.indexOf('tema-' + guardado) !== -1 ? guardado : POR_DEFECTO);
+                    aplicar(
+                        guardado && guardado.era ? guardado.era : POR_DEFECTO.era,
+                        guardado && guardado.variante ? guardado.variante : POR_DEFECTO.variante
+                    );
                 };
 
                 document.head.appendChild(enlace);

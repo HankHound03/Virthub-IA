@@ -2,855 +2,1155 @@
    Temas historicos de Windows para Virthub (entorno de pruebas)
    =============================================================================
 
-   Cuatro epocas, cinco modos: Vista, 7, 8 y 10 (este ultimo en claro y oscuro).
+   Cinco epocas y seis esquemas de color por epoca: 30 combinaciones.
 
-   COMO ESTAN HECHOS
-   -----------------
-   La aplicacion ya usaba variables --vh-* para los colores, asi que cada tema las
-   redefine y luego anade los rasgos de su epoca. No hay que tocar ninguna vista.
+     XP      Luna azul, Oliva, Plata, Royale, Embedded, Clasico
+     Vista   Aero, Grafito, Turquesa, Rojo, Verde, Violeta
+     7       Aero, Arquitectura, Naturaleza, Escenas, Personajes, Paisajes
+     8       Azul, Purpura, Verde, Naranja, Rojo, Turquesa
+     10      Claro azul, Claro verde, Claro grafito, Oscuro azul,
+             Oscuro purpura, Oscuro ambar
 
-   Cada tema lleva su propio fondo (public/pics/temas) y, encima, un velo del color
-   justo para que los paneles se lean: los fondos claros y con brillos, como el de
-   Vista, necesitan oscurecerse; los oscuros, aclararse.
+   COMO FUNCIONA
+   -------------
+   El body lleva dos atributos:
 
-   AVISO: material de pruebas. Se carga solo cuando VIRTHUB_TEMAS=true, que pone
-   docker-compose.test.yml. En produccion no se sirve.
+       data-era="xp"  data-variante="olive"
+
+   Cada epoca define la ESTRUCTURA de su epoca (tipografia, radios, desenfoque,
+   forma de los iconos) y un juego de variables de color. Cada esquema solo cambia
+   esas variables, asi que anadir uno nuevo son quince lineas, no un tema entero.
+
+   Los fondos y las muestras del carrusel salen de config/virthub.php.
    ============================================================================= */
 
-/* -----------------------------------------------------------------------------
-   Windows XP - Luna
-   -----------------------------------------------------------------------------
-   Fondo de la colina (Bliss), verde y azul, muy vivo. Los paneles van opacos y en
-   crema, como las ventanas de XP, con el borde azul y las esquinas redondeadas
-   solo arriba. Aqui la transparencia no pega: XP no la tenia.
+/* =============================================================================
+   PIEZAS COMUNES: todas las epocas
+   ============================================================================= */
+
+body[data-era] {
+    background-color: var(--vh-bg-solid, #0b1220);
+    background-image: var(--vh-bg-image);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: var(--vh-panel-text);
+    font-family: var(--vh-font);
+}
+
+/* El fondo propio de la aplicacion (imagen + velo) no pinta nada aqui. */
+body[data-era]::before,
+body[data-era]::after {
+    display: none;
+}
+
+/* --- Barra superior ------------------------------------------------------- */
+
+body[data-era] header {
+    background: var(--vh-head-bg) !important;
+    border: 1px solid var(--vh-head-border) !important;
+    border-radius: var(--vh-head-radius) !important;
+    box-shadow: var(--vh-head-shadow) !important;
+    color: var(--vh-head-text) !important;
+    text-shadow: var(--vh-head-shadow-text) !important;
+    backdrop-filter: var(--vh-blur) saturate(150%) !important;
+    -webkit-backdrop-filter: var(--vh-blur) saturate(150%) !important;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body[data-era] header a,
+body[data-era] header button,
+body[data-era] .navbar-link {
+    color: var(--vh-head-text) !important;
+    text-shadow: var(--vh-head-shadow-text) !important;
+}
+
+/* --- Paneles -------------------------------------------------------------- */
+
+body[data-era] footer,
+body[data-era] .linux-news-panel,
+body[data-era] .login-screen,
+body[data-era] .sidebar,
+body[data-era] .profile-menu,
+body[data-era] .toggleable-sidebar,
+body[data-era] .chat-panel,
+body[data-era] .chat-header,
+body[data-era] .chat-tabs,
+body[data-era] .chat-input-area,
+body[data-era] .chat-toast,
+body[data-era] .header-login-card,
+body[data-era] .forum-card,
+body[data-era] .forum-post,
+body[data-era] .suggestions-card,
+body[data-era] .config-card,
+body[data-era] .admin-card,
+body[data-era] .gadget,
+body[data-era] .container-card,
+body[data-era] .profile-area-card {
+    background-color: var(--vh-panel-bg) !important;
+    background-image: none !important;
+    border: 1px solid var(--vh-panel-border) !important;
+    border-radius: var(--vh-panel-radius) !important;
+    box-shadow: var(--vh-panel-shadow) !important;
+    color: var(--vh-panel-text) !important;
+    text-shadow: var(--vh-panel-shadow-text) !important;
+    backdrop-filter: var(--vh-blur) !important;
+    -webkit-backdrop-filter: var(--vh-blur) !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+body[data-era] h1,
+body[data-era] h2,
+body[data-era] h3,
+body[data-era] h4 {
+    color: var(--vh-heading) !important;
+    font-family: var(--vh-font-head) !important;
+    font-weight: var(--vh-heading-weight, 700) !important;
+    text-shadow: var(--vh-panel-shadow-text) !important;
+}
+
+/* --- Botones -------------------------------------------------------------- */
+
+body[data-era] button,
+body[data-era] .container-load-btn,
+body[data-era] .header-login-button,
+body[data-era] input[type="submit"] {
+    background: var(--vh-btn-bg) !important;
+    border: 1px solid var(--vh-btn-border) !important;
+    border-radius: var(--vh-btn-radius) !important;
+    box-shadow: var(--vh-btn-shadow) !important;
+    color: var(--vh-btn-text) !important;
+    font-family: var(--vh-font) !important;
+    text-shadow: var(--vh-btn-shadow-text) !important;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
+}
+
+body[data-era] button:hover,
+body[data-era] .container-load-btn:hover,
+body[data-era] .header-login-button:hover {
+    background: var(--vh-btn-hover-bg) !important;
+    border-color: var(--vh-btn-hover-border) !important;
+    color: var(--vh-btn-hover-text) !important;
+}
+
+body[data-era] button:active,
+body[data-era] .container-load-btn:active {
+    transform: translateY(1px);
+}
+
+/* --- Campos --------------------------------------------------------------- */
+
+body[data-era] input[type="text"],
+body[data-era] input[type="email"],
+body[data-era] input[type="password"],
+body[data-era] input[type="search"],
+body[data-era] textarea,
+body[data-era] select {
+    background: var(--vh-input-bg) !important;
+    border: 1px solid var(--vh-input-border) !important;
+    border-radius: var(--vh-input-radius) !important;
+    box-shadow: var(--vh-input-shadow) !important;
+    color: var(--vh-input-text) !important;
+    font-family: var(--vh-font) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body[data-era] input:focus,
+body[data-era] textarea:focus {
+    outline: none !important;
+    border-color: var(--vh-accent) !important;
+    box-shadow: 0 0 0 2px rgba(120, 190, 255, 0.35) !important;
+}
+
+/* --- Iconos ---------------------------------------------------------------
+   Los iconos de la aplicacion estan dibujados con CSS (::before y ::after), asi
+   que cada epoca les da su forma: rectos en XP, redondeados en Vista y 7, planos
+   en 8 y 10.
    -------------------------------------------------------------------------- */
 
-body.tema-xp {
-    --vh-surface: #ece9d8;
-    --vh-surface-strong: #f6f4ea;
-    --vh-border: #0054e3;
-    --vh-icon: #003c74;
-    --vh-text: #000000;
-    --vh-text-soft: #2b2b2b;
-    --vh-button-bg: linear-gradient(180deg, #fdfdfd 0%, #ecebe5 50%, #d9d7cd 100%);
-    --vh-button-hover: linear-gradient(180deg, #fffdf0 0%, #ffe9a8 50%, #ffd24a 100%);
+body[data-era] .chat-icon::before,
+body[data-era] .chat-icon::after,
+body[data-era] .menu-icon::before,
+body[data-era] .menu-icon::after {
+    border-radius: var(--vh-icon-radius) !important;
+    transition: border-radius 0.3s ease, background-color 0.3s ease;
+}
+
+body[data-era] .chat-toggle,
+body[data-era] .retro-toggle,
+body[data-era] .theme-toggle,
+body[data-era] .vh-temas-btn {
+    border-radius: var(--vh-toggle-radius) !important;
+}
+
+/* --- El login -------------------------------------------------------------
+   Con un tema puesto, la capa oscura del login se aclara para que se vea el fondo
+   del escritorio: es lo primero que aparece y quedaba apagado.
+   -------------------------------------------------------------------------- */
+
+body[data-era] .header-login-modal {
+    background: var(--vh-login-scrim) !important;
+    backdrop-filter: blur(3px) !important;
+    -webkit-backdrop-filter: blur(3px) !important;
+}
+
+body[data-era] .header-login-card {
+    box-shadow: var(--vh-login-shadow) !important;
+    animation: vh-login-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes vh-login-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* --- Animacion al cambiar de tamano las tarjetas --------------------------
+   Los gadgets y las tarjetas cambian de ancho con las clases de tamano; sin
+   transicion el salto es seco. Con esto el cambio se ve, y ademas hay un pequeno
+   rebote al terminar.
+   -------------------------------------------------------------------------- */
+
+body[data-era] .gadget,
+body[data-era] .gadget-content,
+body[data-era] .forum-card,
+body[data-era] .admin-card,
+body[data-era] .config-card,
+body[data-era] .suggestions-card,
+body[data-era] .container-card {
+    transition:
+        width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+        max-width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+        flex-basis 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+        height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+        min-height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body[data-era] .gadget.is-resizing {
+    animation: vh-card-pop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes vh-card-pop {
+    0%   { transform: scale(0.985); }
+    55%  { transform: scale(1.008); }
+    100% { transform: scale(1); }
+}
+
+body[data-era] .gadget-grid,
+body[data-era] .admin-grid,
+body[data-era] .forum-layout {
+    transition: grid-template-columns 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), gap 0.35s ease;
+}
+
+/* =============================================================================
+   WINDOWS XP - Luna y familia
+   ============================================================================= */
+
+body[data-era="xp"] {
+    --vh-font: Tahoma, 'Segoe UI', sans-serif;
+    --vh-font-head: Tahoma, sans-serif;
+    --vh-heading-weight: 700;
+    --vh-head-radius: 8px 8px 0 0;
+    --vh-panel-radius: 6px 6px 3px 3px;
+    --vh-btn-radius: 3px;
+    --vh-input-radius: 0;
+    --vh-icon-radius: 1px;
+    --vh-toggle-radius: 4px;
+    --vh-blur: 0px;
+    --vh-bg-image: url('/pics/temas/winxp.jpg');
+    --vh-bg-solid: #3a6ea5;
+    --vh-panel-shadow-text: none;
+    --vh-btn-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(0, 0, 0, 0.25);
+    --vh-btn-shadow-text: none;
+    --vh-input-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.18);
+    --vh-login-scrim: rgba(6, 26, 48, 0.22);
+    --vh-login-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+body[data-era="xp"][data-variante="luna"] {
+    --vh-head-bg: linear-gradient(180deg, #0058e6 0%, #3a93ff 8%, #0a6cd6 52%, #004bb5 92%, #003c8f 100%);
+    --vh-head-border: #003c8f;
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.55);
+    --vh-head-shadow-text: 1px 1px 1px rgba(0, 0, 0, 0.45);
+    --vh-panel-bg: #ece9d8;
+    --vh-panel-border: #0054e3;
     --vh-panel-text: #000000;
-    --vh-glass-blur: 0;
-    --vh-glass-sheen: none;
-    --vh-glass-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    --vh-glass-drop-shadow: 2px 2px 4px rgba(0, 0, 0, 0.35);
-
-    background-color: #3a6ea5;
-    background-image: url('/pics/temas/winxp.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    color: #000000;
-    font-family: Tahoma, 'Segoe UI', sans-serif;
-    font-size: 12px;
+    --vh-panel-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9), 2px 2px 6px rgba(0, 0, 0, 0.3);
+    --vh-accent: #0054e3;
+    --vh-btn-bg: linear-gradient(180deg, #fdfdfd 0%, #ecebe5 50%, #d9d7cd 100%);
+    --vh-btn-border: #003c74;
+    --vh-btn-text: #000000;
+    --vh-btn-hover-bg: linear-gradient(180deg, #fffdf0 0%, #ffe9a8 50%, #ffd24a 100%);
+    --vh-btn-hover-border: #e88b00;
+    --vh-btn-hover-text: #000000;
+    --vh-input-bg: #ffffff;
+    --vh-input-border: #7f9db9;
+    --vh-input-text: #000000;
+    --vh-icon: #003c74;
+    --vh-heading: #003c74;
 }
 
-body.tema-xp::before,
-body.tema-xp::after {
-    display: none;
+body[data-era="xp"][data-variante="olive"] {
+    --vh-head-bg: linear-gradient(180deg, #6d7f3c 0%, #9aad5a 8%, #7f9245 52%, #667a35 92%, #55672c 100%);
+    --vh-head-border: #4d5c26;
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.5);
+    --vh-head-shadow-text: 1px 1px 1px rgba(0, 0, 0, 0.45);
+    --vh-panel-bg: #ece9d8;
+    --vh-panel-border: #7f9245;
+    --vh-panel-text: #1e2410;
+    --vh-panel-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9), 2px 2px 6px rgba(0, 0, 0, 0.3);
+    --vh-accent: #7f9245;
+    --vh-btn-bg: linear-gradient(180deg, #fdfdf7 0%, #eeece0 50%, #dcd8c4 100%);
+    --vh-btn-border: #6d7f3c;
+    --vh-btn-text: #1e2410;
+    --vh-btn-hover-bg: linear-gradient(180deg, #fdfbe8 0%, #eae4b8 50%, #d8cf7f 100%);
+    --vh-btn-hover-border: #8a7a1e;
+    --vh-btn-hover-text: #1e2410;
+    --vh-input-bg: #ffffff;
+    --vh-input-border: #9aa87a;
+    --vh-input-text: #1e2410;
+    --vh-icon: #4d5c26;
+    --vh-heading: #4d5c26;
 }
 
-/* Barra de titulo azul de Luna, con el filo claro arriba. */
-body.tema-xp header {
-    background: linear-gradient(180deg, #0058e6 0%, #3a93ff 8%, #0a6cd6 52%, #004bb5 92%, #003c8f 100%) !important;
-    border: 1px solid #003c8f !important;
-    border-radius: 8px 8px 0 0 !important;
-    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.55) !important;
-    color: #ffffff !important;
-    font-family: Tahoma, sans-serif !important;
-    font-weight: 700;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.45) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-
-body.tema-xp header a,
-body.tema-xp header button,
-body.tema-xp .navbar-link {
-    color: #ffffff !important;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.45) !important;
-}
-
-/* Paneles crema, opacos y con borde azul. */
-body.tema-xp footer,
-body.tema-xp .linux-news-panel,
-body.tema-xp .login-screen,
-body.tema-xp .sidebar,
-body.tema-xp .profile-menu,
-body.tema-xp .toggleable-sidebar,
-body.tema-xp .chat-panel,
-body.tema-xp .chat-header,
-body.tema-xp .chat-tabs,
-body.tema-xp .chat-input-area,
-body.tema-xp .chat-toast,
-body.tema-xp .forum-card,
-body.tema-xp .forum-post,
-body.tema-xp .suggestions-card,
-body.tema-xp .config-card,
-body.tema-xp .admin-card {
-    background-color: #ece9d8 !important;
-    background-image: none !important;
-    border: 1px solid #0054e3 !important;
-    border-radius: 6px 6px 3px 3px !important;
-    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9), 2px 2px 6px rgba(0, 0, 0, 0.3) !important;
-    color: #000000 !important;
-    text-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-
-body.tema-xp h1,
-body.tema-xp h2,
-body.tema-xp h3,
-body.tema-xp h4 {
-    color: #003c74 !important;
-    font-family: Tahoma, sans-serif !important;
-    font-weight: 700 !important;
-    text-shadow: none !important;
-}
-
-/* Botones de XP: degradado claro, borde azul y amarillo al pasar por encima. */
-body.tema-xp button,
-body.tema-xp .container-load-btn,
-body.tema-xp .header-login-button {
-    background: linear-gradient(180deg, #fdfdfd 0%, #ecebe5 50%, #d9d7cd 100%) !important;
-    border: 1px solid #003c74 !important;
-    border-radius: 3px !important;
-    box-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(0, 0, 0, 0.25) !important;
-    color: #000000 !important;
-    font-family: Tahoma, sans-serif !important;
-    text-shadow: none !important;
-}
-
-body.tema-xp button:hover,
-body.tema-xp .container-load-btn:hover {
-    background: linear-gradient(180deg, #fffdf0 0%, #ffe9a8 50%, #ffd24a 100%) !important;
-    border-color: #e88b00 !important;
-}
-
-body.tema-xp input[type="text"],
-body.tema-xp input[type="email"],
-body.tema-xp input[type="password"],
-body.tema-xp input[type="search"],
-body.tema-xp textarea,
-body.tema-xp select {
-    background: #ffffff !important;
-    border: 1px solid #7f9db9 !important;
-    border-radius: 0 !important;
-    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.18) !important;
-    color: #000000 !important;
-    font-family: Tahoma, sans-serif !important;
-}
-
-/* -----------------------------------------------------------------------------
-   Windows Vista - Aero Glass
-   -----------------------------------------------------------------------------
-   El fondo de las "auroras" es muy claro y tiene lineas brillantes, asi que el
-   cristal va oscuro y con desenfoque fuerte: es lo mas parecido a Vista y lo unico
-   que mantiene el texto legible encima.
-   -------------------------------------------------------------------------- */
-
-body.tema-vista {
-    --vh-surface: rgba(12, 34, 50, 0.62);
-    --vh-surface-strong: rgba(8, 24, 38, 0.76);
-    --vh-border: rgba(160, 215, 255, 0.34);
-    --vh-icon: #dff2ff;
-    --vh-text: #eaf7ff;
-    --vh-text-soft: #c9e6f7;
-    --vh-button-bg: rgba(38, 78, 110, 0.72);
-    --vh-button-hover: rgba(70, 130, 175, 0.9);
-    --vh-panel-text: #f4fbff;
-    --vh-glass-blur: 22px;
-    --vh-glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.14) 45%, rgba(255, 255, 255, 0) 72%);
-    --vh-glass-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62), inset 0 -1px 0 rgba(255, 255, 255, 0.12);
-    --vh-glass-drop-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
-
-    background-color: #0a1b26;
-    background-image:
-        linear-gradient(180deg, rgba(3, 20, 30, 0.30), rgba(3, 20, 30, 0.52)),
-        url('/pics/temas/vista.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    color: #eaf7ff;
-    font-family: 'Segoe UI', sans-serif;
-}
-
-body.tema-vista::before,
-body.tema-vista::after {
-    display: none;
-}
-
-body.tema-vista header {
-    background: linear-gradient(180deg, rgba(70, 120, 160, 0.75) 0%, rgba(16, 36, 54, 0.9) 48%, rgba(6, 16, 26, 0.95) 100%) !important;
-    border: 1px solid rgba(160, 215, 255, 0.42) !important;
-    border-radius: 10px 10px 0 0 !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 26px rgba(0, 0, 0, 0.6) !important;
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
-    backdrop-filter: blur(18px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
-}
-
-body.tema-vista header a,
-body.tema-vista header button,
-body.tema-vista .navbar-link {
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
-}
-
-body.tema-vista footer,
-body.tema-vista .linux-news-panel,
-body.tema-vista .login-screen,
-body.tema-vista .sidebar,
-body.tema-vista .profile-menu,
-body.tema-vista .toggleable-sidebar,
-body.tema-vista .chat-panel,
-body.tema-vista .chat-header,
-body.tema-vista .chat-tabs,
-body.tema-vista .chat-input-area,
-body.tema-vista .chat-toast,
-body.tema-vista .forum-card,
-body.tema-vista .forum-post,
-body.tema-vista .suggestions-card,
-body.tema-vista .config-card,
-body.tema-vista .admin-card {
-    background-color: rgba(12, 34, 50, 0.62) !important;
-    background-image: none !important;
-    border: 1px solid rgba(160, 215, 255, 0.34) !important;
-    border-radius: 6px !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36), 0 14px 36px rgba(0, 0, 0, 0.5) !important;
-    color: #eaf7ff !important;
-    backdrop-filter: blur(22px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
-}
-
-body.tema-vista h1,
-body.tema-vista h2,
-body.tema-vista h3,
-body.tema-vista h4 {
-    color: #ffffff !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important;
-}
-
-body.tema-vista button,
-body.tema-vista .container-load-btn,
-body.tema-vista .header-login-button {
-    background: linear-gradient(180deg, rgba(120, 180, 225, 0.9) 0%, rgba(42, 90, 128, 0.92) 50%, rgba(16, 44, 68, 0.95) 100%) !important;
-    border: 1px solid rgba(190, 232, 255, 0.6) !important;
-    border-radius: 6px !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5) !important;
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75) !important;
-}
-
-body.tema-vista button:hover,
-body.tema-vista .container-load-btn:hover {
-    background: linear-gradient(180deg, rgba(170, 220, 255, 0.95) 0%, rgba(70, 140, 190, 0.95) 50%, rgba(26, 70, 105, 0.98) 100%) !important;
-}
-
-body.tema-vista input[type="text"],
-body.tema-vista input[type="email"],
-body.tema-vista input[type="password"],
-body.tema-vista input[type="search"],
-body.tema-vista textarea,
-body.tema-vista select {
-    background: rgba(6, 18, 30, 0.72) !important;
-    border: 1px solid rgba(160, 215, 255, 0.4) !important;
-    border-radius: 4px !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7) !important;
-    color: #eaf7ff !important;
-}
-
-/* -----------------------------------------------------------------------------
-   Windows 7 - Aero
-   -----------------------------------------------------------------------------
-   Fondo azul claro con el logo. El cristal va claro y el texto oscuro, como las
-   ventanas de Windows 7; la barra superior si es oscura, como la barra de tareas.
-   -------------------------------------------------------------------------- */
-
-body.tema-win7 {
-    --vh-surface: rgba(235, 245, 253, 0.82);
-    --vh-surface-strong: rgba(248, 252, 255, 0.92);
-    --vh-border: rgba(70, 130, 180, 0.45);
-    --vh-icon: #123a5a;
-    --vh-text: #10293f;
-    --vh-text-soft: #23465f;
-    --vh-button-bg: linear-gradient(180deg, #f7fcff 0%, #d9ecfa 48%, #b6d8ef 100%);
-    --vh-button-hover: linear-gradient(180deg, #ffffff 0%, #e8f6ff 48%, #c9e8ff 100%);
-    --vh-panel-text: #0c2438;
-    --vh-glass-blur: 16px;
-    --vh-glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.3) 42%, rgba(255, 255, 255, 0.05) 75%);
-    --vh-glass-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    --vh-glass-drop-shadow: 0 10px 26px rgba(20, 50, 80, 0.35);
-
-    background-color: #1a4a70;
-    background-image:
-        linear-gradient(180deg, rgba(6, 30, 55, 0.18), rgba(6, 30, 55, 0.34)),
-        url('/pics/temas/win7.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    color: #10293f;
-    font-family: 'Segoe UI', sans-serif;
-}
-
-body.tema-win7::before,
-body.tema-win7::after {
-    display: none;
-}
-
-body.tema-win7 header {
-    background: linear-gradient(180deg, rgba(120, 150, 180, 0.92) 0%, rgba(60, 85, 110, 0.95) 46%, rgba(24, 40, 58, 0.97) 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.55) !important;
-    border-radius: 8px 8px 0 0 !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 18px rgba(10, 30, 50, 0.45) !important;
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(10, 30, 50, 0.9) !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
-}
-
-body.tema-win7 header a,
-body.tema-win7 header button,
-body.tema-win7 .navbar-link {
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(10, 30, 50, 0.9) !important;
-}
-
-body.tema-win7 footer,
-body.tema-win7 .linux-news-panel,
-body.tema-win7 .login-screen,
-body.tema-win7 .sidebar,
-body.tema-win7 .profile-menu,
-body.tema-win7 .toggleable-sidebar,
-body.tema-win7 .chat-panel,
-body.tema-win7 .chat-header,
-body.tema-win7 .chat-tabs,
-body.tema-win7 .chat-input-area,
-body.tema-win7 .chat-toast,
-body.tema-win7 .forum-card,
-body.tema-win7 .forum-post,
-body.tema-win7 .suggestions-card,
-body.tema-win7 .config-card,
-body.tema-win7 .admin-card {
-    background-color: rgba(235, 245, 253, 0.82) !important;
-    background-image: none !important;
-    border: 1px solid rgba(255, 255, 255, 0.9) !important;
-    border-radius: 6px !important;
-    box-shadow: inset 0 1px 0 #ffffff, 0 8px 22px rgba(20, 50, 80, 0.3) !important;
-    color: #10293f !important;
-    backdrop-filter: blur(16px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
-}
-
-body.tema-win7 h1,
-body.tema-win7 h2,
-body.tema-win7 h3,
-body.tema-win7 h4 {
-    color: #0d3a5c !important;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) !important;
-}
-
-body.tema-win7 button,
-body.tema-win7 .container-load-btn,
-body.tema-win7 .header-login-button {
-    background: linear-gradient(180deg, #f7fcff 0%, #d9ecfa 48%, #b6d8ef 100%) !important;
-    border: 1px solid rgba(70, 130, 180, 0.75) !important;
-    border-radius: 5px !important;
-    box-shadow: inset 0 1px 0 #ffffff, 0 1px 3px rgba(20, 50, 80, 0.3) !important;
-    color: #10293f !important;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-}
-
-body.tema-win7 button:hover,
-body.tema-win7 .container-load-btn:hover {
-    background: linear-gradient(180deg, #ffffff 0%, #e8f6ff 48%, #c9e8ff 100%) !important;
-    border-color: #2f7fb8 !important;
-}
-
-body.tema-win7 input[type="text"],
-body.tema-win7 input[type="email"],
-body.tema-win7 input[type="password"],
-body.tema-win7 input[type="search"],
-body.tema-win7 textarea,
-body.tema-win7 select {
-    background: rgba(255, 255, 255, 0.95) !important;
-    border: 1px solid rgba(120, 165, 200, 0.9) !important;
-    border-radius: 3px !important;
-    box-shadow: inset 0 1px 2px rgba(20, 50, 80, 0.2) !important;
-    color: #10293f !important;
-}
-
-/* -----------------------------------------------------------------------------
-   Windows 8 - Modern UI (Metro)
-   -----------------------------------------------------------------------------
-   Fondo naranja geometrico y muy vivo. Los paneles van solidos y oscuros, sin
-   esquinas ni sombras: el contraste fuerte es justo el lenguaje de Windows 8.
-   -------------------------------------------------------------------------- */
-
-body.tema-win8 {
-    --vh-surface: #1b1b1b;
-    --vh-surface-strong: #242424;
-    --vh-border: #3a3a3a;
-    --vh-icon: #ffffff;
-    --vh-text: #ffffff;
-    --vh-text-soft: #d0d0d0;
-    --vh-button-bg: #2b2b2b;
-    --vh-button-hover: #00a4ef;
-    --vh-panel-text: #ffffff;
-    --vh-glass-blur: 0;
-    --vh-glass-sheen: none;
-    --vh-glass-inner-shadow: none;
-    --vh-glass-drop-shadow: none;
-
-    background-color: #e8a300;
-    background-image:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.16)),
-        url('/pics/temas/win8.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    color: #ffffff;
-    font-family: 'Segoe UI Light', 'Segoe UI', sans-serif;
-}
-
-body.tema-win8::before,
-body.tema-win8::after {
-    display: none;
-}
-
-body.tema-win8 header {
-    background: #141414 !important;
-    border: none !important;
-    border-bottom: 1px solid #3a3a3a !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    color: #ffffff !important;
-    text-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-
-body.tema-win8 footer,
-body.tema-win8 .linux-news-panel,
-body.tema-win8 .login-screen,
-body.tema-win8 .sidebar,
-body.tema-win8 .profile-menu,
-body.tema-win8 .toggleable-sidebar,
-body.tema-win8 .chat-panel,
-body.tema-win8 .chat-header,
-body.tema-win8 .chat-tabs,
-body.tema-win8 .chat-input-area,
-body.tema-win8 .chat-toast,
-body.tema-win8 .forum-card,
-body.tema-win8 .forum-post,
-body.tema-win8 .suggestions-card,
-body.tema-win8 .config-card,
-body.tema-win8 .admin-card {
-    background-color: #1b1b1b !important;
-    background-image: none !important;
-    border: 1px solid #333333 !important;
-    border-radius: 0 !important;
-    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35) !important;
-    color: #ffffff !important;
-    text-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-
-body.tema-win8 h1,
-body.tema-win8 h2,
-body.tema-win8 h3,
-body.tema-win8 h4 {
-    color: #ffffff !important;
-    font-family: 'Segoe UI Light', 'Segoe UI', sans-serif !important;
-    font-weight: 300 !important;
-    letter-spacing: 0.5px;
-    text-shadow: none !important;
-}
-
-body.tema-win8 button,
-body.tema-win8 .container-load-btn,
-body.tema-win8 .header-login-button {
-    background: #2b2b2b !important;
-    border: 1px solid #3a3a3a !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    color: #ffffff !important;
-    text-shadow: none !important;
-    letter-spacing: 0.3px;
-}
-
-body.tema-win8 button:hover,
-body.tema-win8 .container-load-btn:hover {
-    background: #00a4ef !important;
-    border-color: #00a4ef !important;
-    color: #ffffff !important;
-}
-
-body.tema-win8 input[type="text"],
-body.tema-win8 input[type="email"],
-body.tema-win8 input[type="password"],
-body.tema-win8 input[type="search"],
-body.tema-win8 textarea,
-body.tema-win8 select {
-    background: #111111 !important;
-    border: 1px solid #3a3a3a !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    color: #ffffff !important;
-}
-
-/* -----------------------------------------------------------------------------
-   Windows 10 - Fluent, claro
-   -----------------------------------------------------------------------------
-   Mismo fondo que el oscuro, pero con interfaz clara. Paneles blancos con algo de
-   transparencia y el azul de acento de Windows 10.
-   -------------------------------------------------------------------------- */
-
-body.tema-win10-claro {
-    --vh-surface: rgba(248, 248, 248, 0.80);
-    --vh-surface-strong: rgba(255, 255, 255, 0.90);
-    --vh-border: rgba(0, 120, 215, 0.25);
-    --vh-icon: #1a1a1a;
-    --vh-text: #1a1a1a;
-    --vh-text-soft: #3a3a3a;
-    --vh-button-bg: #f0f0f0;
-    --vh-button-hover: #e5e5e5;
+body[data-era="xp"][data-variante="silver"] {
+    --vh-head-bg: linear-gradient(180deg, #b9b9b9 0%, #e8e8e8 8%, #c4c4c4 52%, #a3a3a3 92%, #8a8a8a 100%);
+    --vh-head-border: #7a7a7a;
+    --vh-head-text: #1a1a1a;
+    --vh-head-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9);
+    --vh-head-shadow-text: 1px 1px 0 rgba(255, 255, 255, 0.6);
+    --vh-panel-bg: #ece9d8;
+    --vh-panel-border: #9a9a9a;
     --vh-panel-text: #1a1a1a;
-    --vh-glass-blur: 18px;
-    --vh-glass-sheen: none;
-    --vh-glass-inner-shadow: none;
-    --vh-glass-drop-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-
-    background-color: #0a1a2e;
-    background-image:
-        linear-gradient(180deg, rgba(240, 246, 252, 0.28), rgba(225, 238, 250, 0.42)),
-        url('/pics/temas/win10.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    color: #1a1a1a;
-    font-family: 'Segoe UI', sans-serif;
+    --vh-panel-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.95), 2px 2px 6px rgba(0, 0, 0, 0.28);
+    --vh-accent: #6f6f6f;
+    --vh-btn-bg: linear-gradient(180deg, #fdfdfd 0%, #ebebeb 50%, #d6d6d6 100%);
+    --vh-btn-border: #8a8a8a;
+    --vh-btn-text: #1a1a1a;
+    --vh-btn-hover-bg: linear-gradient(180deg, #ffffff 0%, #eef6ff 50%, #cfe4f7 100%);
+    --vh-btn-hover-border: #4f7fa8;
+    --vh-btn-hover-text: #102a3f;
+    --vh-input-bg: #ffffff;
+    --vh-input-border: #a8a8a8;
+    --vh-input-text: #1a1a1a;
+    --vh-icon: #4a4a4a;
+    --vh-heading: #3a3a3a;
 }
 
-body.tema-win10-claro::before,
-body.tema-win10-claro::after {
-    display: none;
+body[data-era="xp"][data-variante="royale"] {
+    --vh-head-bg: linear-gradient(180deg, #0a1f3d 0%, #2f6ea8 10%, #123a63 55%, #071a2e 100%);
+    --vh-head-border: #0a1f3d;
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 1px 1px 0 rgba(160, 210, 255, 0.6);
+    --vh-head-shadow-text: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    --vh-panel-bg: #eef0f6;
+    --vh-panel-border: #2f6ea8;
+    --vh-panel-text: #101c2c;
+    --vh-panel-shadow: inset 1px 1px 0 #ffffff, 2px 2px 8px rgba(0, 0, 0, 0.35);
+    --vh-accent: #2f6ea8;
+    --vh-btn-bg: linear-gradient(180deg, #ffffff 0%, #e9eef7 50%, #d3dcea 100%);
+    --vh-btn-border: #2f6ea8;
+    --vh-btn-text: #101c2c;
+    --vh-btn-hover-bg: linear-gradient(180deg, #eaf4ff 0%, #c9e0f8 50%, #a8ccf0 100%);
+    --vh-btn-hover-border: #1b4d7a;
+    --vh-btn-hover-text: #08131f;
+    --vh-input-bg: #ffffff;
+    --vh-input-border: #94b4d4;
+    --vh-input-text: #101c2c;
+    --vh-icon: #123a63;
+    --vh-heading: #123a63;
 }
 
-body.tema-win10-claro header {
-    background: rgba(250, 250, 250, 0.90) !important;
-    border: 1px solid rgba(0, 0, 0, 0.12) !important;
-    border-bottom: 2px solid #0078d7 !important;
-    border-radius: 4px 4px 0 0 !important;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25) !important;
-    color: #1a1a1a !important;
-    text-shadow: none !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
+body[data-era="xp"][data-variante="embedded"] {
+    --vh-head-bg: linear-gradient(180deg, #232f3a 0%, #44586b 10%, #2d3d4c 55%, #16202a 100%);
+    --vh-head-border: #101820;
+    --vh-head-text: #dce8f2;
+    --vh-head-shadow: inset 1px 1px 0 rgba(200, 225, 245, 0.35);
+    --vh-head-shadow-text: 1px 1px 1px rgba(0, 0, 0, 0.65);
+    --vh-panel-bg: #dcdfe3;
+    --vh-panel-border: #55697d;
+    --vh-panel-text: #131b22;
+    --vh-panel-shadow: inset 1px 1px 0 #ffffff, 2px 2px 6px rgba(0, 0, 0, 0.32);
+    --vh-accent: #55697d;
+    --vh-btn-bg: linear-gradient(180deg, #f2f4f6 0%, #dfe3e7 50%, #c6ccd2 100%);
+    --vh-btn-border: #55697d;
+    --vh-btn-text: #131b22;
+    --vh-btn-hover-bg: linear-gradient(180deg, #ffffff 0%, #e3edf6 50%, #c2d6e8 100%);
+    --vh-btn-hover-border: #3a4c5c;
+    --vh-btn-hover-text: #0a1116;
+    --vh-input-bg: #ffffff;
+    --vh-input-border: #8fa0b0;
+    --vh-input-text: #131b22;
+    --vh-icon: #2d3d4c;
+    --vh-heading: #2d3d4c;
 }
 
-body.tema-win10-claro header a,
-body.tema-win10-claro header button,
-body.tema-win10-claro .navbar-link {
-    color: #1a1a1a !important;
-    text-shadow: none !important;
+body[data-era="xp"][data-variante="classic"] {
+    --vh-head-bg: linear-gradient(180deg, #000080 0%, #000080 60%, #000060 100%);
+    --vh-head-border: #000000;
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.35);
+    --vh-head-shadow-text: none;
+    --vh-head-radius: 0;
+    --vh-panel-radius: 0;
+    --vh-panel-bg: #d4d0c8;
+    --vh-panel-border: #808080;
+    --vh-panel-text: #000000;
+    --vh-panel-shadow: inset 1px 1px 0 #ffffff, 1px 1px 0 #404040;
+    --vh-accent: #000080;
+    --vh-btn-bg: #d4d0c8;
+    --vh-btn-border: #808080;
+    --vh-btn-text: #000000;
+    --vh-btn-hover-bg: #e4e0d8;
+    --vh-btn-hover-border: #000080;
+    --vh-btn-hover-text: #000000;
+    --vh-btn-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #404040;
+    --vh-input-bg: #ffffff;
+    --vh-input-border: #808080;
+    --vh-input-text: #000000;
+    --vh-icon: #000000;
+    --vh-heading: #000000;
 }
 
-body.tema-win10-claro footer,
-body.tema-win10-claro .linux-news-panel,
-body.tema-win10-claro .login-screen,
-body.tema-win10-claro .sidebar,
-body.tema-win10-claro .profile-menu,
-body.tema-win10-claro .toggleable-sidebar,
-body.tema-win10-claro .chat-panel,
-body.tema-win10-claro .chat-header,
-body.tema-win10-claro .chat-tabs,
-body.tema-win10-claro .chat-input-area,
-body.tema-win10-claro .chat-toast,
-body.tema-win10-claro .forum-card,
-body.tema-win10-claro .forum-post,
-body.tema-win10-claro .suggestions-card,
-body.tema-win10-claro .config-card,
-body.tema-win10-claro .admin-card {
-    background-color: rgba(248, 248, 248, 0.80) !important;
-    background-image: none !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 4px !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
-    color: #1a1a1a !important;
-    text-shadow: none !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
+/* =============================================================================
+   WINDOWS VISTA - Aero Glass
+   ============================================================================= */
+
+body[data-era="vista"] {
+    --vh-font: 'Segoe UI', sans-serif;
+    --vh-font-head: 'Segoe UI', sans-serif;
+    --vh-heading-weight: 600;
+    --vh-head-radius: 10px 10px 0 0;
+    --vh-panel-radius: 6px;
+    --vh-btn-radius: 6px;
+    --vh-input-radius: 4px;
+    --vh-icon-radius: 50%;
+    --vh-toggle-radius: 50%;
+    --vh-blur: 20px;
+    --vh-bg-image: linear-gradient(180deg, rgba(3, 20, 30, 0.3), rgba(3, 20, 30, 0.52)), url('/pics/temas/vista.jpg');
+    --vh-bg-solid: #0a1b26;
+    --vh-panel-shadow-text: 0 1px 3px rgba(0, 0, 0, 0.7);
+    --vh-btn-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5);
+    --vh-btn-shadow-text: 0 1px 2px rgba(0, 0, 0, 0.75);
+    --vh-input-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+    --vh-login-scrim: rgba(2, 12, 20, 0.34);
+    --vh-login-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+    --vh-panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36), 0 14px 36px rgba(0, 0, 0, 0.5);
+    --vh-panel-text: #eaf7ff;
 }
 
-body.tema-win10-claro h1,
-body.tema-win10-claro h2,
-body.tema-win10-claro h3,
-body.tema-win10-claro h4 {
-    color: #0f0f0f !important;
-    font-weight: 600 !important;
-    text-shadow: none !important;
+body[data-era="vista"][data-variante="aero"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(70, 120, 160, 0.75) 0%, rgba(16, 36, 54, 0.9) 48%, rgba(6, 16, 26, 0.95) 100%);
+    --vh-head-border: rgba(160, 215, 255, 0.42);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 26px rgba(0, 0, 0, 0.6);
+    --vh-head-shadow-text: 0 1px 2px rgba(0, 0, 0, 0.8);
+    --vh-panel-bg: rgba(12, 34, 50, 0.62);
+    --vh-panel-border: rgba(160, 215, 255, 0.34);
+    --vh-accent: #7ec8e3;
+    --vh-btn-bg: linear-gradient(180deg, rgba(120, 180, 225, 0.9) 0%, rgba(42, 90, 128, 0.92) 50%, rgba(16, 44, 68, 0.95) 100%);
+    --vh-btn-border: rgba(190, 232, 255, 0.6);
+    --vh-btn-text: #ffffff;
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(170, 220, 255, 0.95) 0%, rgba(70, 140, 190, 0.95) 50%, rgba(26, 70, 105, 0.98) 100%);
+    --vh-btn-hover-border: #bfe8ff;
+    --vh-btn-hover-text: #ffffff;
+    --vh-input-bg: rgba(6, 18, 30, 0.72);
+    --vh-input-border: rgba(160, 215, 255, 0.4);
+    --vh-input-text: #eaf7ff;
+    --vh-heading: #ffffff;
 }
 
-body.tema-win10-claro button,
-body.tema-win10-claro .container-load-btn,
-body.tema-win10-claro .header-login-button {
-    background: #f0f0f0 !important;
-    border: 1px solid #c8c8c8 !important;
-    border-radius: 4px !important;
-    box-shadow: none !important;
-    color: #1a1a1a !important;
-    text-shadow: none !important;
+body[data-era="vista"][data-variante="graphite"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(110, 118, 128, 0.75) 0%, rgba(32, 36, 42, 0.92) 48%, rgba(14, 16, 20, 0.96) 100%);
+    --vh-head-border: rgba(200, 208, 218, 0.4);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 8px 26px rgba(0, 0, 0, 0.6);
+    --vh-head-shadow-text: 0 1px 2px rgba(0, 0, 0, 0.85);
+    --vh-panel-bg: rgba(28, 32, 38, 0.66);
+    --vh-panel-border: rgba(200, 208, 218, 0.3);
+    --vh-accent: #aab4c0;
+    --vh-btn-bg: linear-gradient(180deg, rgba(160, 170, 182, 0.9) 0%, rgba(70, 78, 88, 0.92) 50%, rgba(34, 38, 44, 0.95) 100%);
+    --vh-btn-border: rgba(215, 222, 230, 0.55);
+    --vh-btn-text: #ffffff;
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(205, 212, 220, 0.95) 0%, rgba(105, 115, 126, 0.95) 50%, rgba(52, 58, 66, 0.98) 100%);
+    --vh-btn-hover-border: #e2e8ee;
+    --vh-btn-hover-text: #ffffff;
+    --vh-input-bg: rgba(16, 18, 22, 0.75);
+    --vh-input-border: rgba(200, 208, 218, 0.35);
+    --vh-input-text: #eef2f6;
+    --vh-panel-text: #eef2f6;
+    --vh-heading: #ffffff;
 }
 
-body.tema-win10-claro button:hover,
-body.tema-win10-claro .container-load-btn:hover {
-    background: #e5f1fb !important;
-    border-color: #0078d7 !important;
-    box-shadow: inset 0 -2px 0 #0078d7 !important;
+body[data-era="vista"][data-variante="teal"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(30, 150, 140, 0.75) 0%, rgba(8, 62, 60, 0.92) 48%, rgba(4, 30, 30, 0.96) 100%);
+    --vh-head-border: rgba(140, 235, 225, 0.45);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 26px rgba(0, 0, 0, 0.6);
+    --vh-head-shadow-text: 0 1px 2px rgba(0, 0, 0, 0.8);
+    --vh-panel-bg: rgba(10, 48, 46, 0.62);
+    --vh-panel-border: rgba(140, 235, 225, 0.35);
+    --vh-accent: #3fd0c0;
+    --vh-btn-bg: linear-gradient(180deg, rgba(90, 220, 205, 0.9) 0%, rgba(22, 110, 100, 0.92) 50%, rgba(8, 56, 52, 0.95) 100%);
+    --vh-btn-border: rgba(170, 245, 235, 0.6);
+    --vh-btn-text: #ffffff;
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(150, 245, 235, 0.95) 0%, rgba(40, 150, 140, 0.95) 50%, rgba(12, 80, 74, 0.98) 100%);
+    --vh-btn-hover-border: #b8fff5;
+    --vh-btn-hover-text: #ffffff;
+    --vh-input-bg: rgba(4, 26, 26, 0.75);
+    --vh-input-border: rgba(140, 235, 225, 0.4);
+    --vh-input-text: #e6fffb;
+    --vh-panel-text: #e6fffb;
+    --vh-heading: #ffffff;
 }
 
-body.tema-win10-claro input[type="text"],
-body.tema-win10-claro input[type="email"],
-body.tema-win10-claro input[type="password"],
-body.tema-win10-claro input[type="search"],
-body.tema-win10-claro textarea,
-body.tema-win10-claro select {
-    background: #ffffff !important;
-    border: 1px solid #b8b8b8 !important;
-    border-radius: 2px !important;
-    border-bottom: 2px solid #0078d7 !important;
-    box-shadow: none !important;
-    color: #1a1a1a !important;
+body[data-era="vista"][data-variante="red"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(180, 60, 70, 0.75) 0%, rgba(74, 18, 24, 0.92) 48%, rgba(36, 8, 12, 0.96) 100%);
+    --vh-head-border: rgba(255, 175, 182, 0.42);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 26px rgba(0, 0, 0, 0.65);
+    --vh-head-shadow-text: 0 1px 2px rgba(0, 0, 0, 0.85);
+    --vh-panel-bg: rgba(58, 16, 20, 0.65);
+    --vh-panel-border: rgba(255, 175, 182, 0.34);
+    --vh-accent: #e0566a;
+    --vh-btn-bg: linear-gradient(180deg, rgba(240, 130, 140, 0.9) 0%, rgba(150, 45, 55, 0.92) 50%, rgba(80, 20, 26, 0.95) 100%);
+    --vh-btn-border: rgba(255, 200, 205, 0.6);
+    --vh-btn-text: #ffffff;
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(255, 175, 185, 0.95) 0%, rgba(190, 70, 82, 0.95) 50%, rgba(110, 30, 38, 0.98) 100%);
+    --vh-btn-hover-border: #ffd0d5;
+    --vh-btn-hover-text: #ffffff;
+    --vh-input-bg: rgba(30, 8, 10, 0.75);
+    --vh-input-border: rgba(255, 175, 182, 0.4);
+    --vh-input-text: #ffeef0;
+    --vh-panel-text: #ffeef0;
+    --vh-heading: #ffffff;
 }
 
-/* -----------------------------------------------------------------------------
-   Windows 10 - Fluent, oscuro
-   -----------------------------------------------------------------------------
-   El fondo ya es oscuro, asi que aqui los paneles tambien lo son y el acento azul
-   se usa para el detalle de la barra y los bordes al pasar por encima.
-   -------------------------------------------------------------------------- */
+body[data-era="vista"][data-variante="green"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(80, 170, 90, 0.75) 0%, rgba(24, 62, 26, 0.92) 48%, rgba(10, 30, 12, 0.96) 100%);
+    --vh-head-border: rgba(180, 245, 185, 0.42);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 26px rgba(0, 0, 0, 0.6);
+    --vh-head-shadow-text: 0 1px 2px rgba(0, 0, 0, 0.8);
+    --vh-panel-bg: rgba(18, 48, 22, 0.62);
+    --vh-panel-border: rgba(180, 245, 185, 0.34);
+    --vh-accent: #69c96b;
+    --vh-btn-bg: linear-gradient(180deg, rgba(150, 230, 150, 0.9) 0%, rgba(48, 120, 52, 0.92) 50%, rgba(22, 66, 26, 0.95) 100%);
+    --vh-btn-border: rgba(200, 255, 200, 0.6);
+    --vh-btn-text: #ffffff;
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(190, 250, 190, 0.95) 0%, rgba(70, 160, 76, 0.95) 50%, rgba(32, 92, 36, 0.98) 100%);
+    --vh-btn-hover-border: #d8ffd8;
+    --vh-btn-hover-text: #ffffff;
+    --vh-input-bg: rgba(8, 26, 10, 0.75);
+    --vh-input-border: rgba(180, 245, 185, 0.4);
+    --vh-input-text: #eaffea;
+    --vh-panel-text: #eaffea;
+    --vh-heading: #ffffff;
+}
 
-body.tema-win10-oscuro {
-    --vh-surface: rgba(32, 32, 32, 0.80);
-    --vh-surface-strong: rgba(45, 45, 45, 0.90);
-    --vh-border: #3a3a3a;
-    --vh-icon: #ffffff;
-    --vh-text: #ffffff;
-    --vh-text-soft: #d6d6d6;
-    --vh-button-bg: #333333;
-    --vh-button-hover: #3d3d3d;
+body[data-era="vista"][data-variante="violet"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(140, 100, 210, 0.75) 0%, rgba(43, 23, 69, 0.92) 48%, rgba(22, 10, 38, 0.96) 100%);
+    --vh-head-border: rgba(215, 190, 255, 0.42);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 26px rgba(0, 0, 0, 0.65);
+    --vh-head-shadow-text: 0 1px 2px rgba(0, 0, 0, 0.85);
+    --vh-panel-bg: rgba(36, 20, 58, 0.65);
+    --vh-panel-border: rgba(215, 190, 255, 0.34);
+    --vh-accent: #a97cf0;
+    --vh-btn-bg: linear-gradient(180deg, rgba(200, 170, 250, 0.9) 0%, rgba(90, 60, 150, 0.92) 50%, rgba(48, 28, 84, 0.95) 100%);
+    --vh-btn-border: rgba(230, 215, 255, 0.6);
+    --vh-btn-text: #ffffff;
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(225, 205, 255, 0.95) 0%, rgba(125, 90, 190, 0.95) 50%, rgba(70, 44, 115, 0.98) 100%);
+    --vh-btn-hover-border: #f0e6ff;
+    --vh-btn-hover-text: #ffffff;
+    --vh-input-bg: rgba(18, 10, 32, 0.75);
+    --vh-input-border: rgba(215, 190, 255, 0.4);
+    --vh-input-text: #f3ecff;
+    --vh-panel-text: #f3ecff;
+    --vh-heading: #ffffff;
+}
+
+/* =============================================================================
+   WINDOWS 7 - Aero
+   ============================================================================= */
+
+body[data-era="win7"] {
+    --vh-font: 'Segoe UI', sans-serif;
+    --vh-font-head: 'Segoe UI', sans-serif;
+    --vh-heading-weight: 600;
+    --vh-head-radius: 8px 8px 0 0;
+    --vh-panel-radius: 6px;
+    --vh-btn-radius: 5px;
+    --vh-input-radius: 3px;
+    --vh-icon-radius: 40%;
+    --vh-toggle-radius: 50%;
+    --vh-blur: 16px;
+    --vh-bg-image: linear-gradient(180deg, rgba(6, 30, 55, 0.18), rgba(6, 30, 55, 0.34)), url('/pics/temas/win7.jpg');
+    --vh-bg-solid: #1a4a70;
+    --vh-panel-shadow-text: none;
+    --vh-btn-shadow: inset 0 1px 0 #ffffff, 0 1px 3px rgba(20, 50, 80, 0.3);
+    --vh-btn-shadow-text: 0 1px 0 rgba(255, 255, 255, 0.9);
+    --vh-input-shadow: inset 0 1px 2px rgba(20, 50, 80, 0.2);
+    --vh-login-scrim: rgba(10, 40, 70, 0.2);
+    --vh-login-shadow: 0 18px 44px rgba(10, 35, 60, 0.45);
+    --vh-panel-shadow: inset 0 1px 0 #ffffff, 0 8px 22px rgba(20, 50, 80, 0.3);
+}
+
+body[data-era="win7"][data-variante="aero"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(120, 150, 180, 0.92) 0%, rgba(60, 85, 110, 0.95) 46%, rgba(24, 40, 58, 0.97) 100%);
+    --vh-head-border: rgba(255, 255, 255, 0.55);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 18px rgba(10, 30, 50, 0.45);
+    --vh-head-shadow-text: 0 1px 2px rgba(10, 30, 50, 0.9);
+    --vh-panel-bg: rgba(235, 245, 253, 0.82);
+    --vh-panel-border: rgba(255, 255, 255, 0.9);
+    --vh-panel-text: #10293f;
+    --vh-accent: #4cc2ff;
+    --vh-btn-bg: linear-gradient(180deg, #f7fcff 0%, #d9ecfa 48%, #b6d8ef 100%);
+    --vh-btn-border: rgba(70, 130, 180, 0.75);
+    --vh-btn-text: #10293f;
+    --vh-btn-hover-bg: linear-gradient(180deg, #ffffff 0%, #e8f6ff 48%, #c9e8ff 100%);
+    --vh-btn-hover-border: #2f7fb8;
+    --vh-btn-hover-text: #10293f;
+    --vh-input-bg: rgba(255, 255, 255, 0.95);
+    --vh-input-border: rgba(120, 165, 200, 0.9);
+    --vh-input-text: #10293f;
+    --vh-icon: #123a5a;
+    --vh-heading: #0d3a5c;
+}
+
+body[data-era="win7"][data-variante="architecture"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(150, 145, 135, 0.92) 0%, rgba(70, 66, 60, 0.95) 46%, rgba(32, 30, 27, 0.97) 100%);
+    --vh-head-border: rgba(255, 250, 240, 0.5);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 6px 18px rgba(20, 18, 15, 0.5);
+    --vh-head-shadow-text: 0 1px 2px rgba(0, 0, 0, 0.85);
+    --vh-panel-bg: rgba(240, 236, 228, 0.84);
+    --vh-panel-border: rgba(255, 255, 255, 0.9);
+    --vh-panel-text: #2b2823;
+    --vh-accent: #b0895a;
+    --vh-btn-bg: linear-gradient(180deg, #fbf8f2 0%, #e8e1d5 48%, #d2c7b6 100%);
+    --vh-btn-border: rgba(140, 120, 95, 0.75);
+    --vh-btn-text: #2b2823;
+    --vh-btn-hover-bg: linear-gradient(180deg, #ffffff 0%, #f3ece0 48%, #e2d6c2 100%);
+    --vh-btn-hover-border: #8a6a42;
+    --vh-btn-hover-text: #1e1b16;
+    --vh-input-bg: rgba(255, 255, 255, 0.95);
+    --vh-input-border: rgba(150, 130, 105, 0.85);
+    --vh-input-text: #2b2823;
+    --vh-icon: #4a4238;
+    --vh-heading: #3a332a;
+}
+
+body[data-era="win7"][data-variante="nature"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(120, 175, 110, 0.92) 0%, rgba(45, 95, 45, 0.95) 46%, rgba(20, 48, 22, 0.97) 100%);
+    --vh-head-border: rgba(225, 255, 220, 0.55);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 6px 18px rgba(15, 40, 20, 0.45);
+    --vh-head-shadow-text: 0 1px 2px rgba(8, 30, 12, 0.9);
+    --vh-panel-bg: rgba(238, 250, 234, 0.84);
+    --vh-panel-border: rgba(255, 255, 255, 0.9);
+    --vh-panel-text: #17301a;
+    --vh-accent: #6cc24a;
+    --vh-btn-bg: linear-gradient(180deg, #f6fdf2 0%, #dcf0d2 48%, #bcdcae 100%);
+    --vh-btn-border: rgba(80, 140, 70, 0.75);
+    --vh-btn-text: #17301a;
+    --vh-btn-hover-bg: linear-gradient(180deg, #ffffff 0%, #e8f8de 48%, #cbeab9 100%);
+    --vh-btn-hover-border: #3f8a34;
+    --vh-btn-hover-text: #0f2312;
+    --vh-input-bg: rgba(255, 255, 255, 0.95);
+    --vh-input-border: rgba(120, 165, 120, 0.9);
+    --vh-input-text: #17301a;
+    --vh-icon: #2f5c2c;
+    --vh-heading: #245024;
+}
+
+body[data-era="win7"][data-variante="scenes"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(90, 175, 185, 0.92) 0%, rgba(30, 95, 102, 0.95) 46%, rgba(12, 48, 54, 0.97) 100%);
+    --vh-head-border: rgba(215, 250, 255, 0.55);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 6px 18px rgba(10, 40, 48, 0.45);
+    --vh-head-shadow-text: 0 1px 2px rgba(6, 28, 34, 0.9);
+    --vh-panel-bg: rgba(232, 249, 251, 0.84);
+    --vh-panel-border: rgba(255, 255, 255, 0.9);
+    --vh-panel-text: #103038;
+    --vh-accent: #2fb7c4;
+    --vh-btn-bg: linear-gradient(180deg, #f4fdff 0%, #d6f0f4 48%, #b0dce3 100%);
+    --vh-btn-border: rgba(60, 140, 150, 0.75);
+    --vh-btn-text: #103038;
+    --vh-btn-hover-bg: linear-gradient(180deg, #ffffff 0%, #e2f8fc 48%, #c0e8ee 100%);
+    --vh-btn-hover-border: #2b8f99;
+    --vh-btn-hover-text: #0a2429;
+    --vh-input-bg: rgba(255, 255, 255, 0.95);
+    --vh-input-border: rgba(110, 170, 180, 0.9);
+    --vh-input-text: #103038;
+    --vh-icon: #1b5660;
+    --vh-heading: #114a54;
+}
+
+body[data-era="win7"][data-variante="characters"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(200, 120, 165, 0.92) 0%, rgba(120, 40, 80, 0.95) 46%, rgba(62, 16, 40, 0.97) 100%);
+    --vh-head-border: rgba(255, 220, 238, 0.55);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 6px 18px rgba(50, 12, 30, 0.45);
+    --vh-head-shadow-text: 0 1px 2px rgba(40, 8, 24, 0.9);
+    --vh-panel-bg: rgba(253, 238, 246, 0.84);
+    --vh-panel-border: rgba(255, 255, 255, 0.9);
+    --vh-panel-text: #3a1226;
+    --vh-accent: #e86aa8;
+    --vh-btn-bg: linear-gradient(180deg, #fff6fb 0%, #f6dcea 48%, #e8bcd4 100%);
+    --vh-btn-border: rgba(160, 80, 120, 0.75);
+    --vh-btn-text: #3a1226;
+    --vh-btn-hover-bg: linear-gradient(180deg, #ffffff 0%, #ffe8f4 48%, #f5cfe3 100%);
+    --vh-btn-hover-border: #c04a88;
+    --vh-btn-hover-text: #2a0c1a;
+    --vh-input-bg: rgba(255, 255, 255, 0.95);
+    --vh-input-border: rgba(190, 130, 165, 0.9);
+    --vh-input-text: #3a1226;
+    --vh-icon: #6b2344;
+    --vh-heading: #5c1c38;
+}
+
+body[data-era="win7"][data-variante="landscapes"] {
+    --vh-head-bg: linear-gradient(180deg, rgba(205, 160, 95, 0.92) 0%, rgba(125, 80, 30, 0.95) 46%, rgba(68, 40, 12, 0.97) 100%);
+    --vh-head-border: rgba(255, 240, 210, 0.55);
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 6px 18px rgba(50, 30, 8, 0.45);
+    --vh-head-shadow-text: 0 1px 2px rgba(40, 24, 6, 0.9);
+    --vh-panel-bg: rgba(253, 246, 232, 0.84);
+    --vh-panel-border: rgba(255, 255, 255, 0.9);
+    --vh-panel-text: #3a2a10;
+    --vh-accent: #d99a3c;
+    --vh-btn-bg: linear-gradient(180deg, #fffcf4 0%, #f6e8cc 48%, #e8d4a8 100%);
+    --vh-btn-border: rgba(160, 120, 60, 0.75);
+    --vh-btn-text: #3a2a10;
+    --vh-btn-hover-bg: linear-gradient(180deg, #ffffff 0%, #fff2d8 48%, #f5e0b8 100%);
+    --vh-btn-hover-border: #c08020;
+    --vh-btn-hover-text: #2a1e0a;
+    --vh-input-bg: rgba(255, 255, 255, 0.95);
+    --vh-input-border: rgba(190, 160, 110, 0.9);
+    --vh-input-text: #3a2a10;
+    --vh-icon: #6b4a18;
+    --vh-heading: #5c3e12;
+}
+
+/* =============================================================================
+   WINDOWS 8 - Modern UI (Metro)
+   ============================================================================= */
+
+body[data-era="win8"] {
+    --vh-font: 'Segoe UI Light', 'Segoe UI', sans-serif;
+    --vh-font-head: 'Segoe UI Light', 'Segoe UI', sans-serif;
+    --vh-heading-weight: 300;
+    --vh-head-radius: 0;
+    --vh-panel-radius: 0;
+    --vh-btn-radius: 0;
+    --vh-input-radius: 0;
+    --vh-icon-radius: 0;
+    --vh-toggle-radius: 0;
+    --vh-blur: 0px;
+    --vh-bg-image: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.16)), url('/pics/temas/win8.jpg');
+    --vh-bg-solid: #e8a300;
+    --vh-panel-shadow-text: none;
+    --vh-btn-shadow: none;
+    --vh-btn-shadow-text: none;
+    --vh-input-shadow: none;
+    --vh-login-scrim: rgba(0, 0, 0, 0.25);
+    --vh-login-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    --vh-panel-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+    --vh-panel-bg: #1b1b1b;
+    --vh-panel-border: #333333;
     --vh-panel-text: #ffffff;
-    --vh-glass-blur: 16px;
-    --vh-glass-sheen: none;
-    --vh-glass-inner-shadow: none;
-    --vh-glass-drop-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-
-    background-color: #05101e;
-    background-image:
-        linear-gradient(180deg, rgba(2, 8, 16, 0.25), rgba(2, 8, 16, 0.45)),
-        url('/pics/temas/win10.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    color: #ffffff;
-    font-family: 'Segoe UI', sans-serif;
+    --vh-heading: #ffffff;
+    --vh-icon: #ffffff;
+    --vh-head-text: #ffffff;
+    --vh-head-border: #3a3a3a;
+    --vh-head-shadow: none;
+    --vh-head-shadow-text: none;
+    --vh-head-bg: #141414;
+    --vh-btn-bg: #2b2b2b;
+    --vh-btn-border: #3a3a3a;
+    --vh-btn-text: #ffffff;
+    --vh-input-bg: #111111;
+    --vh-input-border: #3a3a3a;
+    --vh-input-text: #ffffff;
 }
 
-body.tema-win10-oscuro::before,
-body.tema-win10-oscuro::after {
-    display: none;
+/* Metro se distingue por el acento: el fondo de los botones al pasar. */
+body[data-era="win8"][data-variante="blue"]   { --vh-accent: #00a4ef; --vh-btn-hover-bg: #00a4ef; --vh-btn-hover-border: #00a4ef; --vh-btn-hover-text: #ffffff; }
+body[data-era="win8"][data-variante="purple"] { --vh-accent: #7c4dff; --vh-btn-hover-bg: #7c4dff; --vh-btn-hover-border: #7c4dff; --vh-btn-hover-text: #ffffff; }
+body[data-era="win8"][data-variante="green"]  { --vh-accent: #00ab6c; --vh-btn-hover-bg: #00ab6c; --vh-btn-hover-border: #00ab6c; --vh-btn-hover-text: #ffffff; }
+body[data-era="win8"][data-variante="orange"] { --vh-accent: #f7630c; --vh-btn-hover-bg: #f7630c; --vh-btn-hover-border: #f7630c; --vh-btn-hover-text: #ffffff; }
+body[data-era="win8"][data-variante="red"]    { --vh-accent: #e81123; --vh-btn-hover-bg: #e81123; --vh-btn-hover-border: #e81123; --vh-btn-hover-text: #ffffff; }
+body[data-era="win8"][data-variante="teal"]   { --vh-accent: #00b7c3; --vh-btn-hover-bg: #00b7c3; --vh-btn-hover-border: #00b7c3; --vh-btn-hover-text: #ffffff; }
+
+/* =============================================================================
+   WINDOWS 10 - Fluent
+   ============================================================================= */
+
+body[data-era="win10"] {
+    --vh-font: 'Segoe UI', sans-serif;
+    --vh-font-head: 'Segoe UI', sans-serif;
+    --vh-heading-weight: 600;
+    --vh-head-radius: 4px 4px 0 0;
+    --vh-panel-radius: 4px;
+    --vh-btn-radius: 4px;
+    --vh-input-radius: 2px;
+    --vh-icon-radius: 3px;
+    --vh-toggle-radius: 6px;
+    --vh-blur: 16px;
+    --vh-bg-image: linear-gradient(180deg, rgba(2, 8, 16, 0.25), rgba(2, 8, 16, 0.45)), url('/pics/temas/win10.jpg');
+    --vh-bg-solid: #05101e;
+    --vh-panel-shadow-text: none;
+    --vh-btn-shadow: none;
+    --vh-btn-shadow-text: none;
+    --vh-input-shadow: none;
+    --vh-login-scrim: rgba(2, 8, 16, 0.3);
+    --vh-login-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
 }
 
-body.tema-win10-oscuro header {
-    background: rgba(24, 24, 24, 0.88) !important;
-    border: 1px solid #3a3a3a !important;
-    border-bottom: 2px solid #4cc2ff !important;
-    border-radius: 4px 4px 0 0 !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
-    color: #ffffff !important;
-    text-shadow: none !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
+body[data-era="win10"][data-variante="azul-claro"] {
+    --vh-panel-bg: rgba(248, 248, 248, 0.8);
+    --vh-panel-border: rgba(0, 0, 0, 0.1);
+    --vh-panel-text: #1a1a1a;
+    --vh-panel-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --vh-heading: #0f0f0f;
+    --vh-head-bg: rgba(250, 250, 250, 0.9);
+    --vh-head-border: rgba(0, 0, 0, 0.12);
+    --vh-head-text: #1a1a1a;
+    --vh-head-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    --vh-head-shadow-text: none;
+    --vh-accent: #0078d7;
+    --vh-btn-bg: #f0f0f0;
+    --vh-btn-border: #c8c8c8;
+    --vh-btn-text: #1a1a1a;
+    --vh-btn-hover-bg: #e5f1fb;
+    --vh-btn-hover-border: #0078d7;
+    --vh-btn-hover-text: #1a1a1a;
+    --vh-input-bg: #ffffff;
+    --vh-input-border: #b8b8b8;
+    --vh-input-text: #1a1a1a;
+    --vh-icon: #1a1a1a;
 }
 
-body.tema-win10-oscuro footer,
-body.tema-win10-oscuro .linux-news-panel,
-body.tema-win10-oscuro .login-screen,
-body.tema-win10-oscuro .sidebar,
-body.tema-win10-oscuro .profile-menu,
-body.tema-win10-oscuro .toggleable-sidebar,
-body.tema-win10-oscuro .chat-panel,
-body.tema-win10-oscuro .chat-header,
-body.tema-win10-oscuro .chat-tabs,
-body.tema-win10-oscuro .chat-input-area,
-body.tema-win10-oscuro .chat-toast,
-body.tema-win10-oscuro .forum-card,
-body.tema-win10-oscuro .forum-post,
-body.tema-win10-oscuro .suggestions-card,
-body.tema-win10-oscuro .config-card,
-body.tema-win10-oscuro .admin-card {
-    background-color: rgba(32, 32, 32, 0.80) !important;
-    background-image: none !important;
-    border: 1px solid #3a3a3a !important;
-    border-radius: 4px !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
-    color: #ffffff !important;
-    text-shadow: none !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
+body[data-era="win10"][data-variante="verde-claro"] {
+    --vh-panel-bg: rgba(248, 248, 248, 0.8);
+    --vh-panel-border: rgba(0, 0, 0, 0.1);
+    --vh-panel-text: #1a2a1a;
+    --vh-panel-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --vh-heading: #0f1f0f;
+    --vh-head-bg: rgba(250, 250, 250, 0.9);
+    --vh-head-border: rgba(0, 0, 0, 0.12);
+    --vh-head-text: #1a2a1a;
+    --vh-head-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    --vh-head-shadow-text: none;
+    --vh-accent: #107c10;
+    --vh-btn-bg: #f0f0f0;
+    --vh-btn-border: #c8c8c8;
+    --vh-btn-text: #1a2a1a;
+    --vh-btn-hover-bg: #e6f4e6;
+    --vh-btn-hover-border: #107c10;
+    --vh-btn-hover-text: #1a2a1a;
+    --vh-input-bg: #ffffff;
+    --vh-input-border: #b8b8b8;
+    --vh-input-text: #1a2a1a;
+    --vh-icon: #1a2a1a;
 }
 
-body.tema-win10-oscuro h1,
-body.tema-win10-oscuro h2,
-body.tema-win10-oscuro h3,
-body.tema-win10-oscuro h4 {
-    color: #ffffff !important;
-    font-weight: 600 !important;
-    text-shadow: none !important;
+body[data-era="win10"][data-variante="grafito-claro"] {
+    --vh-panel-bg: rgba(244, 244, 244, 0.82);
+    --vh-panel-border: rgba(0, 0, 0, 0.12);
+    --vh-panel-text: #202020;
+    --vh-panel-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --vh-heading: #0f0f0f;
+    --vh-head-bg: rgba(246, 246, 246, 0.92);
+    --vh-head-border: rgba(0, 0, 0, 0.14);
+    --vh-head-text: #202020;
+    --vh-head-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    --vh-head-shadow-text: none;
+    --vh-accent: #5d5d5d;
+    --vh-btn-bg: #ececec;
+    --vh-btn-border: #c0c0c0;
+    --vh-btn-text: #202020;
+    --vh-btn-hover-bg: #e2e2e2;
+    --vh-btn-hover-border: #5d5d5d;
+    --vh-btn-hover-text: #111111;
+    --vh-input-bg: #ffffff;
+    --vh-input-border: #b4b4b4;
+    --vh-input-text: #202020;
+    --vh-icon: #202020;
 }
 
-body.tema-win10-oscuro button,
-body.tema-win10-oscuro .container-load-btn,
-body.tema-win10-oscuro .header-login-button {
-    background: #333333 !important;
-    border: 1px solid #4a4a4a !important;
-    border-radius: 4px !important;
-    box-shadow: none !important;
-    color: #ffffff !important;
-    text-shadow: none !important;
+body[data-era="win10"][data-variante="azul-oscuro"] {
+    --vh-panel-bg: rgba(32, 32, 32, 0.8);
+    --vh-panel-border: #3a3a3a;
+    --vh-panel-text: #ffffff;
+    --vh-panel-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+    --vh-heading: #ffffff;
+    --vh-head-bg: rgba(24, 24, 24, 0.88);
+    --vh-head-border: #3a3a3a;
+    --vh-head-text: #ffffff;
+    --vh-head-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    --vh-head-shadow-text: none;
+    --vh-accent: #4cc2ff;
+    --vh-btn-bg: #333333;
+    --vh-btn-border: #4a4a4a;
+    --vh-btn-text: #ffffff;
+    --vh-btn-hover-bg: #3d3d3d;
+    --vh-btn-hover-border: #4cc2ff;
+    --vh-btn-hover-text: #ffffff;
+    --vh-input-bg: #1f1f1f;
+    --vh-input-border: #4a4a4a;
+    --vh-input-text: #ffffff;
+    --vh-icon: #ffffff;
 }
 
-body.tema-win10-oscuro button:hover,
-body.tema-win10-oscuro .container-load-btn:hover {
-    background: #3d3d3d !important;
-    border-color: #4cc2ff !important;
-    box-shadow: inset 0 -2px 0 #4cc2ff !important;
+body[data-era="win10"][data-variante="purpura-oscuro"] {
+    --vh-panel-bg: rgba(34, 30, 44, 0.82);
+    --vh-panel-border: #443a58;
+    --vh-panel-text: #f2ecff;
+    --vh-panel-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    --vh-heading: #ffffff;
+    --vh-head-bg: rgba(26, 22, 36, 0.9);
+    --vh-head-border: #443a58;
+    --vh-head-text: #f2ecff;
+    --vh-head-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+    --vh-head-shadow-text: none;
+    --vh-accent: #b47cf0;
+    --vh-btn-bg: #332c42;
+    --vh-btn-border: #4d4262;
+    --vh-btn-text: #f2ecff;
+    --vh-btn-hover-bg: #3f3554;
+    --vh-btn-hover-border: #b47cf0;
+    --vh-btn-hover-text: #ffffff;
+    --vh-input-bg: #1d1926;
+    --vh-input-border: #4d4262;
+    --vh-input-text: #f2ecff;
+    --vh-icon: #f2ecff;
 }
 
-body.tema-win10-oscuro input[type="text"],
-body.tema-win10-oscuro input[type="email"],
-body.tema-win10-oscuro input[type="password"],
-body.tema-win10-oscuro input[type="search"],
-body.tema-win10-oscuro textarea,
-body.tema-win10-oscuro select {
-    background: #1f1f1f !important;
-    border: 1px solid #4a4a4a !important;
-    border-radius: 2px !important;
-    border-bottom: 2px solid #4cc2ff !important;
-    box-shadow: none !important;
-    color: #ffffff !important;
+body[data-era="win10"][data-variante="ambar-oscuro"] {
+    --vh-panel-bg: rgba(36, 32, 26, 0.82);
+    --vh-panel-border: #4a4234;
+    --vh-panel-text: #fff6e6;
+    --vh-panel-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    --vh-heading: #ffffff;
+    --vh-head-bg: rgba(28, 24, 18, 0.9);
+    --vh-head-border: #4a4234;
+    --vh-head-text: #fff6e6;
+    --vh-head-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+    --vh-head-shadow-text: none;
+    --vh-accent: #ffb900;
+    --vh-btn-bg: #3a3327;
+    --vh-btn-border: #524937;
+    --vh-btn-text: #fff6e6;
+    --vh-btn-hover-bg: #47402f;
+    --vh-btn-hover-border: #ffb900;
+    --vh-btn-hover-text: #ffffff;
+    --vh-input-bg: #211d16;
+    --vh-input-border: #524937;
+    --vh-input-text: #fff6e6;
+    --vh-icon: #fff6e6;
 }
 
-/* -----------------------------------------------------------------------------
-   El desplegable del selector
-   -----------------------------------------------------------------------------
-   Va donde antes estaba el boton de claro/oscuro. Se adapta al tema activo, asi
-   que no desentona en ninguno. La primera regla es el aspecto comun; las de cada
-   tema solo cambian colores.
-   -------------------------------------------------------------------------- */
+/* =============================================================================
+   EL CARRUSEL DE TEMAS
+   ============================================================================= */
 
-.vh-tema-select {
-    appearance: none;
-    -webkit-appearance: none;
-    padding: 6px 26px 6px 10px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    background-color: rgba(10, 20, 32, 0.72);
-    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
-        linear-gradient(135deg, currentColor 50%, transparent 50%);
-    background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%;
-    background-size: 5px 5px, 5px 5px;
-    background-repeat: no-repeat;
-    color: #eaf4ff;
+.vh-temas {
+    position: relative;
+}
+
+.vh-temas-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 11px;
+    border: 1px solid var(--vh-btn-border, rgba(255, 255, 255, 0.28));
+    background: var(--vh-btn-bg, rgba(10, 20, 32, 0.72));
+    color: var(--vh-btn-text, #eaf4ff);
     font-family: 'Segoe UI', sans-serif;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    max-width: 190px;
+    white-space: nowrap;
+    max-width: 210px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.vh-tema-select:focus {
-    outline: 2px solid rgba(120, 200, 255, 0.7);
-    outline-offset: 1px;
+.vh-temas-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
-.vh-tema-select option {
-    background: #101820;
+.vh-temas-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 5000;
+    width: min(94vw, 520px);
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(12, 18, 28, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.6);
+    animation: vh-panel-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.vh-temas-panel[hidden] {
+    display: none;
+}
+
+@keyframes vh-panel-in {
+    from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.vh-temas-era + .vh-temas-era {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.vh-temas-era h4 {
+    margin: 0 0 8px;
+    color: #8fb3d9;
+    font: 700 11px 'Segoe UI', sans-serif;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.vh-temas-track {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+}
+
+.vh-temas-track::-webkit-scrollbar {
+    height: 6px;
+}
+
+.vh-temas-track::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 3px;
+}
+
+.vh-tema-tile {
+    flex: 0 0 auto;
+    width: 92px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    scroll-snap-align: start;
+    overflow: hidden;
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.vh-tema-tile:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.vh-tema-tile.activo {
+    border-color: #58c4ff;
+    box-shadow: 0 0 0 2px rgba(88, 196, 255, 0.35);
+}
+
+.vh-tema-swatch {
+    display: block;
+    height: 44px;
+    background: linear-gradient(160deg, var(--sw-a) 0%, var(--sw-b) 100%);
+    position: relative;
+}
+
+.vh-tema-swatch::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.35);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.vh-tema-name {
+    display: block;
+    padding: 5px 6px 6px;
     color: #eaf4ff;
+    font: 600 10px 'Segoe UI', sans-serif;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Cada tema le da sus colores. */
-body.tema-vista .vh-tema-select {
-    background-color: rgba(8, 26, 40, 0.85);
-    border-color: rgba(160, 215, 255, 0.5);
-    color: #eaf7ff;
+.vh-temas-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
 }
 
-body.tema-win7 .vh-tema-select {
-    background-color: rgba(255, 255, 255, 0.92);
-    border-color: rgba(70, 130, 180, 0.6);
-    color: #10293f;
+.vh-temas-nav button {
+    padding: 2px 9px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
 }
 
-body.tema-win7 .vh-tema-select option {
-    background: #ffffff;
-    color: #10293f;
-}
-
-body.tema-win8 .vh-tema-select {
-    background-color: #2b2b2b;
-    border-color: #3a3a3a;
-    border-radius: 0;
-    color: #ffffff;
-}
-
-body.tema-win8 .vh-tema-select option {
-    background: #1b1b1b;
-    color: #ffffff;
-}
-
-body.tema-win10-claro .vh-tema-select {
-    background-color: rgba(255, 255, 255, 0.96);
-    border-color: rgba(0, 0, 0, 0.2);
-    color: #1a1a1a;
-}
-
-body.tema-win10-claro .vh-tema-select option {
-    background: #ffffff;
-    color: #1a1a1a;
-}
-
-body.tema-win10-oscuro .vh-tema-select {
-    background-color: rgba(38, 38, 38, 0.96);
-    border-color: #4a4a4a;
-    color: #ffffff;
-}
-
-body.tema-win10-oscuro .vh-tema-select option {
-    background: #202020;
-    color: #ffffff;
-}
-
-/* En pantallas pequenas el desplegable se hace mas estrecho. */
 @media (max-width: 640px) {
-    .vh-tema-select {
-        max-width: 128px;
-        padding: 5px 22px 5px 8px;
+    .vh-temas-btn {
+        max-width: 132px;
+        padding: 5px 8px;
         font-size: 11px;
     }
+
+    .vh-temas-panel {
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        width: auto;
+        top: 62px;
+    }
+
+    .vh-tema-tile {
+        width: 78px;
+    }
+}
+
+/* El resaltado del tema elegido tiene que ganar a la regla general de botones. */
+body[data-era] .vh-tema-tile {
+    border: 2px solid transparent !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+body[data-era] .vh-tema-tile:hover {
+    background: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+body[data-era] .vh-tema-tile.activo {
+    border-color: #58c4ff !important;
+    box-shadow: 0 0 0 2px rgba(88, 196, 255, 0.35) !important;
+}
+
+/* El boton que abre el carrusel no debe heredar el texto de la barra. */
+body[data-era] .vh-temas-btn {
+    text-shadow: none !important;
 }

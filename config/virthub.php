@@ -42,6 +42,73 @@ return [
     'temas' => [
         'enabled' => filter_var(env('VIRTHUB_TEMAS', false), FILTER_VALIDATE_BOOL),
         'activo' => (string) env('VIRTHUB_TEMA_INICIAL', ''),
+
+        /*
+         * Catalogo de estilos disponibles.
+         *
+         * Cada epoca (era) tiene sus esquemas de color (variantes). Los colores
+         * 'a' y 'b' son solo para el degradado de la muestra en el carrusel; el
+         * aspecto real lo pone public/temas.css.
+         *
+         * Anadir un esquema es anadir una entrada aqui y su bloque en el CSS.
+         */
+        'catalogo' => [
+            'xp' => [
+                'nombre' => 'Windows XP',
+                'variantes' => [
+                    'luna' => ['nombre' => 'Luna azul', 'a' => '#0058e6', 'b' => '#3a93ff'],
+                    'olive' => ['nombre' => 'Oliva', 'a' => '#6d7f3c', 'b' => '#9aad5a'],
+                    'silver' => ['nombre' => 'Plata', 'a' => '#9a9a9a', 'b' => '#dedede'],
+                    'royale' => ['nombre' => 'Royale', 'a' => '#0a1f3d', 'b' => '#2f6ea8'],
+                    'embedded' => ['nombre' => 'Embedded', 'a' => '#232f3a', 'b' => '#44586b'],
+                    'classic' => ['nombre' => 'Clasico', 'a' => '#000080', 'b' => '#4a4a9a'],
+                ],
+            ],
+            'vista' => [
+                'nombre' => 'Windows Vista',
+                'variantes' => [
+                    'aero' => ['nombre' => 'Aero', 'a' => '#1b4a63', 'b' => '#7ec8e3'],
+                    'graphite' => ['nombre' => 'Grafito', 'a' => '#22262b', 'b' => '#6b7480'],
+                    'teal' => ['nombre' => 'Turquesa', 'a' => '#0b4f4a', 'b' => '#3fd0c0'],
+                    'red' => ['nombre' => 'Rojo', 'a' => '#4a1218', 'b' => '#e0566a'],
+                    'green' => ['nombre' => 'Verde', 'a' => '#1a3d1a', 'b' => '#69c96b'],
+                    'violet' => ['nombre' => 'Violeta', 'a' => '#2b1745', 'b' => '#a97cf0'],
+                ],
+            ],
+            'win7' => [
+                'nombre' => 'Windows 7',
+                'variantes' => [
+                    'aero' => ['nombre' => 'Aero', 'a' => '#bfe3f7', 'b' => '#1f4a68'],
+                    'architecture' => ['nombre' => 'Arquitectura', 'a' => '#d8d2c8', 'b' => '#3a3a3a'],
+                    'nature' => ['nombre' => 'Naturaleza', 'a' => '#d6f0c8', 'b' => '#2f6b2f'],
+                    'scenes' => ['nombre' => 'Escenas', 'a' => '#c8eef0', 'b' => '#0f5a63'],
+                    'characters' => ['nombre' => 'Personajes', 'a' => '#f7d0e2', 'b' => '#8a2b5c'],
+                    'landscapes' => ['nombre' => 'Paisajes', 'a' => '#f8e4c0', 'b' => '#8a5218'],
+                ],
+            ],
+            'win8' => [
+                'nombre' => 'Windows 8',
+                'variantes' => [
+                    'blue' => ['nombre' => 'Azul', 'a' => '#00a4ef', 'b' => '#0072c6'],
+                    'purple' => ['nombre' => 'Purpura', 'a' => '#7c4dff', 'b' => '#4527a0'],
+                    'green' => ['nombre' => 'Verde', 'a' => '#00ab6c', 'b' => '#00724a'],
+                    'orange' => ['nombre' => 'Naranja', 'a' => '#f7630c', 'b' => '#b84400'],
+                    'red' => ['nombre' => 'Rojo', 'a' => '#e81123', 'b' => '#a00010'],
+                    'teal' => ['nombre' => 'Turquesa', 'a' => '#00b7c3', 'b' => '#00777f'],
+                ],
+            ],
+            'win10' => [
+                'nombre' => 'Windows 10',
+                'variantes' => [
+                    'azul-claro' => ['nombre' => 'Claro azul', 'a' => '#f3f3f3', 'b' => '#0078d7'],
+                    'verde-claro' => ['nombre' => 'Claro verde', 'a' => '#f3f3f3', 'b' => '#107c10'],
+                    'grafito-claro' => ['nombre' => 'Claro grafito', 'a' => '#f3f3f3', 'b' => '#5d5d5d'],
+                    'azul-oscuro' => ['nombre' => 'Oscuro azul', 'a' => '#202020', 'b' => '#4cc2ff'],
+                    'purpura-oscuro' => ['nombre' => 'Oscuro purpura', 'a' => '#202020', 'b' => '#b47cf0'],
+                    'ambar-oscuro' => ['nombre' => 'Oscuro ambar', 'a' => '#202020', 'b' => '#ffb900'],
+                ],
+            ],
+        ],
     ],
 
     /*
