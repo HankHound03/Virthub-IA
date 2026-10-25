@@ -428,6 +428,7 @@ body[data-era="xp"][data-variante="classic"] {
    ============================================================================= */
 
 body[data-era="vista"] {
+    --vh-icon: #dff2ff;
     --vh-icon-stroke: 2px;
     --vh-scrim: 0.34;
     --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
