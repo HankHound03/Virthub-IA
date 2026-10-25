@@ -24,11 +24,15 @@
             --}}
             <div class="vh-temas" id="vhTemas">
                 <button type="button" class="vh-temas-btn" id="vhTemasBtn"
-                        aria-expanded="false" aria-controls="vhTemasPanel" title="Cambiar de tema">
+                        title="Siguiente tema (Alt + flechas)">
                     <span class="vh-temas-dot" id="vhTemasDot" aria-hidden="true"></span>
                     <span id="vhTemasNombre">Tema</span>
-                    <span aria-hidden="true">&#9662;</span>
                 </button>
+                <button type="button" class="vh-temas-caret" id="vhTemasAbrir"
+                        aria-expanded="false" aria-controls="vhTemasPanel"
+                        title="Elegir un esquema concreto">&#9662;</button>
+
+                <div class="vh-temas-aviso" id="vhTemasAviso" role="status" aria-live="polite"></div>
 
                 <div class="vh-temas-panel" id="vhTemasPanel" hidden>
                     @foreach ($vhCatalogo as $era => $datos)
@@ -390,6 +394,8 @@
                 var POR_DEFECTO = { era: 'xp', variante: 'luna' };
 
                 var boton = document.getElementById('vhTemasBtn');
+                var abrir = document.getElementById('vhTemasAbrir');
+                var aviso = document.getElementById('vhTemasAviso');
                 var panel = document.getElementById('vhTemasPanel');
                 var nombre = document.getElementById('vhTemasNombre');
                 var punto = document.getElementById('vhTemasDot');
@@ -399,6 +405,20 @@
                 }
 
                 var fichas = Array.prototype.slice.call(panel.querySelectorAll('.vh-tema-tile'));
+
+                /* Cartel breve con el nombre del tema al cambiarlo. */
+                function avisar(texto) {
+                    if (!aviso) {
+                        return;
+                    }
+
+                    aviso.textContent = texto;
+                    aviso.classList.add('visible');
+                    clearTimeout(avisar.tiempo);
+                    avisar.tiempo = setTimeout(function () {
+                        aviso.classList.remove('visible');
+                    }, 1600);
+                }
 
                 function buscar(era, variante) {
                     return fichas.find(function (f) {
@@ -433,6 +453,8 @@
                         f.classList.toggle('activo', f === ficha);
                     });
 
+                    avisar(ficha ? ficha.dataset.nombre : era);
+
                     try {
                         localStorage.setItem(CLAVE, JSON.stringify({ era: era, variante: variante }));
                     } catch (e) {
@@ -451,12 +473,49 @@
                     });
                 });
 
-                /* Abrir y cerrar el panel. */
+                /* Un clic en el boton grande pasa al siguiente tema; la flechita
+                   abre el carrusel para elegir uno concreto. */
+                function ciclo(paso) {
+                    var actual = document.body.dataset.era + '/' + document.body.dataset.variante;
+                    var i = fichas.findIndex(function (f) {
+                        return (f.dataset.era + '/' + f.dataset.variante) === actual;
+                    });
+
+                    if (i < 0) {
+                        i = 0;
+                    }
+
+                    var f = fichas[(i + paso + fichas.length) % fichas.length];
+                    aplicar(f.dataset.era, f.dataset.variante);
+                }
+
                 boton.addEventListener('click', function (evento) {
                     evento.stopPropagation();
-                    var abierto = panel.hidden;
-                    panel.hidden = !abierto;
-                    boton.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+                    ciclo(1);
+                });
+
+                if (abrir) {
+                    abrir.addEventListener('click', function (evento) {
+                        evento.stopPropagation();
+                        var abierto = panel.hidden;
+                        panel.hidden = !abierto;
+                        abrir.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+                    });
+                }
+
+                /* Alt + flechas: cambiar sin soltar el teclado. */
+                document.addEventListener('keydown', function (evento) {
+                    if (!evento.altKey) {
+                        return;
+                    }
+
+                    if (evento.key === 'ArrowRight') {
+                        evento.preventDefault();
+                        ciclo(1);
+                    } else if (evento.key === 'ArrowLeft') {
+                        evento.preventDefault();
+                        ciclo(-1);
+                    }
                 });
 
                 panel.addEventListener('click', function (evento) {
@@ -466,14 +525,14 @@
                 document.addEventListener('click', function () {
                     if (!panel.hidden) {
                         panel.hidden = true;
-                        boton.setAttribute('aria-expanded', 'false');
+                        if (abrir) { abrir.setAttribute('aria-expanded', 'false'); }
                     }
                 });
 
                 document.addEventListener('keydown', function (evento) {
                     if (evento.key === 'Escape' && !panel.hidden) {
                         panel.hidden = true;
-                        boton.setAttribute('aria-expanded', 'false');
+                        if (abrir) { abrir.setAttribute('aria-expanded', 'false'); }
                     }
                 });
 

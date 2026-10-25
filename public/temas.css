@@ -1250,3 +1250,126 @@ body[data-era] .metric-value {
     color: var(--vh-text) !important;
     font-weight: 700;
 }
+
+/* =============================================================================
+   CAMBIO RAPIDO DE TEMA
+   =============================================================================
+   El boton esta partido en dos: la parte grande pasa al siguiente tema de un
+   clic, y el triangulito abre el carrusel para elegir uno concreto. Tambien
+   valen Alt + flecha izquierda/derecha.
+   -------------------------------------------------------------------------- */
+
+body[data-era] .vh-temas {
+    display: inline-flex;
+    align-items: stretch;
+}
+
+/* El color del boton NO es el de la barra: va en blanco en la barra verde de XP
+   Oliva y quedaba ilegible sobre el fondo claro del boton. */
+body[data-era] .vh-temas-btn,
+body[data-era] .vh-temas-caret {
+    color: var(--vh-btn-text) !important;
+    text-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+body[data-era] .vh-temas-btn {
+    border-top-left-radius: var(--vh-btn-radius) !important;
+    border-bottom-left-radius: var(--vh-btn-radius) !important;
+    border-right: none !important;
+}
+
+body[data-era] .vh-temas-caret {
+    border-top-right-radius: var(--vh-btn-radius) !important;
+    border-bottom-right-radius: var(--vh-btn-radius) !important;
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+    cursor: pointer;
+}
+
+body[data-era] .vh-temas-caret:hover {
+    background: var(--vh-btn-hover-bg) !important;
+    color: var(--vh-btn-hover-text) !important;
+}
+
+/* Cartel breve con el nombre del tema al cambiarlo. */
+.vh-temas-aviso {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translateX(-50%) translateY(6px);
+    z-index: 7000;
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: rgba(10, 16, 26, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #eaf4ff;
+    font: 600 13px 'Segoe UI', sans-serif;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.vh-temas-aviso.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* =============================================================================
+   TEXTOS QUE SEGUIAN SIN LEERSE
+   ============================================================================= */
+
+/* Cabeceras y acciones de las tarjetas. */
+body[data-era] .gadget-head h3,
+body[data-era] .gadget-head h4,
+body[data-era] .gadget-title {
+    color: var(--vh-text) !important;
+}
+
+body[data-era] .gadget-actions button,
+body[data-era] .gadget-size-text-btn,
+body[data-era] .gadget-mini-btn {
+    color: var(--vh-btn-text) !important;
+}
+
+/* Panel de chat. */
+body[data-era] .chat-header,
+body[data-era] .chat-header *,
+body[data-era] .chat-tabs,
+body[data-era] .chat-tabs * {
+    color: var(--vh-text) !important;
+}
+
+body[data-era] .chat-input-area input,
+body[data-era] .chat-input-area textarea {
+    color: var(--vh-input-text) !important;
+}
+
+/* Textos secundarios: fecha, autor, contadores. */
+body[data-era] .post-meta,
+body[data-era] .post-meta *,
+body[data-era] .meta,
+body[data-era] small,
+body[data-era] time {
+    color: var(--vh-text) !important;
+    opacity: 0.85;
+}
+
+/* Enlaces dentro del contenido. */
+body[data-era] .forum-post a,
+body[data-era] .forum-card a,
+body[data-era] .admin-card a,
+body[data-era] .config-card a {
+    color: var(--vh-accent) !important;
+    text-decoration: underline;
+}
+
+/* El desplegable y los campos de busqueda del header. */
+body[data-era] header input,
+body[data-era] header select {
+    color: var(--vh-input-text) !important;
+    background: var(--vh-input-bg) !important;
+    border: 1px solid var(--vh-input-border) !important;
+}
