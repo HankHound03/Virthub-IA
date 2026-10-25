@@ -18,6 +18,137 @@
    ============================================================================= */
 
 /* -----------------------------------------------------------------------------
+   Windows XP - Luna
+   -----------------------------------------------------------------------------
+   Fondo de la colina (Bliss), verde y azul, muy vivo. Los paneles van opacos y en
+   crema, como las ventanas de XP, con el borde azul y las esquinas redondeadas
+   solo arriba. Aqui la transparencia no pega: XP no la tenia.
+   -------------------------------------------------------------------------- */
+
+body.tema-xp {
+    --vh-surface: #ece9d8;
+    --vh-surface-strong: #f6f4ea;
+    --vh-border: #0054e3;
+    --vh-icon: #003c74;
+    --vh-text: #000000;
+    --vh-text-soft: #2b2b2b;
+    --vh-button-bg: linear-gradient(180deg, #fdfdfd 0%, #ecebe5 50%, #d9d7cd 100%);
+    --vh-button-hover: linear-gradient(180deg, #fffdf0 0%, #ffe9a8 50%, #ffd24a 100%);
+    --vh-panel-text: #000000;
+    --vh-glass-blur: 0;
+    --vh-glass-sheen: none;
+    --vh-glass-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --vh-glass-drop-shadow: 2px 2px 4px rgba(0, 0, 0, 0.35);
+
+    background-color: #3a6ea5;
+    background-image: url('/pics/temas/winxp.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: #000000;
+    font-family: Tahoma, 'Segoe UI', sans-serif;
+    font-size: 12px;
+}
+
+body.tema-xp::before,
+body.tema-xp::after {
+    display: none;
+}
+
+/* Barra de titulo azul de Luna, con el filo claro arriba. */
+body.tema-xp header {
+    background: linear-gradient(180deg, #0058e6 0%, #3a93ff 8%, #0a6cd6 52%, #004bb5 92%, #003c8f 100%) !important;
+    border: 1px solid #003c8f !important;
+    border-radius: 8px 8px 0 0 !important;
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.55) !important;
+    color: #ffffff !important;
+    font-family: Tahoma, sans-serif !important;
+    font-weight: 700;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.tema-xp header a,
+body.tema-xp header button,
+body.tema-xp .navbar-link {
+    color: #ffffff !important;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Paneles crema, opacos y con borde azul. */
+body.tema-xp footer,
+body.tema-xp .linux-news-panel,
+body.tema-xp .login-screen,
+body.tema-xp .sidebar,
+body.tema-xp .profile-menu,
+body.tema-xp .toggleable-sidebar,
+body.tema-xp .chat-panel,
+body.tema-xp .chat-header,
+body.tema-xp .chat-tabs,
+body.tema-xp .chat-input-area,
+body.tema-xp .chat-toast,
+body.tema-xp .forum-card,
+body.tema-xp .forum-post,
+body.tema-xp .suggestions-card,
+body.tema-xp .config-card,
+body.tema-xp .admin-card {
+    background-color: #ece9d8 !important;
+    background-image: none !important;
+    border: 1px solid #0054e3 !important;
+    border-radius: 6px 6px 3px 3px !important;
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9), 2px 2px 6px rgba(0, 0, 0, 0.3) !important;
+    color: #000000 !important;
+    text-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.tema-xp h1,
+body.tema-xp h2,
+body.tema-xp h3,
+body.tema-xp h4 {
+    color: #003c74 !important;
+    font-family: Tahoma, sans-serif !important;
+    font-weight: 700 !important;
+    text-shadow: none !important;
+}
+
+/* Botones de XP: degradado claro, borde azul y amarillo al pasar por encima. */
+body.tema-xp button,
+body.tema-xp .container-load-btn,
+body.tema-xp .header-login-button {
+    background: linear-gradient(180deg, #fdfdfd 0%, #ecebe5 50%, #d9d7cd 100%) !important;
+    border: 1px solid #003c74 !important;
+    border-radius: 3px !important;
+    box-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+    color: #000000 !important;
+    font-family: Tahoma, sans-serif !important;
+    text-shadow: none !important;
+}
+
+body.tema-xp button:hover,
+body.tema-xp .container-load-btn:hover {
+    background: linear-gradient(180deg, #fffdf0 0%, #ffe9a8 50%, #ffd24a 100%) !important;
+    border-color: #e88b00 !important;
+}
+
+body.tema-xp input[type="text"],
+body.tema-xp input[type="email"],
+body.tema-xp input[type="password"],
+body.tema-xp input[type="search"],
+body.tema-xp textarea,
+body.tema-xp select {
+    background: #ffffff !important;
+    border: 1px solid #7f9db9 !important;
+    border-radius: 0 !important;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.18) !important;
+    color: #000000 !important;
+    font-family: Tahoma, sans-serif !important;
+}
+
+/* -----------------------------------------------------------------------------
    Windows Vista - Aero Glass
    -----------------------------------------------------------------------------
    El fondo de las "auroras" es muy claro y tiene lineas brillantes, asi que el
@@ -184,8 +315,8 @@ body.tema-win7 header {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 18px rgba(10, 30, 50, 0.45) !important;
     color: #ffffff !important;
     text-shadow: 0 1px 2px rgba(10, 30, 50, 0.9) !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
 }
 
 body.tema-win7 header a,
@@ -388,8 +519,8 @@ body.tema-win8 select {
    -------------------------------------------------------------------------- */
 
 body.tema-win10-claro {
-    --vh-surface: rgba(248, 248, 248, 0.9);
-    --vh-surface-strong: rgba(255, 255, 255, 0.96);
+    --vh-surface: rgba(248, 248, 248, 0.80);
+    --vh-surface-strong: rgba(255, 255, 255, 0.90);
     --vh-border: rgba(0, 120, 215, 0.25);
     --vh-icon: #1a1a1a;
     --vh-text: #1a1a1a;
@@ -397,7 +528,7 @@ body.tema-win10-claro {
     --vh-button-bg: #f0f0f0;
     --vh-button-hover: #e5e5e5;
     --vh-panel-text: #1a1a1a;
-    --vh-glass-blur: 14px;
+    --vh-glass-blur: 18px;
     --vh-glass-sheen: none;
     --vh-glass-inner-shadow: none;
     --vh-glass-drop-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
@@ -420,15 +551,15 @@ body.tema-win10-claro::after {
 }
 
 body.tema-win10-claro header {
-    background: rgba(250, 250, 250, 0.95) !important;
+    background: rgba(250, 250, 250, 0.90) !important;
     border: 1px solid rgba(0, 0, 0, 0.12) !important;
     border-bottom: 2px solid #0078d7 !important;
     border-radius: 4px 4px 0 0 !important;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25) !important;
     color: #1a1a1a !important;
     text-shadow: none !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
 }
 
 body.tema-win10-claro header a,
@@ -454,15 +585,15 @@ body.tema-win10-claro .forum-post,
 body.tema-win10-claro .suggestions-card,
 body.tema-win10-claro .config-card,
 body.tema-win10-claro .admin-card {
-    background-color: rgba(248, 248, 248, 0.9) !important;
+    background-color: rgba(248, 248, 248, 0.80) !important;
     background-image: none !important;
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
     border-radius: 4px !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
     color: #1a1a1a !important;
     text-shadow: none !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
 }
 
 body.tema-win10-claro h1,
@@ -514,8 +645,8 @@ body.tema-win10-claro select {
    -------------------------------------------------------------------------- */
 
 body.tema-win10-oscuro {
-    --vh-surface: rgba(32, 32, 32, 0.9);
-    --vh-surface-strong: rgba(45, 45, 45, 0.95);
+    --vh-surface: rgba(32, 32, 32, 0.80);
+    --vh-surface-strong: rgba(45, 45, 45, 0.90);
     --vh-border: #3a3a3a;
     --vh-icon: #ffffff;
     --vh-text: #ffffff;
@@ -523,7 +654,7 @@ body.tema-win10-oscuro {
     --vh-button-bg: #333333;
     --vh-button-hover: #3d3d3d;
     --vh-panel-text: #ffffff;
-    --vh-glass-blur: 12px;
+    --vh-glass-blur: 16px;
     --vh-glass-sheen: none;
     --vh-glass-inner-shadow: none;
     --vh-glass-drop-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
@@ -546,15 +677,15 @@ body.tema-win10-oscuro::after {
 }
 
 body.tema-win10-oscuro header {
-    background: rgba(24, 24, 24, 0.95) !important;
+    background: rgba(24, 24, 24, 0.88) !important;
     border: 1px solid #3a3a3a !important;
     border-bottom: 2px solid #4cc2ff !important;
     border-radius: 4px 4px 0 0 !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
     color: #ffffff !important;
     text-shadow: none !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
 }
 
 body.tema-win10-oscuro footer,
@@ -573,15 +704,15 @@ body.tema-win10-oscuro .forum-post,
 body.tema-win10-oscuro .suggestions-card,
 body.tema-win10-oscuro .config-card,
 body.tema-win10-oscuro .admin-card {
-    background-color: rgba(32, 32, 32, 0.9) !important;
+    background-color: rgba(32, 32, 32, 0.80) !important;
     background-image: none !important;
     border: 1px solid #3a3a3a !important;
     border-radius: 4px !important;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
     color: #ffffff !important;
     text-shadow: none !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
 }
 
 body.tema-win10-oscuro h1,

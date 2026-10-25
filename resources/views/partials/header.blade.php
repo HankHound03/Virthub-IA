@@ -19,6 +19,7 @@
                 sustituye por completo al tema de la aplicacion.
             --}}
             <select class="vh-tema-select" id="vhTemaSelect" title="Tema de diseno" aria-label="Tema de diseno">
+                <option value="xp">Windows XP</option>
                 <option value="vista">Windows Vista</option>
                 <option value="win7">Windows 7</option>
                 <option value="win8">Windows 8</option>
@@ -351,7 +352,7 @@
             (function () {
                 var CLAVE = 'virthub-tema';
                 var POR_DEFECTO = 'vista';
-                var CLASES = ['tema-vista', 'tema-win7', 'tema-win8', 'tema-win10-claro', 'tema-win10-oscuro'];
+                var CLASES = ['tema-xp', 'tema-vista', 'tema-win7', 'tema-win8', 'tema-win10-claro', 'tema-win10-oscuro'];
 
                 var selector = document.getElementById('vhTemaSelect');
 
