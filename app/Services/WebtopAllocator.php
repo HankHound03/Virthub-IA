@@ -217,6 +217,8 @@ class WebtopAllocator
                 ['name' => $name],
                 [
                     'url' => $url,
+                    'internal_host' => $definition['internal_host'] ?? null,
+                    'internal_port' => $definition['internal_port'] ?? null,
                     'capacity' => $definition['capacity'] ?? null,
                     'cpu_limit' => $definition['cpu_limit'] ?? null,
                     'memory_limit_mb' => $definition['memory_limit_mb'] ?? null,
@@ -238,6 +240,7 @@ class WebtopAllocator
     public function definitionsFromConfig(): array
     {
         $urls = (array) config('virthub.containers.urls', []);
+        $hosts = (array) config('virthub.containers.hosts', []);
         $instances = (int) config('virthub.containers.instances_per_container', 1);
         $cpuLimit = config('virthub.containers.cpu_limit');
         $memoryLimit = config('virthub.containers.memory_limit_mb');
@@ -255,6 +258,11 @@ class WebtopAllocator
             $definitions[] = [
                 'name' => 'ct' . $index,
                 'url' => $url,
+                // Host y puerto por los que el panel de estado alcanza el
+                // escritorio. Solo lo tienen los que viven fuera de este Docker
+                // (equipo 2); los locales se resuelven por nombre de servicio.
+                'internal_host' => $hosts[$index]['host'] ?? null,
+                'internal_port' => $hosts[$index]['port'] ?? null,
                 // Cuantos escritorios caben en esta maquina.
                 'capacity' => $instances > 0 ? $instances : null,
                 // Cuota de recursos de la maquina, no plazas.

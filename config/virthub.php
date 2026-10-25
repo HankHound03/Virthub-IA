@@ -117,6 +117,50 @@ return [
             return $urls;
         })(),
 
+        // Host y puerto internos de los escritorios que NO viven en este Docker
+        // (por ejemplo los del equipo 2). Formato:
+        //
+        //   CONTAINER_HOSTS=8=192.168.1.100:3000,9=192.168.1.100:3100
+        //
+        // Los usa el panel de estado, que sondea cada escritorio por la red local
+        // en lugar de por su URL publica (que responde 403 sin sesion y haria
+        // aparecer como caidos escritorios que estan perfectamente).
+        //
+        // Antes habia que escribirlos a mano en la base de datos, asi que se
+        // perdian al recrear el entorno y no quedaba rastro de donde salian.
+        'hosts' => (static function (): array {
+            $mapa = [];
+
+            foreach (explode(',', (string) env('CONTAINER_HOSTS', '')) as $par) {
+                $par = trim($par);
+
+                if ($par === '' || ! str_contains($par, '=')) {
+                    continue;
+                }
+
+                [$indice, $destino] = explode('=', $par, 2);
+                $indice = trim($indice);
+                $destino = trim($destino);
+
+                if (! is_numeric($indice) || ! str_contains($destino, ':')) {
+                    continue;
+                }
+
+                [$host, $puerto] = explode(':', $destino, 2);
+
+                if (trim($host) === '' || ! is_numeric(trim($puerto))) {
+                    continue;
+                }
+
+                $mapa[(int) $indice] = [
+                    'host' => trim($host),
+                    'port' => (int) trim($puerto),
+                ];
+            }
+
+            return $mapa;
+        })(),
+
         // Ruta del dominio principal por la que se sirve el escritorio.
         // Es la unica puerta: no hay subdominios de escritorio.
         'desktop_path' => (string) env('CONTAINER_DESKTOP_PATH', '/escritorio/'),

@@ -231,6 +231,20 @@ http://ct11.virthub.dpdns.org:8080 {
 	import webtop_proxy ct11 192.168.1.100:3300
 }
 
+# --- ct12: Zorin OS, tambien en el EQUIPO 2 ---
+#
+# Este contenedor NO es Selkies como los anteriores: es KasmVNC (imagen webtop
+# de LinuxServer), asi que su pagina es distinta y su WebSocket va por otro
+# camino. Caddy lo pasa tal cual, sin reglas por ruta.
+#
+# Se apunta al 3400 (HTTP) y no al 3401: son el mismo servicio, pero el 3401 es
+# el lado HTTPS con certificado propio, y su saludo TLS no completa desde aqui.
+# Yendo por el 3400 nos ahorramos ademas tener que saltarse la verificacion del
+# certificado en cada peticion.
+http://ct12.virthub.dpdns.org:8080 {
+	import webtop_proxy ct12 192.168.1.100:3400
+}
+
 # --- ct4: ahora es un escritorio Webtop mas (clon de ct0) ---
 #
 # Mismo control de acceso que los Webtop, pero OJO con dos diferencias:
