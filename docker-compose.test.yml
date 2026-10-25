@@ -30,8 +30,13 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      # Unico puerto. En loopback, como en produccion.
-      - "127.0.0.1:8001:80"
+      # Abierto a la red local, no solo a este equipo: asi se puede probar desde
+      # el telefono o desde un portatil viejo entrando por http://IP-DEL-EQUIPO:8001
+      #
+      # OJO: es el entorno de PRUEBAS (APP_DEBUG activo y sin HTTPS). Cualquiera
+      # en tu misma red puede entrar. Para volver a cerrarlo, cambia esta linea
+      # por "127.0.0.1:8001:80".
+      - "8001:80"
     env_file:
       - .env
     environment:
