@@ -179,7 +179,7 @@
         </div>
     </div>
 
-    <footer>Virthub {{ config('virthub.version') }}</footer>
+    <footer>{{ config('virthub.version') }}</footer>
     
     <script>
         const currentUserName = @json($currentUser['username'] ?? 'guest');

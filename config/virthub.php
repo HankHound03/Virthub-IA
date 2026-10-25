@@ -24,7 +24,7 @@ return [
     |
     */
 
-    'version' => env('VIRTHUB_VERSION', '1.5'),
+    'version' => env('VIRTHUB_VERSION', 'VirtHub Codename: Redmond'),
 
     /*
     |--------------------------------------------------------------------------

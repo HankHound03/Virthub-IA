@@ -1288,7 +1288,7 @@
         </section>
     </div>
 
-    <footer>Virthub {{ config('virthub.version') }}</footer>
+    <footer>{{ config('virthub.version') }}</footer>
 
     <div class="confirmation-modal" id="confirmationModal">
         <div class="modal-content">

@@ -248,7 +248,7 @@
         </div>
     </section>
 
-    <footer>Virthub {{ config('virthub.version') }}</footer>
+    <footer>{{ config('virthub.version') }}</footer>
 
     <script>
         function getThemeStorageKey() {

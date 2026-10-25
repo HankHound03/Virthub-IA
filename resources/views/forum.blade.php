@@ -1147,7 +1147,7 @@
         </div>
     </div>
 
-    <footer>Virthub {{ config('virthub.version') }}</footer>
+    <footer>{{ config('virthub.version') }}</footer>
 
     {{-- Subida por trozos para adjuntos grandes (hasta 5 GB por archivo). --}}
     <script src="{{ asset('chunked-upload.js') }}?v={{ filemtime(public_path('chunked-upload.js')) }}"></script>

@@ -125,6 +125,6 @@
         </form>
     </main>
 
-    <footer>Virthub {{ config('virthub.version') }}</footer>
+    <footer>{{ config('virthub.version') }}</footer>
 </body>
 </html>

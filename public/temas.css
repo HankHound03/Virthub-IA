@@ -52,7 +52,7 @@
 
 /* --- Barra superior ------------------------------------------------------- */
 
-[data-era] body header {
+[data-era] body > header {
     background: var(--vh-head-bg) !important;
     border: 1px solid var(--vh-head-border) !important;
     border-radius: var(--vh-head-radius) !important;
@@ -64,8 +64,8 @@
     transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-[data-era] body header a,
-[data-era] body header button,
+[data-era] body > header a,
+[data-era] body > header button,
 [data-era] body .navbar-link {
     color: var(--vh-head-text) !important;
     text-shadow: var(--vh-head-shadow-text) !important;
@@ -1378,8 +1378,8 @@
 }
 
 /* El desplegable y los campos de busqueda del header. */
-[data-era] body header input,
-[data-era] body header select {
+[data-era] body > header input,
+[data-era] body > header select {
     color: var(--vh-input-text) !important;
     background: var(--vh-input-bg) !important;
     border: 1px solid var(--vh-input-border) !important;
@@ -1681,5 +1681,51 @@
 }
 
 [data-era] body .chat-message.is-mine .chat-message-text {
+    color: var(--vh-btn-text) !important;
+}
+
+/* --- Panel de estado: tarjetas de CPU, RAM, disco y contenedores ----------
+   Tenian un fondo oscuro propio y el texto negro de las epocas claras se perdia.
+   Ademas, su <header> interior recogia la regla de la barra superior del sitio;
+   por eso aparecian como una franja azul con letras negras.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .system-metric-card {
+    background: var(--vh-surface) !important;
+    border: 1px solid var(--vh-panel-border) !important;
+    border-radius: var(--vh-panel-radius) !important;
+    color: var(--vh-text) !important;
+}
+
+[data-era] body .system-metric-card > header {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 0 !important;
+    color: var(--vh-text) !important;
+}
+
+[data-era] body .system-metric-card h4,
+[data-era] body .system-metric-card strong,
+[data-era] body .system-metric-sub,
+[data-era] body .system-metric-sub strong,
+[data-era] body .system-status-meta,
+[data-era] body .system-status-meta span {
+    color: var(--vh-text) !important;
+    text-shadow: none !important;
+}
+
+[data-era] body .system-meter {
+    background: rgba(128, 128, 128, 0.25) !important;
+    border-radius: 999px;
+}
+
+/* Las etiquetas de contenedor (ct0, ct2...) tambien tenian fondo fijo. */
+[data-era] body .system-state-pill,
+[data-era] body .container-chip {
+    background: var(--vh-btn-bg) !important;
+    border: 1px solid var(--vh-btn-border) !important;
     color: var(--vh-btn-text) !important;
 }
