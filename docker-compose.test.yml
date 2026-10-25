@@ -60,6 +60,8 @@ services:
       clamav:
         condition: service_healthy
     volumes:
+      # Que PHP detecte los cambios de codigo sin reiniciar (solo pruebas).
+      - ./docker/php-test.ini:/usr/local/etc/php/conf.d/zzz-virthub-test.ini:ro
       - app_storage:/var/www/html/storage
       # Carpeta del escritorio de invitado. En pruebas no hay escritorio, pero la
       # aplicacion espera la ruta: se le da un volumen vacio propio.

@@ -12,10 +12,27 @@
                 <button type="submit" title="Buscar amigos" aria-label="Buscar amigos">⌕</button>
             </form>
         @endif
-        <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">
-            <span class="theme-icon" aria-hidden="true"></span>
-        </div>
-        <button type="button" class="retro-toggle" onclick="toggleRetroMode()" id="retroToggle" title="Activar tema retro" aria-label="Activar tema retro">Retro</button>
+        @if (config('virthub.temas.enabled'))
+            {{--
+                Entorno de pruebas: en lugar del boton de claro/oscuro, un
+                desplegable con los estilos historicos de Windows. Elegir uno
+                sustituye por completo al tema de la aplicacion.
+            --}}
+            <select class="vh-tema-select" id="vhTemaSelect" title="Tema de diseno" aria-label="Tema de diseno">
+                <option value="vista">Windows Vista</option>
+                <option value="win7">Windows 7</option>
+                <option value="win8">Windows 8</option>
+                <option value="win10-claro">Windows 10 - claro</option>
+                <option value="win10-oscuro">Windows 10 - oscuro</option>
+            </select>
+        @else
+            <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">
+                <span class="theme-icon" aria-hidden="true"></span>
+            </div>
+        @endif
+        @unless (config('virthub.temas.enabled'))
+            <button type="button" class="retro-toggle" onclick="toggleRetroMode()" id="retroToggle" title="Activar tema retro" aria-label="Activar tema retro">Retro</button>
+        @endunless
         @if (!empty($currentUser))
             @php
                 $profileImage = (string) ($currentUser['profile_image_path'] ?? '');
@@ -317,56 +334,50 @@
         });
     </script>
 
+
     {{--
-        Selector de temas historicos de Windows (XP, Vista, 7, 8, 10).
+        Selector de temas historicos de Windows (Vista, 7, 8 y 10).
 
         Solo se pinta cuando el entorno lo pide (VIRTHUB_TEMAS=true, que pone
-        docker-compose.test.yml). En produccion no aparece nada.
+        docker-compose.test.yml). En produccion no aparece nada: alli sigue el
+        boton de claro/oscuro de siempre.
 
         El enlace al CSS lo crea este mismo script en el <head>, para no tener que
         anadir la etiqueta a las nueve vistas. El tema guardado se aplica cuando la
         hoja termina de cargar, asi no se ve un parpadeo con el estilo anterior.
     --}}
     @if (config('virthub.temas.enabled'))
-        <div class="vh-temas" id="vhTemas" role="group" aria-label="Tema de diseno">
-            <button type="button" class="vh-temas-boton" data-tema="">Original</button>
-            <button type="button" class="vh-temas-boton" data-tema="xp">XP</button>
-            <button type="button" class="vh-temas-boton" data-tema="vista">Vista</button>
-            <button type="button" class="vh-temas-boton" data-tema="win7">7</button>
-            <button type="button" class="vh-temas-boton" data-tema="win8">8</button>
-            <button type="button" class="vh-temas-boton" data-tema="win10">10</button>
-        </div>
-
         <script>
             (function () {
                 var CLAVE = 'virthub-tema';
-                var CLASES = ['tema-xp', 'tema-vista', 'tema-win7', 'tema-win8', 'tema-win10'];
+                var POR_DEFECTO = 'vista';
+                var CLASES = ['tema-vista', 'tema-win7', 'tema-win8', 'tema-win10-claro', 'tema-win10-oscuro'];
 
-                function aplicar(tema) {
+                var selector = document.getElementById('vhTemaSelect');
+
+                function aplicar(valor) {
                     CLASES.forEach(function (clase) {
                         document.body.classList.remove(clase);
                     });
 
-                    if (tema) {
-                        document.body.classList.add('tema-' + tema);
+                    document.body.classList.add('tema-' + valor);
+
+                    if (selector) {
+                        selector.value = valor;
                     }
 
-                    document.querySelectorAll('.vh-temas-boton').forEach(function (boton) {
-                        boton.classList.toggle('activo', (boton.dataset.tema || '') === (tema || ''));
-                    });
-
                     try {
-                        localStorage.setItem(CLAVE, tema || '');
+                        localStorage.setItem(CLAVE, valor);
                     } catch (e) {
                         /* Sin almacenamiento: el tema dura solo esta pagina. */
                     }
                 }
 
-                document.querySelectorAll('.vh-temas-boton').forEach(function (boton) {
-                    boton.addEventListener('click', function () {
-                        aplicar(boton.dataset.tema);
+                if (selector) {
+                    selector.addEventListener('change', function () {
+                        aplicar(selector.value);
                     });
-                });
+                }
 
                 var enlace = document.createElement('link');
                 enlace.rel = 'stylesheet';
@@ -380,7 +391,7 @@
                         guardado = '';
                     }
 
-                    aplicar(guardado);
+                    aplicar(CLASES.indexOf('tema-' + guardado) !== -1 ? guardado : POR_DEFECTO);
                 };
 
                 document.head.appendChild(enlace);
