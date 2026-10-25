@@ -1310,40 +1310,7 @@
     color: var(--vh-btn-hover-text) !important;
 }
 
-/* Cartel breve con el nombre del tema al cambiarlo. */
-.vh-temas-aviso {
-    position: fixed;
-    left: 50%;
-    bottom: 26px;
-    transform: translateX(-50%) translateY(6px);
-    z-index: 7000;
-    padding: 10px 18px;
-    border-radius: 10px;
-    background: rgba(10, 16, 26, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    color: #eaf4ff;
-    font: 600 13px 'Segoe UI', sans-serif;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-}
 
-.vh-temas-aviso.visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-/* =============================================================================
-   TEXTOS QUE SEGUIAN SIN LEERSE
-   ============================================================================= */
-
-/* Cabeceras y acciones de las tarjetas. */
-[data-era] body .gadget-head h3,
-[data-era] body .gadget-head h4,
-[data-era] body .gadget-title {
-    color: var(--vh-text) !important;
-}
 
 [data-era] body .gadget-actions button,
 [data-era] body .gadget-size-text-btn,

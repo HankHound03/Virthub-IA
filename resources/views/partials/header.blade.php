@@ -33,7 +33,6 @@
                         aria-expanded="false" aria-controls="vhTemasPanel"
                         title="Elegir un esquema concreto">&#9662;</button>
 
-                <div class="vh-temas-aviso" id="vhTemasAviso" role="status" aria-live="polite"></div>
 
                 <div class="vh-temas-panel" id="vhTemasPanel" hidden>
                     @foreach ($vhCatalogo as $era => $datos)
@@ -403,7 +402,6 @@
 
                 var boton = document.getElementById('vhTemasBtn');
                 var abrir = document.getElementById('vhTemasAbrir');
-                var aviso = document.getElementById('vhTemasAviso');
                 var panel = document.getElementById('vhTemasPanel');
                 var nombre = document.getElementById('vhTemasNombre');
                 var punto = document.getElementById('vhTemasDot');
@@ -448,19 +446,6 @@
                     capaActiva = 1 - capaActiva;
                 }
 
-                /* Cartel breve con el nombre del tema al cambiarlo. */
-                function avisar(texto) {
-                    if (!aviso) {
-                        return;
-                    }
-
-                    aviso.textContent = texto;
-                    aviso.classList.add('visible');
-                    clearTimeout(avisar.tiempo);
-                    avisar.tiempo = setTimeout(function () {
-                        aviso.classList.remove('visible');
-                    }, 1600);
-                }
 
                 function buscar(era, variante) {
                     return fichas.find(function (f) {
@@ -496,7 +481,6 @@
                         f.classList.toggle('activo', f === ficha);
                     });
 
-                    avisar(ficha ? ficha.dataset.nombre : era);
 
                     try {
                         localStorage.setItem(CLAVE, JSON.stringify({ era: era, variante: variante }));
