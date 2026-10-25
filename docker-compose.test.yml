@@ -1,30 +1,112 @@
 # =============================================================================
-# Ajustes para el entorno de PRUEBAS
+# Entorno de PRUEBAS de Virthub
 # =============================================================================
 #
-# Se aplica encima de docker-compose.yml solo cuando se invoca con:
+# Autonomo: NO se combina con docker-compose.yml. Levanta solo lo necesario para
+# probar la aplicacion y su base de datos, mas el antivirus.
 #
-#   docker compose -p virthub-test --env-file .env.test \
-#     -f docker-compose.yml -f docker-compose.test.yml up -d
+#   docker compose -p virthub-test -f docker-compose.test.yml up -d
 #
-# Mueve la aplicacion al puerto 8001 para no chocar con el entorno real, y no
-# levanta Caddy ni los Webtop: las pruebas son de la aplicacion, no del proxy.
+# POR QUE UN ARCHIVO APARTE Y NO UN "OVERRIDE"
+# -------------------------------------------
+# Antes esto era un override que se fusionaba con el principal, y al fusionarse
+# arrastraba todo lo demas: los escritorios (ct0-ct7), Caddy y el puerto 8000.
+# Aqui cada servicio esta escrito a mano, asi que solo existe lo que se declara.
+#
+# QUEDA FUERA, A PROPOSITO
+# ------------------------
+#   - Caddy y los escritorios: no hay nada que probar de proxy ni de escritorio.
+#   - El dominio y el TLS: se entra por http://localhost:8001. No hace falta que
+#     Cloudflare apunte a nada ni tener certificados.
+#
+# LA BASE DE DATOS ES PROPIA
+# --------------------------
+# Volumen distinto al de produccion, aunque el nombre de la base coincida: los
+# datos de las pruebas no tocan los de verdad.
 
 services:
   app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "8001:80"
+      # Unico puerto. En loopback, como en produccion.
+      - "127.0.0.1:8001:80"
+    env_file:
+      - .env
     environment:
-      # Selector de temas de diseno (XP, Vista, 7, 8, 10). Solo aqui: en
-      # produccion la variable no existe y el selector ni se pinta.
+      DB_CONNECTION: mariadb
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-virthub}
+      DB_USERNAME: ${DB_USERNAME:-virthub}
+      DB_PASSWORD: ${DB_PASSWORD:-virthub_password}
+
+      # Sin dominio ni HTTPS: todo local. Sin esto, la aplicacion fuerza
+      # redirecciones a https y la cookie de sesion no viaja, asi que no se puede
+      # ni iniciar sesion en las pruebas.
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8001
+      FORCE_HTTPS: "false"
+      SESSION_DOMAIN: ""
+      SESSION_SECURE_COOKIE: "false"
+
+      # Selector de temas de diseno (XP, Vista, 7, 8, 10).
       VIRTHUB_TEMAS: "true"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      clamav:
+        condition: service_healthy
+    volumes:
+      - app_storage:/var/www/html/storage
+      # Carpeta del escritorio de invitado. En pruebas no hay escritorio, pero la
+      # aplicacion espera la ruta: se le da un volumen vacio propio.
+      - guest_data:/guest-data
+    networks:
+      - virthub
 
-  # En pruebas no hace falta la puerta de entrada.
-  caddy:
-    profiles:
-      - proxy
+  mariadb:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:-virthub}
+      MARIADB_USER: ${DB_USERNAME:-virthub}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-virthub_password}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p$${MARIADB_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - virthub
 
-  # Ni los escritorios.
-  ct0:
-    profiles:
-      - proxy
+  # Se conserva el antivirus: sin el, cualquier subida de archivo fallaria al no
+  # poder analizarla (fail_open esta activo, pero es mejor probarlo de verdad).
+  clamav:
+    image: clamav/clamav:stable
+    environment:
+      CLAMAV_NO_MILTERD: "true"
+    volumes:
+      - clamav_db:/var/lib/clamav
+    healthcheck:
+      test: ["CMD-SHELL", "clamdcheck.sh || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    networks:
+      - virthub
+
+volumes:
+  app_storage:
+  guest_data:
+  mariadb_data:
+  clamav_db:
+
+networks:
+  virthub:
+    driver: bridge
