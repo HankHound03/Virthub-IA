@@ -2187,3 +2187,17 @@ html.vh-ligero body *::after {
         flex: 1 1 auto !important;
     }
 }
+
+/* =============================================================================
+   MOVIL: SIN SELECTOR DE TEMAS
+   =============================================================================
+   En el telefono la barra queda muy justa y el boton de temas ocupaba sitio sin
+   aportar: el tema se elige en el escritorio. Se oculta por completo (tambien su
+   carrusel).
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 760px) {
+    [data-era] body .vh-temas {
+        display: none !important;
+    }
+}

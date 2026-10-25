@@ -49,7 +49,9 @@
             }
             var enlace = document.createElement('link');
             enlace.rel = 'stylesheet';
-            enlace.href = @json(asset('temas.css'));
+            /* Con la marca de tiempo: si el archivo cambia, cambia la direccion y
+               el navegador no sigue usando la copia vieja de la cache. */
+            enlace.href = @json(asset('temas.css') . '?v=' . filemtime(public_path('temas.css')));
             enlace.id = 'vhTemasCss';
             document.head.appendChild(enlace);
         })();
