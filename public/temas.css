@@ -272,7 +272,7 @@
     --vh-icon-radius: 1px;
     --vh-toggle-radius: 4px;
     --vh-blur: 0px;
-    --vh-bg-image: url('/pics/temas/winxp.jpg');
+    --vh-bg-image: image-set(url('/pics/temas/winxp.webp') type('image/webp'), url('/pics/temas/winxp.jpg') type('image/jpeg'));
     --vh-bg-solid: #3a6ea5;
     --vh-panel-shadow-text: none;
     --vh-btn-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(0, 0, 0, 0.25);
@@ -448,7 +448,7 @@
     --vh-icon-radius: 50%;
     --vh-toggle-radius: 50%;
     --vh-blur: 20px;
-    --vh-bg-image: linear-gradient(180deg, rgba(3, 20, 30, 0.3), rgba(3, 20, 30, 0.52)), url('/pics/temas/vista.jpg');
+    --vh-bg-image: linear-gradient(180deg, rgba(3, 20, 30, 0.3), rgba(3, 20, 30, 0.52)), image-set(url('/pics/temas/vista.webp') type('image/webp'), url('/pics/temas/vista.jpg') type('image/jpeg'));
     --vh-bg-solid: #0a1b26;
     --vh-panel-shadow-text: 0 1px 3px rgba(0, 0, 0, 0.7);
     --vh-btn-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5);
@@ -609,7 +609,7 @@
     --vh-icon-radius: 40%;
     --vh-toggle-radius: 50%;
     --vh-blur: 16px;
-    --vh-bg-image: linear-gradient(180deg, rgba(6, 30, 55, 0.18), rgba(6, 30, 55, 0.34)), url('/pics/temas/win7.jpg');
+    --vh-bg-image: linear-gradient(180deg, rgba(6, 30, 55, 0.18), rgba(6, 30, 55, 0.34)), image-set(url('/pics/temas/win7.webp') type('image/webp'), url('/pics/temas/win7.jpg') type('image/jpeg'));
     --vh-bg-solid: #1a4a70;
     --vh-panel-shadow-text: none;
     --vh-btn-shadow: inset 0 1px 0 #ffffff, 0 1px 3px rgba(20, 50, 80, 0.3);
@@ -776,7 +776,7 @@
     --vh-icon-radius: 0;
     --vh-toggle-radius: 0;
     --vh-blur: 0px;
-    --vh-bg-image: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.16)), url('/pics/temas/win8.jpg');
+    --vh-bg-image: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.16)), image-set(url('/pics/temas/win8.webp') type('image/webp'), url('/pics/temas/win8.jpg') type('image/jpeg'));
     --vh-bg-solid: #e8a300;
     --vh-panel-shadow-text: none;
     --vh-btn-shadow: none;
@@ -829,7 +829,7 @@
     --vh-icon-radius: 3px;
     --vh-toggle-radius: 6px;
     --vh-blur: 16px;
-    --vh-bg-image: linear-gradient(180deg, rgba(2, 8, 16, 0.25), rgba(2, 8, 16, 0.45)), url('/pics/temas/win10.jpg');
+    --vh-bg-image: linear-gradient(180deg, rgba(2, 8, 16, 0.25), rgba(2, 8, 16, 0.45)), image-set(url('/pics/temas/win10.webp') type('image/webp'), url('/pics/temas/win10.jpg') type('image/jpeg'));
     --vh-bg-solid: #05101e;
     --vh-panel-shadow-text: none;
     --vh-btn-shadow: none;
@@ -2014,4 +2014,59 @@
 
 [data-era] body > header {
     z-index: 6000 !important;
+}
+
+/* =============================================================================
+   EQUIPOS DE BAJOS RECURSOS
+   =============================================================================
+   Lo que mas cuesta en un equipo modesto no es el tamano de la pagina sino el
+   desenfoque de fondo (backdrop-filter): obliga a la tarjeta grafica a recalcular
+   la zona borrosa cada vez que algo se mueve o se anima. Con 30 esquemas eso se
+   nota.
+
+   Aqui se detecta un equipo modesto al arrancar (pocos nucleos, poca memoria o
+   preferencia por menos animaciones) y se apaga el desenfoque y las sombras
+   grandes. El aspecto se mantiene casi igual, porque los paneles ya son bastante
+   opacos.
+   -------------------------------------------------------------------------- */
+
+html.vh-ligero body :is(header, footer, .gadget, .forum-card, .admin-card,
+    .config-card, .suggestions-card, .container-card, .profile-menu, .sidebar,
+    .chat-panel, .chat-header, .chat-tabs, .chat-input-area, .header-login-card,
+    .login-screen, .linux-news-panel, .profile-area-card, .system-metric-card,
+    .forum-compose-card, .forum-report-card, .friends-panel, .container-toolbar,
+    .vh-temas-panel, .vh-temas-btn, .chat-toggle, .navbar-link, button,
+    input, textarea, select) {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+}
+
+/* Sin desenfoque, los paneles translucidos dejarian ver el fondo: se vuelven
+   opacos para que el texto siga leyendose. */
+html.vh-ligero body :is(.gadget, .forum-card, .admin-card, .config-card,
+    .suggestions-card, .container-card, .profile-menu, .sidebar, .chat-panel,
+    .header-login-card, .login-screen, .linux-news-panel, .profile-area-card,
+    .forum-compose-card, .forum-report-card, .friends-panel) {
+    background-color: var(--vh-panel-bg) !important;
+}
+
+/* Y se acortan las animaciones: en un equipo justo, menos fotogramas. */
+html.vh-ligero body *,
+html.vh-ligero body *::before,
+html.vh-ligero body *::after {
+    animation-duration: 0.12s !important;
+    transition-duration: 0.12s !important;
+}
+
+/* Quien pide menos movimiento en su sistema, directamente sin animaciones. */
+@media (prefers-reduced-motion: reduce) {
+    [data-era] body *,
+    [data-era] body *::before,
+    [data-era] body *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
 }

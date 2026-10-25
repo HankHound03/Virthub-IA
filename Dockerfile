@@ -29,7 +29,7 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libonig-dev libzip-dev \
     && docker-php-ext-install pdo_mysql mbstring bcmath opcache \
-    && a2enmod rewrite \
+    && a2enmod rewrite deflate expires headers \
     && sed -ri "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/000-default.conf /etc/apache2/apache2.conf \
     && rm -rf /var/lib/apt/lists/*
 
@@ -84,4 +84,37 @@ EXPOSE 80
 # escribir dentro y subir un avatar o adjunto falla con "Permission denied".
 # Se hace en el arranque y no solo en el build porque el volumen puede
 # reemplazar el contenido de la imagen.
+# ---------------------------------------------------------------------------
+# Rendimiento: comprimir y cachear los recursos estaticos
+# ---------------------------------------------------------------------------
+# Sin esto, el CSS, el JS y los fondos viajan sin comprimir en cada visita: son
+# unos 140 KB de texto y 260 KB de imagenes que se pueden reducir mucho.
+#
+# Los recursos llevan ?v=<fecha>, asi que se pueden cachear para siempre: si
+# cambian, cambia la direccion y el navegador pide la nueva.
+RUN printf '%s\n' \
+        '<IfModule mod_deflate.c>' \
+        '    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml' \
+        '    AddOutputFilterByType DEFLATE application/javascript application/json' \
+        '    AddOutputFilterByType DEFLATE image/svg+xml' \
+        '</IfModule>' \
+        '<IfModule mod_expires.c>' \
+        '    ExpiresActive On' \
+        '    ExpiresByType text/css "access plus 1 year"' \
+        '    ExpiresByType application/javascript "access plus 1 year"' \
+        '    ExpiresByType image/webp "access plus 1 year"' \
+        '    ExpiresByType image/jpeg "access plus 1 year"' \
+        '    ExpiresByType image/png "access plus 1 year"' \
+        '    ExpiresByType image/svg+xml "access plus 1 year"' \
+        '    ExpiresByType font/woff2 "access plus 1 year"' \
+        '</IfModule>' \
+        '<IfModule mod_headers.c>' \
+        '    <FilesMatch "\.(css|js|jpg|jpeg|png|webp|gif|svg|woff2)$">' \
+        '        Header set Cache-Control "public, max-age=31536000, immutable"' \
+        '    </FilesMatch>' \
+        '</IfModule>' \
+    > /etc/apache2/conf-available/virthub-rendimiento.conf \
+    && a2enconf virthub-rendimiento
+
 CMD ["sh", "-c", "mkdir -p storage/app/data storage/app/chunked storage/app/public/uploads/profiles storage/app/public/uploads/forum/photos storage/app/public/uploads/forum/videos storage/app/public/uploads/forum/files && chown -R www-data:www-data storage && php artisan migrate --force && rm -rf public/storage && php artisan storage:link && apache2-foreground"]
+

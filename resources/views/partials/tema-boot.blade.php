@@ -31,6 +31,22 @@
             document.documentElement.setAttribute('data-era', era);
             document.documentElement.setAttribute('data-variante', variante);
 
+            /*
+             * Equipo modesto: pocos nucleos, poca memoria o preferencia por menos
+             * movimiento. Se apaga el desenfoque de fondo, que es lo que mas pesa
+             * en la tarjeta grafica, y se acortan las animaciones.
+             */
+            try {
+                var nucleos = navigator.hardwareConcurrency || 8;
+                var memoria = navigator.deviceMemory || 8;
+                var menosMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+                if (nucleos <= 4 || memoria <= 4 || menosMovimiento) {
+                    document.documentElement.classList.add('vh-ligero');
+                }
+            } catch (e) {
+                /* Si el navegador no lo soporta, se queda el modo normal. */
+            }
             var enlace = document.createElement('link');
             enlace.rel = 'stylesheet';
             enlace.href = @json(asset('temas.css'));

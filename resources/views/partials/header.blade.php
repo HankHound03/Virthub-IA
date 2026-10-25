@@ -417,6 +417,16 @@
                 var capas = [document.getElementById('vhFondoA'), document.getElementById('vhFondoB')];
                 var capaActiva = 0;
 
+                /* Prefiere el WebP (pesa la mitad) y deja el JPG como respaldo. */
+                function fondoCss(imagen) {
+                    var webp = imagen.replace(/\.jpe?g$/i, '.webp');
+
+                    if (webp === imagen) {
+                        return "url('" + imagen + "')";
+                    }
+
+                    return 'image-set(url("' + webp + '") type("image/webp"), url("' + imagen + '") type("image/jpeg"))';
+                }
                 function pintarFondo(imagen) {
                     var actual = capas[capaActiva];
 
@@ -425,7 +435,7 @@
                     }
 
                     if (!actual.style.backgroundImage) {
-                        actual.style.backgroundImage = "url('" + imagen + "')";
+                        actual.style.backgroundImage = fondoCss(imagen);
                         actual.style.opacity = '1';
                         return;
                     }
@@ -440,7 +450,7 @@
                         return;
                     }
 
-                    otra.style.backgroundImage = "url('" + imagen + "')";
+                    otra.style.backgroundImage = fondoCss(imagen);
                     otra.style.opacity = '1';
                     actual.style.opacity = '0';
                     capaActiva = 1 - capaActiva;
