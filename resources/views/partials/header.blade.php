@@ -22,6 +22,7 @@
                 muestra el estilo actual y abre un panel con una fila deslizable
                 por cada epoca de Windows.
             --}}
+
             <div class="vh-temas" id="vhTemas">
                 <button type="button" class="vh-temas-btn" id="vhTemasBtn"
                         title="Siguiente tema (Alt + flechas)">
@@ -45,6 +46,7 @@
                                             data-era="{{ $era }}"
                                             data-variante="{{ $variante }}"
                                             data-nombre="{{ $datos['nombre'] ?? $era }} · {{ $v['nombre'] ?? $variante }}"
+                                            data-imagen="{{ $datos['imagen'] ?? '' }}"
                                             style="--sw-a: {{ $v['a'] ?? '#444' }}; --sw-b: {{ $v['b'] ?? '#888' }};"
                                             title="{{ $datos['nombre'] ?? $era }} - {{ $v['nombre'] ?? $variante }}">
                                         <span class="vh-tema-swatch" aria-hidden="true"></span>
@@ -388,6 +390,12 @@
         la etiqueta a las nueve vistas.
     --}}
     @if (config('virthub.temas.enabled'))
+        {{-- Dos capas del wallpaper. Van FUERA del <header> a proposito: la barra
+             lleva backdrop-filter, y eso convertiria a cualquier hijo fijo en algo
+             relativo a ella, recortando el fondo al tamano de la barra. --}}
+        <div class="vh-fondo" id="vhFondoA" aria-hidden="true"></div>
+        <div class="vh-fondo" id="vhFondoB" aria-hidden="true"></div>
+
         <script>
             (function () {
                 var CLAVE = 'virthub-tema';
@@ -405,6 +413,40 @@
                 }
 
                 var fichas = Array.prototype.slice.call(panel.querySelectorAll('.vh-tema-tile'));
+
+                /* Dos capas del wallpaper: una imagen de fondo no se puede animar,
+                   asi que se funde la capa nueva encima de la anterior. */
+                var capas = [document.getElementById('vhFondoA'), document.getElementById('vhFondoB')];
+                var capaActiva = 0;
+
+                function pintarFondo(imagen) {
+                    var actual = capas[capaActiva];
+
+                    if (!actual || !imagen) {
+                        return;
+                    }
+
+                    if (!actual.style.backgroundImage) {
+                        actual.style.backgroundImage = "url('" + imagen + "')";
+                        actual.style.opacity = '1';
+                        return;
+                    }
+
+                    if (actual.style.backgroundImage.indexOf(imagen) !== -1) {
+                        return;
+                    }
+
+                    var otra = capas[1 - capaActiva];
+
+                    if (!otra) {
+                        return;
+                    }
+
+                    otra.style.backgroundImage = "url('" + imagen + "')";
+                    otra.style.opacity = '1';
+                    actual.style.opacity = '0';
+                    capaActiva = 1 - capaActiva;
+                }
 
                 /* Cartel breve con el nombre del tema al cambiarlo. */
                 function avisar(texto) {
@@ -437,6 +479,7 @@
 
                     document.body.dataset.era = era;
                     document.body.dataset.variante = variante;
+                    pintarFondo(ficha ? ficha.dataset.imagen : '');
 
                     if (nombre) {
                         nombre.textContent = ficha ? ficha.dataset.nombre : era;
