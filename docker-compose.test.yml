@@ -59,6 +59,9 @@ services:
 
       # Selector de temas de diseno (XP, Vista, 7, 8, 10).
       VIRTHUB_TEMAS: "true"
+
+      # Sin panel de noticias en pruebas.
+      VIRTHUB_NOTICIAS: "false"
     depends_on:
       mariadb:
         condition: service_healthy

@@ -283,37 +283,40 @@
     @include('partials.chat-widget')
 
     <div class="home-panels" id="gadgetBoard">
-        <aside class="linux-news-panel gadget gadget-size-normal" data-gadget-id="news" data-gadget-size="normal" data-default-size="normal">
-            <div class="gadget-head">
-                <h3>Noticias</h3>
-                @if (!empty($currentUser))
-                    <div class="gadget-actions gadget-actions-compact">
-                        <span class="gadget-drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
-                        <button type="button" class="gadget-mini-btn gadget-size-text-btn" onclick="cycleHomeGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">Normal</button>
-                    </div>
-                @endif
-            </div>
-
-            <div class="news-filter-bar">
-                <button type="button" class="news-filter-btn" data-news-filter="all" onclick="applyNewsFilter('all')">Todos</button>
-                <button type="button" class="news-filter-btn" data-news-filter="linux" onclick="applyNewsFilter('linux')">Linux</button>
-                <button type="button" class="news-filter-btn" data-news-filter="cyber" onclick="applyNewsFilter('cyber')">Ciberseguridad</button>
-            </div>
-
-            <div class="news-group" data-news-type="linux">
-                <h3>Noticias Linux</h3>
-                <ul id="linux-news-list">
-                    <li>Cargando noticias...</li>
-                </ul>
-            </div>
-
-            <div class="news-group" data-news-type="cyber">
-                <h3 class="news-section-title">Noticias Ciberseguridad</h3>
-                <ul id="cyber-news-list">
-                    <li>Cargando noticias...</li>
-                </ul>
-            </div>
-        </aside>
+        {{-- Panel de noticias: se puede apagar con VIRTHUB_NOTICIAS. --}}
+        @if (config('virthub.noticias.enabled'))
+            <aside class="linux-news-panel gadget gadget-size-normal" data-gadget-id="news" data-gadget-size="normal" data-default-size="normal">
+                <div class="gadget-head">
+                    <h3>Noticias</h3>
+                    @if (!empty($currentUser))
+                        <div class="gadget-actions gadget-actions-compact">
+                            <span class="gadget-drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
+                            <button type="button" class="gadget-mini-btn gadget-size-text-btn" onclick="cycleHomeGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">Normal</button>
+                        </div>
+                    @endif
+                </div>
+    
+                <div class="news-filter-bar">
+                    <button type="button" class="news-filter-btn" data-news-filter="all" onclick="applyNewsFilter('all')">Todos</button>
+                    <button type="button" class="news-filter-btn" data-news-filter="linux" onclick="applyNewsFilter('linux')">Linux</button>
+                    <button type="button" class="news-filter-btn" data-news-filter="cyber" onclick="applyNewsFilter('cyber')">Ciberseguridad</button>
+                </div>
+    
+                <div class="news-group" data-news-type="linux">
+                    <h3>Noticias Linux</h3>
+                    <ul id="linux-news-list">
+                        <li>Cargando noticias...</li>
+                    </ul>
+                </div>
+    
+                <div class="news-group" data-news-type="cyber">
+                    <h3 class="news-section-title">Noticias Ciberseguridad</h3>
+                    <ul id="cyber-news-list">
+                        <li>Cargando noticias...</li>
+                    </ul>
+                </div>
+            </aside>
+        @endif
 
         <aside class="linux-news-panel gadget welcome-gadget gadget-size-normal" data-gadget-id="welcome" data-gadget-size="normal" data-default-size="normal">
             <div class="gadget-head">
@@ -1676,6 +1679,11 @@
         async function loadNews(endpoint, listId) {
             const list = document.getElementById(listId);
 
+            /* Si el panel de noticias esta apagado no hay lista: nada que hacer. */
+            if (!list) {
+                return;
+            }
+
             try {
                 const response = await fetch(endpoint);
                 const data = await response.json();
@@ -1708,8 +1716,10 @@
         }
 
         bootstrapWorkspaceState();
-        loadNews('/linux-news', 'linux-news-list');
-        loadNews('/cyber-news', 'cyber-news-list');
+        @if (config('virthub.noticias.enabled'))
+            loadNews('/linux-news', 'linux-news-list');
+            loadNews('/cyber-news', 'cyber-news-list');
+        @endif
         window.addEventListener('DOMContentLoaded', applySidebarState);
         window.addEventListener('DOMContentLoaded', applyThemeState);
         window.addEventListener('DOMContentLoaded', () => {

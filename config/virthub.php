@@ -39,6 +39,23 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Noticias
+    |--------------------------------------------------------------------------
+    |
+    | Panel de noticias del inicio (Linux y ciberseguridad) y sus rutas
+    | /linux-news y /cyber-news.
+    |
+    | Activado por defecto. Se apaga con VIRTHUB_NOTICIAS=false, que es lo que hace
+    | docker-compose.test.yml para el entorno de pruebas.
+    |
+    */
+
+    'noticias' => [
+        'enabled' => filter_var(env('VIRTHUB_NOTICIAS', true), FILTER_VALIDATE_BOOL),
+    ],
+
     'temas' => [
         'enabled' => filter_var(env('VIRTHUB_TEMAS', false), FILTER_VALIDATE_BOOL),
         'activo' => (string) env('VIRTHUB_TEMA_INICIAL', ''),

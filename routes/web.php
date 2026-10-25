@@ -59,8 +59,11 @@ Route::post('/sugerencias', [SuggestionController::class, 'store'])
     ->middleware('throttle:30,1')
     ->name('suggestions.store');
 
-Route::get('/linux-news', [SystemController::class, 'linuxNews'])->name('news.linux');
-Route::get('/cyber-news', [SystemController::class, 'cyberNews'])->name('news.cyber');
+// Noticias: se registran solo si estan activadas (VIRTHUB_NOTICIAS).
+if (config('virthub.noticias.enabled')) {
+    Route::get('/linux-news', [SystemController::class, 'linuxNews'])->name('news.linux');
+    Route::get('/cyber-news', [SystemController::class, 'cyberNews'])->name('news.cyber');
+}
 
 // ---------------------------------------------------------------------------
 // Autenticacion
