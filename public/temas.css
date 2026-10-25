@@ -1892,3 +1892,34 @@
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
+
+/* =============================================================================
+   BOTON DEL CHAT EN LA BARRA DEL CONTENEDOR
+   =============================================================================
+   Ese boton lleva un icono y la etiqueta "Chat". La etiqueta solo se ocultaba en
+   pantallas de menos de 560 px, asi que en escritorio se mostraba; pero el boton
+   tiene un ancho minimo de 46 px (pensado solo para el icono), de modo que la
+   etiqueta se montaba encima del dibujo. Se veia mal en todos los temas.
+
+   Ahora es una fila: icono y texto, con su separacion, y el ancho lo pone el
+   contenido.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .container-toolbar .chat-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    width: auto !important;
+    white-space: nowrap !important;
+}
+
+[data-era] body .container-toolbar .chat-toggle .chat-icon {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+[data-era] body .container-toolbar .chat-toggle .chat-button-label {
+    line-height: 1;
+}
