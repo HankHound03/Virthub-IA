@@ -253,6 +253,7 @@ body[data-era] .forum-layout {
    ============================================================================= */
 
 body[data-era="xp"] {
+    --vh-icon-stroke: 2px;
     --vh-scrim: 0.02;
     --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
     --vh-font: Tahoma, 'Segoe UI', sans-serif;
@@ -427,6 +428,7 @@ body[data-era="xp"][data-variante="classic"] {
    ============================================================================= */
 
 body[data-era="vista"] {
+    --vh-icon-stroke: 2px;
     --vh-scrim: 0.34;
     --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
     --vh-font: 'Segoe UI', sans-serif;
@@ -587,6 +589,7 @@ body[data-era="vista"][data-variante="violet"] {
    ============================================================================= */
 
 body[data-era="win7"] {
+    --vh-icon-stroke: 1.5px;
     --vh-scrim: 0.22;
     --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
     --vh-font: 'Segoe UI', sans-serif;
@@ -753,6 +756,7 @@ body[data-era="win7"][data-variante="landscapes"] {
    ============================================================================= */
 
 body[data-era="win8"] {
+    --vh-icon-stroke: 2px;
     --vh-scrim: 0.10;
     --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
     --vh-font: 'Segoe UI Light', 'Segoe UI', sans-serif;
@@ -805,6 +809,7 @@ body[data-era="win8"][data-variante="teal"]   { --vh-accent: #00b7c3; --vh-btn-h
    ============================================================================= */
 
 body[data-era="win10"] {
+    --vh-icon-stroke: 1.5px;
     --vh-scrim: 0.30;
     --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
     --vh-font: 'Segoe UI', sans-serif;
@@ -1508,4 +1513,33 @@ body[data-era] .global-chat-widget .chat-panel {
         background-color 0.5s ease,
         border-color 0.5s ease,
         color 0.45s ease;
+}
+
+/* =============================================================================
+   EL ICONO DEL CHAT
+   =============================================================================
+   Estaba usando --vh-icon, que es el color de los iconos sobre los PANELES. Pero
+   este icono va encima del boton, cuyo fondo cambia con el tema: en Vista, con el
+   boton azul oscuro, un icono oscuro desaparecia.
+
+   Ahora usa el color del texto del boton, asi que se ve en todas las epocas y
+   cambia con ellas. La forma ya la daba --vh-icon-radius: cuadrado en XP, casi
+   redondo en Vista y 7, plano en 8 y 10.
+   -------------------------------------------------------------------------- */
+
+body[data-era] .chat-toggle .chat-icon::before {
+    border-color: var(--vh-btn-text) !important;
+    border-width: var(--vh-icon-stroke, 2px) !important;
+}
+
+body[data-era] .chat-toggle .chat-icon::after {
+    border-top-color: var(--vh-btn-text) !important;
+}
+
+body[data-era] .chat-toggle:hover .chat-icon::before {
+    border-color: var(--vh-btn-hover-text, var(--vh-btn-text)) !important;
+}
+
+body[data-era] .chat-toggle:hover .chat-icon::after {
+    border-top-color: var(--vh-btn-hover-text, var(--vh-btn-text)) !important;
 }
