@@ -1992,3 +1992,26 @@
     width: 100% !important;
     margin: 0 !important;
 }
+
+/* =============================================================================
+   EL BOTON DEL CHAT YA NO TAPA EL CARRUSEL
+   =============================================================================
+   El boton flotante del chat lleva z-index 1001 para quedar por encima de la
+   pagina. Pero el carrusel vive dentro del <header>, que tiene su propio contexto
+   de apilamiento con z-index 1000: todo lo que hay dentro del header queda por
+   debajo del boton, por muy alto que sea su z-index.
+
+   Se resuelve por los dos lados:
+     - dentro de la barra del contenedor, el boton deja de flotar;
+     - el header sube por encima del boton flotante, para que el carrusel se vea
+       siempre entero.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .container-toolbar .chat-toggle {
+    position: relative !important;
+    z-index: auto !important;
+}
+
+[data-era] body > header {
+    z-index: 6000 !important;
+}
