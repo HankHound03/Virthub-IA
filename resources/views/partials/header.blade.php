@@ -528,7 +528,95 @@
 
                 boton.addEventListener('click', function (evento) {
                     evento.stopPropagation();
+
+                    /* Si el clic viene de terminar un deslizamiento, no se hace nada:
+                       el tema ya cambio al soltar. */
+                    if (ignorarClic) {
+                        ignorarClic = false;
+                        return;
+                    }
+
                     ciclo(1);
+                });
+
+                /*
+                 * Deslizar sobre la pastilla cambia de tema.
+                 *
+                 * En el telefono es mas natural que apuntar a un boton pequeno: se
+                 * arrastra a la izquierda para el siguiente tema y a la derecha para
+                 * el anterior. Si el gesto no pasa de 30 px, se trata como un clic.
+                 */
+                var gestoX = null;
+                var gestoY = null;
+                var deslizando = false;
+                var ignorarClic = false;
+
+                boton.addEventListener('pointerdown', function (evento) {
+                    if (evento.pointerType === 'mouse' && evento.button !== 0) {
+                        return;
+                    }
+
+                    gestoX = evento.clientX;
+                    gestoY = evento.clientY;
+                    deslizando = false;
+                });
+
+                boton.addEventListener('pointermove', function (evento) {
+                    if (gestoX === null) {
+                        return;
+                    }
+
+                    var dx = evento.clientX - gestoX;
+                    var dy = evento.clientY - gestoY;
+
+                    if (!deslizando && Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy)) {
+                        deslizando = true;
+                        boton.classList.add('deslizando');
+                    }
+
+                    if (deslizando) {
+                        /* Se mueve un poco para dar la sensacion de arrastre. */
+                        boton.style.transform = 'translateX(' + Math.max(-22, Math.min(22, dx)) + 'px)';
+                    }
+                });
+
+                function terminarGesto(evento) {
+                    if (gestoX === null) {
+                        return;
+                    }
+
+                    var dx = evento.clientX - gestoX;
+                    gestoX = null;
+                    gestoY = null;
+                    boton.classList.remove('deslizando');
+                    boton.style.transform = '';
+
+                    if (!deslizando) {
+                        return;
+                    }
+
+                    deslizando = false;
+
+                    if (Math.abs(dx) < 30) {
+                        return;
+                    }
+
+                    /* Evita que el navegador cuente tambien el clic. */
+                    ignorarClic = true;
+                    setTimeout(function () {
+                        ignorarClic = false;
+                    }, 400);
+
+                    ciclo(dx < 0 ? 1 : -1);
+                }
+
+                boton.addEventListener('pointerup', terminarGesto);
+                boton.addEventListener('pointercancel', function () {
+                    gestoX = null;
+                    gestoY = null;
+                    deslizando = false;
+                    boton.classList.remove('deslizando');
+                    boton.style.transform = '';
                 });
 
                 if (abrir) {

@@ -2070,3 +2070,42 @@ html.vh-ligero body *::after {
         scroll-behavior: auto !important;
     }
 }
+
+/* =============================================================================
+   DESLIZAR PARA CAMBIAR DE TEMA (movil)
+   =============================================================================
+   En el telefono, apuntar a una pastilla pequena y acertar al primer toque es
+   incomodo. Ahora tambien se cambia arrastrando el dedo sobre ella: a la izquierda
+   pasa al siguiente tema y a la derecha al anterior.
+
+   touch-action: pan-y deja que el dedo siga desplazando la pagina en vertical;
+   solo se toma el gesto cuando el movimiento es claramente horizontal.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .vh-temas-btn {
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+                background 0.2s ease,
+                border-color 0.2s ease,
+                color 0.2s ease;
+}
+
+[data-era] body .vh-temas-btn.deslizando {
+    transition: none;
+    cursor: grabbing;
+    /* Se ilumina un poco mientras se arrastra, para que se note la respuesta. */
+    filter: brightness(1.12);
+}
+
+/* En pantallas tactiles, una pista de que se puede deslizar. */
+@media (hover: none) {
+    [data-era] body .vh-temas-btn::after {
+        content: '\2039 \203A';
+        font-size: 10px;
+        opacity: 0.55;
+        margin-left: 2px;
+        letter-spacing: -1px;
+    }
+}
