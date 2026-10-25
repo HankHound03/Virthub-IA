@@ -99,70 +99,68 @@
                     </div>
                 @endif
 
-                <button type="button" class="container-load-btn chat-toggle" onclick="toggleChat()" id="chatToggle" title="Abrir chat" aria-label="Abrir chat">
-                    <span class="chat-icon" aria-hidden="true"></span>
-                    <span class="chat-button-label">Chat</span>
-                </button>
-
-                <button type="button" class="container-load-btn" onclick="loadInIframe(true)">Recargar Contenedor</button>
-                <button type="button" class="container-load-btn" id="fullscreenToggle" onclick="toggleFullscreen()" title="Entrar en pantalla completa" aria-label="Alternar pantalla completa" aria-pressed="false">Pantalla Completa</button>
-
                 {{--
-                    Abrir el escritorio en una ventana aparte.
+                    Selector de escritorios, SOLO para administradores.
 
-                    No se abre el subdominio directamente: se abre una pagina
-                    nuestra (/contenedor/ventana) que pinta el escritorio dentro.
-                    Asi la barra de direcciones muestra virthub.dpdns.org y nunca
-                    ctX.virthub.dpdns.org.
+                    Permite probar los escritorios sin crear una cuenta por cada
+                    uno. Un usuario normal no lo ve, y aunque forzara la peticion
+                    el proxy le devuelve 403: el permiso se comprueba en el
+                    servidor.
 
-                    El href se conserva como respaldo por si el navegador bloquea
-                    las ventanas emergentes: en ese caso se abre en una pestana.
+                    Vive dentro de la barra para que quede en la misma linea que
+                    los botones: a la izquierda el selector, a la derecha las
+                    acciones.
                 --}}
-                <a class="container-load-btn" id="openWindow"
-                   href="{{ url('/contenedor/ventana') }}{{ ($currentUser['role'] ?? 'user') === 'admin' && !empty($currentDesktop) ? '?contenedor=' . urlencode((string) $currentDesktop) : '' }}"
-                   onclick="return abrirVentanaEscritorio(event)"
-                   title="Abrir el escritorio en una ventana aparte">Ventana Nueva</a>
-            </div>
+                @if (($currentUser['role'] ?? 'user') === 'admin')
+                    <div class="admin-desktop-picker">
+                        <span class="admin-desktop-picker-label">Probar escritorio:</span>
 
-            {{--
-                Selector de escritorios, SOLO para administradores.
+                        {{--
+                            En un telefono muchos botones ocupan varias filas y
+                            empujan el escritorio hacia abajo, asi que en pantalla
+                            estrecha se usa una lista desplegable. Los botones se
+                            ocultan por CSS (ambos llaman a loadAdminDesktop).
+                        --}}
+                        <select class="admin-desktop-select"
+                                onchange="loadAdminDesktop(this.value)"
+                                aria-label="Probar escritorio">
+                            @foreach (($adminDesktops ?? []) as $desktop)
+                                <option value="{{ $desktop['name'] }}"{{ $desktop['name'] === ($currentDesktop ?? '') ? ' selected' : '' }}>{{ $desktop['name'] }}</option>
+                            @endforeach
+                        </select>
 
-                Sirve para probar los once escritorios sin tener que crear once
-                cuentas ni cambiar de sesion: al pulsar uno, se carga en el iframe
-                con un pase emitido para ese escritorio.
+                        @foreach (($adminDesktops ?? []) as $desktop)
+                            <button type="button"
+                                    class="admin-desktop-btn{{ $desktop['name'] === ($currentDesktop ?? '') ? ' is-current' : '' }}"
+                                    data-container="{{ $desktop['name'] }}"
+                                    onclick="loadAdminDesktop('{{ $desktop['name'] }}')"
+                                    title="Abrir {{ $desktop['name'] }}">
+                                {{ $desktop['name'] }}
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
 
-                Un usuario normal no ve esto, y aunque forzara la peticion, el
-                control de acceso del proxy le devuelve 403: el permiso se
-                comprueba en el servidor, no aqui.
-            --}}
-            @if (($currentUser['role'] ?? 'user') === 'admin')
-                <div class="admin-desktop-picker">
-                    <span class="admin-desktop-picker-label">Probar escritorio:</span>
+                <div class="container-actions">
+                    <button type="button" class="container-load-btn chat-toggle" onclick="toggleChat()" id="chatToggle" title="Abrir chat" aria-label="Abrir chat">
+                        <span class="chat-icon" aria-hidden="true"></span>
+                        <span class="chat-button-label">Chat</span>
+                    </button>
+
+                    <button type="button" class="container-load-btn" onclick="loadInIframe(true)">Recargar Contenedor</button>
 
                     {{--
-                        En un telefono once botones ocupan varias filas y empujan
-                        el escritorio hacia abajo, asi que en pantalla estrecha se
-                        usa una lista desplegable. Los botones se ocultan por CSS
-                        (no se duplica la logica: ambos llaman a loadAdminDesktop).
+                        Abrir el escritorio en una ventana aparte: se abre una
+                        pagina nuestra (/contenedor/ventana) que pinta el escritorio
+                        dentro, para que la barra de direcciones muestre siempre
+                        virthub.dpdns.org y nunca ctX.virthub.dpdns.org.
                     --}}
-                    <select class="admin-desktop-select"
-                            onchange="loadAdminDesktop(this.value)"
-                            aria-label="Probar escritorio">
-                        @foreach (($adminDesktops ?? []) as $desktop)
-                            <option value="{{ $desktop['name'] }}"{{ $desktop['name'] === ($currentDesktop ?? '') ? ' selected' : '' }}>{{ $desktop['name'] }}</option>
-                        @endforeach
-                    </select>
-
-                    @foreach (($adminDesktops ?? []) as $desktop)
-                        <button type="button"
-                                class="admin-desktop-btn{{ $desktop['name'] === ($currentDesktop ?? '') ? ' is-current' : '' }}"
-                                data-container="{{ $desktop['name'] }}"
-                                onclick="loadAdminDesktop('{{ $desktop['name'] }}')"
-                                title="Abrir {{ $desktop['name'] }}">
-                            {{ $desktop['name'] }}
-                        </button>
-                    @endforeach
+                    <a class="container-load-btn" id="openWindow"
+                       href="{{ url('/contenedor/ventana') }}{{ ($currentUser['role'] ?? 'user') === 'admin' && !empty($currentDesktop) ? '?contenedor=' . urlencode((string) $currentDesktop) : '' }}"
+                       onclick="return abrirVentanaEscritorio(event)"
+                       title="Abrir el escritorio en una ventana aparte">Ventana Nueva</a>
                 </div>
+            </div>
             @endif
             {{--
                 sandbox sin 'allow-top-navigation': el escritorio no puede salirse

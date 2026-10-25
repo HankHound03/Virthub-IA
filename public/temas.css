@@ -1923,3 +1923,75 @@
 [data-era] body .container-toolbar .chat-toggle .chat-button-label {
     line-height: 1;
 }
+
+/* =============================================================================
+   BARRA DE ACCIONES DEL CONTENEDOR
+   =============================================================================
+   Antes eran dos filas sueltas: arriba los botones alineados a la derecha y
+   debajo el selector de escritorios a la izquierda, cada uno con su propio
+   margen; parecia desalineado. Ahora es una sola barra: el selector a la
+   izquierda y las acciones a la derecha.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .container-toolbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 10px 12px !important;
+    padding: 10px 12px !important;
+}
+
+[data-era] body .container-toolbar .admin-desktop-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 0 !important;
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+[data-era] body .container-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+
+/* Todos los botones de la barra, del mismo alto y tamano. */
+[data-era] body .container-actions > .container-load-btn,
+[data-era] body .container-toolbar .chat-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    width: auto !important;
+    min-height: 40px;
+    padding: 10px 16px !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    box-sizing: border-box;
+}
+
+/* En pantalla estrecha, la barra en dos filas y los botones repartidos. */
+@media (max-width: 768px) {
+    [data-era] body .container-toolbar {
+        justify-content: center !important;
+    }
+
+    [data-era] body .container-toolbar .admin-desktop-picker {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+
+    [data-era] body .container-actions {
+        flex: 1 1 100%;
+        justify-content: center;
+        margin-left: 0;
+    }
+}
