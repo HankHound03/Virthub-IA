@@ -1832,3 +1832,63 @@
 [data-era] body .navbar-link.active {
     font-weight: 700;
 }
+
+/* =============================================================================
+   BOTONES DE NAVEGACION DEL HEADER
+   =============================================================================
+   No son <button> sino enlaces, y su aspecto sale de un bloque de estilos que
+   vive en partials/navigation-menu: usa --vh-button-bg, una variable del diseno
+   anterior que ningun tema define. Por eso conservaban el color viejo.
+
+   Ahora llevan el aspecto de boton de su epoca, igual que el resto.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .navbar-link {
+    background: var(--vh-btn-bg) !important;
+    border: 1px solid var(--vh-btn-border) !important;
+    border-radius: var(--vh-btn-radius) !important;
+    box-shadow: var(--vh-btn-shadow) !important;
+    color: var(--vh-btn-text) !important;
+    font-family: var(--vh-font) !important;
+    text-shadow: var(--vh-btn-shadow-text) !important;
+}
+
+[data-era] body .navbar-link:hover,
+[data-era] body .navbar-link.active {
+    background: var(--vh-btn-hover-bg) !important;
+    border-color: var(--vh-btn-hover-border) !important;
+    color: var(--vh-btn-hover-text) !important;
+}
+
+[data-era] body .navbar-link.active {
+    font-weight: 700 !important;
+}
+
+/* =============================================================================
+   FLUIDEZ DEL CHAT EN LA PAGINA DEL CONTENEDOR
+   =============================================================================
+   Ese panel no flota: se abre dentro de la maqueta, animando su ancho de 0 a
+   390 px. Con el desenfoque de fondo puesto, el navegador tiene que recalcular el
+   blur de toda la zona en cada fotograma y la animacion se atasca. Aqui se quita
+   el desenfoque (el panel va opaco) y se deja la transicion de ancho explicita.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .container-wrapper .chat-panel {
+    background: var(--vh-panel-bg) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition:
+        flex-basis 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        max-width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 0.25s ease,
+        visibility 0.3s ease;
+}
+
+/* Los hijos tampoco necesitan desenfoque: se mueven con el panel. */
+[data-era] body .container-wrapper .chat-panel .chat-header,
+[data-era] body .container-wrapper .chat-panel .chat-tabs,
+[data-era] body .container-wrapper .chat-panel .chat-input-area {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
