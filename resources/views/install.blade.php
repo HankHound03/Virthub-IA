@@ -135,6 +135,7 @@
             .hero, .form { padding: 24px; }
         }
     </style>
+    @include('partials.tema-boot')
 </head>
 <body>
     <div class="panel">

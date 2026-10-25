@@ -399,7 +399,7 @@
         <script>
             (function () {
                 var CLAVE = 'virthub-tema';
-                var POR_DEFECTO = { era: 'xp', variante: 'luna' };
+                var POR_DEFECTO = { era: 'vista', variante: 'aero' };
 
                 var boton = document.getElementById('vhTemasBtn');
                 var abrir = document.getElementById('vhTemasAbrir');
@@ -477,8 +477,8 @@
                         variante = POR_DEFECTO.variante;
                     }
 
-                    document.body.dataset.era = era;
-                    document.body.dataset.variante = variante;
+                    document.documentElement.dataset.era = era;
+                    document.documentElement.dataset.variante = variante;
                     pintarFondo(ficha ? ficha.dataset.imagen : '');
 
                     if (nombre) {
@@ -519,7 +519,7 @@
                 /* Un clic en el boton grande pasa al siguiente tema; la flechita
                    abre el carrusel para elegir uno concreto. */
                 function ciclo(paso) {
-                    var actual = document.body.dataset.era + '/' + document.body.dataset.variante;
+                    var actual = document.documentElement.dataset.era + '/' + document.documentElement.dataset.variante;
                     var i = fichas.findIndex(function (f) {
                         return (f.dataset.era + '/' + f.dataset.variante) === actual;
                     });
@@ -591,25 +591,20 @@
                     });
                 });
 
-                var enlace = document.createElement('link');
-                enlace.rel = 'stylesheet';
-                enlace.href = @json(asset('temas.css'));
-                enlace.onload = function () {
-                    var guardado = null;
+                /* La hoja de estilos y el tema ya los puso el arranque del <head>
+                   antes de pintar. Aqui solo se sincroniza el boton y el fondo. */
+                var guardado = null;
 
-                    try {
-                        guardado = JSON.parse(localStorage.getItem(CLAVE) || 'null');
-                    } catch (e) {
-                        guardado = null;
-                    }
+                try {
+                    guardado = JSON.parse(localStorage.getItem(CLAVE) || 'null');
+                } catch (e) {
+                    guardado = null;
+                }
 
-                    aplicar(
-                        guardado && guardado.era ? guardado.era : POR_DEFECTO.era,
-                        guardado && guardado.variante ? guardado.variante : POR_DEFECTO.variante
-                    );
-                };
-
-                document.head.appendChild(enlace);
+                aplicar(
+                    guardado && guardado.era ? guardado.era : POR_DEFECTO.era,
+                    guardado && guardado.variante ? guardado.variante : POR_DEFECTO.variante
+                );
             })();
         </script>
     @endif

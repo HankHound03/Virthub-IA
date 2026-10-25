@@ -32,6 +32,7 @@
             .friends-search button, .friend-result a, .friend-result button { width: 100%; box-sizing: border-box; text-align: center; }
         }
     </style>
+    @include('partials.tema-boot')
 </head>
 <body>
     @include('partials.header', ['pageTitle' => 'Buscar amigos', 'currentUser' => $currentUser ?? null, 'currentPage' => 'buscar-amigos'])

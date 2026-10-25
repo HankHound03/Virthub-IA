@@ -64,6 +64,7 @@
             background-color: rgba(30, 52, 72, 0.9);
         }
     </style>
+    @include('partials.tema-boot')
 </head>
 <body>
     <div class="ventana-controles">

@@ -8,6 +8,7 @@
     <link rel="icon" type="image/png" href="{{ asset('pics/logovh.png') }}">
     <link rel="stylesheet" href="{{ asset('style.css') }}?v={{ filemtime(public_path('style.css')) }}">
     <link rel="stylesheet" href="{{ asset('container.css') }}?v={{ filemtime(public_path('container.css')) }}">
+    @include('partials.tema-boot')
 </head>
 <body>
     <audio id="chatNotificationAudio" preload="auto" style="display: none;">

@@ -28,7 +28,7 @@
    PIEZAS COMUNES: todas las epocas
    ============================================================================= */
 
-body[data-era] {
+[data-era] body {
     /* La aplicacion pinta el texto con estas dos; si no se redefinen, queda el
        verde claro del tema oscuro original y no se lee sobre paneles claros. */
     --vh-text: var(--vh-panel-text);
@@ -45,14 +45,14 @@ body[data-era] {
 }
 
 /* El fondo propio de la aplicacion (imagen + velo) no pinta nada aqui. */
-body[data-era]::before,
-body[data-era]::after {
+[data-era] body::before,
+[data-era] body::after {
     display: none;
 }
 
 /* --- Barra superior ------------------------------------------------------- */
 
-body[data-era] header {
+[data-era] body header {
     background: var(--vh-head-bg) !important;
     border: 1px solid var(--vh-head-border) !important;
     border-radius: var(--vh-head-radius) !important;
@@ -64,35 +64,35 @@ body[data-era] header {
     transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-body[data-era] header a,
-body[data-era] header button,
-body[data-era] .navbar-link {
+[data-era] body header a,
+[data-era] body header button,
+[data-era] body .navbar-link {
     color: var(--vh-head-text) !important;
     text-shadow: var(--vh-head-shadow-text) !important;
 }
 
 /* --- Paneles -------------------------------------------------------------- */
 
-body[data-era] footer,
-body[data-era] .linux-news-panel,
-body[data-era] .login-screen,
-body[data-era] .sidebar,
-body[data-era] .profile-menu,
-body[data-era] .toggleable-sidebar,
-body[data-era] .chat-panel,
-body[data-era] .chat-header,
-body[data-era] .chat-tabs,
-body[data-era] .chat-input-area,
-body[data-era] .chat-toast,
-body[data-era] .header-login-card,
-body[data-era] .forum-card,
-body[data-era] .forum-post,
-body[data-era] .suggestions-card,
-body[data-era] .config-card,
-body[data-era] .admin-card,
-body[data-era] .gadget,
-body[data-era] .container-card,
-body[data-era] .profile-area-card {
+[data-era] body footer,
+[data-era] body .linux-news-panel,
+[data-era] body .login-screen,
+[data-era] body .sidebar,
+[data-era] body .profile-menu,
+[data-era] body .toggleable-sidebar,
+[data-era] body .chat-panel,
+[data-era] body .chat-header,
+[data-era] body .chat-tabs,
+[data-era] body .chat-input-area,
+[data-era] body .chat-toast,
+[data-era] body .header-login-card,
+[data-era] body .forum-card,
+[data-era] body .forum-post,
+[data-era] body .suggestions-card,
+[data-era] body .config-card,
+[data-era] body .admin-card,
+[data-era] body .gadget,
+[data-era] body .container-card,
+[data-era] body .profile-area-card {
     background-color: var(--vh-panel-bg) !important;
     background-image: none !important;
     border: 1px solid var(--vh-panel-border) !important;
@@ -105,10 +105,10 @@ body[data-era] .profile-area-card {
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-body[data-era] h1,
-body[data-era] h2,
-body[data-era] h3,
-body[data-era] h4 {
+[data-era] body h1,
+[data-era] body h2,
+[data-era] body h3,
+[data-era] body h4 {
     color: var(--vh-heading) !important;
     font-family: var(--vh-font-head) !important;
     font-weight: var(--vh-heading-weight, 700) !important;
@@ -117,10 +117,10 @@ body[data-era] h4 {
 
 /* --- Botones -------------------------------------------------------------- */
 
-body[data-era] button,
-body[data-era] .container-load-btn,
-body[data-era] .header-login-button,
-body[data-era] input[type="submit"] {
+[data-era] body button,
+[data-era] body .container-load-btn,
+[data-era] body .header-login-button,
+[data-era] body input[type="submit"] {
     background: var(--vh-btn-bg) !important;
     border: 1px solid var(--vh-btn-border) !important;
     border-radius: var(--vh-btn-radius) !important;
@@ -131,27 +131,27 @@ body[data-era] input[type="submit"] {
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
 }
 
-body[data-era] button:hover,
-body[data-era] .container-load-btn:hover,
-body[data-era] .header-login-button:hover {
+[data-era] body button:hover,
+[data-era] body .container-load-btn:hover,
+[data-era] body .header-login-button:hover {
     background: var(--vh-btn-hover-bg) !important;
     border-color: var(--vh-btn-hover-border) !important;
     color: var(--vh-btn-hover-text) !important;
 }
 
-body[data-era] button:active,
-body[data-era] .container-load-btn:active {
+[data-era] body button:active,
+[data-era] body .container-load-btn:active {
     transform: translateY(1px);
 }
 
 /* --- Campos --------------------------------------------------------------- */
 
-body[data-era] input[type="text"],
-body[data-era] input[type="email"],
-body[data-era] input[type="password"],
-body[data-era] input[type="search"],
-body[data-era] textarea,
-body[data-era] select {
+[data-era] body input[type="text"],
+[data-era] body input[type="email"],
+[data-era] body input[type="password"],
+[data-era] body input[type="search"],
+[data-era] body textarea,
+[data-era] body select {
     background: var(--vh-input-bg) !important;
     border: 1px solid var(--vh-input-border) !important;
     border-radius: var(--vh-input-radius) !important;
@@ -161,8 +161,8 @@ body[data-era] select {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-body[data-era] input:focus,
-body[data-era] textarea:focus {
+[data-era] body input:focus,
+[data-era] body textarea:focus {
     outline: none !important;
     border-color: var(--vh-accent) !important;
     box-shadow: 0 0 0 2px rgba(120, 190, 255, 0.35) !important;
@@ -174,18 +174,18 @@ body[data-era] textarea:focus {
    en 8 y 10.
    -------------------------------------------------------------------------- */
 
-body[data-era] .chat-icon::before,
-body[data-era] .chat-icon::after,
-body[data-era] .menu-icon::before,
-body[data-era] .menu-icon::after {
+[data-era] body .chat-icon::before,
+[data-era] body .chat-icon::after,
+[data-era] body .menu-icon::before,
+[data-era] body .menu-icon::after {
     border-radius: var(--vh-icon-radius) !important;
     transition: border-radius 0.3s ease, background-color 0.3s ease;
 }
 
-body[data-era] .chat-toggle,
-body[data-era] .retro-toggle,
-body[data-era] .theme-toggle,
-body[data-era] .vh-temas-btn {
+[data-era] body .chat-toggle,
+[data-era] body .retro-toggle,
+[data-era] body .theme-toggle,
+[data-era] body .vh-temas-btn {
     border-radius: var(--vh-toggle-radius) !important;
 }
 
@@ -194,13 +194,13 @@ body[data-era] .vh-temas-btn {
    del escritorio: es lo primero que aparece y quedaba apagado.
    -------------------------------------------------------------------------- */
 
-body[data-era] .header-login-modal {
+[data-era] body .header-login-modal {
     background: var(--vh-login-scrim) !important;
     backdrop-filter: blur(3px) !important;
     -webkit-backdrop-filter: blur(3px) !important;
 }
 
-body[data-era] .header-login-card {
+[data-era] body .header-login-card {
     box-shadow: var(--vh-login-shadow) !important;
     animation: vh-login-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -216,13 +216,13 @@ body[data-era] .header-login-card {
    rebote al terminar.
    -------------------------------------------------------------------------- */
 
-body[data-era] .gadget,
-body[data-era] .gadget-content,
-body[data-era] .forum-card,
-body[data-era] .admin-card,
-body[data-era] .config-card,
-body[data-era] .suggestions-card,
-body[data-era] .container-card {
+[data-era] body .gadget,
+[data-era] body .gadget-content,
+[data-era] body .forum-card,
+[data-era] body .admin-card,
+[data-era] body .config-card,
+[data-era] body .suggestions-card,
+[data-era] body .container-card {
     transition:
         width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
         max-width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -232,7 +232,7 @@ body[data-era] .container-card {
         transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-body[data-era] .gadget.is-resizing {
+[data-era] body .gadget.is-resizing {
     animation: vh-card-pop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -242,9 +242,9 @@ body[data-era] .gadget.is-resizing {
     100% { transform: scale(1); }
 }
 
-body[data-era] .gadget-grid,
-body[data-era] .admin-grid,
-body[data-era] .forum-layout {
+[data-era] body .gadget-grid,
+[data-era] body .admin-grid,
+[data-era] body .forum-layout {
     transition: grid-template-columns 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), gap 0.35s ease;
 }
 
@@ -252,7 +252,7 @@ body[data-era] .forum-layout {
    WINDOWS XP - Luna y familia
    ============================================================================= */
 
-body[data-era="xp"] {
+[data-era="xp"] body {
     --vh-icon-stroke: 2px;
     --vh-scrim: 0.02;
     --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
@@ -276,7 +276,7 @@ body[data-era="xp"] {
     --vh-login-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
 }
 
-body[data-era="xp"][data-variante="luna"] {
+[data-era="xp"][data-variante="luna"] body {
     --vh-head-bg: linear-gradient(180deg, #0058e6 0%, #3a93ff 8%, #0a6cd6 52%, #004bb5 92%, #003c8f 100%);
     --vh-head-border: #003c8f;
     --vh-head-text: #ffffff;
@@ -300,7 +300,7 @@ body[data-era="xp"][data-variante="luna"] {
     --vh-heading: #003c74;
 }
 
-body[data-era="xp"][data-variante="olive"] {
+[data-era="xp"][data-variante="olive"] body {
     --vh-head-bg: linear-gradient(180deg, #6d7f3c 0%, #9aad5a 8%, #7f9245 52%, #667a35 92%, #55672c 100%);
     --vh-head-border: #4d5c26;
     --vh-head-text: #ffffff;
@@ -324,7 +324,7 @@ body[data-era="xp"][data-variante="olive"] {
     --vh-heading: #4d5c26;
 }
 
-body[data-era="xp"][data-variante="silver"] {
+[data-era="xp"][data-variante="silver"] body {
     --vh-head-bg: linear-gradient(180deg, #b9b9b9 0%, #e8e8e8 8%, #c4c4c4 52%, #a3a3a3 92%, #8a8a8a 100%);
     --vh-head-border: #7a7a7a;
     --vh-head-text: #1a1a1a;
@@ -348,7 +348,7 @@ body[data-era="xp"][data-variante="silver"] {
     --vh-heading: #3a3a3a;
 }
 
-body[data-era="xp"][data-variante="royale"] {
+[data-era="xp"][data-variante="royale"] body {
     --vh-head-bg: linear-gradient(180deg, #0a1f3d 0%, #2f6ea8 10%, #123a63 55%, #071a2e 100%);
     --vh-head-border: #0a1f3d;
     --vh-head-text: #ffffff;
@@ -372,7 +372,7 @@ body[data-era="xp"][data-variante="royale"] {
     --vh-heading: #123a63;
 }
 
-body[data-era="xp"][data-variante="embedded"] {
+[data-era="xp"][data-variante="embedded"] body {
     --vh-head-bg: linear-gradient(180deg, #232f3a 0%, #44586b 10%, #2d3d4c 55%, #16202a 100%);
     --vh-head-border: #101820;
     --vh-head-text: #dce8f2;
@@ -396,7 +396,7 @@ body[data-era="xp"][data-variante="embedded"] {
     --vh-heading: #2d3d4c;
 }
 
-body[data-era="xp"][data-variante="classic"] {
+[data-era="xp"][data-variante="classic"] body {
     --vh-head-bg: linear-gradient(180deg, #000080 0%, #000080 60%, #000060 100%);
     --vh-head-border: #000000;
     --vh-head-text: #ffffff;
@@ -427,7 +427,7 @@ body[data-era="xp"][data-variante="classic"] {
    WINDOWS VISTA - Aero Glass
    ============================================================================= */
 
-body[data-era="vista"] {
+[data-era="vista"] body {
     --vh-icon: #dff2ff;
     --vh-icon-stroke: 2px;
     --vh-scrim: 0.34;
@@ -454,7 +454,7 @@ body[data-era="vista"] {
     --vh-panel-text: #eaf7ff;
 }
 
-body[data-era="vista"][data-variante="aero"] {
+[data-era="vista"][data-variante="aero"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(70, 120, 160, 0.75) 0%, rgba(16, 36, 54, 0.9) 48%, rgba(6, 16, 26, 0.95) 100%);
     --vh-head-border: rgba(160, 215, 255, 0.42);
     --vh-head-text: #ffffff;
@@ -475,7 +475,7 @@ body[data-era="vista"][data-variante="aero"] {
     --vh-heading: #ffffff;
 }
 
-body[data-era="vista"][data-variante="graphite"] {
+[data-era="vista"][data-variante="graphite"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(110, 118, 128, 0.75) 0%, rgba(32, 36, 42, 0.92) 48%, rgba(14, 16, 20, 0.96) 100%);
     --vh-head-border: rgba(200, 208, 218, 0.4);
     --vh-head-text: #ffffff;
@@ -497,7 +497,7 @@ body[data-era="vista"][data-variante="graphite"] {
     --vh-heading: #ffffff;
 }
 
-body[data-era="vista"][data-variante="teal"] {
+[data-era="vista"][data-variante="teal"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(30, 150, 140, 0.75) 0%, rgba(8, 62, 60, 0.92) 48%, rgba(4, 30, 30, 0.96) 100%);
     --vh-head-border: rgba(140, 235, 225, 0.45);
     --vh-head-text: #ffffff;
@@ -519,7 +519,7 @@ body[data-era="vista"][data-variante="teal"] {
     --vh-heading: #ffffff;
 }
 
-body[data-era="vista"][data-variante="red"] {
+[data-era="vista"][data-variante="red"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(180, 60, 70, 0.75) 0%, rgba(74, 18, 24, 0.92) 48%, rgba(36, 8, 12, 0.96) 100%);
     --vh-head-border: rgba(255, 175, 182, 0.42);
     --vh-head-text: #ffffff;
@@ -541,7 +541,7 @@ body[data-era="vista"][data-variante="red"] {
     --vh-heading: #ffffff;
 }
 
-body[data-era="vista"][data-variante="green"] {
+[data-era="vista"][data-variante="green"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(80, 170, 90, 0.75) 0%, rgba(24, 62, 26, 0.92) 48%, rgba(10, 30, 12, 0.96) 100%);
     --vh-head-border: rgba(180, 245, 185, 0.42);
     --vh-head-text: #ffffff;
@@ -563,7 +563,7 @@ body[data-era="vista"][data-variante="green"] {
     --vh-heading: #ffffff;
 }
 
-body[data-era="vista"][data-variante="violet"] {
+[data-era="vista"][data-variante="violet"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(140, 100, 210, 0.75) 0%, rgba(43, 23, 69, 0.92) 48%, rgba(22, 10, 38, 0.96) 100%);
     --vh-head-border: rgba(215, 190, 255, 0.42);
     --vh-head-text: #ffffff;
@@ -589,7 +589,7 @@ body[data-era="vista"][data-variante="violet"] {
    WINDOWS 7 - Aero
    ============================================================================= */
 
-body[data-era="win7"] {
+[data-era="win7"] body {
     --vh-icon-stroke: 1.5px;
     --vh-scrim: 0.22;
     --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
@@ -614,7 +614,7 @@ body[data-era="win7"] {
     --vh-panel-shadow: inset 0 1px 0 #ffffff, 0 8px 22px rgba(20, 50, 80, 0.3);
 }
 
-body[data-era="win7"][data-variante="aero"] {
+[data-era="win7"][data-variante="aero"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(120, 150, 180, 0.92) 0%, rgba(60, 85, 110, 0.95) 46%, rgba(24, 40, 58, 0.97) 100%);
     --vh-head-border: rgba(255, 255, 255, 0.55);
     --vh-head-text: #ffffff;
@@ -637,7 +637,7 @@ body[data-era="win7"][data-variante="aero"] {
     --vh-heading: #0d3a5c;
 }
 
-body[data-era="win7"][data-variante="architecture"] {
+[data-era="win7"][data-variante="architecture"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(150, 145, 135, 0.92) 0%, rgba(70, 66, 60, 0.95) 46%, rgba(32, 30, 27, 0.97) 100%);
     --vh-head-border: rgba(255, 250, 240, 0.5);
     --vh-head-text: #ffffff;
@@ -660,7 +660,7 @@ body[data-era="win7"][data-variante="architecture"] {
     --vh-heading: #3a332a;
 }
 
-body[data-era="win7"][data-variante="nature"] {
+[data-era="win7"][data-variante="nature"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(120, 175, 110, 0.92) 0%, rgba(45, 95, 45, 0.95) 46%, rgba(20, 48, 22, 0.97) 100%);
     --vh-head-border: rgba(225, 255, 220, 0.55);
     --vh-head-text: #ffffff;
@@ -683,7 +683,7 @@ body[data-era="win7"][data-variante="nature"] {
     --vh-heading: #245024;
 }
 
-body[data-era="win7"][data-variante="scenes"] {
+[data-era="win7"][data-variante="scenes"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(90, 175, 185, 0.92) 0%, rgba(30, 95, 102, 0.95) 46%, rgba(12, 48, 54, 0.97) 100%);
     --vh-head-border: rgba(215, 250, 255, 0.55);
     --vh-head-text: #ffffff;
@@ -706,7 +706,7 @@ body[data-era="win7"][data-variante="scenes"] {
     --vh-heading: #114a54;
 }
 
-body[data-era="win7"][data-variante="characters"] {
+[data-era="win7"][data-variante="characters"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(200, 120, 165, 0.92) 0%, rgba(120, 40, 80, 0.95) 46%, rgba(62, 16, 40, 0.97) 100%);
     --vh-head-border: rgba(255, 220, 238, 0.55);
     --vh-head-text: #ffffff;
@@ -729,7 +729,7 @@ body[data-era="win7"][data-variante="characters"] {
     --vh-heading: #5c1c38;
 }
 
-body[data-era="win7"][data-variante="landscapes"] {
+[data-era="win7"][data-variante="landscapes"] body {
     --vh-head-bg: linear-gradient(180deg, rgba(205, 160, 95, 0.92) 0%, rgba(125, 80, 30, 0.95) 46%, rgba(68, 40, 12, 0.97) 100%);
     --vh-head-border: rgba(255, 240, 210, 0.55);
     --vh-head-text: #ffffff;
@@ -756,7 +756,7 @@ body[data-era="win7"][data-variante="landscapes"] {
    WINDOWS 8 - Modern UI (Metro)
    ============================================================================= */
 
-body[data-era="win8"] {
+[data-era="win8"] body {
     --vh-icon-stroke: 2px;
     --vh-scrim: 0.10;
     --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
@@ -798,18 +798,18 @@ body[data-era="win8"] {
 }
 
 /* Metro se distingue por el acento: el fondo de los botones al pasar. */
-body[data-era="win8"][data-variante="blue"]   { --vh-accent: #00a4ef; --vh-btn-hover-bg: #00a4ef; --vh-btn-hover-border: #00a4ef; --vh-btn-hover-text: #ffffff; }
-body[data-era="win8"][data-variante="purple"] { --vh-accent: #7c4dff; --vh-btn-hover-bg: #7c4dff; --vh-btn-hover-border: #7c4dff; --vh-btn-hover-text: #ffffff; }
-body[data-era="win8"][data-variante="green"]  { --vh-accent: #00ab6c; --vh-btn-hover-bg: #00ab6c; --vh-btn-hover-border: #00ab6c; --vh-btn-hover-text: #ffffff; }
-body[data-era="win8"][data-variante="orange"] { --vh-accent: #f7630c; --vh-btn-hover-bg: #f7630c; --vh-btn-hover-border: #f7630c; --vh-btn-hover-text: #ffffff; }
-body[data-era="win8"][data-variante="red"]    { --vh-accent: #e81123; --vh-btn-hover-bg: #e81123; --vh-btn-hover-border: #e81123; --vh-btn-hover-text: #ffffff; }
-body[data-era="win8"][data-variante="teal"]   { --vh-accent: #00b7c3; --vh-btn-hover-bg: #00b7c3; --vh-btn-hover-border: #00b7c3; --vh-btn-hover-text: #ffffff; }
+[data-era="win8"][data-variante="blue"] body   { --vh-accent: #00a4ef; --vh-btn-hover-bg: #00a4ef; --vh-btn-hover-border: #00a4ef; --vh-btn-hover-text: #ffffff; }
+[data-era="win8"][data-variante="purple"] body { --vh-accent: #7c4dff; --vh-btn-hover-bg: #7c4dff; --vh-btn-hover-border: #7c4dff; --vh-btn-hover-text: #ffffff; }
+[data-era="win8"][data-variante="green"] body  { --vh-accent: #00ab6c; --vh-btn-hover-bg: #00ab6c; --vh-btn-hover-border: #00ab6c; --vh-btn-hover-text: #ffffff; }
+[data-era="win8"][data-variante="orange"] body { --vh-accent: #f7630c; --vh-btn-hover-bg: #f7630c; --vh-btn-hover-border: #f7630c; --vh-btn-hover-text: #ffffff; }
+[data-era="win8"][data-variante="red"] body    { --vh-accent: #e81123; --vh-btn-hover-bg: #e81123; --vh-btn-hover-border: #e81123; --vh-btn-hover-text: #ffffff; }
+[data-era="win8"][data-variante="teal"] body   { --vh-accent: #00b7c3; --vh-btn-hover-bg: #00b7c3; --vh-btn-hover-border: #00b7c3; --vh-btn-hover-text: #ffffff; }
 
 /* =============================================================================
    WINDOWS 10 - Fluent
    ============================================================================= */
 
-body[data-era="win10"] {
+[data-era="win10"] body {
     --vh-icon-stroke: 1.5px;
     --vh-scrim: 0.30;
     --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
@@ -833,7 +833,7 @@ body[data-era="win10"] {
     --vh-login-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
 }
 
-body[data-era="win10"][data-variante="azul-claro"] {
+[data-era="win10"][data-variante="azul-claro"] body {
     --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
     --vh-panel-bg: rgba(248, 248, 248, 0.8);
     --vh-panel-border: rgba(0, 0, 0, 0.1);
@@ -858,7 +858,7 @@ body[data-era="win10"][data-variante="azul-claro"] {
     --vh-icon: #1a1a1a;
 }
 
-body[data-era="win10"][data-variante="verde-claro"] {
+[data-era="win10"][data-variante="verde-claro"] body {
     --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
     --vh-panel-bg: rgba(248, 248, 248, 0.8);
     --vh-panel-border: rgba(0, 0, 0, 0.1);
@@ -883,7 +883,7 @@ body[data-era="win10"][data-variante="verde-claro"] {
     --vh-icon: #1a2a1a;
 }
 
-body[data-era="win10"][data-variante="grafito-claro"] {
+[data-era="win10"][data-variante="grafito-claro"] body {
     --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
     --vh-panel-bg: rgba(244, 244, 244, 0.82);
     --vh-panel-border: rgba(0, 0, 0, 0.12);
@@ -908,7 +908,7 @@ body[data-era="win10"][data-variante="grafito-claro"] {
     --vh-icon: #202020;
 }
 
-body[data-era="win10"][data-variante="azul-oscuro"] {
+[data-era="win10"][data-variante="azul-oscuro"] body {
     --vh-panel-bg: rgba(32, 32, 32, 0.8);
     --vh-panel-border: #3a3a3a;
     --vh-panel-text: #ffffff;
@@ -932,7 +932,7 @@ body[data-era="win10"][data-variante="azul-oscuro"] {
     --vh-icon: #ffffff;
 }
 
-body[data-era="win10"][data-variante="purpura-oscuro"] {
+[data-era="win10"][data-variante="purpura-oscuro"] body {
     --vh-panel-bg: rgba(34, 30, 44, 0.82);
     --vh-panel-border: #443a58;
     --vh-panel-text: #f2ecff;
@@ -956,7 +956,7 @@ body[data-era="win10"][data-variante="purpura-oscuro"] {
     --vh-icon: #f2ecff;
 }
 
-body[data-era="win10"][data-variante="ambar-oscuro"] {
+[data-era="win10"][data-variante="ambar-oscuro"] body {
     --vh-panel-bg: rgba(36, 32, 26, 0.82);
     --vh-panel-border: #4a4234;
     --vh-panel-text: #fff6e6;
@@ -1157,25 +1157,25 @@ body[data-era="win10"][data-variante="ambar-oscuro"] {
 }
 
 /* El resaltado del tema elegido tiene que ganar a la regla general de botones. */
-body[data-era] .vh-tema-tile {
+[data-era] body .vh-tema-tile {
     border: 2px solid transparent !important;
     background: rgba(255, 255, 255, 0.06) !important;
     box-shadow: none !important;
     padding: 0 !important;
 }
 
-body[data-era] .vh-tema-tile:hover {
+[data-era] body .vh-tema-tile:hover {
     background: rgba(255, 255, 255, 0.14) !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
-body[data-era] .vh-tema-tile.activo {
+[data-era] body .vh-tema-tile.activo {
     border-color: #58c4ff !important;
     box-shadow: 0 0 0 2px rgba(88, 196, 255, 0.35) !important;
 }
 
 /* El boton que abre el carrusel no debe heredar el texto de la barra. */
-body[data-era] .vh-temas-btn {
+[data-era] body .vh-temas-btn {
     text-shadow: none !important;
 }
 
@@ -1188,7 +1188,7 @@ body[data-era] .vh-temas-btn {
    -------------------------------------------------------------------------- */
 
 /* Guardia general: cualquier texto dentro de un panel usa el color del panel. */
-body[data-era] :is(.gadget, .forum-card, .forum-post, .admin-card, .config-card,
+[data-era] body :is(.gadget, .forum-card, .forum-post, .admin-card, .config-card,
                    .suggestions-card, .profile-menu, .sidebar, .chat-panel,
                    .chat-header, .chat-tabs, .chat-input-area, .header-login-card,
                    .linux-news-panel, .container-card, .profile-area-card,
@@ -1199,47 +1199,47 @@ body[data-era] :is(.gadget, .forum-card, .forum-post, .admin-card, .config-card,
 }
 
 /* La pantalla de login tenia un color casi transparente. */
-body[data-era] .login-screen {
+[data-era] body .login-screen {
     color: var(--vh-text) !important;
 }
 
 /* El panel de acceso forzaba blanco. */
-body[data-era] .access-gadget,
-body[data-era] .access-gadget h3,
-body[data-era] .access-gadget p,
-body[data-era] .access-gadget label,
-body[data-era] .access-gadget div {
+[data-era] body .access-gadget,
+[data-era] body .access-gadget h3,
+[data-era] body .access-gadget p,
+[data-era] body .access-gadget label,
+[data-era] body .access-gadget div {
     color: var(--vh-text) !important;
 }
 
 /* La inicial del avatar tambien iba en blanco fijo. */
-body[data-era] .profile-aero-frame span {
+[data-era] body .profile-aero-frame span {
     color: var(--vh-text) !important;
 }
 
 /* Avisos: rojo y verde legibles sobre panel claro y sobre panel oscuro. */
-body[data-era] .auth-error {
+[data-era] body .auth-error {
     color: var(--vh-alert-error, #8a1c1c) !important;
     background-color: rgba(200, 60, 60, 0.16) !important;
     border-color: rgba(200, 60, 60, 0.35) !important;
 }
 
-body[data-era] .auth-success {
+[data-era] body .auth-success {
     color: var(--vh-alert-ok, #1c6b32) !important;
     background-color: rgba(50, 160, 90, 0.16) !important;
     border-color: rgba(50, 160, 90, 0.35) !important;
 }
 
-body[data-era] .system-state-pill.is-online {
+[data-era] body .system-state-pill.is-online {
     color: var(--vh-alert-ok, #1c6b32) !important;
 }
 
-body[data-era] .system-state-pill.is-offline {
+[data-era] body .system-state-pill.is-offline {
     color: var(--vh-alert-error, #8a1c1c) !important;
 }
 
 /* Los botones dentro de un panel conservan SU color, no el del texto. */
-body[data-era] :is(.gadget, .forum-card, .admin-card, .config-card,
+[data-era] body :is(.gadget, .forum-card, .admin-card, .config-card,
                    .suggestions-card, .profile-menu, .sidebar, .chat-panel,
                    .header-login-card, .container-card, .profile-area-card)
     :is(button, input[type="submit"]) {
@@ -1247,17 +1247,17 @@ body[data-era] :is(.gadget, .forum-card, .admin-card, .config-card,
 }
 
 /* El menu de perfil: sus enlaces se veian lavados sobre el panel claro. */
-body[data-era] .profile-menu a,
-body[data-era] .profile-menu span,
-body[data-era] .profile-menu li {
+[data-era] body .profile-menu a,
+[data-era] body .profile-menu span,
+[data-era] body .profile-menu li {
     color: var(--vh-text) !important;
 }
 
 /* Los numeros grandes del panel de estado. */
-body[data-era] .gadget strong,
-body[data-era] .gadget b,
-body[data-era] .status-value,
-body[data-era] .metric-value {
+[data-era] body .gadget strong,
+[data-era] body .gadget b,
+[data-era] body .status-value,
+[data-era] body .metric-value {
     color: var(--vh-text) !important;
     font-weight: 700;
 }
@@ -1270,27 +1270,27 @@ body[data-era] .metric-value {
    valen Alt + flecha izquierda/derecha.
    -------------------------------------------------------------------------- */
 
-body[data-era] .vh-temas {
+[data-era] body .vh-temas {
     display: inline-flex;
     align-items: stretch;
 }
 
 /* El color del boton NO es el de la barra: va en blanco en la barra verde de XP
    Oliva y quedaba ilegible sobre el fondo claro del boton. */
-body[data-era] .vh-temas-btn,
-body[data-era] .vh-temas-caret {
+[data-era] body .vh-temas-btn,
+[data-era] body .vh-temas-caret {
     color: var(--vh-btn-text) !important;
     text-shadow: none !important;
     border-radius: 0 !important;
 }
 
-body[data-era] .vh-temas-btn {
+[data-era] body .vh-temas-btn {
     border-top-left-radius: var(--vh-btn-radius) !important;
     border-bottom-left-radius: var(--vh-btn-radius) !important;
     border-right: none !important;
 }
 
-body[data-era] .vh-temas-caret {
+[data-era] body .vh-temas-caret {
     border-top-right-radius: var(--vh-btn-radius) !important;
     border-bottom-right-radius: var(--vh-btn-radius) !important;
     padding: 6px 8px !important;
@@ -1299,7 +1299,7 @@ body[data-era] .vh-temas-caret {
     cursor: pointer;
 }
 
-body[data-era] .vh-temas-caret:hover {
+[data-era] body .vh-temas-caret:hover {
     background: var(--vh-btn-hover-bg) !important;
     color: var(--vh-btn-hover-text) !important;
 }
@@ -1333,53 +1333,53 @@ body[data-era] .vh-temas-caret:hover {
    ============================================================================= */
 
 /* Cabeceras y acciones de las tarjetas. */
-body[data-era] .gadget-head h3,
-body[data-era] .gadget-head h4,
-body[data-era] .gadget-title {
+[data-era] body .gadget-head h3,
+[data-era] body .gadget-head h4,
+[data-era] body .gadget-title {
     color: var(--vh-text) !important;
 }
 
-body[data-era] .gadget-actions button,
-body[data-era] .gadget-size-text-btn,
-body[data-era] .gadget-mini-btn {
+[data-era] body .gadget-actions button,
+[data-era] body .gadget-size-text-btn,
+[data-era] body .gadget-mini-btn {
     color: var(--vh-btn-text) !important;
 }
 
 /* Panel de chat. */
-body[data-era] .chat-header,
-body[data-era] .chat-header *,
-body[data-era] .chat-tabs,
-body[data-era] .chat-tabs * {
+[data-era] body .chat-header,
+[data-era] body .chat-header *,
+[data-era] body .chat-tabs,
+[data-era] body .chat-tabs * {
     color: var(--vh-text) !important;
 }
 
-body[data-era] .chat-input-area input,
-body[data-era] .chat-input-area textarea {
+[data-era] body .chat-input-area input,
+[data-era] body .chat-input-area textarea {
     color: var(--vh-input-text) !important;
 }
 
 /* Textos secundarios: fecha, autor, contadores. */
-body[data-era] .post-meta,
-body[data-era] .post-meta *,
-body[data-era] .meta,
-body[data-era] small,
-body[data-era] time {
+[data-era] body .post-meta,
+[data-era] body .post-meta *,
+[data-era] body .meta,
+[data-era] body small,
+[data-era] body time {
     color: var(--vh-text) !important;
     opacity: 0.85;
 }
 
 /* Enlaces dentro del contenido. */
-body[data-era] .forum-post a,
-body[data-era] .forum-card a,
-body[data-era] .admin-card a,
-body[data-era] .config-card a {
+[data-era] body .forum-post a,
+[data-era] body .forum-card a,
+[data-era] body .admin-card a,
+[data-era] body .config-card a {
     color: var(--vh-accent) !important;
     text-decoration: underline;
 }
 
 /* El desplegable y los campos de busqueda del header. */
-body[data-era] header input,
-body[data-era] header select {
+[data-era] body header input,
+[data-era] body header select {
     color: var(--vh-input-text) !important;
     background: var(--vh-input-bg) !important;
     border: 1px solid var(--vh-input-border) !important;
@@ -1396,7 +1396,7 @@ body[data-era] header select {
    deslizandose desde el boton en vez de aparecer de repente.
    -------------------------------------------------------------------------- */
 
-body[data-era] .global-chat-widget .chat-panel {
+[data-era] body .global-chat-widget .chat-panel {
     flex: 0 0 0;
     width: 0;
     min-width: 0;
@@ -1415,7 +1415,7 @@ body[data-era] .global-chat-widget .chat-panel {
         transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-body[data-era] .global-chat-widget .chat-panel.is-open {
+[data-era] body .global-chat-widget .chat-panel.is-open {
     flex-basis: clamp(300px, 28vw, 390px);
     width: clamp(300px, 28vw, 390px);
     max-width: min(390px, calc(100vw - 86px));
@@ -1426,7 +1426,7 @@ body[data-era] .global-chat-widget .chat-panel.is-open {
 
 /* En pantallas estrechas el panel ocupa casi todo el ancho. */
 @media (max-width: 900px), (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
-    body[data-era] .global-chat-widget .chat-panel.is-open {
+    [data-era] body .global-chat-widget .chat-panel.is-open {
         flex-basis: min(92vw, 360px);
         width: min(92vw, 360px);
         max-width: min(92vw, 360px);
@@ -1434,16 +1434,16 @@ body[data-era] .global-chat-widget .chat-panel.is-open {
 }
 
 /* El boton tambien responde al pasar por encima, para que se note que abre algo. */
-body[data-era] .global-chat-widget .chat-toggle {
+[data-era] body .global-chat-widget .chat-toggle {
     transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease;
 }
 
-body[data-era] .global-chat-widget .chat-toggle:hover {
+[data-era] body .global-chat-widget .chat-toggle:hover {
     transform: translateY(-2px) scale(1.04);
 }
 
 /* Al abrir, el icono se inclina un poco: da la sensacion de que responde. */
-body[data-era] .global-chat-widget .chat-panel.is-open ~ .chat-toggle {
+[data-era] body .global-chat-widget .chat-panel.is-open ~ .chat-toggle {
     transform: rotate(0deg);
 }
 
@@ -1477,7 +1477,7 @@ body[data-era] .global-chat-widget .chat-panel.is-open ~ .chat-toggle {
 
 /* El contenido cambia de color con calma, no de golpe. Se dejan fuera .gadget y
    .chat-panel, que tienen su propia transicion de tamano y no deben perderla. */
-body[data-era] :is(header, footer, h1, h2, h3, h4, a, button, input, textarea, select,
+[data-era] body :is(header, footer, h1, h2, h3, h4, a, button, input, textarea, select,
                    .forum-card, .admin-card, .config-card, .suggestions-card,
                    .container-card, .profile-menu, .sidebar, .login-screen,
                    .header-login-card, .chat-header, .chat-tabs, .chat-input-area,
@@ -1490,7 +1490,7 @@ body[data-era] :is(header, footer, h1, h2, h3, h4, a, button, input, textarea, s
 }
 
 /* Las tarjetas conservan su animacion de tamano y ganan la de color. */
-body[data-era] :is(.gadget, .gadget-content) {
+[data-era] body :is(.gadget, .gadget-content) {
     transition:
         background-color 0.5s ease,
         border-color 0.5s ease,
@@ -1503,7 +1503,7 @@ body[data-era] :is(.gadget, .gadget-content) {
 }
 
 /* Y el chat mantiene la suya (ancho) y ademas cambia de color. */
-body[data-era] .global-chat-widget .chat-panel {
+[data-era] body .global-chat-widget .chat-panel {
     transition:
         flex-basis 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
         width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -1528,19 +1528,158 @@ body[data-era] .global-chat-widget .chat-panel {
    redondo en Vista y 7, plano en 8 y 10.
    -------------------------------------------------------------------------- */
 
-body[data-era] .chat-toggle .chat-icon::before {
+[data-era] body .chat-toggle .chat-icon::before {
     border-color: var(--vh-btn-text) !important;
     border-width: var(--vh-icon-stroke, 2px) !important;
 }
 
-body[data-era] .chat-toggle .chat-icon::after {
+[data-era] body .chat-toggle .chat-icon::after {
     border-top-color: var(--vh-btn-text) !important;
 }
 
-body[data-era] .chat-toggle:hover .chat-icon::before {
+[data-era] body .chat-toggle:hover .chat-icon::before {
     border-color: var(--vh-btn-hover-text, var(--vh-btn-text)) !important;
 }
 
-body[data-era] .chat-toggle:hover .chat-icon::after {
+[data-era] body .chat-toggle:hover .chat-icon::after {
     border-top-color: var(--vh-btn-hover-text, var(--vh-btn-text)) !important;
+}
+
+/* =============================================================================
+   COMPONENTES QUE SE QUEDARON FUERA
+   =============================================================================
+   Estas piezas tienen estilos propios en su vista o en style.css y no estaban en
+   la lista de paneles, asi que seguian con el diseno anterior: el boton del chat,
+   el modal de publicar del foro, las publicaciones del perfil y el buscador de
+   amigos.
+   -------------------------------------------------------------------------- */
+
+/* --- Boton del chat ------------------------------------------------------ */
+
+[data-era] body .chat-toggle {
+    background: var(--vh-btn-bg) !important;
+    border: 1px solid var(--vh-btn-border) !important;
+    border-radius: var(--vh-toggle-radius) !important;
+    box-shadow: var(--vh-btn-shadow) !important;
+    color: var(--vh-btn-text) !important;
+    backdrop-filter: var(--vh-blur) !important;
+    -webkit-backdrop-filter: var(--vh-blur) !important;
+}
+
+[data-era] body .chat-toggle:hover {
+    background: var(--vh-btn-hover-bg) !important;
+    border-color: var(--vh-btn-hover-border) !important;
+}
+
+[data-era] body .chat-toggle .chat-icon::before {
+    border-color: var(--vh-btn-text) !important;
+    border-radius: var(--vh-icon-radius) !important;
+}
+
+[data-era] body .chat-toggle .chat-icon::after {
+    border-top-color: var(--vh-btn-text) !important;
+}
+
+/* --- Modal de publicar y de reportar del foro ---------------------------- */
+
+[data-era] body .forum-compose-modal,
+[data-era] body .forum-report-modal {
+    background: var(--vh-login-scrim) !important;
+    backdrop-filter: blur(3px) !important;
+    -webkit-backdrop-filter: blur(3px) !important;
+}
+
+[data-era] body .forum-compose-card,
+[data-era] body .forum-report-card {
+    background-color: var(--vh-panel-bg) !important;
+    background-image: none !important;
+    border: 1px solid var(--vh-panel-border) !important;
+    border-radius: var(--vh-panel-radius) !important;
+    box-shadow: var(--vh-login-shadow) !important;
+    color: var(--vh-text) !important;
+    backdrop-filter: var(--vh-blur) !important;
+    -webkit-backdrop-filter: var(--vh-blur) !important;
+}
+
+[data-era] body .forum-compose-card h3,
+[data-era] body .forum-compose-card label,
+[data-era] body .forum-compose-card p,
+[data-era] body .forum-compose-card span,
+[data-era] body .forum-compose-head h3,
+[data-era] body .forum-report-card h3,
+[data-era] body .forum-report-card label,
+[data-era] body .forum-report-card p {
+    color: var(--vh-text) !important;
+    text-shadow: none !important;
+}
+
+[data-era] body .forum-compose-launcher {
+    background: var(--vh-btn-bg) !important;
+    border: 1px solid var(--vh-btn-border) !important;
+    border-radius: var(--vh-btn-radius) !important;
+    color: var(--vh-btn-text) !important;
+}
+
+/* --- Publicaciones del perfil -------------------------------------------- */
+
+[data-era] body .profile-posts,
+[data-era] body .profile-post,
+[data-era] body .profile-post-form,
+[data-era] body .profile-feed {
+    background-color: var(--vh-panel-bg) !important;
+    background-image: none !important;
+    border: 1px solid var(--vh-panel-border) !important;
+    border-radius: var(--vh-panel-radius) !important;
+    box-shadow: var(--vh-panel-shadow) !important;
+    color: var(--vh-text) !important;
+}
+
+[data-era] body .profile-post-content,
+[data-era] body .profile-post-meta,
+[data-era] body .profile-post time,
+[data-era] body .profile-post span,
+[data-era] body .profile-post p {
+    color: var(--vh-text) !important;
+    text-shadow: none !important;
+}
+
+/* --- Buscar amigos -------------------------------------------------------- */
+
+[data-era] body .friends-page,
+[data-era] body .friends-panel,
+[data-era] body .friends-search,
+[data-era] body .friend-result,
+[data-era] body .friend-results {
+    background-color: var(--vh-panel-bg) !important;
+    background-image: none !important;
+    border: 1px solid var(--vh-panel-border) !important;
+    border-radius: var(--vh-panel-radius) !important;
+    box-shadow: var(--vh-panel-shadow) !important;
+    color: var(--vh-text) !important;
+    backdrop-filter: var(--vh-blur) !important;
+    -webkit-backdrop-filter: var(--vh-blur) !important;
+}
+
+[data-era] body .friends-panel h1,
+[data-era] body .friends-panel h2,
+[data-era] body .friends-panel h3,
+[data-era] body .friends-panel p,
+[data-era] body .friends-empty,
+[data-era] body .friend-result span,
+[data-era] body .friend-result p {
+    color: var(--vh-text) !important;
+    text-shadow: none !important;
+}
+
+/* --- Mensajes del chat ---------------------------------------------------- */
+
+[data-era] body .chat-messages,
+[data-era] body .chat-message,
+[data-era] body .chat-message-text,
+[data-era] body .chat-conversation-header {
+    color: var(--vh-text) !important;
+}
+
+[data-era] body .chat-message.is-mine .chat-message-text {
+    color: var(--vh-btn-text) !important;
 }

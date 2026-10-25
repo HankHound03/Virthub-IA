@@ -171,6 +171,7 @@
             }
         }
     </style>
+    @include('partials.tema-boot')
 </head>
 <body>
     @include('partials.header', [

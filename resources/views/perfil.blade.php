@@ -241,6 +241,7 @@
             }
         }
     </style>
+    @include('partials.tema-boot')
 </head>
 <body>
     @php
