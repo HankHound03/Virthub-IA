@@ -512,6 +512,24 @@
                     aplicar(f.dataset.era, f.dataset.variante);
                 }
 
+                /* En pantallas tactiles el toque abre el selector y el cambio se hace
+                   deslizando. Con raton se mantiene el clic para pasar al siguiente. */
+                var esTactil = false;
+
+                try {
+                    esTactil = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+                } catch (e) {
+                    esTactil = false;
+                }
+
+                function abrirPanel(abierto) {
+                    panel.hidden = !abierto;
+
+                    if (abrir) {
+                        abrir.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+                    }
+                }
+
                 boton.addEventListener('click', function (evento) {
                     evento.stopPropagation();
 
@@ -519,6 +537,11 @@
                        el tema ya cambio al soltar. */
                     if (ignorarClic) {
                         ignorarClic = false;
+                        return;
+                    }
+
+                    if (esTactil) {
+                        abrirPanel(panel.hidden);
                         return;
                     }
 

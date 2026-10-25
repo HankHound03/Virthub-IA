@@ -2109,3 +2109,81 @@ html.vh-ligero body *::after {
         letter-spacing: -1px;
     }
 }
+
+/* =============================================================================
+   MOVIL: CHAT A TAMANO COMPLETO Y PESTANAS DESLIZABLES
+   =============================================================================
+   En el telefono el panel del chat se abria al lado del boton, dentro de una fila
+   flexible: sumando el ancho del panel mas el del boton se pasaba de la pantalla y
+   el panel se salia por la izquierda, dejando las pestanas cortadas.
+
+   Ahora, en pantalla estrecha, el panel se coloca encima de la pagina ocupando todo
+   el ancho, y se deja libre la franja de abajo para que el boton redondo siga a la
+   vista y se pueda cerrar.
+
+   Las pestanas (Mensajes, Usuarios, Solicitudes, Anuncios) pasan a ser una tira
+   deslizable: se arrastran de lado en vez de apretarse todas en una fila.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 760px) {
+    [data-era] body .global-chat-widget .chat-panel.is-open {
+        position: fixed !important;
+        left: 8px !important;
+        right: 8px !important;
+        top: 8px !important;
+        bottom: 78px !important;
+        width: auto !important;
+        max-width: none !important;
+        flex-basis: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        z-index: 2400;
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* El boton queda por encima del panel para poder cerrarlo. */
+    [data-era] body .global-chat-widget .chat-toggle {
+        position: relative;
+        z-index: 2500;
+    }
+}
+
+/* Pestanas del chat: tira deslizable en cualquier tamano. */
+[data-era] body .chat-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 8px !important;
+}
+
+[data-era] body .chat-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+[data-era] body .chat-tabs > * {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    scroll-snap-align: start;
+}
+
+/* Los mensajes y el campo de escritura, con margen para no pegarse al borde. */
+@media (max-width: 760px) {
+    [data-era] body .global-chat-widget .chat-input-area {
+        padding: 8px !important;
+        gap: 6px !important;
+    }
+
+    [data-era] body .global-chat-widget .chat-input-area input,
+    [data-era] body .global-chat-widget .chat-input-area textarea {
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+}
