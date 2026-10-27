@@ -41,6 +41,12 @@ class ModerationTest extends TestCase
 
         app(JsonUserStore::class)->createOrUpdateAdmin('ana', 'P@ssword123!');
 
+        // Las carpetas de destino se crean aqui: en este equipo mover un archivo a
+        // una carpeta recien creada por el controlador falla al escribir.
+        File::ensureDirectoryExists($this->uploadDir . '/photos');
+        File::ensureDirectoryExists($this->uploadDir . '/videos');
+        File::ensureDirectoryExists($this->uploadDir . '/files');
+
         config([
             'virthub.uploads.chunk_bytes' => 1024,
             'virthub.uploads.max_file_bytes' => 1024 * 100,

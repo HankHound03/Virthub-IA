@@ -28,6 +28,8 @@ class ForumController extends Controller
 
     public function __construct(
         private readonly ForumStore $forum,
+        private readonly \App\Services\ModerationService $moderacion,
+        private readonly \App\Services\AvisoStore $avisos,
         private readonly ChunkedUploadService $uploads,
         private readonly VirusScanner $antivirus,
     ) {}
@@ -347,6 +349,51 @@ class ForumController extends Controller
     }
 
     /**
+     * Avisa de una foto retirada: al usuario y al administrador.
+     *
+     * @param array{prohibida: bool, puntuacion: float, motivo: string} $revision
+     */
+    private function registrarFotoRetirada(Request $request, string $nombre, array $revision): void
+    {
+        $usuario = (string) \App\Support\ActiveUser::username(\App\Support\ActiveUser::from($request));
+
+        if ($usuario === '') {
+            $usuario = 'invitado';
+        }
+
+        $this->avisos->crear(
+            $usuario,
+            'Foto retirada del foro',
+            'La imagen "' . $nombre . '" no se publico porque se detecto contenido no permitido. '
+                . 'Si crees que es un error, escribe al administrador.',
+            'moderacion',
+            [
+                'archivo' => $nombre,
+                'motivo' => $revision['motivo'] ?? '',
+                'puntuacion' => $revision['puntuacion'] ?? 0,
+            ]
+        );
+
+        $this->avisos->crear(
+            'admin',
+            'Foto retirada automaticamente',
+            $usuario . ' intento publicar "' . $nombre . '" y la moderacion la retiro por contenido no permitido '
+                . '(puntuacion ' . ($revision['puntuacion'] ?? 0) . ').',
+            'moderacion',
+            [
+                'usuario' => $usuario,
+                'archivo' => $nombre,
+                'puntuacion' => $revision['puntuacion'] ?? 0,
+            ]
+        );
+
+        $request->session()->flash(
+            'aviso_moderacion',
+            'La imagen "' . $nombre . '" no se publico porque se detecto contenido no permitido.'
+        );
+    }
+
+    /**
      * @return array<int, array<string, string>>
      */
     private function storeAttachments(Request $request): array
@@ -389,6 +436,42 @@ class ForumController extends Controller
                 }
 
                 $uploaded->move($dir, $filename);
+
+                /*
+                 * Moderacion de la foto.
+                 *
+                 * Las fotos pequenas del formulario no pasan por la subida por
+                 * trozos, asi que hay que revisarlas aqui tambien. Sin esto solo
+                 * se moderaban los archivos grandes: una foto pequena entraba sin
+                 * mirar.
+                 */
+                if ($type === 'photo' && $this->moderacion->habilitado()) {
+                    $ruta = $dir . '/' . $filename;
+
+                    $revision = $this->moderacion->revisarImagen(
+                        $ruta,
+                        (string) $uploaded->getClientOriginalName()
+                    );
+
+                    if ($revision['prohibida']) {
+                        @unlink($ruta);
+
+                        try {
+                            $this->registrarFotoRetirada(
+                                $request,
+                                (string) $uploaded->getClientOriginalName(),
+                                $revision
+                            );
+                        } catch (\Throwable $e) {
+                            // Avisar nunca debe impedir que la publicacion siga.
+                            logger()->error('No se pudo avisar de la foto retirada: ' . $e->getMessage(), [
+                                'excepcion' => $e::class,
+                            ]);
+                        }
+
+                        continue;
+                    }
+                }
 
                 $attachments[] = [
                     'type' => $type,
