@@ -2020,3 +2020,81 @@ body .chat-users-panel {
         padding: 0 3%;
     }
 }
+
+/* =============================================================================
+   AVISOS PARA EL USUARIO
+   =============================================================================
+   Banda fina encima de la cabecera con los mensajes pendientes: por ejemplo,
+   cuando la moderacion retira una foto del foro. Se queda hasta que el
+   destinatario pulsa "Entendido".
+   -------------------------------------------------------------------------- */
+
+.vh-avisos {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 8px 5px 0;
+}
+
+.vh-aviso {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--vh-border, rgba(255, 255, 255, 0.16));
+    border-left: 4px solid #e0a63c;
+    border-radius: 10px;
+    background-color: var(--vh-surface, rgba(16, 28, 44, 0.92));
+    color: var(--vh-text, #e8f1ff);
+    font-family: Monocraft Nerd Font, monospace;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.vh-aviso-moderacion {
+    border-left-color: #e0574a;
+}
+
+.vh-aviso-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.vh-aviso-texto strong {
+    font-size: 13px;
+}
+
+.vh-aviso-texto span {
+    opacity: 0.9;
+}
+
+.vh-aviso-btn {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    border: 1px solid var(--vh-btn-border, rgba(255, 255, 255, 0.2));
+    border-radius: 8px;
+    background-color: var(--vh-btn-bg, rgba(255, 255, 255, 0.1));
+    color: inherit;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.vh-aviso-btn:hover {
+    filter: brightness(1.15);
+}
+
+@media (max-width: 640px) {
+    .vh-aviso {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .vh-aviso-btn {
+        align-self: flex-end;
+    }
+}

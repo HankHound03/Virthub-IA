@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AvisoStore;
 use App\Services\ChunkedUploadService;
+use App\Services\ModerationService;
 use App\Support\ActiveUser;
 use App\Support\SecurityAudit;
 use Illuminate\Http\JsonResponse;
@@ -21,6 +23,8 @@ class AttachmentController extends Controller
     public function __construct(
         private readonly ChunkedUploadService $uploads,
         private readonly SecurityAudit $audit,
+        private readonly ModerationService $moderation,
+        private readonly AvisoStore $avisos,
     ) {}
 
     /**
@@ -88,6 +92,20 @@ class AttachmentController extends Controller
             return response()->json(['error' => $e->getMessage()], 422);
         }
 
+        /*
+         * Revision de la imagen antes de darla por buena.
+         *
+         * Se hace aqui, al terminar la subida, y no al publicar: asi la foto no
+         * llega nunca a estar visible ni unos segundos. Solo se revisan imagenes;
+         * videos y documentos siguen su curso.
+         */
+        $username = ActiveUser::username(ActiveUser::from($request));
+        $revision = $this->revisarSiEsImagen($attachment, $username);
+
+        if ($revision !== null) {
+            return $revision;
+        }
+
         $this->audit->log($request, 'attachment.uploaded', ActiveUser::from($request), [
             'upload_id' => $uploadId,
             'path' => $attachment['path'],
@@ -100,6 +118,81 @@ class AttachmentController extends Controller
             'upload_id' => $uploadId,
             'attachment' => $attachment,
         ], 201);
+    }
+
+    /**
+     * Pasa la imagen por la moderacion y, si no es apta, la retira.
+     *
+     * Devuelve la respuesta de error si la foto se retiro, o null si puede seguir
+     * adelante (apta, moderacion apagada o servicio no disponible).
+     *
+     * @param array{type: string, name: string, mime: string, path: string, size: int} $attachment
+     */
+    private function revisarSiEsImagen(array $attachment, string $username): ?JsonResponse
+    {
+        // El servicio marca las imagenes como 'photo' (no 'image').
+        if (! in_array((string) ($attachment['type'] ?? ''), ['photo', 'image'], true)) {
+            return null;
+        }
+
+        if (! $this->moderation->habilitado()) {
+            return null;
+        }
+
+        $ruta = storage_path('app/public/' . $attachment['path']);
+
+        $resultado = $this->moderation->revisarImagen($ruta, (string) ($attachment['name'] ?? 'imagen'));
+
+        if (! $resultado['prohibida']) {
+            return null;
+        }
+
+        // Fuera la foto: ni se publica ni se queda ocupando disco.
+        @unlink($ruta);
+
+        $nombre = (string) ($attachment['name'] ?? 'una foto');
+        $motivo = (string) ($resultado['motivo'] ?? 'Contenido no permitido.');
+
+        $this->avisos->crear(
+            $username,
+            'Foto retirada del foro',
+            'La imagen "' . $nombre . '" se retiro del foro porque se detecto contenido no permitido. '
+                . 'Si crees que es un error, responde a este aviso o escribe al administrador.',
+            'moderacion',
+            [
+                'archivo' => $nombre,
+                'motivo' => $motivo,
+                'puntuacion' => $resultado['puntuacion'] ?? 0,
+            ]
+        );
+
+        $this->avisos->crear(
+            'admin',
+            'Foto retirada automaticamente',
+            $username . ' intento subir "' . $nombre . '" y la moderacion la retiro por contenido no permitido '
+                . '(puntuacion ' . ($resultado['puntuacion'] ?? 0) . ').',
+            'moderacion',
+            [
+                'usuario' => $username,
+                'archivo' => $nombre,
+                'motivo' => $motivo,
+                'puntuacion' => $resultado['puntuacion'] ?? 0,
+            ]
+        );
+
+        $this->audit->log(request(), 'attachment.blocked', ActiveUser::from(request()), [
+            'usuario' => $username,
+            'archivo' => $nombre,
+            'puntuacion' => $resultado['puntuacion'] ?? 0,
+        ]);
+
+        return response()->json([
+            'error' => 'La imagen se retiro porque se detecto contenido no permitido.',
+            'moderacion' => [
+                'retirada' => true,
+                'motivo' => $motivo,
+            ],
+        ], 422);
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ContainerController;
+use App\Support\ActiveUser;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\GuestWorkspaceController;
@@ -151,6 +152,29 @@ Route::get('/internal/proxy-auth', ProxyAuthController::class)
 // ---------------------------------------------------------------------------
 
 Route::middleware(EnsureRegisteredUser::class)->group(function (): void {
+    /*
+     * Avisos: mensajes cortos para el usuario (por ejemplo, cuando la moderacion
+     * retira una foto). El aviso se marca como leido y se vuelve a donde estaba.
+     */
+    Route::post('/avisos/{id}/leido', function (int $id) {
+        $usuario = (string) (ActiveUser::username(ActiveUser::from(request())) ?? '');
+
+        if ($usuario !== '') {
+            app(\App\Services\AvisoStore::class)->marcarLeido($usuario, $id);
+        }
+
+        return back();
+    })->name('avisos.leido');
+
+    Route::post('/avisos/leidos', function () {
+        $usuario = (string) (ActiveUser::username(ActiveUser::from(request())) ?? '');
+
+        if ($usuario !== '') {
+            app(\App\Services\AvisoStore::class)->marcarLeido($usuario);
+        }
+
+        return back();
+    })->name('avisos.leidos');
     // Espacio de trabajo del escritorio
     Route::get('/home/state', [HomeController::class, 'state'])->name('home.state');
     Route::post('/home/state', [HomeController::class, 'saveState'])

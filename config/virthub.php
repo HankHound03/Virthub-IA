@@ -24,7 +24,7 @@ return [
     |
     */
 
-    'version' => env('VIRTHUB_VERSION', 'VirtHub Codename: Redmond'),
+    'version' => env('VIRTHUB_VERSION', 'Virthub 1.7'),
 
     /*
     |--------------------------------------------------------------------------
@@ -62,6 +62,27 @@ return [
     | de seis digitos cada vez que se reinicia la base.
     |
     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Moderacion de imagenes (NSFW Sherlock)
+    |--------------------------------------------------------------------------
+    |
+    | Sherlock corre aparte, en su propio contenedor, y recibe la imagen en base64.
+    | Si la puntuacion de contenido no apto pasa del umbral, la foto se retira al
+    | terminar la subida y se avisa al usuario y al administrador.
+    |
+    | Viene apagada: hay que activarla con VIRTHUB_MODERACION=true y tener el
+    | servicio levantado.
+    |
+    */
+
+    'moderacion' => [
+        'enabled' => filter_var(env('VIRTHUB_MODERACION', false), FILTER_VALIDATE_BOOL),
+        'url' => env('VIRTHUB_MODERACION_URL', 'http://nsfw-sherlock:4000'),
+        'umbral' => (float) env('VIRTHUB_MODERACION_UMBRAL', 0.75),
+        'timeout' => (int) env('VIRTHUB_MODERACION_TIMEOUT', 25),
+    ],
 
     'seguridad' => [
         'dos_factores' => filter_var(env('VIRTHUB_2FA', true), FILTER_VALIDATE_BOOL),

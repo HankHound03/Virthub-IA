@@ -47,8 +47,21 @@ services:
       DB_DATABASE: ${DB_DATABASE:-virthub}
       DB_USERNAME: ${DB_USERNAME:-virthub}
       DB_PASSWORD: ${DB_PASSWORD:-virthub_password}
+
+      # Diseno Redmond: cinco epocas con sus esquemas y sus fondos.
+      VIRTHUB_TEMAS: "true"
+
+      # Sin panel de noticias en el inicio.
+      VIRTHUB_NOTICIAS: "false"
+
+      # Moderacion de las fotos del foro con NSFW Sherlock.
+      VIRTHUB_MODERACION: "true"
+      VIRTHUB_MODERACION_URL: "http://nsfw-sherlock:4000"
+      VIRTHUB_MODERACION_UMBRAL: "0.75"
     depends_on:
       mariadb:
+        condition: service_healthy
+      nsfw-sherlock:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1/up\") === false ? 1 : 0);'"]
@@ -229,6 +242,28 @@ services:
       TITLE: "Escritorio ct7"
     volumes:
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct7:/config
+    networks:
+      - virthub
+
+  # ---------------------------------------------------------------------------
+  # Moderacion de imagenes (NSFW Sherlock)
+  # ---------------------------------------------------------------------------
+  # Servicio aparte, autoalojado: recibe la foto en base64 y devuelve si es
+  # contenido no apto. La aplicacion lo consulta al terminar cada subida de
+  # imagen; si la tumbla, borra el archivo y avisa al usuario y al administrador.
+  #
+  # Sin puerto publicado: solo lo ve la aplicacion, dentro de la red interna.
+  nsfw-sherlock:
+    image: m1chl/nsfw-sherlock:latest
+    restart: unless-stopped
+    environment:
+      APP_ENV: web
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:4000/ping || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - virthub
 

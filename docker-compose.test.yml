@@ -65,10 +65,17 @@ services:
 
       # Sin codigo de seis digitos en pruebas.
       VIRTHUB_2FA: "false"
+
+      # Moderacion de fotos del foro con NSFW Sherlock.
+      VIRTHUB_MODERACION: "true"
+      VIRTHUB_MODERACION_URL: "http://nsfw-sherlock:4000"
+      VIRTHUB_MODERACION_UMBRAL: "0.75"
     depends_on:
       mariadb:
         condition: service_healthy
       clamav:
+        condition: service_healthy
+      nsfw-sherlock:
         condition: service_healthy
     volumes:
       # Que PHP detecte los cambios de codigo sin reiniciar (solo pruebas).
@@ -111,6 +118,28 @@ services:
       timeout: 10s
       retries: 5
       start_period: 120s
+    networks:
+      - virthub
+
+  # ---------------------------------------------------------------------------
+  # Moderacion de imagenes (NSFW Sherlock)
+  # ---------------------------------------------------------------------------
+  # Servicio aparte, autoalojado: recibe la foto en base64 y devuelve si es
+  # contenido no apto. La aplicacion lo consulta al terminar cada subida de
+  # imagen; si la tumbla, borra el archivo y avisa al usuario y al administrador.
+  #
+  # Corre en la red interna, sin puerto publicado: solo la aplicacion lo ve.
+  nsfw-sherlock:
+    image: m1chl/nsfw-sherlock:latest
+    environment:
+      APP_ENV: web
+    # El modelo tarda en cargar; el healthcheck evita que la app lo consulte antes.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:4000/ping || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - virthub
 

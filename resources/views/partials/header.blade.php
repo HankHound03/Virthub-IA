@@ -1,3 +1,43 @@
+@php
+    /*
+     * Avisos para el usuario.
+     *
+     * Aqui aparece, por ejemplo, el motivo por el que la moderacion retiro una
+     * foto del foro. El administrador recibe los suyos por el mismo camino, con
+     * su propio nombre como destinatario.
+     *
+     * Si algo falla leyendo el almacen, la pagina no se rompe: simplemente no se
+     * muestra ningun aviso.
+     */
+    $vhAvisos = [];
+
+    if (! empty($currentUser['username'] ?? null)) {
+        try {
+            $vhAvisos = app(\App\Services\AvisoStore::class)->para((string) $currentUser['username']);
+        } catch (\Throwable $e) {
+            $vhAvisos = [];
+        }
+    }
+@endphp
+
+@if (! empty($vhAvisos))
+    <div class="vh-avisos" role="status" aria-live="polite">
+        @foreach ($vhAvisos as $vhAviso)
+            <div class="vh-aviso vh-aviso-{{ $vhAviso['tipo'] ?? 'info' }}">
+                <div class="vh-aviso-texto">
+                    <strong>{{ $vhAviso['titulo'] ?? 'Aviso' }}</strong>
+                    <span>{{ $vhAviso['mensaje'] ?? '' }}</span>
+                </div>
+
+                <form method="POST" action="{{ url('/avisos/' . (int) ($vhAviso['id'] ?? 0) . '/leido') }}">
+                    @csrf
+                    <button type="submit" class="vh-aviso-btn">Entendido</button>
+                </form>
+            </div>
+        @endforeach
+    </div>
+@endif
+
 <header>
     <h1 class="brand-mark">
         <a href="{{ url('/') }}" aria-label="Ir al inicio de VirtHub">
