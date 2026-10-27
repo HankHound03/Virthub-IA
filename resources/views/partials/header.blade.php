@@ -192,7 +192,7 @@
         const openButton = document.getElementById('openLoginModal');
         const closeButton = document.getElementById('closeLoginModal');
         if (!modal || !openButton) return;
-        const shouldOpen = @json((bool) (session('two_factor_pending_username') || session('error') || (isset($errors) && $errors->any())));
+        const shouldOpen = @json((bool) (session('two_factor_pending_username') || session('error') || session('abrir_login') || (isset($errors) && $errors->any())));
         const card = modal.querySelector('.header-login-card');
 
         const getErrorMessage = payload => {

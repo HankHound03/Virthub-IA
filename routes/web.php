@@ -69,6 +69,19 @@ if (config('virthub.noticias.enabled')) {
 // Autenticacion
 // ---------------------------------------------------------------------------
 
+/*
+ * /login como direccion de verdad.
+ *
+ * Hasta ahora solo existia el POST: el inicio de sesion se hace en una ventana
+ * del inicio, asi que entrar a mano a /login devolvia 405 y parecia que la pagina
+ * no existia. Ahora esa direccion lleva al inicio con la ventana ya abierta.
+ */
+Route::get('/login', function () {
+    return redirect('/')->with('abrir_login', true);
+})->name('login.form');
+
+Route::get('/iniciar-sesion', fn () => redirect('/')->with('abrir_login', true));
+
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:login-ip')
     ->name('login');
