@@ -408,6 +408,28 @@ class ForumController extends Controller
     }
 
     /**
+     * Tipo real de un adjunto a partir de su extension y su tipo MIME.
+     *
+     * Coincide con el que usa la subida por trozos, para que las dos vias guarden
+     * las cosas en el mismo sitio y se comporten igual.
+     */
+    private function tipoDeArchivo(string $extension, string $mime): string
+    {
+        $imagenes = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'svg'];
+        $videos = ['mp4', 'webm', 'mov', 'avi', 'mkv'];
+
+        if (in_array($extension, $imagenes, true) || str_starts_with($mime, 'image/')) {
+            return 'photo';
+        }
+
+        if (in_array($extension, $videos, true) || str_starts_with($mime, 'video/')) {
+            return 'video';
+        }
+
+        return 'file';
+    }
+
+    /**
      * @return array<int, array<string, string>>
      */
     private function storeAttachments(Request $request): array
@@ -420,6 +442,18 @@ class ForumController extends Controller
                 // tocar el disco del servidor.
                 $this->verificarArchivo($uploaded);
 
+                $extension = strtolower((string) $uploaded->getClientOriginalExtension()) ?: 'bin';
+
+                /*
+                 * El tipo se deduce del archivo, no del boton con el que se subio.
+                 *
+                 * Antes se usaba el nombre del campo ('photos', 'files'...): una
+                 * imagen enviada por el boton "Archivo" quedaba como documento y,
+                 * ademas, se saltaba la moderacion, porque solo se revisaba lo que
+                 * llegaba por 'photos'.
+                 */
+                $type = $this->tipoDeArchivo($extension, (string) $uploaded->getClientMimeType());
+
                 // storage/app/public vive en el volumen persistente de Docker;
                 // public/uploads se perderia al reconstruir el contenedor.
                 $dir = storage_path('app/public/uploads/forum/' . $type . 's');
@@ -428,7 +462,6 @@ class ForumController extends Controller
                     mkdir($dir, 0755, true);
                 }
 
-                $extension = strtolower((string) $uploaded->getClientOriginalExtension()) ?: 'bin';
                 $filename = bin2hex(random_bytes(8)) . '_' . time() . '.' . $extension;
 
                 /*

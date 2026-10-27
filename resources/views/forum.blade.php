@@ -1000,10 +1000,18 @@
                                     // con un ternario y un cast se compila mal y rompe el
                                     // resto de la plantilla.
                                     $attachmentAvailable = \App\Support\AttachmentStorage::exists($attachment['path'] ?? null);
+
+                                    /*
+                                     * Una imagen se muestra aunque este guardada como documento.
+                                     * Antes, subirla por el boton "Archivo" la dejaba como archivo
+                                     * suelto y el usuario veia un enlace en vez de la foto.
+                                     */
+                                    $esImagen = ($attachment['type'] ?? '') === 'photo'
+                                        || str_starts_with((string) ($attachment['mime'] ?? ''), 'image/');
                                 @endphp
                                 @if (!$attachmentAvailable)
                                     <p class="attachment-missing">{{ $attachment['name'] ?? 'Archivo adjunto' }} — ya no esta en el servidor</p>
-                                @elseif (($attachment['type'] ?? '') === 'photo')
+                                @elseif ($esImagen)
                                     <img class="forum-post-image" src="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}" alt="{{ $attachment['name'] ?? 'Imagen adjunta' }}" loading="lazy">
                                 @elseif (($attachment['type'] ?? '') === 'video')
                                     <video class="forum-post-image" controls preload="metadata"><source src="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}" type="{{ $attachment['mime'] ?? 'video/mp4' }}"></video>
