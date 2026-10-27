@@ -211,7 +211,21 @@ class ForumController extends Controller
             return redirect('/foro')->with('error', 'No se pudo eliminar la publicacion.');
         }
 
+        /*
+         * Se borran TODOS los adjuntos, no solo la imagen antigua.
+         *
+         * Antes solo se miraba 'image_path', que las publicaciones nuevas dejan en
+         * null: los archivos adjuntos (fotos, videos y documentos, incluidos los
+         * subidos por trozos) se quedaban en el servidor ocupando espacio para
+         * siempre.
+         */
         $this->deleteAttachment((string) ($deleted['image_path'] ?? ''));
+
+        foreach ((array) ($deleted['attachments'] ?? []) as $adjunto) {
+            if (is_array($adjunto)) {
+                $this->deleteAttachment((string) ($adjunto['path'] ?? ''));
+            }
+        }
 
         return redirect('/foro')->with('success', 'Publicacion eliminada del foro.');
     }
