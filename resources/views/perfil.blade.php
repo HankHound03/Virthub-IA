@@ -277,7 +277,6 @@
                 </div>
                 <div>
                     <h2>{{ $profile['name'] ?: $profile['username'] }}</h2>
-                    <p class="profile-identity">ID: {{ $profile['id'] }}</p>
                     <p class="profile-identity">Username: {{ '@' . $profile['username'] }}</p>
                     @if (!$isOwner && !empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest'))
                         @php($friendshipStatus = $friendship['status'] ?? '')

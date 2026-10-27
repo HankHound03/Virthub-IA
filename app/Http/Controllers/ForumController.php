@@ -52,7 +52,19 @@ class ForumController extends Controller
          */
         $autores = [];
 
-        foreach (array_unique(array_map(static fn ($p) => (string) ($p['author'] ?? ''), $posts)) as $nombre) {
+        // Autores de las publicaciones y de los comentarios: unos y otros se
+        // muestran con su nombre de perfil.
+        $nombres = [];
+
+        foreach ($posts as $publicacion) {
+            $nombres[] = (string) ($publicacion['author'] ?? '');
+
+            foreach ((array) ($publicacion['comments'] ?? []) as $comentario) {
+                $nombres[] = (string) ($comentario['author'] ?? '');
+            }
+        }
+
+        foreach (array_unique(array_filter($nombres)) as $nombre) {
             if ($nombre === '') {
                 continue;
             }

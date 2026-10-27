@@ -999,7 +999,7 @@
                             <span class="forum-post-avatar" style="--marco: {{ $autorColor }};">
                                 @if ($autorImagen !== '' && \App\Support\AttachmentStorage::exists($autorImagen))
                                     <img src="{{ \App\Support\AttachmentStorage::url($autorImagen) }}"
-                                         alt="Foto de perfil de {{ $autorNombre }}"
+                                         alt="Foto de perfil de {{ $autorPerfil['name'] ?? $autorNombre }}"
                                          loading="lazy">
                                 @else
                                     <span class="forum-post-avatar-inicial" aria-hidden="true">{{ $autorInicial }}</span>
@@ -1008,7 +1008,7 @@
 
                             <div class="forum-post-head-texto">
                                 <h4>{{ $post['title'] ?: 'Publicacion sin titulo' }}</h4>
-                                <span class="forum-post-meta"><a href="{{ url('/perfil/' . rawurlencode((string) ($post['author'] ?? 'usuario'))) }}">{{ $post['author'] ?? 'usuario' }}</a> | {{ $post['created_at'] ?? '-' }}</span>
+                                <span class="forum-post-meta"><a href="{{ url('/perfil/' . rawurlencode((string) ($post['author'] ?? 'usuario'))) }}">{{ $autorPerfil['name'] ?? ($post['author'] ?? 'usuario') }}</a> | {{ $post['created_at'] ?? '-' }}</span>
                             </div>
                         </div>
 
@@ -1151,7 +1151,7 @@
                             <div class="comment-list">
                                 @forelse ($comments as $comment)
                                     <div class="comment-item">
-                                        <span class="comment-meta">{{ $comment['author'] ?? 'usuario' }} | {{ $comment['created_at'] ?? '-' }}</span>
+                                        <span class="comment-meta">{{ $autores[$comment['author'] ?? '']['name'] ?? ($comment['author'] ?? 'usuario') }} | {{ $comment['created_at'] ?? '-' }}</span>
                                         <div>{!! nl2br(e($comment['content'] ?? '')) !!}</div>
                                     </div>
                                 @empty
