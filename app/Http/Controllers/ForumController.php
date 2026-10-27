@@ -32,6 +32,7 @@ class ForumController extends Controller
         private readonly \App\Services\AvisoStore $avisos,
         private readonly ChunkedUploadService $uploads,
         private readonly VirusScanner $antivirus,
+        private readonly \App\Services\UserStore $users,
     ) {}
 
     public function index(Request $request): View
@@ -40,10 +41,36 @@ class ForumController extends Controller
 
         $maxFileBytes = (int) config('virthub.uploads.max_file_bytes', 5 * 1024 ** 3);
 
+        $posts = $this->forum->latestPosts((int) config('virthub.chat.posts_per_page', 120));
+
+        /*
+         * Datos de perfil de quienes publican.
+         *
+         * Se consulta una vez por autor (no por publicacion) y se pasa a la vista,
+         * que asi puede pintar la foto de perfil junto al nombre como en cualquier
+         * foro.
+         */
+        $autores = [];
+
+        foreach (array_unique(array_map(static fn ($p) => (string) ($p['author'] ?? ''), $posts)) as $nombre) {
+            if ($nombre === '') {
+                continue;
+            }
+
+            $usuario = $this->users->findByUsername($nombre);
+
+            $autores[$nombre] = [
+                'profile_image_path' => (string) ($usuario['profile_image_path'] ?? ''),
+                'profile_frame_color' => (string) ($usuario['profile_frame_color'] ?? '#6ea8ff'),
+                'name' => (string) ($usuario['name'] ?? $nombre),
+            ];
+        }
+
         return view('forum', [
             'currentUser' => $currentUser,
             'canPost' => ActiveUser::isRegistered($currentUser),
-            'posts' => $this->forum->latestPosts((int) config('virthub.chat.posts_per_page', 120)),
+            'posts' => $posts,
+            'autores' => $autores,
             // Limite de los adjuntos en el formulario clasico (una sola peticion).
             'attachmentMaxBytes' => self::ATTACHMENT_MAX_BYTES,
             'attachmentMaxLabel' => $this->humanSize(self::ATTACHMENT_MAX_BYTES),

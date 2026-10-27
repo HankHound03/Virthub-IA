@@ -981,8 +981,37 @@
 
                             $hasPoll = $pollQuestion !== '' && count($pollOptions) >= 2;
                         @endphp
-                        <h4>{{ $post['title'] ?: 'Publicacion sin titulo' }}</h4>
-                        <span class="forum-post-meta"><a href="{{ url('/perfil/' . rawurlencode((string) ($post['author'] ?? 'usuario'))) }}">{{ $post['author'] ?? 'usuario' }}</a> | {{ $post['created_at'] ?? '-' }}</span>
+                        @php
+                            /*
+                             * Foto de perfil del autor, como en cualquier foro.
+                             *
+                             * Si no tiene foto se muestra su inicial sobre el color de su
+                             * marco, para que la cabecera no quede coja.
+                             */
+                            $autorNombre = (string) ($post['author'] ?? 'usuario');
+                            $autorPerfil = $autores[$autorNombre] ?? [];
+                            $autorImagen = (string) ($autorPerfil['profile_image_path'] ?? '');
+                            $autorColor = (string) ($autorPerfil['profile_frame_color'] ?? '#6ea8ff');
+                            $autorInicial = strtoupper(substr($autorNombre !== '' ? $autorNombre : 'U', 0, 1));
+                        @endphp
+
+                        <div class="forum-post-head">
+                            <span class="forum-post-avatar" style="--marco: {{ $autorColor }};">
+                                @if ($autorImagen !== '' && \App\Support\AttachmentStorage::exists($autorImagen))
+                                    <img src="{{ \App\Support\AttachmentStorage::url($autorImagen) }}"
+                                         alt="Foto de perfil de {{ $autorNombre }}"
+                                         loading="lazy">
+                                @else
+                                    <span class="forum-post-avatar-inicial" aria-hidden="true">{{ $autorInicial }}</span>
+                                @endif
+                            </span>
+
+                            <div class="forum-post-head-texto">
+                                <h4>{{ $post['title'] ?: 'Publicacion sin titulo' }}</h4>
+                                <span class="forum-post-meta"><a href="{{ url('/perfil/' . rawurlencode((string) ($post['author'] ?? 'usuario'))) }}">{{ $post['author'] ?? 'usuario' }}</a> | {{ $post['created_at'] ?? '-' }}</span>
+                            </div>
+                        </div>
+
                         <div>{!! nl2br(e($post['content'] ?? '')) !!}</div>
 
                         @if (!empty($post['image_path']))

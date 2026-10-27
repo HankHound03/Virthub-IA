@@ -1,0 +1,8 @@
+Get-CimInstance : Acceso denegado 
+En línea: 1 Carácter: 2
++ (Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory
++  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (root\cimv2:Win32_OperatingSystem:String) [Get-CimInstance], CimExcept 
+   ion
+    + FullyQualifiedErrorId : HRESULT 0x80041003,Microsoft.Management.Infrastructure.CimCmdlets.GetCimInstanceCommand
+ 

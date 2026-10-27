@@ -2115,3 +2115,64 @@ body .chat-users-panel {
 .forum-upload-cancel:hover {
     filter: brightness(1.15);
 }
+
+/* =============================================================================
+   FOTO DE PERFIL EN LAS PUBLICACIONES DEL FORO
+   =============================================================================
+   La cabecera de cada publicacion lleva la foto del autor, con su inicial como
+   respaldo para quien no tenga foto puesta.
+   -------------------------------------------------------------------------- */
+
+.forum-post-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.forum-post-head-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.forum-post-avatar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    /* --marco lo pone la vista con el color del perfil de cada autor. */
+    border: 2px solid var(--marco, #6ea8ff);
+    background: rgba(0, 0, 0, 0.18);
+    box-sizing: border-box;
+}
+
+.forum-post-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.forum-post-avatar-inicial {
+    font-family: Monocraft Nerd Font, monospace;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--marco, #6ea8ff);
+}
+
+@media (max-width: 560px) {
+    .forum-post-avatar {
+        width: 34px;
+        height: 34px;
+    }
+
+    .forum-post-avatar-inicial {
+        font-size: 13px;
+    }
+}
