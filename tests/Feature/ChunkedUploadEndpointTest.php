@@ -152,16 +152,19 @@ class ChunkedUploadEndpointTest extends TestCase
             ->assertJsonFragment(['error' => 'La subida no existe o no te pertenece.']);
     }
 
-    public function test_un_trozo_fuera_de_orden_devuelve_error_claro(): void
+    public function test_un_trozo_fuera_de_orden_se_acepta(): void
     {
+        // Los trozos ya no tienen que llegar en orden: cada uno se escribe en su
+        // posicion, para que el cliente pueda mandar varios a la vez.
         $session = $this->initiate('notas.txt', 3072);
 
         $this->withSession($this->authSession())
             ->call('POST', '/attachments/' . $session['upload_id'] . '/chunk/2', [], [], [], [
                 'CONTENT_TYPE' => 'application/octet-stream',
             ], str_repeat('X', 1024))
-            ->assertStatus(422)
-            ->assertJsonPath('error', 'Trozo fuera de orden: se esperaba el 0 y llego el 2.');
+            ->assertOk()
+            ->assertJsonPath('received_chunks', 1)
+            ->assertJsonPath('total_chunks', 3);
     }
 
     public function test_completar_sin_todos_los_trozos_es_rechazado(): void

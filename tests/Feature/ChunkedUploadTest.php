@@ -110,16 +110,47 @@ class ChunkedUploadTest extends TestCase
         $this->service()->initiate('ana', 'malware.exe', 2048);
     }
 
-    public function test_exige_que_los_trozos_lleguen_en_orden(): void
+    public function test_acepta_los_trozos_en_cualquier_orden(): void
     {
         $service = $this->service();
         $session = $service->initiate('ana', 'datos.txt', 3072);
 
-        // Saltarse el trozo 0 y enviar el 1 debe fallar.
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageMatches('/fuera de orden/');
-
+        /*
+         * Los trozos pueden llegar en cualquier orden.
+         *
+         * Antes se exigia que cada uno fuera el siguiente, porque se escribian al
+         * final del archivo. Ahora cada trozo se escribe en su posicion, asi que
+         * el cliente puede mandar varios en paralelo y deja de trabarse cada 8 MB.
+         * Lo que importa es que al final esten todos y en el sitio correcto.
+         */
+        $service->appendChunk($session['upload_id'], 'ana', 2, str_repeat('C', 1024));
         $service->appendChunk($session['upload_id'], 'ana', 1, str_repeat('B', 1024));
+        $resultado = $service->appendChunk($session['upload_id'], 'ana', 0, str_repeat('A', 1024));
+
+        $this->assertSame(3, $resultado['received_chunks']);
+
+        $adjunto = $service->complete($session['upload_id'], 'ana');
+        $ruta = storage_path('app/public/' . $adjunto['path']);
+
+        $this->assertSame(
+            str_repeat('A', 1024) . str_repeat('B', 1024) . str_repeat('C', 1024),
+            file_get_contents($ruta),
+            'El archivo debe respetar el orden de los trozos, no el de llegada.'
+        );
+
+        @unlink($ruta);
+    }
+
+    public function test_un_trozo_repetido_no_se_cuenta_dos_veces(): void
+    {
+        $service = $this->service();
+        $session = $service->initiate('ana', 'datos.txt', 2048);
+
+        $service->appendChunk($session['upload_id'], 'ana', 0, str_repeat('A', 1024));
+        $resultado = $service->appendChunk($session['upload_id'], 'ana', 0, str_repeat('A', 1024));
+
+        $this->assertSame(1, $resultado['received_chunks']);
+        $this->assertSame(1024, $resultado['received_bytes']);
     }
 
     public function test_rechaza_un_trozo_con_tamano_incorrecto(): void
