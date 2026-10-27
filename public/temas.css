@@ -2236,3 +2236,186 @@ html.vh-ligero body *::after {
     --vh-bg: var(--vh-panel-bg);
     --vh-bg-soft: color-mix(in srgb, var(--vh-panel-bg) 88%, var(--vh-panel-text) 12%);
 }
+
+/* =============================================================================
+   BOTONES QUE SE QUEDARON SIN TEMA
+   =============================================================================
+   Dos controles no tenian ninguna regla propia, asi que el navegador los pintaba a
+   su manera: un enlace azul subrayado y un triangulito de "detalles".
+
+     - "Mi perfil", el enlace del panel de bienvenida;
+     - el menu de tres puntos de cada publicacion del foro.
+
+   Ahora usan los mismos colores, borde y esquinas que los botones de su epoca.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .welcome-gadget-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border: 1px solid var(--vh-btn-border);
+    border-radius: var(--vh-btn-radius);
+    background: var(--vh-btn-bg);
+    color: var(--vh-btn-text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition: filter 0.15s ease, background 0.2s ease;
+}
+
+[data-era] body .welcome-gadget-link:hover {
+    filter: brightness(1.15);
+}
+
+/* Menu de tres puntos de las publicaciones */
+[data-era] body .forum-post-menu > summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 30px;
+    border: 1px solid var(--vh-btn-border);
+    border-radius: var(--vh-btn-radius);
+    background: var(--vh-btn-bg);
+    color: var(--vh-btn-text);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    transition: filter 0.15s ease;
+}
+
+/* Fuera el triangulito que dibuja el navegador */
+[data-era] body .forum-post-menu > summary::-webkit-details-marker,
+[data-era] body .forum-post-menu > summary::marker {
+    display: none;
+    content: '';
+}
+
+[data-era] body .forum-post-menu > summary:hover,
+[data-era] body .forum-post-menu[open] > summary {
+    filter: brightness(1.18);
+}
+
+/* El desplegable que abre ese boton */
+[data-era] body .forum-post-menu {
+    position: relative;
+}
+
+[data-era] body .forum-post-menu-panel {
+    position: absolute;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 150px;
+    margin-top: 6px;
+    padding: 8px;
+    border: 1px solid var(--vh-panel-border);
+    border-radius: var(--vh-btn-radius);
+    background: var(--vh-panel-bg);
+    color: var(--vh-panel-text);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+[data-era] body .forum-post-menu-panel .reaction-btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 8px 10px;
+    border: 1px solid var(--vh-btn-border);
+    border-radius: var(--vh-btn-radius);
+    background: var(--vh-btn-bg);
+    color: var(--vh-btn-text);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+[data-era] body .forum-post-menu-panel .reaction-btn:hover {
+    filter: brightness(1.15);
+}
+
+/* =============================================================================
+   BOTONES SIN NINGUNA REGLA PROPIA
+   =============================================================================
+   La aplicacion no tiene un estilo base para <button>: cada uno depende de su
+   clase. Estas no tenian ninguna, asi que el navegador las pintaba a su manera y
+   no cambiaban con el tema:
+
+     admin:  .admin-link-btn .btn-activate .btn-deactivate .btn-delete
+             .report-delete-btn .gadget-control-btn .gadget-hide-btn
+             .gadget-size-btn .modal-btn-cancel .modal-btn-confirm
+     foro:   .delete-btn .forum-compose-close .js-open-report-modal
+             .poll-add-option .report-btn
+     otros:  .header-guest-button .profile-friend-state
+
+   Se les da la forma, el color y las esquinas de la epoca. Las clases que ya
+   tenian su propia regla no se tocan: alli manda la regla concreta.
+   -------------------------------------------------------------------------- */
+
+[data-era] body :is(.admin-link-btn, .btn-activate, .btn-deactivate, .btn-delete,
+    .report-delete-btn, .gadget-control-btn, .gadget-hide-btn, .gadget-size-btn,
+    .modal-btn-cancel, .modal-btn-confirm, .delete-btn, .forum-compose-close,
+    .js-open-report-modal, .poll-add-option, .report-btn, .header-guest-button,
+    .profile-friend-state) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--vh-btn-border);
+    border-radius: var(--vh-btn-radius);
+    background: var(--vh-btn-bg);
+    color: var(--vh-btn-text);
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: filter 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+[data-era] body :is(.admin-link-btn, .btn-activate, .btn-deactivate, .btn-delete,
+    .report-delete-btn, .gadget-control-btn, .gadget-hide-btn, .gadget-size-btn,
+    .modal-btn-cancel, .modal-btn-confirm, .delete-btn, .forum-compose-close,
+    .js-open-report-modal, .poll-add-option, .report-btn, .header-guest-button,
+    .profile-friend-state):hover {
+    filter: brightness(1.15);
+}
+
+[data-era] body :is(.admin-link-btn, .btn-activate, .btn-deactivate, .btn-delete,
+    .report-delete-btn, .gadget-control-btn, .gadget-hide-btn, .gadget-size-btn,
+    .modal-btn-cancel, .modal-btn-confirm, .delete-btn, .forum-compose-close,
+    .js-open-report-modal, .poll-add-option, .report-btn, .header-guest-button,
+    .profile-friend-state):focus-visible {
+    outline: 2px solid var(--vh-btn-text);
+    outline-offset: 2px;
+}
+
+/* Lo que borra o denuncia se distingue: rojo suave sobre el color de la epoca. */
+[data-era] body :is(.btn-delete, .delete-btn, .report-delete-btn) {
+    border-color: color-mix(in srgb, #d9534f 60%, var(--vh-btn-border));
+    background: color-mix(in srgb, #d9534f 22%, var(--vh-btn-bg));
+}
+
+/* Acciones principales: con el color de acento de la epoca. */
+[data-era] body :is(.btn-activate, .modal-btn-confirm) {
+    border-color: color-mix(in srgb, var(--vh-btn-text) 45%, var(--vh-btn-border));
+    background: color-mix(in srgb, var(--vh-btn-text) 16%, var(--vh-btn-bg));
+    font-weight: 600;
+}
+
+/* Los de la cabecera de gadgets son pequenos: solo el simbolo. */
+[data-era] body :is(.gadget-control-btn, .gadget-hide-btn, .gadget-size-btn) {
+    width: 28px;
+    height: 26px;
+    padding: 0;
+    font-size: 12px;
+}
