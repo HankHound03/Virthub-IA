@@ -61,7 +61,10 @@ class AuthController extends Controller
             return $this->handleFailedLogin($request);
         }
 
-        if ($this->users->hasTwoFactorEnabled((string) $authUser['username'])) {
+        // En pruebas el reto se puede apagar con VIRTHUB_2FA=false.
+        $dosFactoresActivo = (bool) config('virthub.seguridad.dos_factores', true);
+
+        if ($dosFactoresActivo && $this->users->hasTwoFactorEnabled((string) $authUser['username'])) {
             return $this->beginTwoFactorChallenge($request, $authUser);
         }
 

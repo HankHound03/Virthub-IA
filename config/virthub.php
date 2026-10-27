@@ -52,6 +52,21 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Verificacion en dos pasos
+    |--------------------------------------------------------------------------
+    |
+    | Activada por defecto. Se apaga con VIRTHUB_2FA=false, que es lo que hace
+    | docker-compose.test.yml: en pruebas no tiene sentido pelearse con el codigo
+    | de seis digitos cada vez que se reinicia la base.
+    |
+    */
+
+    'seguridad' => [
+        'dos_factores' => filter_var(env('VIRTHUB_2FA', true), FILTER_VALIDATE_BOOL),
+    ],
+
     'noticias' => [
         'enabled' => filter_var(env('VIRTHUB_NOTICIAS', true), FILTER_VALIDATE_BOOL),
     ],

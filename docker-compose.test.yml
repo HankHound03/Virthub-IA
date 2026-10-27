@@ -62,6 +62,9 @@ services:
 
       # Sin panel de noticias en pruebas.
       VIRTHUB_NOTICIAS: "false"
+
+      # Sin codigo de seis digitos en pruebas.
+      VIRTHUB_2FA: "false"
     depends_on:
       mariadb:
         condition: service_healthy
