@@ -157,10 +157,43 @@
 
         const totalBytes = file.size;
         const startedAt = Date.now();
-        let sentBytes = 0;
 
-        // 2) Enviar los trozos en orden.
-        for (let index = 0; index < totalChunks; index++) {
+        /*
+         * Varios trozos a la vez.
+         *
+         * Antes se enviaba uno y se esperaba la respuesta para mandar el siguiente:
+         * con un archivo grande eso son cientos de pausas, y la barra se quedaba
+         * clavada cada 8 MB. Ahora van tres en paralelo, asi que el enlace nunca se
+         * queda sin datos que enviar. El servidor escribe cada trozo en su posicion,
+         * de modo que el orden da igual.
+         */
+        const EN_PARALELO = 3;
+        const progreso = new Float64Array(totalChunks);
+        let completados = 0;
+
+        function informar() {
+            let current = 0;
+
+            for (let i = 0; i < totalChunks; i++) {
+                current += progreso[i];
+            }
+
+            const elapsed = (Date.now() - startedAt) / 1000;
+            const speed = elapsed > 0 ? current / elapsed : 0;
+            const remaining = speed > 0 ? (totalBytes - current) / speed : NaN;
+
+            onProgress({
+                percent: Math.min(100, Math.round((current / totalBytes) * 100)),
+                uploadedBytes: current,
+                totalBytes: totalBytes,
+                chunkIndex: completados,
+                totalChunks: totalChunks,
+                bytesPerSecond: speed,
+                remainingSeconds: remaining,
+            });
+        }
+
+        async function enviarTrozo(index) {
             throwIfAborted();
 
             const start = index * chunkBytes;
@@ -174,27 +207,17 @@
 
                 try {
                     await sendChunk(url, blob, loaded => {
-                        const current = sentBytes + loaded;
-                        const elapsed = (Date.now() - startedAt) / 1000;
-                        const speed = elapsed > 0 ? current / elapsed : 0;
-                        const remaining = speed > 0 ? (totalBytes - current) / speed : NaN;
-
-                        onProgress({
-                            percent: Math.min(100, Math.round((current / totalBytes) * 100)),
-                            uploadedBytes: current,
-                            totalBytes: totalBytes,
-                            chunkIndex: index + 1,
-                            totalChunks: totalChunks,
-                            bytesPerSecond: speed,
-                            remainingSeconds: remaining,
-                        });
+                        progreso[index] = loaded;
+                        informar();
                     });
 
-                    sentBytes = end;
-                    lastError = null;
-                    break;
+                    progreso[index] = blob.size;
+                    informar();
+
+                    return;
                 } catch (error) {
                     lastError = error;
+                    progreso[index] = 0;
 
                     if (signal && signal.aborted) {
                         throw error;
@@ -210,19 +233,40 @@
                 }
             }
 
-            if (lastError) {
-                // Si un trozo falla de forma definitiva, se descarta la sesion
-                // para no dejar gigabytes ocupando disco sin dueno.
-                abort(uploadId).catch(() => {});
-                throw lastError;
-            }
-
-            onStatus(
-                'Subiendo… trozo ' + (index + 1) + ' de ' + totalChunks +
-                ' (' + formatBytes(sentBytes) + ' de ' + formatBytes(totalBytes) + ')'
-            );
+            // Si un trozo falla de forma definitiva, se descarta la sesion para no
+            // dejar gigabytes ocupando disco sin dueno.
+            abort(uploadId).catch(() => {});
+            throw lastError;
         }
 
+        let siguiente = 0;
+
+        async function trabajador() {
+            while (true) {
+                const index = siguiente++;
+
+                if (index >= totalChunks) {
+                    return;
+                }
+
+                await enviarTrozo(index);
+                completados++;
+
+                onStatus(
+                    'Subiendo… ' + completados + ' de ' + totalChunks + ' trozos (' +
+                    formatBytes(Math.min(totalBytes, completados * chunkBytes)) + ' de ' +
+                    formatBytes(totalBytes) + ')'
+                );
+            }
+        }
+
+        const trabajadores = [];
+
+        for (let i = 0; i < Math.min(EN_PARALELO, totalChunks); i++) {
+            trabajadores.push(trabajador());
+        }
+
+        await Promise.all(trabajadores);
         // 3) Ensamblar en el servidor.
         throwIfAborted();
         onStatus('Ensamblando el archivo en el servidor…');

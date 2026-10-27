@@ -79,6 +79,9 @@ class ChunkedUploadService
             'total_chunks' => $totalChunks,
             'received_chunks' => 0,
             'received_bytes' => 0,
+            // Que trozos han llegado ya. Permite que lleguen en paralelo y en
+            // cualquier orden: cada uno se escribe en su posicion.
+            'received_indexes' => [],
             'created_at' => date('c'),
             'updated_at' => date('c'),
         ];
@@ -110,21 +113,19 @@ class ChunkedUploadService
             throw new RuntimeException('Indice de trozo fuera de rango.');
         }
 
-        // Los trozos deben llegar en orden: escribir al final solo es correcto
-        // si el que toca es el siguiente. El cliente reintenta los que fallan.
-        $expected = (int) $meta['received_chunks'];
-
-        if ($index !== $expected) {
-            throw new RuntimeException(
-                'Trozo fuera de orden: se esperaba el ' . $expected . ' y llego el ' . $index . '.'
-            );
-        }
-
-        $receivedBytes = (int) $meta['received_bytes'];
+        $chunkBytes = (int) $meta['chunk_bytes'];
         $totalBytes = (int) $meta['total_bytes'];
+
+        /*
+         * Tamano que debe tener ESTE trozo.
+         *
+         * Antes se calculaba restando lo ya recibido, lo que obligaba a que los
+         * trozos llegaran en orden. Ahora se deduce de la posicion, asi que cada
+         * trozo es independiente y pueden subirse varios a la vez.
+         */
         $expectedSize = $index === $totalChunks - 1
-            ? $totalBytes - $receivedBytes
-            : (int) $meta['chunk_bytes'];
+            ? $totalBytes - ($chunkBytes * ($totalChunks - 1))
+            : $chunkBytes;
 
         if (strlen($content) !== $expectedSize) {
             throw new RuntimeException(
@@ -133,16 +134,27 @@ class ChunkedUploadService
             );
         }
 
+        /*
+         * Se escribe en SU posicion, no al final del archivo.
+         *
+         * Asi varios trozos pueden llegar a la vez sin pisarse: cada uno toca una
+         * zona distinta de part.bin. Antes iban en serie y cada trozo esperaba al
+         * anterior, que es lo que hacia que la barra se parase cada 8 MB.
+         */
         $path = $this->sessionDir($uploadId) . '/part.bin';
-        $handle = fopen($path, 'ab');
+        $handle = fopen($path, 'c+b');
 
         if ($handle === false) {
             throw new RuntimeException('No se pudo abrir el archivo en construccion.');
         }
 
         try {
-            if (fwrite($handle, $content) === false) {
-                throw new RuntimeException('No se pudo escribir el trozo.');
+            if (fseek($handle, $index * $chunkBytes) !== 0) {
+                throw new RuntimeException('No se pudo posicionar en el trozo ' . $index . '.');
+            }
+
+            if (fwrite($handle, $content) !== strlen($content)) {
+                throw new RuntimeException('No se pudo escribir el trozo ' . $index . '.');
             }
 
             fflush($handle);
@@ -150,10 +162,28 @@ class ChunkedUploadService
             fclose($handle);
         }
 
-        $meta['received_chunks'] = $index + 1;
-        $meta['received_bytes'] = $receivedBytes + strlen($content);
-        $meta['updated_at'] = date('c');
-        $this->writeMeta($uploadId, $meta);
+        // Apuntar el trozo recibido. Con bloqueo, porque varios pueden coincidir.
+        $lock = $this->lockMeta($uploadId);
+
+        try {
+            $meta = $this->loadMeta($uploadId);
+            $recibidos = (array) ($meta['received_indexes'] ?? []);
+
+            if (! in_array($index, $recibidos, true)) {
+                $recibidos[] = $index;
+                sort($recibidos);
+
+                $meta['received_indexes'] = $recibidos;
+                $meta['received_chunks'] = count($recibidos);
+                $meta['received_bytes'] = (int) $meta['received_bytes'] + strlen($content);
+                $meta['updated_at'] = date('c');
+
+                $this->writeMeta($uploadId, $meta);
+            }
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
 
         return [
             'received_chunks' => (int) $meta['received_chunks'],
@@ -184,9 +214,14 @@ class ChunkedUploadService
 
         $this->assertOwnership($meta, $owner);
 
-        if ((int) $meta['received_chunks'] !== (int) $meta['total_chunks']) {
+        // Con trozos en paralelo, el numero que vale es el de indices unicos.
+        $recibidos = array_key_exists('received_indexes', $meta)
+            ? count((array) $meta['received_indexes'])
+            : (int) $meta['received_chunks'];
+
+        if ($recibidos !== (int) $meta['total_chunks']) {
             throw new RuntimeException(
-                'Faltan trozos: ' . $meta['received_chunks'] . ' de ' . $meta['total_chunks'] . '.'
+                'Faltan trozos: ' . $recibidos . ' de ' . $meta['total_chunks'] . '.'
             );
         }
 
@@ -486,6 +521,32 @@ class ChunkedUploadService
     /**
      * @return array<string, mixed>
      */
+    /**
+     * Bloqueo exclusivo sobre el registro de la subida.
+     *
+     * Varios trozos pueden llegar a la vez y todos actualizan meta.json. Sin este
+     * bloqueo se pisarian: uno contaria el trozo 5 y otro, que leyo antes, lo
+     * sobrescribiria con su propio conteo.
+     *
+     * @return resource
+     */
+    private function lockMeta(string $uploadId)
+    {
+        $path = $this->sessionDir($uploadId) . '/meta.lock';
+        $handle = fopen($path, 'c');
+
+        if ($handle === false) {
+            throw new RuntimeException('No se pudo bloquear la sesion de subida.');
+        }
+
+        if (! flock($handle, LOCK_EX)) {
+            fclose($handle);
+
+            throw new RuntimeException('No se pudo bloquear la sesion de subida.');
+        }
+
+        return $handle;
+    }
     private function loadMeta(string $uploadId): array
     {
         $path = $this->sessionDir($uploadId) . '/meta.json';
