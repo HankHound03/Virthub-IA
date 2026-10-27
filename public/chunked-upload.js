@@ -113,6 +113,7 @@
         const settings = options || {};
         const onProgress = settings.onProgress || function () {};
         const onStatus = settings.onStatus || function () {};
+        const onStart = settings.onStart || function () {};
         const signal = settings.signal;
 
         const throwIfAborted = () => {
@@ -150,6 +151,22 @@
         const uploadId = initPayload.upload_id;
         const chunkBytes = initPayload.chunk_bytes;
         const totalChunks = initPayload.total_chunks;
+
+        // La vista necesita el id para poder cancelar y limpiar.
+        onStart(uploadId);
+
+        /*
+         * Cancelar tiene que dejar el servidor limpio.
+         *
+         * Abortar las peticiones solo corta la subida en el navegador: en el
+         * servidor quedaba la carpeta de la sesion con su parte a medio escribir,
+         * ocupando disco para siempre. Aqui se avisa para que la borre.
+         */
+        if (signal) {
+            signal.addEventListener('abort', () => {
+                abort(uploadId).catch(() => {});
+            });
+        }
 
         if (!uploadId || !chunkBytes || !totalChunks) {
             throw new Error('El servidor no devolvio una sesion de subida valida.');

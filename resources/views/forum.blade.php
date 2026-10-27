@@ -891,9 +891,12 @@
                                 <span id="forumUploadBarFill"></span>
                             </div>
                             <p class="forum-upload-label" id="forumUploadLabel">Subiendo…</p>
-                        </div>
 
-                        <ul class="forum-uploaded-list" id="forumUploadedList"></ul>
+                            {{-- Corta la subida y borra del servidor lo que llevaba. --}}
+                            <button type="button" class="forum-upload-cancel" id="forumUploadCancel">
+                                Cancelar subida
+                            </button>
+                        </div>
 
                         <ul class="forum-uploaded-list" id="forumUploadedList"></ul>
 
@@ -1006,7 +1009,15 @@
                                     <video class="forum-post-image" controls preload="metadata"><source src="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}" type="{{ $attachment['mime'] ?? 'video/mp4' }}"></video>
                                 @else
                                     <p>
-                                        <a href="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}" target="_blank" rel="noopener">
+                                        {{--
+                                            El atributo download guarda el archivo con su nombre
+                                            original. Como el enlace sigue apuntando al archivo real,
+                                            Apache puede servir por rangos: importante para archivos de
+                                            varios GB.
+                                        --}}
+                                        <a href="{{ \App\Support\AttachmentStorage::url($attachment['path']) }}"
+                                           download="{{ $attachment['name'] ?? 'adjunto' }}"
+                                           rel="noopener">
                                             {{ $attachment['name'] ?? 'Abrir archivo adjunto' }}
                                             @if ($size = \App\Support\AttachmentStorage::humanSize($attachment['path'] ?? null, (int) ($attachment['size'] ?? 0)))
                                                 <span class="attachment-size">({{ $size }})</span>
@@ -1493,11 +1504,29 @@
                 input.addEventListener('change', () => { uploadSelected(input); });
             });
 
-            // Cancelar una subida en curso al cerrar el modal o salir de la pagina.
+            /*
+             * Cancelar la subida.
+             *
+             * Abortar corta las peticiones y, ademas, el propio cargador avisa al
+             * servidor para que borre la sesion a medias: sin eso quedaba el
+             * archivo parcial ocupando disco.
+             */
+            const cancelButton = modal.querySelector('#forumUploadCancel');
+
+            const cancelarSubida = () => {
+                if (!state.controller) return;
+
+                state.controller.abort();
+                setStatus('Subida cancelada. Se borro lo que se habia enviado.', 'idle');
+            };
+
+            if (cancelButton) {
+                cancelButton.addEventListener('click', cancelarSubida);
+            }
+
+            // Cerrar el modal tambien cancela, para no dejar nada a medias.
             modal.querySelectorAll('.forum-compose-close').forEach(button => {
-                button.addEventListener('click', () => {
-                    if (state.controller) state.controller.abort();
-                });
+                button.addEventListener('click', cancelarSubida);
             });
 
             window.addEventListener('beforeunload', (event) => {

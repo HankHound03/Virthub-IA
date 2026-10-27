@@ -2098,3 +2098,20 @@ body .chat-users-panel {
         align-self: flex-end;
     }
 }
+
+/* Boton para cortar una subida en curso desde el panel de progreso. */
+.forum-upload-cancel {
+    margin-top: 8px;
+    padding: 6px 14px;
+    border: 1px solid var(--vh-btn-border, rgba(255, 255, 255, 0.2));
+    border-radius: 8px;
+    background-color: var(--vh-btn-bg, rgba(255, 255, 255, 0.1));
+    color: var(--vh-btn-text, inherit);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.forum-upload-cancel:hover {
+    filter: brightness(1.15);
+}

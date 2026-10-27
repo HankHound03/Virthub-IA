@@ -2217,3 +2217,22 @@ html.vh-ligero body *::after {
         border-right: 1px solid var(--vh-btn-border) !important;
     }
 }
+
+/* =============================================================================
+   VARIABLES ANTIGUAS DE LAS VISTAS
+   =============================================================================
+   Las plantillas de la aplicacion usan nombres antiguos (--vh-border,
+   --vh-button-bg, --vh-bg). Los temas definen su propia paleta con otros nombres,
+   asi que esos elementos se quedaban con el color original: botones y bordes que
+   desentonaban en algunas vistas (sugerencias, perfil, admin, foro...).
+
+   Aqui se traducen una sola vez, en la raiz del tema, y todas las vistas reciben
+   el color de su epoca sin tocar cada plantilla.
+   -------------------------------------------------------------------------- */
+
+[data-era] {
+    --vh-border: var(--vh-btn-border);
+    --vh-button-bg: var(--vh-btn-bg);
+    --vh-bg: var(--vh-panel-bg);
+    --vh-bg-soft: color-mix(in srgb, var(--vh-panel-bg) 88%, var(--vh-panel-text) 12%);
+}

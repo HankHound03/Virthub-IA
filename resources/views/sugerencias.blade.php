@@ -242,7 +242,6 @@
 
                 <div class="suggestions-actions">
                     <button type="submit">Enviar sugerencia</button>
-                    <a href="{{ url('/') }}">Volver a Home</a>
                 </div>
             </form>
         </div>
