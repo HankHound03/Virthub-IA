@@ -389,7 +389,15 @@ return [
         'max_file_bytes' => (int) env('UPLOAD_MAX_FILE_BYTES', 5 * 1024 ** 3),
 
         // Tamaño de cada trozo. 8 MB deja margen sobrado bajo post_max_size=40M.
-        'chunk_bytes' => (int) env('UPLOAD_CHUNK_BYTES', 8 * 1024 ** 2),
+        /*
+     * Tamano de cada trozo.
+     *
+     * Antes eran 8 MB. Con tres trozos a la vez, la barra avanzaba a saltos de
+     * 24 MB y parecia que se trababa entre salto y salto, aunque el rendimiento
+     * fuese el mismo. Con trozos de 2 MB el avance es cuatro veces mas fino y la
+     * subida se ve continua.
+     */
+    'chunk_bytes' => (int) env('UPLOAD_CHUNK_BYTES', 2 * 1024 ** 2),
 
         // Cuantos archivos se pueden adjuntar a una publicacion.
         'max_files_per_post' => (int) env('UPLOAD_MAX_FILES', 10),

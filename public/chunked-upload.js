@@ -184,7 +184,7 @@
          * queda sin datos que enviar. El servidor escribe cada trozo en su posicion,
          * de modo que el orden da igual.
          */
-        const EN_PARALELO = 3;
+        const EN_PARALELO = 4;
         const progreso = new Float64Array(totalChunks);
         let completados = 0;
 
