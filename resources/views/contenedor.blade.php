@@ -328,6 +328,8 @@
 
                 const sonar = () => {
                     try {
+                        // Solo se rebobina si el audio ya tiene datos: si no,
+                        // lanzaría un error y no sonaría nunca la primera vez.
                         if (audio.readyState >= 1) {
                             audio.currentTime = 0;
                         }
@@ -351,11 +353,7 @@
                     audio.addEventListener('canplay', sonar, { once: true });
                 }
             } catch (error) {
-                        console.log('Notificación de audio no disponible:', error);
-                    });
-                }
-            } catch (error) {
-                console.log('Error al reproducir sonido:', error);
+                // Sin sonido no pasa nada.
             }
         }
 
@@ -1339,34 +1337,6 @@
          * Sirve para empezar de cero: el modelo deja de arrastrar respuestas
          * anteriores y cualquier personalidad que se hubiera colado.
          */
-        /*
-         * Indicador de "está respondiendo".
-         *
-         * Aparece como una burbuja al final del chat mientras el modelo piensa,
-         * para que quede claro que la consulta salió y se está trabajando en ella.
-         */
-        function mostrarEscribiendoIA() {
-            const messagesDiv = document.getElementById('ollamaMessages');
-            if (!messagesDiv) return;
-
-            let previo = document.getElementById('iaEscribiendo');
-            if (previo) previo.remove();
-
-            const burbuja = document.createElement('div');
-            burbuja.id = 'iaEscribiendo';
-            burbuja.className = 'ia-escribiendo';
-            burbuja.innerHTML =
-                '<span class="ia-puntos" aria-hidden="true"><i></i><i></i><i></i></span>' +
-                '<span class="ia-escribiendo-texto">TutorUTT está escribiendo…</span>';
-
-            messagesDiv.appendChild(burbuja);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function quitarEscribiendoIA() {
-            const burbuja = document.getElementById('iaEscribiendo');
-            if (burbuja) burbuja.remove();
-        }
         /*
          * Borrar el historial de la conversacion con la IA.
          *
