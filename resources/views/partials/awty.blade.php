@@ -75,9 +75,6 @@
 
 <script>
     (function () {
-        // Cualquier elemento con .awty-trigger abre la ventana: el boton de la
-        // cabecera y el del gadget de bienvenida del inicio.
-        const disparadores = document.querySelectorAll('.awty-trigger');
         const overlay = document.getElementById('awtyOverlay');
         const cerrar = document.getElementById('awtyClose');
         const audio = document.getElementById('awtyAudio');
@@ -87,8 +84,19 @@
         const stop = document.getElementById('awtyStop');
         const tiempo = document.getElementById('awtyTiempo');
 
-        if (!disparadores.length || !overlay || !audio) {
+        if (!overlay || !audio) {
             return;
+        }
+
+        /*
+         * La ventana se mueve al final del body.
+         *
+         * Nace dentro de la cabecera, que tiene su propio recorte y su posicion;
+         * ahi dentro, position:fixed se queda pegado a la cabecera y la ventana no
+         * llega a verse. Como hija directa de body, se abre sobre toda la pagina.
+         */
+        if (overlay.parentElement !== document.body) {
+            document.body.appendChild(overlay);
         }
 
         function etiqueta() {
@@ -135,7 +143,19 @@
             }
         }
 
-        disparadores.forEach(disparador => disparador.addEventListener('click', abrir));
+        /*
+         * Un solo listener en el documento: sirve para botones que ya existen y
+         * para los que se pintan despues (el del gadget de bienvenida del inicio
+         * aparece mas abajo en la pagina, cuando este script ya se ejecuto).
+         */
+        document.addEventListener('click', (evento) => {
+            const disparador = evento.target.closest ? evento.target.closest('.awty-trigger') : null;
+
+            if (!disparador) return;
+
+            evento.preventDefault();
+            abrir();
+        });
         if (cerrar) cerrar.addEventListener('click', cerrarPanel);
 
         overlay.addEventListener('click', (evento) => {

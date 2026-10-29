@@ -119,15 +119,6 @@
                 $frameColor = (string) ($currentUser['profile_frame_color'] ?? '#6ea8ff');
                 $userInitial = strtoupper(substr((string) ($currentUser['username'] ?? 'U'), 0, 1));
             @endphp
-            {{--
-                AWTY: el mensaje que Francisco dejó a quien encuentre este proyecto.
-
-                Va al lado del perfil, sin adornos, para quien sepa que está ahí. La
-                ventana usa las variables del tema, así que cambia de aspecto con él.
-            --}}
-            <button type="button" class="awty-btn awty-trigger" id="awtyBtn" title="AWTY" aria-label="Abrir el mensaje AWTY">
-                AWTY
-            </button>
 
             <div class="header-profile-dock toggleable-profile-menu" onclick="toggleProfileMenu(event)" title="Menu de perfil" aria-label="Menu de perfil">
                 <div class="profile-aero-frame profile-aero-frame-sm" style="--profile-frame-color: {{ $frameColor }};">
