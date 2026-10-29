@@ -46,9 +46,40 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Evita que una cuenta inunde el chat (y el puente hacia Ollama).
-        RateLimiter::for('chat-send', function (Request $request): Limit {
-            return Limit::perMinute(30)->by((string) optional($request->user())->getAuthIdentifier() ?: ($request->ip() ?: 'unknown'));
+        /*
+         * Clave de los limites del chat.
+         *
+         * La aplicacion no usa el guard de Laravel: la sesion guarda 'auth_user'.
+         * Por eso $request->user() siempre era null y todos los limites acababan
+         * contando por IP. En un aula con cien alumnos detras de la misma
+         * direccion, eso hace que uno consuma el cupo de todos: al borrar el
+         * historial de la IA, sin ir mas lejos, salia un 429 que no era culpa del
+         * usuario.
+         *
+         * Ahora se cuenta por usuario y solo se cae a la IP si no hay sesion.
+         */
+        $porUsuario = static function (Request $request): string {
+            $usuario = trim((string) $request->session()->get('auth_user.username', ''));
+
+            return $usuario !== ''
+                ? 'usuario:' . mb_strtolower($usuario)
+                : 'ip:' . ($request->ip() ?: 'unknown');
+        };
+
+        RateLimiter::for('chat-typing', function (Request $request) use ($porUsuario): Limit {
+            // El cliente avisa cada 2,5 s como mucho: 24 por minuto. Margen de sobra.
+            return Limit::perMinute(120)->by($porUsuario($request));
         });
+
+        RateLimiter::for('chat-clear', function (Request $request) use ($porUsuario): Limit {
+            // Borrar el historial es una accion puntual; con diez por minuto basta.
+            return Limit::perMinute(10)->by($porUsuario($request));
+        });
+
+        RateLimiter::for('chat-send', function (Request $request) use ($porUsuario): Limit {
+            return Limit::perMinute(30)->by($porUsuario($request));
+        });
+
 
         // Un archivo de 5 GB en trozos de 8 MB son ~640 peticiones, asi que el
         // limite debe ser holgado pero acotado: frena un bucle descontrolado sin

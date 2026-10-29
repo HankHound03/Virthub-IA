@@ -256,11 +256,11 @@ Route::middleware(EnsureRegisteredUser::class)->group(function (): void {
     // Aviso de "esta escribiendo" y vaciado de una conversacion. Van aqui, en el
     // grupo de usuarios registrados: el chat es entre personas, no solo del admin.
     Route::post('/chat/conversation/{username}/escribiendo', [ChatController::class, 'escribiendo'])
-        ->middleware('throttle:60,1')
+        ->middleware('throttle:chat-typing')
         ->name('chat.conversation.typing');
 
     Route::post('/chat/conversation/{username}/limpiar', [ChatController::class, 'limpiarConversacion'])
-        ->middleware('throttle:10,1')
+        ->middleware('throttle:chat-clear')
         ->name('chat.conversation.clear');
     Route::get('/chat/broadcast', [ChatController::class, 'broadcast'])->name('chat.broadcast');
 });

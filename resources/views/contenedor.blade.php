@@ -1392,8 +1392,18 @@
                 if (!response.ok) {
                     const payload = await response.json().catch(() => ({}));
 
-                    // El detalle ayuda a saber que paso: sesion caducada, permisos...
-                    const motivo = payload.error || ('error ' + response.status);
+                    // El detalle ayuda a saber qué pasó: sesión caducada, permisos...
+                    let motivo = payload.error;
+
+                    if (!motivo) {
+                        if (response.status === 429) {
+                            motivo = 'demasiados intentos seguidos, espera un minuto';
+                        } else if (response.status === 419) {
+                            motivo = 'la sesión caducó, recarga la página';
+                        } else {
+                            motivo = 'error ' + response.status;
+                        }
+                    }
 
                     throw new Error(motivo);
                 }
