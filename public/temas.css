@@ -2580,12 +2580,12 @@ html.vh-ligero body *::after {
 .awty-overlay {
     position: fixed;
     inset: 0;
-    z-index: 4000;
+    z-index: 9000;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 18px;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(0, 0, 0, 0.72);
     backdrop-filter: blur(3px);
 }
 
@@ -2593,15 +2593,23 @@ html.vh-ligero body *::after {
     display: none;
 }
 
-/* La ventana. */
+/*
+ * La ventana.
+ *
+ * Ojo con el fondo: en Vista y 8 el panel del tema es de cristal (rgba con ~62%
+ * de opacidad). Poniendolo tal cual, el mensaje se leia sobre la pagina y la
+ * cabecera se veia a traves. Se pinta el color solido de la epoca debajo y el
+ * cristal encima: asi queda opaca y conserva el tono del tema.
+ */
 .awty-panel {
     display: flex;
     flex-direction: column;
     width: min(680px, 100%);
     max-height: min(82vh, 720px);
-    border: 1px solid color-mix(in srgb, var(--vh-head-bg) 70%, #000);
+    border: 1px solid color-mix(in srgb, var(--vh-panel-text) 30%, #000);
     border-radius: var(--vh-panel-radius, 6px);
-    background: var(--vh-panel-bg);
+    background-color: var(--vh-bg-solid, #16324a);
+    background-image: linear-gradient(var(--vh-panel-bg), var(--vh-panel-bg));
     color: var(--vh-panel-text);
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
     font-family: var(--vh-font, sans-serif);
@@ -2615,9 +2623,10 @@ html.vh-ligero body *::after {
     justify-content: space-between;
     gap: 12px;
     padding: 8px 12px;
-    background: var(--vh-head-bg);
+    background-color: color-mix(in srgb, var(--vh-bg-solid, #16324a) 70%, var(--vh-head-bg, #000));
+    background-image: linear-gradient(var(--vh-head-bg), var(--vh-head-bg));
     color: var(--vh-panel-text);
-    border-bottom: 1px solid color-mix(in srgb, var(--vh-head-bg) 60%, #000);
+    border-bottom: 1px solid color-mix(in srgb, var(--vh-panel-text) 25%, #000);
     border-radius: var(--vh-head-radius, 6px 6px 0 0);
 }
 
@@ -2680,7 +2689,8 @@ html.vh-ligero body *::after {
     gap: 8px;
     padding: 10px 14px;
     border-top: 1px solid color-mix(in srgb, var(--vh-panel-text) 18%, transparent);
-    background: color-mix(in srgb, var(--vh-panel-bg) 80%, var(--vh-btn-bg));
+    background-color: color-mix(in srgb, var(--vh-bg-solid, #16324a) 70%, var(--vh-btn-bg));
+    background-image: linear-gradient(var(--vh-panel-bg), var(--vh-panel-bg));
 }
 
 .awty-play,
