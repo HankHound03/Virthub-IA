@@ -586,15 +586,28 @@
 
         if (notify && messages.length > prev) {
             const newMessages = messages.slice(prev).filter(m => (m.from || '') !== currentUserName);
+            /*
+             * ¿Estás leyendo esta conversación?
+             *
+             * Solo si el panel está abierto, es esta persona, estás en la pestaña
+             * de mensajes y la ventana está a la vista. En ese caso no tiene
+             * sentido avisar de lo que ya estás viendo: suena el aviso, pero sin
+             * notificación del navegador y sin subir el contador.
+             */
             const isChatPanelOpen = chatPanel.classList.contains('is-open');
             const isConversationOpen = currentChatUser === username;
-            const shouldShowFloatingNotification = !isChatPanelOpen || (isChatPanelOpen && !isConversationOpen);
-            
+            const messagesTabActive = document.getElementById('messagesView')?.classList.contains('active') !== false;
+            const leyendo = !document.hidden && isChatPanelOpen && isConversationOpen && messagesTabActive;
+
             newMessages.forEach(m => {
-                showNotification('Nuevo mensaje de ' + (m.from || username), m.message || 'Tienes un nuevo mensaje.');
-                if (shouldShowFloatingNotification) {
-                    showFloatingNotification(m.from || username, m.message || 'Tienes un nuevo mensaje.', profileFor(m.from || username));
+                if (leyendo) {
+                    // Solo el sonido.
+                    playChatNotificationSound();
+                    return;
                 }
+
+                showNotification('Nuevo mensaje de ' + (m.from || username), m.message || 'Tienes un nuevo mensaje.');
+                showFloatingNotification(m.from || username, m.message || 'Tienes un nuevo mensaje.', profileFor(m.from || username));
                 incrementNotificationBadge();
             });
         }

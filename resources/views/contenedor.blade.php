@@ -1108,14 +1108,23 @@
                 const incoming = newMessages.filter(message => (message.from || '') !== getUserKey());
                 const isChatPanelOpen = document.getElementById('chatPanel')?.classList.contains('is-open');
                 const isConversationOpen = currentChatUser === username;
-                const shouldShowFloatingNotification = !isChatPanelOpen || (isChatPanelOpen && !isConversationOpen);
+                const messagesTabActive = document.getElementById('messagesView')?.classList.contains('active') !== false;
+
+                /*
+                 * "Leyendo" = panel abierto, es esta conversacion, pestaña de
+                 * mensajes activa y ventana a la vista. Solo entonces se evita la
+                 * notificacion del navegador (el sonido se mantiene).
+                 */
+                const leyendo = !document.hidden && isChatPanelOpen && isConversationOpen && messagesTabActive;
 
                 incoming.forEach(message => {
                     /*
-                     * Si la conversación está abierta y a la vista, no se avisa:
-                     * ya la estás leyendo. Antes sonaba igual.
+                     * ¿Estás leyendo esta conversación? Entonces suena el aviso,
+                     * pero no se lanza notificación del navegador ni se sube el
+                     * contador: ya lo estás viendo.
                      */
-                    if (!shouldShowFloatingNotification) {
+                    if (leyendo) {
+                        playChatNotificationSound();
                         return;
                     }
 
