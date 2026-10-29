@@ -135,6 +135,37 @@ class ChatStore
         });
     }
 
+    /**
+     * Mensajes sin leer por remitente.
+     *
+     * Devuelve ['usuario' => cuantos]. Se usa para el contador que aparece al
+     * lado de cada persona en la lista de usuarios del chat.
+     *
+     * @return array<string, int>
+     */
+    public function conteoNoLeidos(string $usuario): array
+    {
+        $usuario = $this->normalizeUser($usuario);
+        $conteos = [];
+
+        foreach ($this->readData()['conversations'] ?? [] as $entradas) {
+            foreach ($entradas as $entrada) {
+                if (($entrada['to'] ?? '') !== $usuario || ! empty($entrada['read_at'])) {
+                    continue;
+                }
+
+                $de = (string) ($entrada['from'] ?? '');
+
+                if ($de === '' || $de === $usuario) {
+                    continue;
+                }
+
+                $conteos[$de] = ($conteos[$de] ?? 0) + 1;
+            }
+        }
+
+        return $conteos;
+    }
     public function getBroadcastMessages(): array
     {
         $data = $this->readData();

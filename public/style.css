@@ -2379,3 +2379,36 @@ body .chat-users-panel {
 .chat-message.own .chat-visto {
     color: color-mix(in srgb, var(--vh-btn-text, #fff) 75%, #4caf50);
 }
+
+/* =============================================================================
+   CONTADOR DE MENSAJES SIN LEER EN LA LISTA DE USUARIOS
+   =============================================================================
+   Al lado del nombre, un numero pequeno con los mensajes que esa persona ha
+   mandado y siguen sin leer. Desaparece al abrir la conversacion.
+   -------------------------------------------------------------------------- */
+
+.chat-user-badge {
+    margin-left: auto;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #c62828;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+}
+
+.chat-user-badge[hidden] {
+    display: none;
+}
+
+/* El nombre no debe empujar el contador fuera de la fila. */
+.chat-user-main .chat-user-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

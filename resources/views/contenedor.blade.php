@@ -349,8 +349,13 @@
                 if (audio.readyState >= 2) {
                     sonar();
                 } else {
-                    audio.load();
+                    /*
+                     * El evento se registra ANTES de load(): si se pone despues,
+                     * el archivo puede estar listo entre las dos llamadas y el
+                     * 'canplay' se pierde, con lo que el aviso nunca suena.
+                     */
                     audio.addEventListener('canplay', sonar, { once: true });
+                    audio.load();
                 }
             } catch (error) {
                 // Sin sonido no pasa nada.
@@ -978,6 +983,46 @@
             return avatar;
         }
 
+        /*
+         * Contador de mensajes sin leer por persona.
+         *
+         * Se pide a /chat/unread en una sola petición para todos los contactos y
+         * se pinta al lado del nombre. Solo cuenta lo que sigue sin leer: al abrir
+         * la conversación desaparece.
+         */
+        let conteosNoLeidos = {};
+
+        async function actualizarContadoresNoLeidos() {
+            try {
+                const response = await apiFetch('/chat/unread');
+                const payload = await response.json();
+
+                if (!response.ok) return;
+
+                conteosNoLeidos = payload.conteos || {};
+                pintarContadoresNoLeidos();
+            } catch (error) {
+                // Si falla, se queda el contador anterior.
+            }
+        }
+
+        function pintarContadoresNoLeidos() {
+            document.querySelectorAll('.chat-user-item').forEach(item => {
+                const usuario = item.dataset.username || '';
+                const badge = item.querySelector('.chat-user-badge');
+                if (!badge) return;
+
+                const cuantos = Number(conteosNoLeidos[usuario] || 0);
+
+                if (cuantos > 0) {
+                    badge.textContent = cuantos > 99 ? '99+' : String(cuantos);
+                    badge.hidden = false;
+                } else {
+                    badge.textContent = '';
+                    badge.hidden = true;
+                }
+            });
+        }
         async function loadUsersList() {
             const list = document.getElementById('chatUsersList');
             if (!list) return;
@@ -1007,6 +1052,7 @@
 
                     const item = document.createElement('div');
                     item.className = 'chat-user-item';
+                    item.dataset.username = user.username;
                     if (!accountActive) {
                         item.classList.add('inactive');
                     } else {
@@ -1026,6 +1072,11 @@
                     name.textContent = user.name || user.username;
                     main.appendChild(name);
 
+                    const badge = document.createElement('span');
+                    badge.className = 'chat-user-badge';
+                    badge.hidden = true;
+                    main.appendChild(badge);
+
                     const status = document.createElement('span');
                     status.className = 'chat-user-status ' + (isOnline ? 'active' : 'inactive');
                     status.title = isOnline ? 'Conectado recientemente' : 'Desconectado';
@@ -1034,6 +1085,8 @@
                     item.appendChild(main);
                     list.appendChild(item);
                 });
+
+                pintarContadoresNoLeidos();
             } catch (error) {
                 list.innerHTML = `<p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">${error.message}</p>`;
             }
@@ -1061,6 +1114,7 @@
                 requests.forEach(friendRequest => {
                     const item = document.createElement('div');
                     item.className = 'chat-user-item';
+                    item.dataset.username = user.username;
 
                     const name = document.createElement('span');
                     name.className = 'chat-user-name';
@@ -1613,6 +1667,8 @@
                     const shouldNotify = notificationsPrimed;
 
                     if (!isGuestChatMode) {
+                        await actualizarContadoresNoLeidos();
+
                         if (chatContacts.length === 0) {
                             await loadUsersList();
                         }

@@ -91,19 +91,56 @@
         setTimeout(() => toast.remove(), 3600);
     }
 
+    /*
+     * Sonido del aviso.
+     *
+     * Se espera a que el audio tenga datos antes de rebobinarlo: poner
+     * currentTime cuando todavia no ha cargado lanza un error y el aviso se queda
+     * mudo. El evento se registra antes de load() para no perderlo.
+     *
+     * Ademas hay un freno de 1,5 s, para que varios mensajes seguidos no suenen en
+     * rafaga.
+     */
+    let ultimoSonidoChat = 0;
+
     function playChatNotificationSound() {
+        const ahora = Date.now();
+
+        if (ahora - ultimoSonidoChat < 1500) {
+            return;
+        }
+
+        ultimoSonidoChat = ahora;
+
         try {
             const audio = initAudio();
-            audio.currentTime = 0;
-            audio.volume = 0.75;
-            const playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log('Notificación de audio no disponible:', error);
-                });
+
+            const sonar = () => {
+                try {
+                    if (audio.readyState >= 1) {
+                        audio.currentTime = 0;
+                    }
+
+                    audio.volume = 0.75;
+
+                    const playPromise = audio.play();
+
+                    if (playPromise !== undefined) {
+                        playPromise.catch(() => {});
+                    }
+                } catch (error) {
+                    // Sin sonido no pasa nada: el aviso visual sigue.
+                }
+            };
+
+            if (audio.readyState >= 2) {
+                sonar();
+            } else {
+                audio.addEventListener('canplay', sonar, { once: true });
+                audio.load();
             }
         } catch (error) {
-            console.log('Error al reproducir sonido:', error);
+            // Sin sonido no pasa nada.
         }
     }
 
@@ -439,6 +476,47 @@
     // Aviso de 'está escribiendo' al teclear (el freno está dentro).
     document.getElementById('chatInput')?.addEventListener('input', avisarEscribiendo);
 
+    /*
+     * Contador de mensajes sin leer por persona.
+     *
+     * Se pide a /chat/unread en una sola peticion para todos los contactos y se
+     * pinta al lado del nombre en la lista de usuarios. Solo cuenta lo que sigue
+     * sin leer: al abrir la conversacion desaparece.
+     */
+    let conteosNoLeidos = {};
+
+    async function actualizarContadoresNoLeidos() {
+        try {
+            const res = await apiFetch('/chat/unread');
+            const payload = await res.json();
+
+            if (!res.ok) return;
+
+            conteosNoLeidos = payload.conteos || {};
+            pintarContadoresNoLeidos();
+        } catch (error) {
+            // Si falla, se queda el contador anterior.
+        }
+    }
+
+    function pintarContadoresNoLeidos() {
+        document.querySelectorAll('.chat-user-item').forEach(item => {
+            const usuario = item.dataset.username || '';
+            const badge = item.querySelector('.chat-user-badge');
+            if (!badge) return;
+
+            const cuantos = Number(conteosNoLeidos[usuario] || 0);
+
+            if (cuantos > 0) {
+                badge.textContent = cuantos > 99 ? '99+' : String(cuantos);
+                badge.hidden = false;
+            } else {
+                badge.textContent = '';
+                badge.hidden = true;
+            }
+        });
+    }
+
     async function loadUsersList() {
         const list = document.getElementById('chatUsersList');
         if (!list) return;
@@ -476,6 +554,7 @@
                 const isOnline = (user.presence_status || (accountActive ? 'online' : 'offline')) === 'online';
                 const item = document.createElement('div');
                 item.className = 'chat-user-item';
+                item.dataset.username = user.username;
                 if (!accountActive) {
                     item.classList.add('inactive');
                 } else {
@@ -493,6 +572,11 @@
                 name.textContent = user.name || user.username;
                 main.appendChild(name);
 
+                const badge = document.createElement('span');
+                badge.className = 'chat-user-badge';
+                badge.hidden = true;
+                main.appendChild(badge);
+
                 const status = document.createElement('span');
                 status.className = 'chat-user-status ' + (isOnline ? 'active' : 'inactive');
                 status.title = isOnline ? 'Conectado recientemente' : 'Desconectado';
@@ -501,6 +585,8 @@
                 item.appendChild(main);
                 list.appendChild(item);
             });
+
+            pintarContadoresNoLeidos();
         } catch (error) {
             list.innerHTML = '<p style="text-align:center;color:var(--vh-text-soft);font-size:12px;padding:20px 10px;">' + error.message + '</p>';
         }
@@ -796,6 +882,8 @@
                         await refreshConversationSilently(c.username, shouldNotify, viendo);
                     }
                 }
+
+                await actualizarContadoresNoLeidos();
 
                 const res = await apiFetch('/chat/broadcast');
                 const payload = await res.json();

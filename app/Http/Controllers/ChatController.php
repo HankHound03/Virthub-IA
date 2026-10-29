@@ -158,6 +158,24 @@ class ChatController extends Controller
             : $this->sendToUser($request, $currentUser, $username, $message);
     }
 
+    /**
+     * Cuantos mensajes sin leer tengo de cada persona.
+     *
+     * Lo usa la lista de usuarios para poner el contador al lado del nombre. Una
+     * sola peticion para todos los contactos, en lugar de una por conversacion.
+     */
+    public function unread(Request $request): JsonResponse
+    {
+        $currentUser = ActiveUser::from($request);
+
+        if (ActiveUser::isGuest($currentUser)) {
+            return response()->json(['conteos' => []]);
+        }
+
+        return response()->json([
+            'conteos' => $this->chat->conteoNoLeidos(ActiveUser::username($currentUser)),
+        ]);
+    }
     public function broadcast(Request $request): JsonResponse
     {
         $messages = $this->chat->getBroadcastMessages();

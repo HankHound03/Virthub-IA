@@ -263,6 +263,11 @@ Route::middleware(EnsureRegisteredUser::class)->group(function (): void {
         ->middleware('throttle:chat-clear')
         ->name('chat.conversation.clear');
     Route::get('/chat/broadcast', [ChatController::class, 'broadcast'])->name('chat.broadcast');
+
+    // Contador de mensajes sin leer por persona (lista de usuarios del chat).
+    Route::get('/chat/unread', [ChatController::class, 'unread'])
+        ->middleware('throttle:120,1')
+        ->name('chat.unread');
 });
 
 // ---------------------------------------------------------------------------
