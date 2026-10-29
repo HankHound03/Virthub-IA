@@ -259,6 +259,8 @@
    ============================================================================= */
 
 [data-era="xp"] body {
+    /* Color de los dias con eventos: propio de esta epoca (dorado de la barra de XP). */
+    --vh-evento: #e0a63c;
     --vh-icon-stroke: 2px;
     --vh-scrim: 0.02;
     --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
@@ -434,6 +436,8 @@
    ============================================================================= */
 
 [data-era="vista"] body {
+    /* Color de los dias con eventos: propio de esta epoca (verde azulado del cristal Aero). */
+    --vh-evento: #2fa38a;
     --vh-icon: #dff2ff;
     --vh-icon-stroke: 2px;
     --vh-scrim: 0.34;
@@ -596,6 +600,8 @@
    ============================================================================= */
 
 [data-era="win7"] body {
+    /* Color de los dias con eventos: propio de esta epoca (azul cielo de Aero). */
+    --vh-evento: #4a9fe0;
     --vh-icon-stroke: 1.5px;
     --vh-scrim: 0.22;
     --vh-alert-error: #8a1c1c; --vh-alert-ok: #1c6b32;
@@ -763,6 +769,8 @@
    ============================================================================= */
 
 [data-era="win8"] body {
+    /* Color de los dias con eventos: propio de esta epoca (azul de las baldosas). */
+    --vh-evento: #00a4ef;
     --vh-icon-stroke: 2px;
     --vh-scrim: 0.10;
     --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
@@ -816,6 +824,8 @@
    ============================================================================= */
 
 [data-era="win10"] body {
+    /* Color de los dias con eventos: propio de esta epoca (azul de acento de Windows 10). */
+    --vh-evento: #0078d4;
     --vh-icon-stroke: 1.5px;
     --vh-scrim: 0.30;
     --vh-alert-error: #ffd6d6; --vh-alert-ok: #b5ffd3;
@@ -2482,9 +2492,14 @@ html.vh-ligero body *::after {
     position: relative;
 }
 
+/*
+ * El color sale de --vh-evento, que cada epoca define a su manera: dorado en XP,
+ * verde azulado en Vista, azul cielo en 7, azul de baldosa en 8 y azul de acento
+ * en 10. Asi el calendario no desentona con el tema elegido.
+ */
 [data-era] body .calendar-day.has-events {
-    border-color: #e8a33d !important;
-    background: color-mix(in srgb, #f0b64a 34%, var(--vh-btn-bg)) !important;
+    border-color: var(--vh-evento, #e0a63c) !important;
+    background: color-mix(in srgb, var(--vh-evento, #e0a63c) 30%, var(--vh-btn-bg)) !important;
     color: var(--vh-btn-text) !important;
     font-weight: 700;
 }
@@ -2499,15 +2514,15 @@ html.vh-ligero body *::after {
     height: 4px;
     margin-left: -2px;
     border-radius: 50%;
-    background: #a86a12;
+    background: color-mix(in srgb, var(--vh-evento, #e0a63c) 70%, #000);
 }
 
-/* El dia de hoy y el seleccionado siguen mandando, pero sin perder la senal. */
+/* Hoy y el dia seleccionado siguen mandando, pero sin perder la senal. */
 [data-era] body .calendar-day.has-events.is-today {
-    border-color: color-mix(in srgb, #e8a33d 60%, #4caf50) !important;
+    border-color: color-mix(in srgb, var(--vh-evento, #e0a63c) 65%, #4caf50) !important;
 }
 
 [data-era] body .calendar-day.has-events.is-selected {
-    border-color: #e8a33d !important;
-    box-shadow: 0 0 0 2px color-mix(in srgb, #e8a33d 55%, transparent);
+    border-color: var(--vh-evento, #e0a63c) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--vh-evento, #e0a63c) 55%, transparent);
 }
