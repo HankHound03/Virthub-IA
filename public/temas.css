@@ -2526,3 +2526,208 @@ html.vh-ligero body *::after {
     border-color: var(--vh-evento, #e0a63c) !important;
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--vh-evento, #e0a63c) 55%, transparent);
 }
+
+/* =============================================================================
+   VENTANA AWTY · "¿Ya estamos ahí?"
+   =============================================================================
+   El mensaje que Francisco dejo dentro del proyecto. La ventana se viste con las
+   mismas variables que el resto: toma el fondo del panel, el color del texto y el
+   borde de la epoca elegida, asi que no hay que repetir estilos por tema.
+   -------------------------------------------------------------------------- */
+
+/* Boton de la cabecera: discreto, al lado del perfil. */
+.awty-btn {
+    flex: 0 0 auto;
+    padding: 4px 10px;
+    border: 1px solid color-mix(in srgb, var(--vh-btn-text) 22%, transparent);
+    border-radius: var(--vh-btn-radius, 4px);
+    background: color-mix(in srgb, var(--vh-btn-bg) 60%, transparent);
+    color: color-mix(in srgb, var(--vh-btn-text) 70%, transparent);
+    font-family: var(--vh-font, sans-serif);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.awty-btn:hover,
+.awty-btn:focus-visible {
+    color: var(--vh-btn-text);
+    background: var(--vh-btn-bg);
+    border-color: var(--vh-evento, #e0a63c);
+    outline: none;
+}
+
+/* Fondo oscurecido. */
+.awty-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 4000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(3px);
+}
+
+.awty-overlay[hidden] {
+    display: none;
+}
+
+/* La ventana. */
+.awty-panel {
+    display: flex;
+    flex-direction: column;
+    width: min(680px, 100%);
+    max-height: min(82vh, 720px);
+    border: 1px solid color-mix(in srgb, var(--vh-head-bg) 70%, #000);
+    border-radius: var(--vh-panel-radius, 6px);
+    background: var(--vh-panel-bg);
+    color: var(--vh-panel-text);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    font-family: var(--vh-font, sans-serif);
+    overflow: hidden;
+}
+
+/* Barra de titulo, como la de una ventana del sistema. */
+.awty-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--vh-head-bg);
+    color: var(--vh-panel-text);
+    border-bottom: 1px solid color-mix(in srgb, var(--vh-head-bg) 60%, #000);
+    border-radius: var(--vh-head-radius, 6px 6px 0 0);
+}
+
+.awty-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.awty-close {
+    width: 24px;
+    height: 22px;
+    border: 1px solid color-mix(in srgb, var(--vh-panel-text) 25%, transparent);
+    border-radius: 3px;
+    background: transparent;
+    color: inherit;
+    font-size: 16px;
+    line-height: 18px;
+    cursor: pointer;
+}
+
+.awty-close:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+    color: #fff;
+}
+
+/* El texto: ancho comodo de lectura y aire entre parrafos. */
+.awty-body {
+    padding: 18px 22px;
+    overflow-y: auto;
+    font-size: 13.5px;
+    line-height: 1.65;
+    text-align: left;
+}
+
+.awty-body p {
+    margin: 0 0 12px;
+}
+
+.awty-body p:last-child {
+    margin-bottom: 0;
+}
+
+.awty-body em {
+    font-style: italic;
+}
+
+.awty-firma {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px dashed color-mix(in srgb, var(--vh-panel-text) 25%, transparent);
+    text-align: right;
+}
+
+/* Controles del audio. */
+.awty-audio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: 1px solid color-mix(in srgb, var(--vh-panel-text) 18%, transparent);
+    background: color-mix(in srgb, var(--vh-panel-bg) 80%, var(--vh-btn-bg));
+}
+
+.awty-play,
+.awty-stop {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid color-mix(in srgb, var(--vh-panel-text) 30%, transparent);
+    border-radius: var(--vh-btn-radius, 4px);
+    background: var(--vh-btn-bg);
+    color: var(--vh-btn-text);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.awty-play:hover,
+.awty-stop:hover {
+    border-color: var(--vh-evento, #e0a63c);
+}
+
+.awty-play-icono {
+    font-size: 11px;
+}
+
+.awty-stop {
+    font-size: 11px;
+    padding: 6px 10px;
+}
+
+.awty-tiempo {
+    margin-left: auto;
+    font-size: 11px;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Equipo modesto: sin desenfoque ni transiciones. */
+html.vh-ligero .awty-overlay {
+    backdrop-filter: none;
+}
+
+html.vh-ligero .awty-btn {
+    transition: none;
+}
+
+/* Pantallas pequenas: la ventana ocupa casi todo, con el texto mas grande. */
+@media (max-width: 560px) {
+    .awty-overlay {
+        padding: 10px;
+    }
+
+    .awty-panel {
+        max-height: 88vh;
+    }
+
+    .awty-body {
+        padding: 14px 16px;
+        font-size: 14px;
+    }
+
+    .awty-tiempo {
+        display: none;
+    }
+}
