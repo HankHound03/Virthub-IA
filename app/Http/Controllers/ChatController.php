@@ -254,6 +254,17 @@ class ChatController extends Controller
         }
 
         if ($this->ollama->isChatUsername($username)) {
+            /*
+             * La IA es del administrador.
+             *
+             * La interfaz solo se la ensena a el, pero la direccion del chat se
+             * puede pedir a mano: sin esta comprobacion, cualquier cuenta con
+             * sesion podia hablar con el modelo del equipo.
+             */
+            if (! ActiveUser::isAdmin($currentUser)) {
+                return response()->json(['error' => 'La IA solo esta disponible para el administrador.'], 403);
+            }
+
             return null;
         }
 

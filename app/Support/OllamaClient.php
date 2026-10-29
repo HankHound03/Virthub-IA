@@ -63,6 +63,17 @@ class OllamaClient
             ]);
     }
 
+    /**
+     * Modelos cargados ahora mismo en memoria (y cuanto ocupan en la GPU).
+     */
+    public function modelosCargados(): Response
+    {
+        return Http::connectTimeout(1)
+            ->timeout(2)
+            ->acceptJson()
+            ->get($this->baseUrl() . '/api/ps');
+    }
+
     public function systemPrompt(): string
     {
         $prompt = trim((string) config('virthub.ollama.system_prompt', ''));

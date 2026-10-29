@@ -276,7 +276,17 @@ Route::middleware(EnsureAdmin::class)->group(function (): void {
         ->middleware('throttle:20,1')
         ->name('chat.broadcast.publish');
 
+    /*
+     * IA local. Solo el administrador: el modelo corre en el equipo del dueno y no
+     * queremos que cualquier cuenta con sesion lo use. Se limita por usuario, no
+     * por IP, porque en un aula todos salen por la misma direccion.
+     */
     Route::post('/ai/ollama', [AiController::class, 'generate'])
-        ->middleware('throttle:10,1')
+        ->middleware(['admin', 'throttle:30,1'])
         ->name('ai.ollama');
+
+    // Monitor de recursos del panel de IA (GPU y modelo cargado).
+    Route::get('/ia/recursos', [AiController::class, 'recursos'])
+        ->middleware(['admin', 'throttle:120,1'])
+        ->name('ai.recursos');
 });

@@ -71,6 +71,22 @@
                 <div class="chat-messages" id="ollamaMessages">
                     <p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">Cargando chat de IA...</p>
                 </div>
+                {{--
+                    Monitor de recursos.
+                    Muestra la GPU mientras se conversa, para ver cuanto esta
+                    trabajando el equipo. Solo aparece si el monitor esta activo
+                    (entorno de pruebas por ahora).
+                --}}
+                @if (config('virthub.ia.monitor'))
+                    <div class="ia-monitor" id="iaMonitor" hidden>
+                        <span class="ia-monitor-chip"><span>GPU</span><b id="iaMonGpu">—</b></span>
+                        <span class="ia-monitor-chip"><span>VRAM</span><b id="iaMonVram">—</b></span>
+                        <span class="ia-monitor-chip"><span>Temp</span><b id="iaMonTemp">—</b></span>
+                        <span class="ia-monitor-chip"><span>Modelo</span><b id="iaMonModelo">—</b></span>
+                        <span class="ia-monitor-chip" id="iaMonVelocidadChip" hidden><span>Velocidad</span><b id="iaMonVelocidad">—</b></span>
+                    </div>
+                @endif
+
                 <p class="chat-view-note">La IA puede tardar varios segundos en responder.</p>
                 <div class="chat-input-area">
                     <input type="text" id="ollamaInput" placeholder="Escribe un mensaje para la IA..." onkeypress="if(event.key==='Enter') sendOllamaMessage();">
@@ -791,6 +807,7 @@
 
             if (tab === 'ollama') {
                 await loadOllamaMessages();
+                iniciarMonitorIA();
             }
         }
 
@@ -1036,6 +1053,7 @@
             }
 
             const messageText = input.value.trim();
+            const inicioConsulta = performance.now();
 
             try {
                 const response = await apiFetch(`/chat/conversation/${encodeURIComponent(currentChatUser)}`, {
@@ -1055,6 +1073,18 @@
 
                 input.value = '';
                 input.focus();
+
+                // Velocidad aproximada: caracteres por segundo de esta respuesta.
+                const segundos = (performance.now() - inicioConsulta) / 1000;
+                const ultima = messages && messages.length ? String(messages[messages.length - 1].message || '') : '';
+
+                if (segundos > 0.5 && ultima.length > 0) {
+                    const chip = document.getElementById('iaMonVelocidadChip');
+                    if (chip) {
+                        chip.hidden = false;
+                        document.getElementById('iaMonVelocidad').textContent = (ultima.length / segundos).toFixed(1) + ' car/s';
+                    }
+                }
             } catch (error) {
                 alert(error.message);
             }
@@ -1098,6 +1128,55 @@
             }
         }
 
+        /*
+         * Monitor de recursos del panel de IA.
+         *
+         * Consulta cada dos segundos la GPU y el modelo mientras la pestaña esta
+         * abierta. Si el puente de la GPU no responde, el bloque se oculta solo:
+         * no debe estorbar ni romper el chat.
+         */
+        let iaMonitorTimer = null;
+
+        async function refrescarMonitorIA() {
+            const bloque = document.getElementById('iaMonitor');
+            if (!bloque) return;
+
+            try {
+                const response = await apiFetch('/ia/recursos', { method: 'GET' });
+                if (!response.ok) { bloque.hidden = true; return; }
+
+                const datos = await response.json();
+
+                if (!datos.monitor) { bloque.hidden = true; return; }
+                bloque.hidden = false;
+
+                if (datos.gpu) {
+                    document.getElementById('iaMonGpu').textContent = datos.gpu.util + ' %';
+                    document.getElementById('iaMonVram').textContent =
+                        (datos.gpu.mem_used / 1024).toFixed(0) + ' / ' + (datos.gpu.mem_total / 1024).toFixed(0) + ' GB';
+                    document.getElementById('iaMonTemp').textContent = datos.gpu.temp + ' °C';
+                } else {
+                    document.getElementById('iaMonGpu').textContent = 'sin datos';
+                    document.getElementById('iaMonVram').textContent = '—';
+                    document.getElementById('iaMonTemp').textContent = '—';
+                }
+
+                const cargados = (datos.ollama && datos.ollama.cargados) || [];
+                document.getElementById('iaMonModelo').textContent = cargados.length
+                    ? cargados[0].name
+                    : (datos.ollama && datos.ollama.modelo) || '—';
+            } catch (error) {
+                bloque.hidden = true;
+            }
+        }
+
+        function iniciarMonitorIA() {
+            if (!document.getElementById('iaMonitor')) return;
+            refrescarMonitorIA();
+            if (!iaMonitorTimer) {
+                iaMonitorTimer = setInterval(refrescarMonitorIA, 2000);
+            }
+        }
         async function sendOllamaMessage() {
             if (!ollamaVisible) return;
 
@@ -1108,6 +1187,7 @@
             }
 
             const messageText = input.value.trim();
+            const inicioConsulta = performance.now();
 
             try {
                 // Deshabilitar input y botón mientras procesa
@@ -1132,6 +1212,18 @@
 
                 input.value = '';
                 input.focus();
+
+                // Velocidad aproximada: caracteres por segundo de esta respuesta.
+                const segundos = (performance.now() - inicioConsulta) / 1000;
+                const ultima = messages && messages.length ? String(messages[messages.length - 1].message || '') : '';
+
+                if (segundos > 0.5 && ultima.length > 0) {
+                    const chip = document.getElementById('iaMonVelocidadChip');
+                    if (chip) {
+                        chip.hidden = false;
+                        document.getElementById('iaMonVelocidad').textContent = (ultima.length / segundos).toFixed(1) + ' car/s';
+                    }
+                }
             } catch (error) {
                 alert(error.message);
             } finally {
@@ -1148,6 +1240,7 @@
             if (!input || !input.value.trim()) return;
 
             const messageText = input.value.trim();
+            const inicioConsulta = performance.now();
 
             try {
                 // Deshabilitar input y botón mientras procesa
@@ -1169,6 +1262,18 @@
                 chatSnapshots.broadcast = (await (await apiFetch('/chat/broadcast')).json()).messages.length;
                 input.value = '';
                 input.focus();
+
+                // Velocidad aproximada: caracteres por segundo de esta respuesta.
+                const segundos = (performance.now() - inicioConsulta) / 1000;
+                const ultima = messages && messages.length ? String(messages[messages.length - 1].message || '') : '';
+
+                if (segundos > 0.5 && ultima.length > 0) {
+                    const chip = document.getElementById('iaMonVelocidadChip');
+                    if (chip) {
+                        chip.hidden = false;
+                        document.getElementById('iaMonVelocidad').textContent = (ultima.length / segundos).toFixed(1) + ' car/s';
+                    }
+                }
             } catch (error) {
                 alert(error.message);
             } finally {

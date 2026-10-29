@@ -70,6 +70,18 @@ services:
       VIRTHUB_MODERACION: "true"
       VIRTHUB_MODERACION_URL: "http://nsfw-sherlock:4000"
       VIRTHUB_MODERACION_UMBRAL: "0.75"
+
+      # IA local (Ollama en el equipo, no en el contenedor).
+      # host.docker.internal es la puerta al host desde dentro de Docker:
+      # 127.0.0.1 dentro del contenedor es el propio contenedor.
+      OLLAMA_BASE_URL: "http://host.docker.internal:11434"
+      OLLAMA_MODEL: "granite4.2:3b"
+      OLLAMA_CONNECT_TIMEOUT: "5"
+      OLLAMA_REQUEST_TIMEOUT: "300"
+
+      # Monitor de recursos del panel de IA: solo en pruebas por ahora.
+      VIRTHUB_IA_MONITOR: "true"
+      VIRTHUB_GPU_URL: "http://host.docker.internal:11435"
     depends_on:
       mariadb:
         condition: service_healthy

@@ -337,6 +337,22 @@ return [
     |--------------------------------------------------------------------------
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Panel de IA
+    |--------------------------------------------------------------------------
+    |
+    | monitor: muestra el uso de la GPU y del modelo mientras se conversa.
+    | gpu_url: direccion del puente que lee nvidia-smi en el equipo anfitrion
+    |          (tools/gpu-bridge.ps1). Sin puente, el panel oculta esos datos.
+    |
+    */
+
+    'ia' => [
+        'monitor' => filter_var(env('VIRTHUB_IA_MONITOR', false), FILTER_VALIDATE_BOOL),
+        'gpu_url' => trim((string) env('VIRTHUB_GPU_URL', '')),
+    ],
+
     'ollama' => [
         'base_url' => trim((string) env('OLLAMA_BASE_URL', '')),
         'model' => trim((string) env('OLLAMA_MODEL', 'llama3.1')),

@@ -2176,3 +2176,51 @@ body .chat-users-panel {
         font-size: 13px;
     }
 }
+
+/* =============================================================================
+   MONITOR DE RECURSOS DEL PANEL DE IA
+   =============================================================================
+   Chips pequenos encima del campo de escritura: uso de GPU, memoria grafica,
+   temperatura y modelo cargado. Sin puente de GPU se oculta solo.
+   -------------------------------------------------------------------------- */
+
+.ia-monitor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--vh-border, rgba(255, 255, 255, 0.12));
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.ia-monitor-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border: 1px solid var(--vh-btn-border, rgba(255, 255, 255, 0.16));
+    border-radius: 999px;
+    background: var(--vh-btn-bg, rgba(255, 255, 255, 0.08));
+    color: var(--vh-btn-text, inherit);
+    font-family: Monocraft Nerd Font, monospace;
+    font-size: 10px;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.ia-monitor-chip span {
+    opacity: 0.65;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.ia-monitor-chip b {
+    font-weight: 700;
+}
+
+@media (max-width: 560px) {
+    .ia-monitor-chip {
+        font-size: 9px;
+        padding: 2px 7px;
+    }
+}
