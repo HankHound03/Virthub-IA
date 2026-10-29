@@ -307,8 +307,6 @@
                 profileLauncher.classList.remove('is-open');
             }
         });
-
-        applyThemeState();
     </script>
 </body>
 </html>

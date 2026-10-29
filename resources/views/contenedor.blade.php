@@ -302,14 +302,55 @@
             }, 3600);
         }
 
+        /*
+         * Sonido de notificacion.
+         *
+         * Tres cosas que antes fallaban:
+         *  - poner currentTime antes de que el audio tenga datos lanza un error y
+         *    el sonido no se oia nunca la primera vez;
+         *  - si llegaban mensajes de varios contactos a la vez, sonaban en ráfaga;
+         *  - sonaba tambien mientras leias esa misma conversacion.
+         */
+        let ultimoSonidoChat = 0;
+
         function playChatNotificationSound() {
+            const ahora = Date.now();
+
+            // Un solo aviso cada 1,5 s: evita la ráfaga de varias conversaciones.
+            if (ahora - ultimoSonidoChat < 1500) {
+                return;
+            }
+
+            ultimoSonidoChat = ahora;
+
             try {
                 const audio = initChatNotificationAudio();
-                audio.currentTime = 0;
-                audio.volume = 0.75;
-                const playPromise = audio.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
+
+                const sonar = () => {
+                    try {
+                        if (audio.readyState >= 1) {
+                            audio.currentTime = 0;
+                        }
+
+                        audio.volume = 0.75;
+
+                        const playPromise = audio.play();
+
+                        if (playPromise !== undefined) {
+                            playPromise.catch(() => {});
+                        }
+                    } catch (error) {
+                        // Sin sonido no pasa nada: el aviso visual sigue.
+                    }
+                };
+
+                if (audio.readyState >= 2) {
+                    sonar();
+                } else {
+                    audio.load();
+                    audio.addEventListener('canplay', sonar, { once: true });
+                }
+            } catch (error) {
                         console.log('Notificación de audio no disponible:', error);
                     });
                 }
@@ -1072,10 +1113,16 @@
                 const shouldShowFloatingNotification = !isChatPanelOpen || (isChatPanelOpen && !isConversationOpen);
 
                 incoming.forEach(message => {
-                    showChatNotification(`Nuevo mensaje de ${message.from || username}`, message.message || 'Tienes un nuevo mensaje.');
-                    if (shouldShowFloatingNotification) {
-                        showFloatingNotification(message.from || username, message.message || 'Tienes un nuevo mensaje.', message.profile_image_path || null);
+                    /*
+                     * Si la conversación está abierta y a la vista, no se avisa:
+                     * ya la estás leyendo. Antes sonaba igual.
+                     */
+                    if (!shouldShowFloatingNotification) {
+                        return;
                     }
+
+                    showChatNotification(`Nuevo mensaje de ${message.from || username}`, message.message || 'Tienes un nuevo mensaje.');
+                    showFloatingNotification(message.from || username, message.message || 'Tienes un nuevo mensaje.', message.profile_image_path || null);
                 });
             }
 
@@ -1539,6 +1586,13 @@
         function startChatPolling() {
             let notificationsPrimed = false;
 
+            /*
+             * Sondeo del chat: una vez por contacto cada 5 segundos.
+             *
+             * Antes iba cada 2 segundos: con veinte contactos eran diez peticiones
+             * por segundo, para siempre. A cinco segundos se nota igual de vivo y
+             * el servidor respira.
+             */
             setInterval(async () => {
                 try {
                     const shouldNotify = notificationsPrimed;
@@ -1588,12 +1642,11 @@
                 } catch (error) {
                     // Silenciar errores temporales de polling.
                 }
-            }, 2000);
+            }, 5000);
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
             applySidebarState();
-            applyThemeState();
             syncFullscreenButtonState();
             loadInIframe();
             syncChatLayoutState();

@@ -210,22 +210,6 @@
         @endif
 
 <script>
-    (() => {
-        const retroStorageKey = 'virthub_retro_mode';
-
-        function applyRetroMode(enabled) {
-            document.body.classList.toggle('retro-mode', enabled);
-            localStorage.setItem(retroStorageKey, enabled ? '1' : '0');
-        }
-
-        window.toggleRetroMode = () => {
-            applyRetroMode(!document.body.classList.contains('retro-mode'));
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            applyRetroMode(localStorage.getItem(retroStorageKey) === '1');
-        });
-    })();
 
     (() => {
         const modal = document.getElementById('headerLoginModal');
