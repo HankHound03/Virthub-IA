@@ -431,6 +431,54 @@
             return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         }
 
+        /*
+         * Estado del chat entre personas.
+         *
+         * chatEscribiendo guarda quienes estan escribiendo (lo dice el servidor al
+         * refrescar la conversacion) y ultimoAvisoEscribiendo sirve para no mandar
+         * el aviso en cada tecla.
+         */
+        const chatEscribiendo = {};
+        let ultimoAvisoEscribiendo = 0;
+
+        function avisarEscribiendo() {
+            if (!currentChatUser || currentChatUser === ollamaChatUser) return;
+
+            const ahora = Date.now();
+            if (ahora - ultimoAvisoEscribiendo < 2500) return;
+
+            ultimoAvisoEscribiendo = ahora;
+
+            apiFetch(`/chat/conversation/${encodeURIComponent(currentChatUser)}/escribiendo`, {
+                method: 'POST',
+                body: JSON.stringify({}),
+            }).catch(() => {});
+        }
+
+        /** Burbuja de "esta escribiendo" al final de la conversacion. */
+        function pintarEscribiendo(usuario) {
+            const contenedor = document.getElementById('chatMessages');
+            if (!contenedor) return;
+
+            const previa = document.getElementById('chatEscribiendo');
+            if (previa) previa.remove();
+
+            if (!usuario || !chatEscribiendo[usuario]) return;
+            if (document.getElementById('messagesView')?.classList.contains('active') === false) return;
+
+            const burbuja = document.createElement('div');
+            burbuja.id = 'chatEscribiendo';
+            burbuja.className = 'ia-escribiendo';
+            burbuja.innerHTML =
+                '<span class="ia-puntos" aria-hidden="true"><i></i><i></i><i></i></span>' +
+                '<span class="ia-escribiendo-texto"></span>';
+
+            burbuja.querySelector('.ia-escribiendo-texto').textContent = usuario + ' está escribiendo…';
+
+            contenedor.appendChild(burbuja);
+            contenedor.scrollTop = contenedor.scrollHeight;
+        }
+
         function renderChatMessages(container, messages, emptyText, ownUser, messageLabelPrefix = '') {
             if (!container) return;
 
@@ -475,6 +523,14 @@
                 const meta = document.createElement('small');
                 const timeLabel = safeTimeLabel(message.created_at);
                 meta.textContent = timeLabel ? `${sender}${sender ? ' • ' : ''}${timeLabel}` : sender;
+
+                // Marca de visto: solo en mis mensajes, y solo si el otro ya lo abrió.
+                if (ownUser && sender === ownUser && message.read_at && !messageLabelPrefix) {
+                    const visto = document.createElement('span');
+                    visto.className = 'chat-visto';
+                    visto.textContent = ' ✓ Visto';
+                    meta.appendChild(visto);
+                }
 
                 wrapper.appendChild(header);
                 wrapper.appendChild(body);
@@ -1026,6 +1082,7 @@
             if (currentChatUser === username) {
                 const messagesDiv = document.getElementById('chatMessages');
                 renderChatMessages(messagesDiv, messages, chatConversationTitle(username), getUserKey());
+            pintarEscribiendo(username);
             }
 
             return messages;
@@ -1038,6 +1095,8 @@
             if (!response.ok) {
                 throw new Error(payload.error || 'No se pudo cargar la conversación');
             }
+
+            chatEscribiendo[username] = !!payload.escribiendo;
 
             return payload.messages || [];
         }
@@ -1054,6 +1113,7 @@
             try {
                 const messages = await refreshConversationSilently(username, false);
                 renderChatMessages(messagesDiv, messages, chatConversationTitle(username), getUserKey());
+            pintarEscribiendo(username);
             } catch (error) {
                 messagesDiv.innerHTML = `<p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">${error.message}</p>`;
             }
@@ -1086,6 +1146,7 @@
                 const messagesDiv = document.getElementById('chatMessages');
                 const messages = await refreshConversationSilently(currentChatUser, false);
                 renderChatMessages(messagesDiv, messages, chatConversationTitle(currentChatUser), getUserKey());
+                pintarEscribiendo(currentChatUser);
                 chatSnapshots.conversations[currentChatUser] = messages.length;
 
                 input.value = '';
@@ -1546,6 +1607,12 @@
             }
             startChatPolling();
         });
+
+        /*
+         * Aviso de "está escribiendo" al teclear en el chat de usuarios.
+         * El freno está dentro de avisarEscribiendo (una vez cada 2,5 s).
+         */
+        document.getElementById('chatInput')?.addEventListener('input', avisarEscribiendo);
 
         document.addEventListener('click', () => {
             unlockChatNotificationAudio();

@@ -253,6 +253,15 @@ Route::middleware(EnsureRegisteredUser::class)->group(function (): void {
     Route::post('/chat/conversation/{username}', [ChatController::class, 'sendMessage'])
         ->middleware('throttle:chat-send')
         ->name('chat.conversation.send');
+    // Aviso de "esta escribiendo" y vaciado de una conversacion. Van aqui, en el
+    // grupo de usuarios registrados: el chat es entre personas, no solo del admin.
+    Route::post('/chat/conversation/{username}/escribiendo', [ChatController::class, 'escribiendo'])
+        ->middleware('throttle:60,1')
+        ->name('chat.conversation.typing');
+
+    Route::post('/chat/conversation/{username}/limpiar', [ChatController::class, 'limpiarConversacion'])
+        ->middleware('throttle:10,1')
+        ->name('chat.conversation.clear');
     Route::get('/chat/broadcast', [ChatController::class, 'broadcast'])->name('chat.broadcast');
 });
 
@@ -285,10 +294,6 @@ Route::middleware(EnsureAdmin::class)->group(function (): void {
         ->middleware(['admin', 'throttle:30,1'])
         ->name('ai.ollama');
 
-    // Vaciar una conversacion (el chat de IA lo usa para empezar de cero).
-    Route::post('/chat/conversation/{username}/limpiar', [ChatController::class, 'limpiarConversacion'])
-        ->middleware('throttle:10,1')
-        ->name('chat.conversation.clear');
 
     // Monitor de recursos del panel de IA (GPU y modelo cargado).
     Route::get('/ia/recursos', [AiController::class, 'recursos'])

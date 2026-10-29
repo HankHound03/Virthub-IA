@@ -57,6 +57,84 @@ class ChatStore
         });
     }
 
+    /**
+     * Apunta que un usuario esta escribiendo en una conversacion.
+     *
+     * No se guarda un "si/no" sino la hora del ultimo aviso: asi el otro lado
+     * puede considerar que sigue escribiendo solo si el aviso es reciente, y no
+     * se queda el cartel pegado si la persona cierra el navegador.
+     */
+    public function marcarEscribiendo(string $usuario, string $otro): void
+    {
+        $this->updateData(function (array &$data) use ($usuario, $otro): void {
+            $key = $this->conversationKey($usuario, $otro);
+
+            $data['escribiendo'] = is_array($data['escribiendo'] ?? null) ? $data['escribiendo'] : [];
+            $data['escribiendo'][$key][$this->normalizeUser($usuario)] = time();
+        });
+    }
+
+    /**
+     * Dice si el OTRO esta escribiendo en esta conversacion.
+     */
+    public function estaEscribiendo(string $usuario, string $otro, int $segundos = 6): bool
+    {
+        $data = $this->readData();
+        $key = $this->conversationKey($usuario, $otro);
+
+        $aviso = $data['escribiendo'][$key][$this->normalizeUser($otro)] ?? 0;
+
+        return is_int($aviso) && (time() - $aviso) <= $segundos;
+    }
+
+    /**
+     * Marca como leidos los mensajes que el otro me envio.
+     *
+     * Devuelve cuantos cambio, para no reescribir el archivo si no hay nada nuevo.
+     */
+    public function marcarLeidos(string $usuario, string $otro): int
+    {
+        $usuario = $this->normalizeUser($usuario);
+        $otro = $this->normalizeUser($otro);
+
+        /*
+         * Primero se mira si queda algo por marcar, sin abrir el archivo para
+         * escribir. El chat se refresca cada pocos segundos por cada contacto:
+         * reescribir el JSON cuando no hay nada nuevo seria un gasto inutil.
+         */
+        $key = $this->conversationKey($usuario, $otro);
+
+        $pendientes = 0;
+
+        foreach ($this->readData()['conversations'][$key] ?? [] as $entrada) {
+            if (($entrada['to'] ?? '') === $usuario
+                && ($entrada['from'] ?? '') === $otro
+                && empty($entrada['read_at'])) {
+                $pendientes++;
+            }
+        }
+
+        if ($pendientes === 0) {
+            return 0;
+        }
+
+        return $this->updateData(function (array &$data) use ($usuario, $otro, $key): int {
+            $marcados = 0;
+
+            foreach ($data['conversations'][$key] ?? [] as $indice => $entrada) {
+                $esParaMi = ($entrada['to'] ?? '') === $usuario;
+                $esDelOtro = ($entrada['from'] ?? '') === $otro;
+
+                if ($esParaMi && $esDelOtro && empty($entrada['read_at'])) {
+                    $data['conversations'][$key][$indice]['read_at'] = date('Y-m-d H:i:s');
+                    $marcados++;
+                }
+            }
+
+            return $marcados;
+        });
+    }
+
     public function getBroadcastMessages(): array
     {
         $data = $this->readData();

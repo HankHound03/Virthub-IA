@@ -112,9 +112,21 @@ class ChatController extends Controller
             return $guard;
         }
 
-        $messages = $this->chat->getConversationMessages(ActiveUser::username($currentUser), $username);
+        $yo = ActiveUser::username($currentUser);
+        $esIA = $this->ollama->isChatUsername($username);
 
-        return response()->json(['messages' => $this->decorate($messages, $username)]);
+        // Al abrir o refrescar la conversacion, lo que me han escrito queda visto.
+        if (! $esIA) {
+            $this->chat->marcarLeidos($yo, $username);
+        }
+
+        $messages = $this->chat->getConversationMessages($yo, $username);
+
+        return response()->json([
+            'messages' => $this->decorate($messages, $username),
+            // Solo para conversaciones entre personas: la IA no "escribe".
+            'escribiendo' => ! $esIA && $this->chat->estaEscribiendo($yo, $username),
+        ]);
     }
 
     public function sendMessage(Request $request, string $username): JsonResponse
@@ -239,6 +251,32 @@ class ChatController extends Controller
         $history[] = ['role' => 'user', 'content' => $message];
 
         return $history;
+    }
+
+    /**
+     * Aviso de "estoy escribiendo".
+     *
+     * El cliente lo manda mientras la persona teclea (con freno, no en cada
+     * letra) y el otro lado lo lee al refrescar la conversacion.
+     */
+    public function escribiendo(Request $request, string $username): JsonResponse
+    {
+        $currentUser = ActiveUser::from($request);
+
+        $guard = $this->guardConversation($currentUser, $username);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
+        // La IA no tiene sentido aqui.
+        if ($this->ollama->isChatUsername($username)) {
+            return response()->json(['ok' => true]);
+        }
+
+        $this->chat->marcarEscribiendo(ActiveUser::username($currentUser), $username);
+
+        return response()->json(['ok' => true]);
     }
 
     /**
