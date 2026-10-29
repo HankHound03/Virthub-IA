@@ -2304,3 +2304,18 @@ body .chat-users-panel {
     background: rgba(217, 83, 79, 0.14);
     color: var(--vh-text, inherit);
 }
+
+/* =============================================================================
+   EL ATRIBUTO hidden DEBE GANAR SIEMPRE
+   =============================================================================
+   El navegador oculta lo que lleva hidden con una regla de muy baja prioridad.
+   En cuanto el CSS le da un display propio (flex, inline-flex...), esa regla
+   pierde y el elemento se queda a la vista: paso con la tira de confirmacion del
+   panel de IA y con el monitor de recursos, que se veian siempre.
+
+   Esta regla lo arregla de raiz para toda la aplicacion.
+   -------------------------------------------------------------------------- */
+
+[hidden] {
+    display: none !important;
+}

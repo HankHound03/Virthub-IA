@@ -1,0 +1,15 @@
+﻿Los paneles ocultos ya no se ven siempre
+
+El atributo hidden del HTML estaba siendo ignorado. El navegador lo oculta con una
+regla de prioridad muy baja, y en cuanto el CSS define un display propio (flex,
+inline-flex) esa regla pierde: el elemento se queda a la vista aunque lleve hidden.
+
+Paso con la tira de confirmacion del panel de IA (se veia siempre el "Si, borrar /
+Cancelar" sin haber pulsado nada) y con el monitor de recursos.
+
+Se anade una regla global:
+  [hidden] { display: none !important; }
+que lo arregla de raiz para toda la aplicacion.
+
+Comprobado: la tira y el monitor llegan con el atributo hidden y la regla viaja al
+navegador.
