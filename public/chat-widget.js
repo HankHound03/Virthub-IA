@@ -739,13 +739,20 @@
     function toggleChat() {
         chatPanel.classList.toggle('is-open');
         unlockAudio();
+
         if (chatPanel.classList.contains('is-open')) {
             requestPermission();
             sendPresenceHeartbeat();
             resetNotificationBadge();
-            if (isBroadcastOnly) {
-                switchChatTab('broadcast');
-            }
+
+            /*
+             * Al abrir, siempre la pestaña de usuarios: es lo primero que se
+             * necesita al entrar al chat, elegir con quién hablar.
+             *
+             * Los invitados solo tienen anuncios, así que ellos siguen viendo su
+             * única pestaña.
+             */
+            switchChatTab(isBroadcastOnly ? 'broadcast' : 'users');
         }
     }
 

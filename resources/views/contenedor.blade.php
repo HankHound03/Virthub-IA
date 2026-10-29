@@ -871,6 +871,13 @@
 
             if (chatPanel.classList.contains('is-open')) {
                 requestChatNotificationPermission();
+
+                /*
+                 * Al abrir, siempre la pestaña de usuarios: es lo primero que se
+                 * necesita, elegir con quién hablar. Los invitados solo tienen
+                 * anuncios, así que ellos se quedan ahí.
+                 */
+                switchChatTab(isGuestChatMode ? 'broadcast' : 'users');
             }
         }
 
