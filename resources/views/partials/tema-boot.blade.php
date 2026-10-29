@@ -41,19 +41,38 @@
                 var memoria = navigator.deviceMemory || 8;
                 var menosMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-                if (nucleos <= 4 || memoria <= 4 || menosMovimiento) {
+                /*
+                 * Ahorro de datos o conexion lenta: tambien cuenta. Un equipo
+                 * viejo suele ir acompañado de una conexion justa, y cargar menos
+                 * cosas se agradece igual.
+                 */
+                var ahorroDatos = false;
+
+                try {
+                    ahorroDatos = !!(navigator.connection && navigator.connection.saveData);
+                } catch (e) {
+                    ahorroDatos = false;
+                }
+
+                if (nucleos <= 4 || memoria <= 4 || menosMovimiento || ahorroDatos) {
                     document.documentElement.classList.add('vh-ligero');
                 }
             } catch (e) {
                 /* Si el navegador no lo soporta, se queda el modo normal. */
             }
-            var enlace = document.createElement('link');
-            enlace.rel = 'stylesheet';
-            /* Con la marca de tiempo: si el archivo cambia, cambia la direccion y
-               el navegador no sigue usando la copia vieja de la cache. */
-            enlace.href = @json(asset('temas.css') . '?v=' . filemtime(public_path('temas.css')));
-            enlace.id = 'vhTemasCss';
-            document.head.appendChild(enlace);
         })();
     </script>
+
+    {{--
+        La hoja del tema va como <link> normal, no creada por JavaScript.
+
+        Antes se metía desde el script: el navegador ya estaba pintando cuando la
+        descargaba, así que al recargar se veía un instante el diseño original
+        antes del tema elegido. Como <link> en el <head>, entra en el primer
+        pintado y ese parpadeo desaparece.
+
+        La marca de tiempo evita que el navegador use una copia vieja.
+    --}}
+    <link id="vhTemasCss" rel="stylesheet"
+          href="{{ asset('temas.css') }}?v={{ filemtime(public_path('temas.css')) }}">
 @endif

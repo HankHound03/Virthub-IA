@@ -1263,6 +1263,9 @@
         let iaMonitorTimer = null;
 
         async function refrescarMonitorIA() {
+            // Sin la pestaña a la vista no se consulta la GPU.
+            if (document.hidden) return;
+
             const bloque = document.getElementById('iaMonitor');
             if (!bloque) return;
 
@@ -1594,6 +1597,11 @@
              * el servidor respira.
              */
             setInterval(async () => {
+                // Con la pestaña en segundo plano no se pide nada: ni gasta CPU ni datos.
+                if (document.hidden) {
+                    return;
+                }
+
                 try {
                     const shouldNotify = notificationsPrimed;
 

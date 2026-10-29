@@ -2419,3 +2419,46 @@ html.vh-ligero body *::after {
     padding: 0;
     font-size: 12px;
 }
+
+/* =============================================================================
+   EQUIPOS VIEJOS: LO QUE MAS CUESTA
+   =============================================================================
+   En un Core 2 Duo o un Atom con poca memoria, lo caro no es el tamano de la
+   pagina sino el trabajo de pintado:
+
+     - background-attachment: fixed obliga a repintar el fondo entero en cada
+       desplazamiento, y sin tarjeta grafica decente eso se nota muchisimo;
+     - los desenfoques (backdrop-filter y filter: blur) recalculan la zona
+       borrosa constantemente;
+     - las sombras grandes y las animaciones largas suman.
+
+   Aqui se apagan para los equipos detectados como modestos. El diseno se mantiene:
+   solo pierde el desenfoque y el fondo fijo.
+   -------------------------------------------------------------------------- */
+
+html.vh-ligero body,
+html.vh-ligero body::before,
+html.vh-ligero body::after {
+    /* Fondo normal: se desplaza con la pagina en vez de repintarse entero. */
+    background-attachment: scroll !important;
+}
+
+html.vh-ligero body * {
+    /* Sin desenfoques de ningun tipo. */
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html.vh-ligero body .vh-fondo {
+    /* Las capas del cambio de tema tampoco necesitan desenfoque. */
+    filter: none !important;
+}
+
+/* Las animaciones se quedan, pero cortas: menos fotogramas que calcular. */
+html.vh-ligero body *,
+html.vh-ligero body *::before,
+html.vh-ligero body *::after {
+    animation-duration: 0.12s !important;
+    transition-duration: 0.12s !important;
+}
