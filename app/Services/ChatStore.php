@@ -41,6 +41,22 @@ class ChatStore
         });
     }
 
+    /**
+     * Borra una conversacion completa.
+     *
+     * Se usa en el chat de IA: al empezar de cero, el modelo deja de arrastrar
+     * respuestas anteriores (y cualquier personalidad que se hubiera colado en el
+     * historial).
+     */
+    public function borrarConversacion(string $firstUser, string $secondUser): void
+    {
+        $this->updateData(function (array &$data) use ($firstUser, $secondUser): void {
+            $key = $this->conversationKey($firstUser, $secondUser);
+
+            unset($data['conversations'][$key]);
+        });
+    }
+
     public function getBroadcastMessages(): array
     {
         $data = $this->readData();

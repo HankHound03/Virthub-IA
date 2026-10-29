@@ -285,6 +285,11 @@ Route::middleware(EnsureAdmin::class)->group(function (): void {
         ->middleware(['admin', 'throttle:30,1'])
         ->name('ai.ollama');
 
+    // Vaciar una conversacion (el chat de IA lo usa para empezar de cero).
+    Route::post('/chat/conversation/{username}/limpiar', [ChatController::class, 'limpiarConversacion'])
+        ->middleware('throttle:10,1')
+        ->name('chat.conversation.clear');
+
     // Monitor de recursos del panel de IA (GPU y modelo cargado).
     Route::get('/ia/recursos', [AiController::class, 'recursos'])
         ->middleware(['admin', 'throttle:120,1'])

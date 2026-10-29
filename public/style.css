@@ -2224,3 +2224,30 @@ body .chat-users-panel {
         padding: 2px 7px;
     }
 }
+
+.ia-acciones {
+    display: flex;
+    justify-content: flex-end;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--vh-border, rgba(255, 255, 255, 0.12));
+}
+
+.ia-borrar {
+    padding: 5px 12px;
+    border: 1px solid color-mix(in srgb, #d9534f 55%, var(--vh-btn-border, rgba(255, 255, 255, 0.2)));
+    border-radius: 8px;
+    background: color-mix(in srgb, #d9534f 18%, var(--vh-btn-bg, rgba(255, 255, 255, 0.08)));
+    color: var(--vh-btn-text, inherit);
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.ia-borrar:hover {
+    filter: brightness(1.15);
+}
+
+.ia-borrar:disabled {
+    opacity: 0.6;
+    cursor: default;
+}

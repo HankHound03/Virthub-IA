@@ -87,6 +87,13 @@
                     </div>
                 @endif
 
+                <div class="ia-acciones">
+                    <button type="button" class="ia-borrar" id="iaBorrarHistorial"
+                            onclick="borrarHistorialIA()">
+                        Borrar historial
+                    </button>
+                </div>
+
                 <p class="chat-view-note">La IA puede tardar varios segundos en responder.</p>
                 <div class="chat-input-area">
                     <input type="text" id="ollamaInput" placeholder="Escribe un mensaje para la IA..." onkeypress="if(event.key==='Enter') sendOllamaMessage();">
@@ -1175,6 +1182,45 @@
             refrescarMonitorIA();
             if (!iaMonitorTimer) {
                 iaMonitorTimer = setInterval(refrescarMonitorIA, 2000);
+            }
+        }
+        /*
+         * Borrar el historial de la conversacion con la IA.
+         *
+         * Sirve para empezar de cero: el modelo deja de arrastrar respuestas
+         * anteriores y cualquier personalidad que se hubiera colado.
+         */
+        async function borrarHistorialIA() {
+            if (!ollamaVisible) return;
+
+            if (!confirm('¿Borrar todo el historial de este chat de IA? No se puede deshacer.')) {
+                return;
+            }
+
+            const boton = document.getElementById('iaBorrarHistorial');
+            if (boton) boton.disabled = true;
+
+            try {
+                const response = await apiFetch(`/chat/conversation/${encodeURIComponent(ollamaChatUser)}/limpiar`, {
+                    method: 'POST',
+                    body: JSON.stringify({}),
+                });
+
+                if (!response.ok) {
+                    const payload = await response.json().catch(() => ({}));
+                    throw new Error(payload.error || 'No se pudo borrar el historial');
+                }
+
+                const messagesDiv = document.getElementById('ollamaMessages');
+                if (messagesDiv) {
+                    messagesDiv.innerHTML = '<p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">Historial borrado. Escribe un mensaje para empezar.</p>';
+                }
+
+                chatSnapshots.conversations[ollamaChatUser] = 0;
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                if (boton) boton.disabled = false;
             }
         }
         async function sendOllamaMessage() {

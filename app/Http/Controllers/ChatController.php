@@ -242,6 +242,27 @@ class ChatController extends Controller
     }
 
     /**
+     * Vacia una conversacion.
+     *
+     * En el chat de IA sirve para empezar de cero, sin que el modelo arrastre lo
+     * que se hablo antes.
+     */
+    public function limpiarConversacion(Request $request, string $username): JsonResponse
+    {
+        $currentUser = ActiveUser::from($request);
+
+        $guard = $this->guardConversation($currentUser, $username);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
+        $this->chat->borrarConversacion(ActiveUser::username($currentUser), $username);
+
+        return response()->json(['limpiado' => true]);
+    }
+
+    /**
      * Devuelve una respuesta de error si la conversacion no esta permitida.
      *
      * Reglas: los invitados no tienen mensajes privados y solo se puede hablar
