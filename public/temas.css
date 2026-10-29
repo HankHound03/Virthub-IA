@@ -2535,28 +2535,45 @@ html.vh-ligero body *::after {
    borde de la epoca elegida, asi que no hay que repetir estilos por tema.
    -------------------------------------------------------------------------- */
 
-/* Boton de la cabecera: discreto, al lado del perfil. */
+/*
+ * Boton AWTY.
+ *
+ * Va en dos sitios: la cabecera (junto al perfil) y el gadget de bienvenida del
+ * inicio (junto a "Mi perfil"). Tiene que verse pero sin llamar la atencion mas
+ * que el resto, asi que usa el borde de acento de la epoca (--vh-evento).
+ */
 .awty-btn {
     flex: 0 0 auto;
-    padding: 4px 10px;
-    border: 1px solid color-mix(in srgb, var(--vh-btn-text) 22%, transparent);
+    padding: 5px 11px;
+    border: 1px solid var(--vh-evento, #e0a63c);
     border-radius: var(--vh-btn-radius, 4px);
-    background: color-mix(in srgb, var(--vh-btn-bg) 60%, transparent);
-    color: color-mix(in srgb, var(--vh-btn-text) 70%, transparent);
+    background: color-mix(in srgb, var(--vh-evento, #e0a63c) 14%, var(--vh-btn-bg));
+    color: var(--vh-btn-text);
     font-family: var(--vh-font, sans-serif);
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     cursor: pointer;
-    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .awty-btn:hover,
 .awty-btn:focus-visible {
-    color: var(--vh-btn-text);
-    background: var(--vh-btn-bg);
-    border-color: var(--vh-evento, #e0a63c);
+    background: color-mix(in srgb, var(--vh-evento, #e0a63c) 30%, var(--vh-btn-bg));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--vh-evento, #e0a63c) 40%, transparent);
     outline: none;
+}
+
+/* El boton del gadget de bienvenida va junto al enlace, alineado con el. */
+.welcome-gadget-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.welcome-gadget-actions .awty-btn {
+    font-size: 11px;
+    padding: 6px 12px;
 }
 
 /* Fondo oscurecido. */

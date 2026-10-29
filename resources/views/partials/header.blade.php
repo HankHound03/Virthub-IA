@@ -125,7 +125,7 @@
                 Va al lado del perfil, sin adornos, para quien sepa que está ahí. La
                 ventana usa las variables del tema, así que cambia de aspecto con él.
             --}}
-            <button type="button" class="awty-btn" id="awtyBtn" title="AWTY" aria-label="Abrir el mensaje AWTY">
+            <button type="button" class="awty-btn awty-trigger" id="awtyBtn" title="AWTY" aria-label="Abrir el mensaje AWTY">
                 AWTY
             </button>
 

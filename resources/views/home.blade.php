@@ -364,9 +364,16 @@
                         <p class="welcome-gadget-clock" id="welcomeClock">--:--</p>
                         <p class="welcome-gadget-date" id="welcomeDate">Cargando fecha...</p>
                     </div>
-                    @if (!empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest'))
-                        <a class="welcome-gadget-link" href="{{ url('/perfil/' . rawurlencode((string) $currentUser['username'])) }}">Mi perfil</a>
-                    @endif
+                    <div class="welcome-gadget-actions">
+                        {{-- AWTY: abre el mensaje de Francisco. --}}
+                        <button type="button" class="awty-btn awty-trigger" title="AWTY · ¿Ya estamos ahí?" aria-label="Abrir el mensaje AWTY">
+                            AWTY
+                        </button>
+
+                        @if (!empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest'))
+                            <a class="welcome-gadget-link" href="{{ url('/perfil/' . rawurlencode((string) $currentUser['username'])) }}">Mi perfil</a>
+                        @endif
+                    </div>
                 </div>
             </div>
         </aside>

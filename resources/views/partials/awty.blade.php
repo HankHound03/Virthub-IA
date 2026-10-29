@@ -75,7 +75,9 @@
 
 <script>
     (function () {
-        const boton = document.getElementById('awtyBtn');
+        // Cualquier elemento con .awty-trigger abre la ventana: el boton de la
+        // cabecera y el del gadget de bienvenida del inicio.
+        const disparadores = document.querySelectorAll('.awty-trigger');
         const overlay = document.getElementById('awtyOverlay');
         const cerrar = document.getElementById('awtyClose');
         const audio = document.getElementById('awtyAudio');
@@ -85,7 +87,7 @@
         const stop = document.getElementById('awtyStop');
         const tiempo = document.getElementById('awtyTiempo');
 
-        if (!boton || !overlay || !audio) {
+        if (!disparadores.length || !overlay || !audio) {
             return;
         }
 
@@ -109,6 +111,17 @@
             document.body.classList.add('awty-abierto');
             if (cerrar) cerrar.focus();
             etiqueta();
+
+            /*
+             * La cancion arranca sola al abrir.
+             *
+             * El clic en el boton cuenta como gesto del usuario, asi que el
+             * navegador deja reproducir. Si aun asi lo bloquea, queda el boton de
+             * reproducir y el aviso visual no se toca.
+             */
+            if (audio.paused) {
+                audio.play().then(() => mostrarIcono(false)).catch(() => mostrarIcono(true));
+            }
         }
 
         function cerrarPanel() {
@@ -122,7 +135,7 @@
             }
         }
 
-        boton.addEventListener('click', abrir);
+        disparadores.forEach(disparador => disparador.addEventListener('click', abrir));
         if (cerrar) cerrar.addEventListener('click', cerrarPanel);
 
         overlay.addEventListener('click', (evento) => {
