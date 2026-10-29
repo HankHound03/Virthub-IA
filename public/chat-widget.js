@@ -324,6 +324,61 @@
         return avatar;
     }
 
+    /*
+     * "Esta escribiendo" y marca de visto, igual que en el chat del contenedor.
+     *
+     * chatEscribiendo lo dice el servidor al refrescar la conversacion;
+     * ultimoAvisoEscribiendo evita mandar el aviso en cada tecla.
+     */
+    const chatEscribiendo = {};
+    let ultimoAvisoEscribiendo = 0;
+
+    function avisarEscribiendo() {
+        if (!currentChatUser) return;
+
+        const ahora = Date.now();
+        if (ahora - ultimoAvisoEscribiendo < 2500) return;
+
+        ultimoAvisoEscribiendo = ahora;
+
+        apiFetch('/chat/conversation/' + encodeURIComponent(currentChatUser) + '/escribiendo', {
+            method: 'POST',
+            body: JSON.stringify({}),
+        }).catch(() => {});
+    }
+
+    function pintarEscribiendo(usuario) {
+        const contenedor = document.getElementById('chatMessages');
+        if (!contenedor) return;
+
+        const previa = document.getElementById('chatEscribiendo');
+        if (previa) previa.remove();
+
+        if (!usuario || !chatEscribiendo[usuario]) return;
+
+        const vista = document.getElementById('messagesView');
+        if (vista && !vista.classList.contains('active')) return;
+
+        const burbuja = document.createElement('div');
+        burbuja.id = 'chatEscribiendo';
+        burbuja.className = 'ia-escribiendo';
+
+        const puntos = document.createElement('span');
+        puntos.className = 'ia-puntos';
+        puntos.setAttribute('aria-hidden', 'true');
+        puntos.innerHTML = '<i></i><i></i><i></i>';
+
+        const texto = document.createElement('span');
+        texto.className = 'ia-escribiendo-texto';
+        texto.textContent = usuario + ' está escribiendo…';
+
+        burbuja.appendChild(puntos);
+        burbuja.appendChild(texto);
+
+        contenedor.appendChild(burbuja);
+        contenedor.scrollTop = contenedor.scrollHeight;
+    }
+
     function renderMessages(container, messages, emptyText, ownUser, prefix) {
         if (!container) return;
         container.innerHTML = '';
@@ -364,6 +419,14 @@
             const time = safeTimeLabel(message.created_at);
             meta.textContent = time ? sender + (sender ? ' • ' : '') + time : sender;
 
+            // Visto: solo en mis mensajes, y solo si el otro ya lo abrió.
+            if (ownUser && sender === ownUser && message.read_at && !prefix) {
+                const visto = document.createElement('span');
+                visto.className = 'chat-visto';
+                visto.textContent = ' ✓ Visto';
+                meta.appendChild(visto);
+            }
+
             row.appendChild(header);
             row.appendChild(body);
             row.appendChild(meta);
@@ -372,6 +435,9 @@
 
         container.scrollTop = container.scrollHeight;
     }
+
+    // Aviso de 'está escribiendo' al teclear (el freno está dentro).
+    document.getElementById('chatInput')?.addEventListener('input', avisarEscribiendo);
 
     async function loadUsersList() {
         const list = document.getElementById('chatUsersList');
@@ -507,6 +573,9 @@
         const res = await apiFetch('/chat/conversation/' + encodeURIComponent(username));
         const payload = await res.json();
         if (!res.ok) throw new Error(payload.error || 'No se pudo cargar la conversación');
+        // El servidor dice si el otro está escribiendo en esta conversación.
+        chatEscribiendo[username] = !!payload.escribiendo;
+
         return payload.messages || [];
     }
 
@@ -532,6 +601,7 @@
 
         if (currentChatUser === username) {
             renderMessages(document.getElementById('chatMessages'), messages, 'Chat con ' + username, currentUserName, '');
+            pintarEscribiendo(username);
         }
 
         return messages;
@@ -670,6 +740,11 @@
         let notificationsPrimed = false;
 
         setInterval(async () => {
+            // Con la pestaña en segundo plano no se pide nada.
+            if (document.hidden) {
+                return;
+            }
+
             try {
                 await sendPresenceHeartbeat();
                 if (!isBroadcastOnly) await loadFriendRequests();
@@ -716,7 +791,7 @@
             } catch (error) {
                 // ignore temporary polling failures
             }
-        }, 2000);
+        }, 5000);
     }
 
     window.switchChatTab = switchChatTab;
