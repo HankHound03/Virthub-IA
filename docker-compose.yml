@@ -58,6 +58,18 @@ services:
       VIRTHUB_MODERACION: "true"
       VIRTHUB_MODERACION_URL: "http://nsfw-sherlock:4000"
       VIRTHUB_MODERACION_UMBRAL: "0.75"
+
+      # IA local (Ollama en el equipo, no en el contenedor). Solo el administrador
+      # puede usarla: la ruta y el chat con la IA lo comprueban en el servidor.
+      OLLAMA_BASE_URL: "http://host.docker.internal:11434"
+      OLLAMA_MODEL: "virthub-ia"
+      OLLAMA_CONNECT_TIMEOUT: "5"
+      OLLAMA_REQUEST_TIMEOUT: "300"
+
+      # Monitor de recursos del panel de IA. Si el puente de GPU no esta
+      # levantado, el panel oculta esos datos y sigue funcionando.
+      VIRTHUB_IA_MONITOR: "true"
+      VIRTHUB_GPU_URL: "http://host.docker.internal:11435"
     depends_on:
       mariadb:
         condition: service_healthy
