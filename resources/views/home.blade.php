@@ -163,9 +163,24 @@
     }
 
     .calendar-day.has-events {
-        border-color: rgba(255, 199, 104, 0.72);
-        background-color: rgba(255, 199, 104, 0.22);
+        border-color: #e8a33d;
+        background-color: rgba(240, 182, 74, 0.38);
         color: var(--vh-text);
+        font-weight: 700;
+        position: relative;
+    }
+
+    /* Punto bajo el numero: se distingue aunque el fondo no contraste. */
+    .calendar-day.has-events::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: 3px;
+        width: 4px;
+        height: 4px;
+        margin-left: -2px;
+        border-radius: 50%;
+        background: #a86a12;
     }
 
     .calendar-day.has-events.is-selected {
@@ -1348,6 +1363,7 @@
                     }
 
                     saveCalendarEventsState();
+                    renderMiniCalendar();
                     renderMiniCalendarEvents();
                 });
 
@@ -1488,6 +1504,13 @@
 
                 saveCalendarEventsState();
                 input.value = '';
+
+                /*
+                 * Repintar toda la rejilla, no solo la lista: el día se marca con
+                 * su color cuando tiene eventos, y antes no se actualizaba hasta
+                 * recargar la página.
+                 */
+                renderMiniCalendar();
                 renderMiniCalendarEvents();
             });
 

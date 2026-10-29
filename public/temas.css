@@ -2462,3 +2462,52 @@ html.vh-ligero body *::after {
     animation-duration: 0.12s !important;
     transition-duration: 0.12s !important;
 }
+
+/* =============================================================================
+   DIAS CON EVENTOS EN EL CALENDARIO
+   =============================================================================
+   El calendario del inicio ya marcaba los dias con eventos, pero con un ambar
+   translucido que en los temas claros casi no se veia.
+
+   Ahora el dia con eventos lleva:
+     - fondo ambar y borde marcado, en cualquier epoca;
+     - un punto debajo del numero, para que se distinga incluso de reojo;
+     - el numero en negrita.
+
+   El color no depende del tema: el ambar es la senal de "aqui hay algo", y se
+   mantiene igual en Windows XP, Vista, 7, 8 y 10.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .calendar-day {
+    position: relative;
+}
+
+[data-era] body .calendar-day.has-events {
+    border-color: #e8a33d !important;
+    background: color-mix(in srgb, #f0b64a 34%, var(--vh-btn-bg)) !important;
+    color: var(--vh-btn-text) !important;
+    font-weight: 700;
+}
+
+/* Punto bajo el numero: se ve incluso si el fondo apenas contrasta. */
+[data-era] body .calendar-day.has-events::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 3px;
+    width: 4px;
+    height: 4px;
+    margin-left: -2px;
+    border-radius: 50%;
+    background: #a86a12;
+}
+
+/* El dia de hoy y el seleccionado siguen mandando, pero sin perder la senal. */
+[data-era] body .calendar-day.has-events.is-today {
+    border-color: color-mix(in srgb, #e8a33d 60%, #4caf50) !important;
+}
+
+[data-era] body .calendar-day.has-events.is-selected {
+    border-color: #e8a33d !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, #e8a33d 55%, transparent);
+}
