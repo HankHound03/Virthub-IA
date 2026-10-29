@@ -1070,6 +1070,7 @@
 
             const messageText = input.value.trim();
             const inicioConsulta = performance.now();
+            let avisoTarda = null;
 
             try {
                 const response = await apiFetch(`/chat/conversation/${encodeURIComponent(currentChatUser)}`, {
@@ -1194,11 +1195,67 @@
             }
         }
         /*
+         * Indicador de "está respondiendo".
+         *
+         * Aparece como una burbuja al final del chat mientras el modelo piensa,
+         * para que quede claro que la consulta salió y se está trabajando en ella.
+         */
+        function mostrarEscribiendoIA() {
+            const messagesDiv = document.getElementById('ollamaMessages');
+            if (!messagesDiv) return;
+
+            let previo = document.getElementById('iaEscribiendo');
+            if (previo) previo.remove();
+
+            const burbuja = document.createElement('div');
+            burbuja.id = 'iaEscribiendo';
+            burbuja.className = 'ia-escribiendo';
+            burbuja.innerHTML =
+                '<span class="ia-puntos" aria-hidden="true"><i></i><i></i><i></i></span>' +
+                '<span class="ia-escribiendo-texto">TutorUTT está escribiendo…</span>';
+
+            messagesDiv.appendChild(burbuja);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function quitarEscribiendoIA() {
+            const burbuja = document.getElementById('iaEscribiendo');
+            if (burbuja) burbuja.remove();
+        }
+        /*
          * Borrar el historial de la conversacion con la IA.
          *
          * Sirve para empezar de cero: el modelo deja de arrastrar respuestas
          * anteriores y cualquier personalidad que se hubiera colado.
          */
+        /*
+         * Indicador de "está respondiendo".
+         *
+         * Aparece como una burbuja al final del chat mientras el modelo piensa,
+         * para que quede claro que la consulta salió y se está trabajando en ella.
+         */
+        function mostrarEscribiendoIA() {
+            const messagesDiv = document.getElementById('ollamaMessages');
+            if (!messagesDiv) return;
+
+            let previo = document.getElementById('iaEscribiendo');
+            if (previo) previo.remove();
+
+            const burbuja = document.createElement('div');
+            burbuja.id = 'iaEscribiendo';
+            burbuja.className = 'ia-escribiendo';
+            burbuja.innerHTML =
+                '<span class="ia-puntos" aria-hidden="true"><i></i><i></i><i></i></span>' +
+                '<span class="ia-escribiendo-texto">TutorUTT está escribiendo…</span>';
+
+            messagesDiv.appendChild(burbuja);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function quitarEscribiendoIA() {
+            const burbuja = document.getElementById('iaEscribiendo');
+            if (burbuja) burbuja.remove();
+        }
         /*
          * Borrar el historial de la conversacion con la IA.
          *
@@ -1284,12 +1341,28 @@
 
             const messageText = input.value.trim();
             const inicioConsulta = performance.now();
+            let avisoTarda = null;
 
             try {
                 // Deshabilitar input y botón mientras procesa
                 input.disabled = true;
                 sendBtn.disabled = true;
-                input.placeholder = 'Ollama está escribiendo...';
+                input.placeholder = 'El tutor está escribiendo...';
+
+                mostrarEscribiendoIA();
+
+                /*
+                 * El primer mensaje puede tardar: hay que cargar el modelo en
+                 * memoria. Pasados unos segundos se avisa, para que nadie piense
+                 * que se quedó colgado.
+                 */
+                avisoTarda = setTimeout(() => {
+                    const texto = document.querySelector('#iaEscribiendo .ia-escribiendo-texto');
+
+                    if (texto) {
+                        texto.textContent = 'Cargando el modelo… la primera vez tarda más.';
+                    }
+                }, 12000);
 
                 const response = await apiFetch(`/chat/conversation/${encodeURIComponent(ollamaChatUser)}`, {
                     method: 'POST',
@@ -1323,6 +1396,9 @@
             } catch (error) {
                 mostrarAvisoIA(error.message, 'error');
             } finally {
+                clearTimeout(avisoTarda);
+                quitarEscribiendoIA();
+
                 // Restaurar estado del input y botón
                 input.disabled = false;
                 sendBtn.disabled = false;
@@ -1337,12 +1413,28 @@
 
             const messageText = input.value.trim();
             const inicioConsulta = performance.now();
+            let avisoTarda = null;
 
             try {
                 // Deshabilitar input y botón mientras procesa
                 input.disabled = true;
                 sendBtn.disabled = true;
-                input.placeholder = 'Enviando anuncio...';
+                input.placeholder = 'El tutor está escribiendo...';
+
+                mostrarEscribiendoIA();
+
+                /*
+                 * El primer mensaje puede tardar: hay que cargar el modelo en
+                 * memoria. Pasados unos segundos se avisa, para que nadie piense
+                 * que se quedó colgado.
+                 */
+                avisoTarda = setTimeout(() => {
+                    const texto = document.querySelector('#iaEscribiendo .ia-escribiendo-texto');
+
+                    if (texto) {
+                        texto.textContent = 'Cargando el modelo… la primera vez tarda más.';
+                    }
+                }, 12000);
 
                 const response = await apiFetch('/chat/broadcast', {
                     method: 'POST',
@@ -1373,6 +1465,9 @@
             } catch (error) {
                 mostrarAvisoIA(error.message, 'error');
             } finally {
+                clearTimeout(avisoTarda);
+                quitarEscribiendoIA();
+
                 // Restaurar estado del input y botón
                 input.disabled = false;
                 sendBtn.disabled = false;
