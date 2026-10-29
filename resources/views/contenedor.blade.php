@@ -89,10 +89,19 @@
 
                 <div class="ia-acciones">
                     <button type="button" class="ia-borrar" id="iaBorrarHistorial"
-                            onclick="borrarHistorialIA()">
+                            onclick="confirmarBorradoIA()">
                         Borrar historial
                     </button>
+
+                    <span class="ia-confirmar" id="iaConfirmar" hidden>
+                        <span>¿Borrar el historial?</span>
+                        <button type="button" class="ia-si" onclick="borrarHistorialIA()">Sí, borrar</button>
+                        <button type="button" class="ia-no" onclick="cancelarBorradoIA()">Cancelar</button>
+                    </span>
                 </div>
+
+                {{-- Mensajes del panel: aquí se ve el resultado, sin ventanas del navegador. --}}
+                <p class="ia-aviso" id="iaAviso" hidden role="status" aria-live="polite"></p>
 
                 <p class="chat-view-note">La IA puede tardar varios segundos en responder.</p>
                 <div class="chat-input-area">
@@ -1190,15 +1199,51 @@
          * Sirve para empezar de cero: el modelo deja de arrastrar respuestas
          * anteriores y cualquier personalidad que se hubiera colado.
          */
+        /*
+         * Borrar el historial de la conversacion con la IA.
+         *
+         * Todo pasa en la pagina: la confirmacion es una tira en la misma barra y
+         * el resultado se muestra en un aviso. Nada de ventanas del navegador, que
+         * tapaban el chat y no dejaban ver el motivo si algo fallaba.
+         */
+        function mostrarAvisoIA(texto, tipo) {
+            const aviso = document.getElementById('iaAviso');
+            if (!aviso) return;
+
+            aviso.textContent = texto;
+            aviso.className = 'ia-aviso ' + (tipo === 'error' ? 'ia-aviso-error' : 'ia-aviso-ok');
+            aviso.hidden = false;
+
+            clearTimeout(mostrarAvisoIA.tiempo);
+            mostrarAvisoIA.tiempo = setTimeout(() => { aviso.hidden = true; }, 8000);
+        }
+
+        function confirmarBorradoIA() {
+            const confirmar = document.getElementById('iaConfirmar');
+            const boton = document.getElementById('iaBorrarHistorial');
+            if (!confirmar) return;
+
+            confirmar.hidden = false;
+            if (boton) boton.hidden = true;
+        }
+
+        function cancelarBorradoIA() {
+            const confirmar = document.getElementById('iaConfirmar');
+            const boton = document.getElementById('iaBorrarHistorial');
+            if (!confirmar) return;
+
+            confirmar.hidden = true;
+            if (boton) boton.hidden = false;
+        }
+
         async function borrarHistorialIA() {
             if (!ollamaVisible) return;
 
-            if (!confirm('¿Borrar todo el historial de este chat de IA? No se puede deshacer.')) {
-                return;
-            }
-
+            const confirmar = document.getElementById('iaConfirmar');
             const boton = document.getElementById('iaBorrarHistorial');
-            if (boton) boton.disabled = true;
+
+            if (confirmar) confirmar.hidden = true;
+            if (boton) { boton.hidden = false; boton.disabled = true; }
 
             try {
                 const response = await apiFetch(`/chat/conversation/${encodeURIComponent(ollamaChatUser)}/limpiar`, {
@@ -1208,7 +1253,11 @@
 
                 if (!response.ok) {
                     const payload = await response.json().catch(() => ({}));
-                    throw new Error(payload.error || 'No se pudo borrar el historial');
+
+                    // El detalle ayuda a saber que paso: sesion caducada, permisos...
+                    const motivo = payload.error || ('error ' + response.status);
+
+                    throw new Error(motivo);
                 }
 
                 const messagesDiv = document.getElementById('ollamaMessages');
@@ -1217,8 +1266,9 @@
                 }
 
                 chatSnapshots.conversations[ollamaChatUser] = 0;
+                mostrarAvisoIA('Historial borrado. El chat empieza de cero.', 'ok');
             } catch (error) {
-                alert(error.message);
+                mostrarAvisoIA('No se pudo borrar el historial: ' + error.message, 'error');
             } finally {
                 if (boton) boton.disabled = false;
             }
@@ -1271,7 +1321,7 @@
                     }
                 }
             } catch (error) {
-                alert(error.message);
+                mostrarAvisoIA(error.message, 'error');
             } finally {
                 // Restaurar estado del input y botón
                 input.disabled = false;
@@ -1321,7 +1371,7 @@
                     }
                 }
             } catch (error) {
-                alert(error.message);
+                mostrarAvisoIA(error.message, 'error');
             } finally {
                 // Restaurar estado del input y botón
                 input.disabled = false;

@@ -74,11 +74,42 @@ class OllamaClient
             ->get($this->baseUrl() . '/api/ps');
     }
 
+    /**
+     * Personalidad del asistente.
+     *
+     * El orden es: lo que diga la variable de entorno, luego el archivo
+     * resources/prompts/tutorutt.txt (asi el texto largo vive en su sitio y se
+     * edita sin tocar el compose), y por ultimo una instruccion minima.
+     */
     public function systemPrompt(): string
     {
+        /*
+         * Manda el archivo del proyecto.
+         *
+         * Antes ganaba OLLAMA_SYSTEM_PROMPT del .env, que era un texto corto y
+         * tapaba la personalidad de verdad. El prompt del tutor es parte del
+         * codigo: se versiona, se revisa y no depende de cada entorno.
+         *
+         * La variable queda como ultimo recurso, para poder cambiarlo sin
+         * recompilar si algun dia hace falta.
+         */
+        $archivo = resource_path('prompts/tutorutt.txt');
+
+        if (is_file($archivo)) {
+            $leido = trim((string) @file_get_contents($archivo));
+
+            if ($leido !== '') {
+                return $leido;
+            }
+        }
+
         $prompt = trim((string) config('virthub.ollama.system_prompt', ''));
 
-        return $prompt !== '' ? $prompt : 'Responde en español, de forma clara, breve y útil.';
+        if ($prompt !== '') {
+            return $prompt;
+        }
+
+        return 'Responde en español, de forma clara, breve y útil.';
     }
 
     private function baseUrl(): string
