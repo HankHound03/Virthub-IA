@@ -569,8 +569,16 @@
         }
     }
 
-    async function loadConversationMessages(username) {
-        const res = await apiFetch('/chat/conversation/' + encodeURIComponent(username));
+    /*
+     * Carga los mensajes de una conversación.
+     *
+     * marcarVisto solo debe ir en true cuando el usuario está mirando esa
+     * conversación: si se pide siempre, el otro ve "Visto" sin que nadie lo haya
+     * abierto (el chat consulta todas las conversaciones para avisar de novedades).
+     */
+    async function loadConversationMessages(username, marcarVisto) {
+        const url = '/chat/conversation/' + encodeURIComponent(username) + (marcarVisto ? '?visto=1' : '');
+        const res = await apiFetch(url);
         const payload = await res.json();
         if (!res.ok) throw new Error(payload.error || 'No se pudo cargar la conversación');
         // El servidor dice si el otro está escribiendo en esta conversación.
@@ -579,8 +587,8 @@
         return payload.messages || [];
     }
 
-    async function refreshConversationSilently(username, notify) {
-        const messages = await loadConversationMessages(username);
+    async function refreshConversationSilently(username, notify, viendo) {
+        const messages = await loadConversationMessages(username, !!viendo);
         const prev = snapshots.conversations[username] || 0;
         snapshots.conversations[username] = messages.length;
 
@@ -650,7 +658,8 @@
         box.innerHTML = '<p style="text-align:center;color:var(--vh-text-soft);font-size:12px;padding:20px 10px;">Cargando mensajes...</p>';
 
         try {
-            const messages = await refreshConversationSilently(username, false);
+            // Se acaba de abrir esta conversacion: si que se marca como leida.
+            const messages = await refreshConversationSilently(username, false, true);
             renderMessages(box, messages, 'Chat con ' + username, currentUserName, '');
         } catch (error) {
             box.innerHTML = '<p style="text-align:center;color:var(--vh-text-soft);font-size:12px;padding:20px 10px;">' + error.message + '</p>';
@@ -773,8 +782,18 @@
 
                 if (!isBroadcastOnly) {
                     if (chatContacts.length === 0) await loadUsersList();
+                    const panelAbierto = chatPanel.classList.contains('is-open');
+                    const pestanaMensajes = document.getElementById('messagesView')?.classList.contains('active') !== false;
+
                     for (const c of chatContacts) {
-                        await refreshConversationSilently(c.username, shouldNotify);
+                        /*
+                         * Solo cuenta como "visto" la conversacion que el usuario
+                         * esta mirando ahora mismo. El resto se consulta para saber
+                         * si hay mensajes nuevos, sin marcar nada.
+                         */
+                        const viendo = !document.hidden && panelAbierto && pestanaMensajes && currentChatUser === c.username;
+
+                        await refreshConversationSilently(c.username, shouldNotify, viendo);
                     }
                 }
 

@@ -1104,8 +1104,8 @@
             }
         }
 
-        async function refreshConversationSilently(username, shouldNotify = false) {
-            const messages = await loadConversationMessages(username);
+        async function refreshConversationSilently(username, shouldNotify = false, viendo = false) {
+            const messages = await loadConversationMessages(username, viendo);
             const previousCount = chatSnapshots.conversations[username] || 0;
 
             chatSnapshots.conversations[username] = messages.length;
@@ -1149,8 +1149,17 @@
             return messages;
         }
 
-        async function loadConversationMessages(username) {
-            const response = await apiFetch(`/chat/conversation/${encodeURIComponent(username)}`);
+        /*
+         * Carga los mensajes de una conversación.
+         *
+         * marcarVisto solo va en true cuando el usuario está mirando esa
+         * conversación. Si se pide siempre, el otro ve "Visto" sin que nadie la
+         * haya abierto: el chat consulta todas las conversaciones para avisar de
+         * novedades.
+         */
+        async function loadConversationMessages(username, marcarVisto) {
+            const url = `/chat/conversation/${encodeURIComponent(username)}` + (marcarVisto ? '?visto=1' : '');
+            const response = await apiFetch(url);
             const payload = await response.json();
 
             if (!response.ok) {
@@ -1172,7 +1181,8 @@
             messagesDiv.innerHTML = '<p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">Cargando mensajes...</p>';
 
             try {
-                const messages = await refreshConversationSilently(username, false);
+                // Se acaba de abrir: sí se marca como leída.
+                const messages = await refreshConversationSilently(username, false, true);
                 renderChatMessages(messagesDiv, messages, chatConversationTitle(username), getUserKey());
             pintarEscribiendo(username);
             } catch (error) {
@@ -1205,7 +1215,8 @@
                 }
 
                 const messagesDiv = document.getElementById('chatMessages');
-                const messages = await refreshConversationSilently(currentChatUser, false);
+                // Acaba de escribir y está viendo esta conversación: se marca leída.
+                const messages = await refreshConversationSilently(currentChatUser, false, true);
                 renderChatMessages(messagesDiv, messages, chatConversationTitle(currentChatUser), getUserKey());
                 pintarEscribiendo(currentChatUser);
                 chatSnapshots.conversations[currentChatUser] = messages.length;
@@ -1606,8 +1617,18 @@
                             await loadUsersList();
                         }
 
+                        const panelAbierto = document.getElementById('chatPanel')?.classList.contains('is-open');
+                        const pestanaMensajes = document.getElementById('messagesView')?.classList.contains('active') !== false;
+
                         for (const contact of chatContacts) {
-                            await refreshConversationSilently(contact.username, shouldNotify);
+                            /*
+                             * Solo cuenta como "visto" la conversación que se está
+                             * mirando ahora mismo. El resto se consulta para saber
+                             * si hay mensajes nuevos, sin marcar nada.
+                             */
+                            const viendo = !document.hidden && panelAbierto && pestanaMensajes && currentChatUser === contact.username;
+
+                            await refreshConversationSilently(contact.username, shouldNotify, viendo);
                         }
                     }
 

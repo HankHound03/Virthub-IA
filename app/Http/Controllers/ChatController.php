@@ -115,8 +115,15 @@ class ChatController extends Controller
         $yo = ActiveUser::username($currentUser);
         $esIA = $this->ollama->isChatUsername($username);
 
-        // Al abrir o refrescar la conversacion, lo que me han escrito queda visto.
-        if (! $esIA) {
+        /*
+         * Solo se marca como leido si el cliente dice que la esta viendo.
+         *
+         * Antes se marcaba en cada consulta, y el chat consulta TODAS las
+         * conversaciones cada pocos segundos para avisar de mensajes nuevos: el
+         * resultado era que aparecian como "visto" mensajes que nadie habia
+         * abierto.
+         */
+        if (! $esIA && $request->boolean('visto')) {
             $this->chat->marcarLeidos($yo, $username);
         }
 
