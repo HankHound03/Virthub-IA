@@ -34,7 +34,7 @@ portada(
     doc,
     "Manual del Administrador",
     "Virthub 2.0",
-    "Arquitectura, seguridad y mantenimiento\nUniversidad Tecnológica de Tula-Tepeji",
+    "Arquitectura, seguridad y mantenimiento\nUniversidad Tecnológica de Tecámac",
     imagen_portada=imagen("07-admin-usuarios.png"),
 )
 
@@ -69,6 +69,7 @@ indice(
         (1, "11. Mantenimiento"),
         (1, "12. Seguridad"),
         (1, "13. Diagnóstico rápido"),
+        (1, "14. De la versión 1.0 a la 2.0"),
     ],
 )
 
@@ -688,6 +689,69 @@ tabla(
     anchos=[2.6, 4.0],
 )
 
+# --------------------------------------------------------------------------
+# 14. Cambios de la 1.0 a la 2.0
+# --------------------------------------------------------------------------
+
+h1(doc, "14. De la versión 1.0 a la 2.0")
+
+parrafo(
+    doc,
+    "Resumen técnico de lo que cambió entre la primera versión y esta. Sirve para saber qué se "
+    "tocó y dónde mirar si algo falla.",
+)
+
+h2(doc, "Diseño y temas")
+
+vineta(doc, "Sistema de temas Redmond: cinco épocas por seis esquemas, montado sobre variables CSS.")
+vineta(doc, "Catálogo en configuración, no repartido por las vistas: un solo sitio para añadir un esquema.")
+vineta(doc, "La hoja del tema se carga como <link> en el <head>, no por JavaScript: se elimina el parpadeo.")
+vineta(doc, "Se retiraron los restos del tema anterior (modo oscuro y retro), que se aplicaban en cada carga.")
+
+h2(doc, "Foro y archivos")
+
+vineta(doc, "Avatares en las publicaciones, resueltos desde el perfil del autor.")
+vineta(doc, "Descarga con el nombre original del archivo, manteniendo el soporte de rangos.")
+vineta(doc, "Subida por trozos con reanudación y botón de cancelar.")
+vineta(doc, "Borrado de adjuntos al eliminar una publicación, más el comando foro:huerfanos para los que quedaron sueltos.")
+
+h2(doc, "Seguridad de contenido")
+
+vineta(doc, "Moderación de imágenes con NSFW-Sherlock: umbral configurable y aviso al usuario y al administrador.")
+vineta(doc, "Antivirus ClamAV por INSTREAM antes de mover cada archivo a su destino.")
+vineta(doc, "El tipo de adjunto se deduce del archivo, no del campo del formulario: cerraba un hueco de la moderación.")
+
+h2(doc, "Chat")
+
+vineta(doc, "Indicador de «está escribiendo» con marca de tiempo en el servidor, que caduca a los seis segundos.")
+vineta(doc, "Marca de «visto» solo cuando el cliente confirma que está mirando la conversación (?visto=1).")
+vineta(doc, "Contador de no leídos por remitente en un solo endpoint, y no una consulta por contacto.")
+vineta(doc, "Límites de peticiones por usuario en lugar de por IP.")
+vineta(doc, "Sondeo más espaciado y detenido cuando la pestaña no está a la vista.")
+
+h2(doc, "Escritorios virtuales")
+
+vineta(doc, "Pase firmado (DesktopPass) con caducidad de ocho horas, atado a usuario y contenedor.")
+vineta(doc, "Control de acceso del proxy en /internal/proxy-auth, con la cabecera X-Container puesta por Caddy.")
+vineta(doc, "Selector de escritorios para que el administrador pruebe cualquiera.")
+
+h2(doc, "Inteligencia artificial")
+
+vineta(doc, "Integración con Ollama y modelo propio virthub-ia con la personalidad de TutorUTT.")
+vineta(doc, "El archivo de instrucciones del proyecto tiene prioridad sobre el prompt del entorno.")
+vineta(doc, "Monitor de GPU con puente local; si el puente no está, el panel oculta esos datos.")
+vineta(doc, "La ruta y el chat con la IA están restringidos al administrador en el servidor.")
+
+h2(doc, "Rendimiento")
+
+vineta(doc, "Modo ligero automático por núcleos, memoria, preferencia de movimiento y ahorro de datos.")
+vineta(doc, "Fondos de los temas a resolución de 1080p, con las dos imágenes pequeñas reescaladas.")
+vineta(doc, "Sondeos en pausa con la pestaña oculta.")
+
+h2(doc, "Documentación y versión")
+
+vineta(doc, "Versión 2.0 en un solo sitio, mostrada en el pie de todas las páginas.")
+vineta(doc, "Manual de usuario, manual de administrador y presentación, generados con scripts reproducibles.")
 doc.save(SALIDA)
 print(f"Guardado: {SALIDA}")
 

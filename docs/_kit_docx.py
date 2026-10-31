@@ -133,7 +133,7 @@ def portada(doc: Document, titulo: str, subtitulo: str, detalle: str, imagen_por
 
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run("Virthub 2.0  ·  Universidad Tecnológica de Tula-Tepeji")
+    run = p.add_run("Virthub 2.0  ·  Universidad Tecnológica de Tecámac")
     run.font.size = Pt(9)
     run.font.color.rgb = GRIS_CLARO
     run.font.name = FUENTE

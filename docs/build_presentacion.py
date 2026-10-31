@@ -92,8 +92,9 @@ def titulo_diapositiva(slide, titulo, subtitulo=None, numero=None):
     if subtitulo:
         texto(slide, 1.05, 1.16, 11.2, 0.45, subtitulo, tam=14, color=GRIS)
 
-    if numero is not None:
-        texto(slide, 12.1, 6.85, 1.0, 0.4, str(numero), tam=11, color=GRIS, alineacion=PP_ALIGN.RIGHT)
+    # El numero sale del orden real de las diapositivas: asi no hay que renumerar
+    # a mano cada vez que se inserta una en medio.
+    texto(slide, 12.1, 6.85, 1.0, 0.4, str(len(prs.slides)), tam=11, color=GRIS, alineacion=PP_ALIGN.RIGHT)
 
 
 def vinietas(slide, elementos, izq=1.05, arriba=1.85, ancho=11.3, tam=17, alto=4.6, color=BLANCO):
@@ -206,7 +207,7 @@ banda.fill.solid()
 banda.fill.fore_color.rgb = VERDE
 banda.line.fill.background()
 
-texto(slide, 1.1, 1.55, 11.0, 0.5, "UNIVERSIDAD TECNOLÓGICA DE TULA-TEPEJI", tam=13, color=VERDE, negrita=True)
+texto(slide, 1.1, 1.55, 11.0, 0.5, "UNIVERSIDAD TECNOLÓGICA DE TECÁMAC", tam=13, color=VERDE, negrita=True)
 texto(slide, 1.1, 2.05, 11.0, 1.5, "Virthub 2.0", tam=76, color=BLANCO, negrita=True, fuente=FUENTE_TITULO)
 texto(
     slide, 1.1, 3.55, 10.2, 1.3,
@@ -596,6 +597,84 @@ texto(slide, 0.95, 6.4, 11.4, 0.6,
       tam=14, color=GRIS)
 
 # ---------------------------------------------------------------------------
+# Diseno: la nostalgia
+# ---------------------------------------------------------------------------
+
+slide = nueva_diapositiva()
+titulo_diapositiva(slide, "¿Por qué Redmond?", "Una decisión de diseño, no un capricho", 20)
+
+tarjeta(slide, 0.75, 1.95, 2.9, 2.15, "Ya lo conocemos",
+        ["Aprendimos a usar una computadora en XP, Vista o 7.",
+         "La barra, el cristal y los botones no se estudian: se reconocen."],
+        acento=VERDE, tam_titulo=14, tam_cuerpo=11)
+
+tarjeta(slide, 3.85, 1.95, 2.9, 2.15, "Nada que aprender",
+        ["La interfaz no compite con el contenido.",
+         "El estudiante entra a trabajar, no a descubrir un sistema."],
+        acento=VERDE, tam_titulo=14, tam_cuerpo=11)
+
+tarjeta(slide, 6.95, 1.95, 2.9, 2.15, "Coherente",
+        ["Bordes, degradados y tipografía.",
+         "Nada que pida una tarjeta gráfica moderna."],
+        acento=VERDE, tam_titulo=14, tam_cuerpo=11)
+
+tarjeta(slide, 10.05, 1.95, 2.6, 2.15, "Un homenaje",
+        ["Se ve como la computadora que inspiró el proyecto."],
+        acento=AMBAR, tam_titulo=14, tam_cuerpo=11)
+
+texto(slide, 0.95, 4.55, 11.5, 1.4,
+      ["Sería incoherente vestir con un diseño que exige una pantalla nueva",
+       "un proyecto hecho para quien no puede cambiar de computadora."],
+      tam=20, color=VERDE, negrita=True, alineacion=PP_ALIGN.CENTER, espaciado=4)
+
+texto(slide, 0.95, 6.0, 11.5, 0.6,
+      "La nostalgia aquí no es decoración: es una forma de decir que ese equipo, y quien lo usa, todavía tienen lugar.",
+      tam=13, color=GRIS, alineacion=PP_ALIGN.CENTER)
+
+# ---------------------------------------------------------------------------
+# Cambios de la 1.0 a la 2.0
+# ---------------------------------------------------------------------------
+
+slide = nueva_diapositiva()
+titulo_diapositiva(slide, "De la 1.0 a la 2.0", "Lo que trajo esta versión", 21)
+
+tarjeta(slide, 0.75, 1.9, 3.85, 2.3, "Diseño",
+        ["30 esquemas en 5 épocas.",
+         "Carrusel de temas.",
+         "Sin parpadeo al recargar."],
+        acento=VERDE, tam_titulo=13, tam_cuerpo=11)
+
+tarjeta(slide, 4.85, 1.9, 3.85, 2.3, "Foro",
+        ["Avatares en publicaciones.",
+         "Descarga con nombre original.",
+         "Cancelar subidas · borrar adjuntos."],
+        acento=AZUL, tam_titulo=13, tam_cuerpo=11)
+
+tarjeta(slide, 8.95, 1.9, 3.7, 2.3, "Chat",
+        ["«Está escribiendo» y «visto».",
+         "Contador de no leídos.",
+         "Sonido corregido · abre en Usuarios."],
+        acento=VERDE, tam_titulo=13, tam_cuerpo=11)
+
+tarjeta(slide, 0.75, 4.45, 3.85, 2.2, "Escritorio e IA",
+        ["Ventana nueva y recarga.",
+         "Pase firmado que caduca.",
+         "TutorUTT local (solo admin)."],
+        acento=AMBAR, tam_titulo=13, tam_cuerpo=11)
+
+tarjeta(slide, 4.85, 4.45, 3.85, 2.2, "Rendimiento",
+        ["Modo ligero automático.",
+         "Fondos a 1080p reales.",
+         "Sondeos en pausa."],
+        acento=AZUL, tam_titulo=13, tam_cuerpo=11)
+
+tarjeta(slide, 8.95, 4.45, 3.7, 2.2, "Seguridad",
+        ["2FA con Authenticator.",
+         "Límites por usuario.",
+         "Monitor del sistema: solo admin."],
+        acento=ROJO, tam_titulo=13, tam_cuerpo=11)
+
+# ---------------------------------------------------------------------------
 # 20. IA local
 # ---------------------------------------------------------------------------
 
@@ -706,7 +785,7 @@ texto(slide, 1.2, 3.35, 10.6, 2.2, [
 
 texto(slide, 1.2, 5.75, 10.8, 1.0, [
     "Francisco González  ·  Virthub 2.0",
-    "Universidad Tecnológica de Tula-Tepeji",
+    "Universidad Tecnológica de Tecámac",
 ], tam=14, color=VERDE, espaciado=2)
 
 prs.save(SALIDA)

@@ -38,7 +38,7 @@ portada(
     doc,
     "Manual de Usuario",
     "Virthub 2.0",
-    "Guía para estudiantes: foro, chat, perfil y escritorios virtuales\nUniversidad Tecnológica de Tula-Tepeji",
+    "Guía para estudiantes: foro, chat, perfil y escritorios virtuales\nUniversidad Tecnológica de Tecámac",
     imagen_portada=imagen("18-inicio-admin.png"),
 )
 
@@ -54,12 +54,14 @@ indice(
         (2, "3.3 To-do y notas rápidas"),
         (2, "3.4 Estado del sistema"),
         (1, "4. Los temas: el carrusel"),
+        (2, "4.1 Por qué este diseño: la nostalgia"),
         (1, "5. El foro"),
         (2, "5.1 Leer y reaccionar"),
         (2, "5.2 Publicar"),
         (2, "5.3 Adjuntos: foto, video, archivo y encuesta"),
         (2, "5.4 Reportar una publicación"),
         (1, "6. Tu perfil"),
+        (2, "6.1 Foto y color del marco"),
         (1, "7. Amigos"),
         (1, "8. El chat"),
         (2, "8.1 Abrir el chat y sus pestañas"),
@@ -74,6 +76,7 @@ indice(
         (1, "12. AWTY"),
         (1, "13. Problemas frecuentes"),
         (1, "14. Detalles que conviene saber"),
+        (1, "15. De la versión 1.0 a la 2.0"),
     ],
 )
 
@@ -85,7 +88,7 @@ h1(doc, "1. Qué es Virthub")
 
 parrafo(
     doc,
-    "Virthub es el espacio de la comunidad de la UTT para conversar, compartir y trabajar. "
+    "Virthub es el espacio de la comunidad de la Universidad Tecnológica de Tecámac para conversar, compartir y trabajar. "
     "Reúne en un solo lugar el foro del grupo, el chat entre compañeros y un escritorio virtual "
     "completo que se abre dentro del navegador.",
 )
@@ -110,7 +113,7 @@ vineta(doc, "Elegir el aspecto visual de todo el sitio entre cinco estilos de Wi
 nota(
     doc,
     "Requisito importante",
-    "Necesita una cuenta de la UTT para publicar. Sin cuenta puede leer el foro y entrar como "
+    "Necesita una cuenta de la universidad para publicar. Sin cuenta puede leer el foro y entrar como "
     "invitado, pero no escribir.",
 )
 
@@ -228,12 +231,21 @@ nota(
     "escritorio virtual o el foro.",
 )
 
-h2(doc, "3.4 Estado del sistema")
+h2(doc, "3.4 Estado del sistema (solo administrador)")
 
 parrafo(
     doc,
-    "Muestra de un vistazo cómo va el equipo: procesador, memoria, disco y el estado de los "
-    "contenedores del servidor. Si algo está en rojo, avise al administrador.",
+    "Muestra de un vistazo cómo va el servidor: procesador, memoria, disco y el estado de los "
+    "contenedores. Es información de operación, no de clase, así que solo la ve el "
+    "administrador: si entra con una cuenta normal, ese panel no aparece en el inicio.",
+)
+
+parrafo(
+    doc,
+    "La razón es sencilla: son datos del equipo que sostiene a todo el grupo. Un alumno no "
+    "necesita saber cuánta memoria libre queda en el servidor, y publicarlo no aporta nada. Si "
+    "usted ve algo en rojo y es administrador, revise el contenedor correspondiente antes de que "
+    "se note en clase.",
 )
 
 imagen_con_pie(
@@ -282,6 +294,46 @@ nota(
     "Equipos modestos",
     "Si su equipo es antiguo, Virthub lo detecta solo y apaga los efectos más pesados (desenfoques "
     "y fondos fijos). No hace falta configurar nada: sigue siendo cómodo de usar.",
+)
+
+h2(doc, "4.1 Por qué este diseño: la nostalgia")
+
+parrafo(
+    doc,
+    "Virthub no se ve como una aplicación moderna, y es a propósito.",
+)
+
+parrafo(
+    doc,
+    "La mayoría de quienes estudian hoy aprendieron a usar una computadora en Windows XP, en "
+    "Vista o en ese Windows 7 que estaba en la casa, en el ciber o en el laboratorio de la "
+    "secundaria. La barra azul de XP, el cristal de Aero, los botones con brillo: son formas que "
+    "ya conocemos sin haberlas estudiado.",
+)
+
+parrafo(
+    doc,
+    "Eso tiene una consecuencia práctica: nadie tiene que aprender a usar Virthub. La interfaz "
+    "no compite con la atención del estudiante, porque se parece a algo que ya sabe. Cuando un "
+    "alumno entra por primera vez, no está descubriendo un sistema nuevo; está reconociendo un "
+    "lugar.",
+)
+
+parrafo(
+    doc,
+    "Hay también una razón de fondo. Este proyecto existe para estudiantes que no pueden cambiar "
+    "de computadora. Sería incoherente vestirlo con un diseño que exige una pantalla de última "
+    "generación y una tarjeta gráfica para dibujar sombras suaves. El diseño de Redmond está "
+    "hecho con bordes, degradados y tipografías: nada que dependa de la potencia del equipo. Se "
+    "ve bien en un Core 2 Duo porque está pensado para esa época.",
+)
+
+parrafo(
+    doc,
+    "Y hay una razón sentimental que conviene decir en voz alta: el proyecto es un homenaje. "
+    "Virthub se ve así porque la computadora que lo inspiró se veía así. Quien lo abra en un "
+    "equipo viejo va a reconocer algo propio, y ese reconocimiento también es una forma de decir "
+    "que ese equipo, y quien lo usa, todavía tienen lugar aquí.",
 )
 
 # --------------------------------------------------------------------------
@@ -393,6 +445,38 @@ pasos(
     ],
 )
 
+h2(doc, "6.1 Foto y color del marco")
+
+parrafo(
+    doc,
+    "Su foto se muestra con un marco redondeado cuyo color usted elige. Ese marco aparece en el "
+    "perfil, en el chat y en sus publicaciones del foro: es su señal dentro de la comunidad.",
+)
+
+imagen_con_pie(
+    doc,
+    imagen("23-perfil-marco.png"),
+    "Figura 10. Cambio de foto y selector de color del marco.",
+    ancho=4.9,
+)
+
+pasos(
+    doc,
+    [
+        "Pulse «Seleccionar archivo» y elija una imagen de su equipo (JPG o PNG).",
+        "Elija el color del marco con la barra: se abre un selector donde puede escribir el código o mover el punto.",
+        "La previsualización de la izquierda muestra cómo va a quedar antes de guardar.",
+        "Pulse «Guardar perfil» para aplicar los cambios.",
+    ],
+)
+
+nota(
+    doc,
+    "Si su foto no cambia",
+    "Después de guardar puede tardar unos segundos en verse en las demás páginas. Si pasó un "
+    "minuto y sigue la anterior, recargue con Ctrl + F5.",
+)
+
 parrafo(
     doc,
     "Desde el propio perfil puede publicar algo suyo, como una nota o un trabajo. Esas "
@@ -473,6 +557,32 @@ tabla(
         ["Anuncios", "Mensajes para todo el grupo."],
     ],
     anchos=[1.3, 5.3],
+)
+
+parrafo(
+    doc,
+    "En «Mensajes» aparece la conversación con la persona que eligió. Si todavía no han hablado, "
+    "verá un aviso en el centro; ese es el punto de partida normal.",
+)
+
+imagen_con_pie(
+    doc,
+    imagen("21-chat-mensajes.png"),
+    "Figura 12. Pestaña Mensajes sin conversación abierta.",
+    ancho=3.1,
+)
+
+parrafo(
+    doc,
+    "En «Anuncios» el administrador publica avisos para todo el grupo: cambios, mantenimientos o "
+    "recordatorios. Se leen, no se responden.",
+)
+
+imagen_con_pie(
+    doc,
+    imagen("22-chat-anuncios.png"),
+    "Figura 13. Pestaña Anuncios con avisos del administrador.",
+    ancho=3.1,
 )
 
 h2(doc, "8.2 Escribir, «está escribiendo» y «visto»")
@@ -705,6 +815,70 @@ parrafo(
     "este proyecto se construye entre todos.",
 )
 
+# --------------------------------------------------------------------------
+# 15. Cambios de la 1.0 a la 2.0
+# --------------------------------------------------------------------------
+
+h1(doc, "15. De la versión 1.0 a la 2.0")
+
+parrafo(
+    doc,
+    "Lo que cambió entre la primera versión y esta, contado desde el lado de quien la usa.",
+)
+
+h2(doc, "El diseño")
+
+vineta(doc, "Cinco épocas de Windows (XP, Vista, 7, 8 y 10) con seis esquemas cada una: treinta en total.")
+vineta(doc, "El tema se elige con un carrusel y se recuerda en el navegador.")
+vineta(doc, "La hoja del tema entra desde el primer dibujado: ya no parpadea al recargar.")
+
+h2(doc, "El foro")
+
+vineta(doc, "Cada publicación muestra la foto de quien escribe.")
+vineta(doc, "Los archivos se descargan con su nombre original, no con un nombre interno.")
+vineta(doc, "Se puede cancelar una subida en curso sin dejar restos.")
+vineta(doc, "Al eliminar una publicación se eliminan también sus archivos.")
+vineta(doc, "Las fotos pasan por una revisión automática antes de publicarse, y si se rechazan se avisa del motivo.")
+
+h2(doc, "El chat")
+
+vineta(doc, "Aviso de «está escribiendo» con tres puntos.")
+vineta(doc, "Marca de «visto» en los mensajes que el otro ya abrió.")
+vineta(doc, "Contador de mensajes sin leer junto a cada persona.")
+vineta(doc, "El chat abre siempre en la lista de usuarios.")
+vineta(doc, "El sonido se corrigió: ya no se queda mudo ni suena en ráfaga.")
+vineta(doc, "Si estás leyendo la conversación, suena el aviso pero no salta la notificación del navegador.")
+
+h2(doc, "El escritorio y la IA")
+
+vineta(doc, "Botón para abrir el escritorio en una ventana aparte.")
+vineta(doc, "Botón para recargar el escritorio si se queda colgado.")
+vineta(doc, "Acceso más seguro: cada escritorio se entrega con un permiso firmado que caduca.")
+vineta(doc, "Asistente TutorUTT para dudas de las materias (por ahora, solo el administrador).")
+
+h2(doc, "El inicio")
+
+vineta(doc, "Los días con eventos en el calendario se marcan con color y un punto.")
+vineta(doc, "El color del marcador cambia según el tema elegido.")
+vineta(doc, "El panel de estado del sistema queda reservado al administrador.")
+
+h2(doc, "Pensado para equipos modestos")
+
+vineta(doc, "Modo ligero automático: se apagan desenfoques y fondos fijos.")
+vineta(doc, "Los fondos de los temas se ajustaron a la resolución real de la pantalla.")
+vineta(doc, "El chat deja de consultar cuando la pestaña está en segundo plano.")
+
+h2(doc, "Seguridad")
+
+vineta(doc, "La verificación en dos pasos con Google Authenticator quedó disponible.")
+vineta(doc, "Los límites de uso del chat cuentan por usuario, no por dirección IP: en un aula todos salen por la misma.")
+
+parrafo(
+    doc,
+    "Y una cosa que no es una función pero sí un cambio: el proyecto ahora se entrega con su "
+    "manual de usuario, su manual de administrador y una presentación. Este documento es parte "
+    "de esa versión.",
+)
 doc.save(SALIDA)
 print(f"Guardado: {SALIDA}")
 
