@@ -42,3 +42,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 OBJETIVOS_PROYECTO.md
+
+# Archivo que crea PowerShell al redirigir a $null en algunos comandos.
+$null
+
