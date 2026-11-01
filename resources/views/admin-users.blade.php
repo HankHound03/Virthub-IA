@@ -11,6 +11,75 @@
     <style>
 
         /* =============================================================
+           TABLA DE USUARIOS SIN DESPLAZAMIENTO
+           =============================================================
+           Las acciones llevan solo icono (con su nombre en el title): con texto,
+           la tabla no cabia y aparecia una barra horizontal. La fecha se parte a
+           proposito en dos lineas, en vez de romperse donde caiga.
+           ------------------------------------------------------------- */
+
+        .users-table {
+            width: 100%;
+            table-layout: auto;
+            font-size: 12.5px;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 7px 8px;
+            vertical-align: middle;
+        }
+
+        .users-table td[data-label="Acciones"] {
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        .users-table td[data-label="Estado"] {
+            white-space: nowrap;
+        }
+
+        .tabla-fecha,
+        .tabla-hora {
+            display: block;
+            white-space: nowrap;
+            line-height: 1.35;
+        }
+
+        .tabla-hora,
+        .tabla-vacio {
+            opacity: 0.72;
+            font-size: 11.5px;
+        }
+
+        /* Botones de accion: cuadrados, con el icono centrado. */
+        .user-actions {
+            gap: 5px;
+            flex-wrap: nowrap;
+        }
+
+        .user-actions button {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .user-actions button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* Tarjetas que ya no se mueven ni cambian de tamaño. */
+        .admin-card-fija {
+            cursor: default;
+        }
+        /* =============================================================
            PESTANAS DEL PANEL
            =============================================================
            Cada tarjeta dice a que pestana pertenece (data-admin-panel) y el
@@ -22,13 +91,18 @@
             margin: 8px 5px 2px;
         }
 
-        .admin-wrapper[data-vista] .admin-gadget {
+        /*
+         * El filtro va por la pestana declarada en cada tarjeta, no por la clase
+         * de gadget: reportes y sugerencias ya no son gadgets (no se mueven ni
+         * cambian de tamano) y con el filtro anterior se mostraban siempre.
+         */
+        .admin-wrapper[data-vista] > [data-admin-panel] {
             display: none;
         }
 
-        .admin-wrapper[data-vista="usuarios"] .admin-gadget[data-admin-panel="usuarios"],
-        .admin-wrapper[data-vista="reportes"] .admin-gadget[data-admin-panel="reportes"],
-        .admin-wrapper[data-vista="sugerencias"] .admin-gadget[data-admin-panel="sugerencias"] {
+        .admin-wrapper[data-vista="usuarios"] > [data-admin-panel="usuarios"],
+        .admin-wrapper[data-vista="reportes"] > [data-admin-panel="reportes"],
+        .admin-wrapper[data-vista="sugerencias"] > [data-admin-panel="sugerencias"] {
             display: block;
         }
 
@@ -881,6 +955,75 @@
         (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
     
         /* =============================================================
+           TABLA DE USUARIOS SIN DESPLAZAMIENTO
+           =============================================================
+           Las acciones llevan solo icono (con su nombre en el title): con texto,
+           la tabla no cabia y aparecia una barra horizontal. La fecha se parte a
+           proposito en dos lineas, en vez de romperse donde caiga.
+           ------------------------------------------------------------- */
+
+        .users-table {
+            width: 100%;
+            table-layout: auto;
+            font-size: 12.5px;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 7px 8px;
+            vertical-align: middle;
+        }
+
+        .users-table td[data-label="Acciones"] {
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        .users-table td[data-label="Estado"] {
+            white-space: nowrap;
+        }
+
+        .tabla-fecha,
+        .tabla-hora {
+            display: block;
+            white-space: nowrap;
+            line-height: 1.35;
+        }
+
+        .tabla-hora,
+        .tabla-vacio {
+            opacity: 0.72;
+            font-size: 11.5px;
+        }
+
+        /* Botones de accion: cuadrados, con el icono centrado. */
+        .user-actions {
+            gap: 5px;
+            flex-wrap: nowrap;
+        }
+
+        .user-actions button {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .user-actions button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* Tarjetas que ya no se mueven ni cambian de tamaño. */
+        .admin-card-fija {
+            cursor: default;
+        }
+        /* =============================================================
            PESTANAS DEL PANEL
            =============================================================
            Cada tarjeta dice a que pestana pertenece (data-admin-panel) y el
@@ -892,13 +1035,18 @@
             margin: 8px 5px 2px;
         }
 
-        .admin-wrapper[data-vista] .admin-gadget {
+        /*
+         * El filtro va por la pestana declarada en cada tarjeta, no por la clase
+         * de gadget: reportes y sugerencias ya no son gadgets (no se mueven ni
+         * cambian de tamano) y con el filtro anterior se mostraban siempre.
+         */
+        .admin-wrapper[data-vista] > [data-admin-panel] {
             display: none;
         }
 
-        .admin-wrapper[data-vista="usuarios"] .admin-gadget[data-admin-panel="usuarios"],
-        .admin-wrapper[data-vista="reportes"] .admin-gadget[data-admin-panel="reportes"],
-        .admin-wrapper[data-vista="sugerencias"] .admin-gadget[data-admin-panel="sugerencias"] {
+        .admin-wrapper[data-vista="usuarios"] > [data-admin-panel="usuarios"],
+        .admin-wrapper[data-vista="reportes"] > [data-admin-panel="reportes"],
+        .admin-wrapper[data-vista="sugerencias"] > [data-admin-panel="sugerencias"] {
             display: block;
         }
 
@@ -1077,6 +1225,75 @@
         @media (max-width: 560px) {
     
         /* =============================================================
+           TABLA DE USUARIOS SIN DESPLAZAMIENTO
+           =============================================================
+           Las acciones llevan solo icono (con su nombre en el title): con texto,
+           la tabla no cabia y aparecia una barra horizontal. La fecha se parte a
+           proposito en dos lineas, en vez de romperse donde caiga.
+           ------------------------------------------------------------- */
+
+        .users-table {
+            width: 100%;
+            table-layout: auto;
+            font-size: 12.5px;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 7px 8px;
+            vertical-align: middle;
+        }
+
+        .users-table td[data-label="Acciones"] {
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        .users-table td[data-label="Estado"] {
+            white-space: nowrap;
+        }
+
+        .tabla-fecha,
+        .tabla-hora {
+            display: block;
+            white-space: nowrap;
+            line-height: 1.35;
+        }
+
+        .tabla-hora,
+        .tabla-vacio {
+            opacity: 0.72;
+            font-size: 11.5px;
+        }
+
+        /* Botones de accion: cuadrados, con el icono centrado. */
+        .user-actions {
+            gap: 5px;
+            flex-wrap: nowrap;
+        }
+
+        .user-actions button {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .user-actions button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* Tarjetas que ya no se mueven ni cambian de tamaño. */
+        .admin-card-fija {
+            cursor: default;
+        }
+        /* =============================================================
            PESTANAS DEL PANEL
            =============================================================
            Cada tarjeta dice a que pestana pertenece (data-admin-panel) y el
@@ -1088,13 +1305,18 @@
             margin: 8px 5px 2px;
         }
 
-        .admin-wrapper[data-vista] .admin-gadget {
+        /*
+         * El filtro va por la pestana declarada en cada tarjeta, no por la clase
+         * de gadget: reportes y sugerencias ya no son gadgets (no se mueven ni
+         * cambian de tamano) y con el filtro anterior se mostraban siempre.
+         */
+        .admin-wrapper[data-vista] > [data-admin-panel] {
             display: none;
         }
 
-        .admin-wrapper[data-vista="usuarios"] .admin-gadget[data-admin-panel="usuarios"],
-        .admin-wrapper[data-vista="reportes"] .admin-gadget[data-admin-panel="reportes"],
-        .admin-wrapper[data-vista="sugerencias"] .admin-gadget[data-admin-panel="sugerencias"] {
+        .admin-wrapper[data-vista="usuarios"] > [data-admin-panel="usuarios"],
+        .admin-wrapper[data-vista="reportes"] > [data-admin-panel="reportes"],
+        .admin-wrapper[data-vista="sugerencias"] > [data-admin-panel="sugerencias"] {
             display: block;
         }
 
@@ -1335,7 +1557,19 @@
                         <tr>
                             <td data-label="Username">{{ $user['username'] }}</td>
                             <td data-label="Rol">{{ $user['role'] }}</td>
-                            <td data-label="Ultima conexion">{{ $user['last_login_at'] ?? 'Nunca' }}</td>
+<td data-label="Ultima conexion">
+                                    @php
+                                        $conexion = (string) ($user['last_login_at'] ?? '');
+                                        $partesConexion = $conexion !== '' ? explode(' ', $conexion) : [];
+                                    @endphp
+
+                                    @if (! empty($partesConexion))
+                                        <span class="tabla-fecha">{{ $partesConexion[0] }}</span>
+                                        <span class="tabla-hora">{{ $partesConexion[1] ?? '' }}</span>
+                                    @else
+                                        <span class="tabla-vacio">Nunca</span>
+                                    @endif
+                                </td>
                             <td data-label="Estado">
                                 @if ($user['is_active'])
                                     <span class="user-status status-active">✓ Activo</span>
@@ -1343,38 +1577,46 @@
                                     <span class="user-status status-inactive">✗ Desactivado</span>
                                 @endif
                             </td>
-                            <td data-label="Acciones">
-                                <div class="user-actions">
-                                    @php
-                                        // La cuenta 'admin' es la principal: el servidor
-                                        // no deja desactivarla ni eliminarla. Se marca
-                                        // como no disponible en vez de dejar que el
-                                        // usuario pulse y reciba un error.
-                                        $esCuentaPrincipal = strtolower((string) $user['username']) === 'admin';
-                                    @endphp
+<td data-label="Acciones">
+                                    <div class="user-actions">
+                                        @php
+                                            // La cuenta 'admin' es la principal: el servidor no deja
+                                            // desactivarla ni eliminarla. Se marca como no disponible.
+                                            $esCuentaPrincipal = strtolower((string) $user['username']) === 'admin';
+                                        @endphp
 
-                                    @if ($esCuentaPrincipal)
-                                        <button type="button" class="btn-deactivate" disabled
-                                                title="La cuenta admin principal no se puede desactivar">🔒 Desactivar</button>
-                                    @elseif ($user['is_active'])
-                                        <button type="button" class="btn-deactivate" onclick="openConfirmation('deactivate', '{{ $user['username'] }}')">🔒 Desactivar</button>
-                                    @else
-                                        <button type="button" class="btn-activate" onclick="openConfirmation('activate', '{{ $user['username'] }}')">▶ Activar</button>
-                                    @endif
+                                        {{-- Iconos con su nombre en el title: con texto, la tabla
+                                             necesitaba desplazamiento horizontal. --}}
 
-                                    {{-- Restablecer: genera una contraseña nueva al azar. --}}
-                                    <button type="button" class="btn-reset"
-                                            onclick="openConfirmation('reset', '{{ $user['username'] }}')"
-                                            title="Generar una contraseña nueva para esta cuenta">Restablecer</button>
+                                        @if ($esCuentaPrincipal)
+                                            <button type="button" class="btn-deactivate" disabled
+                                                    title="La cuenta admin principal no se puede desactivar"
+                                                    aria-label="Desactivar">🔒</button>
+                                        @elseif ($user['is_active'])
+                                            <button type="button" class="btn-deactivate"
+                                                    onclick="openConfirmation('deactivate', '{{ $user['username'] }}')"
+                                                    title="Desactivar esta cuenta" aria-label="Desactivar">🔒</button>
+                                        @else
+                                            <button type="button" class="btn-activate"
+                                                    onclick="openConfirmation('activate', '{{ $user['username'] }}')"
+                                                    title="Activar esta cuenta" aria-label="Activar">▶</button>
+                                        @endif
 
-                                    @if ($esCuentaPrincipal)
-                                        <button type="button" class="btn-delete" disabled
-                                                title="La cuenta admin principal no se puede eliminar">🗑️ Eliminar</button>
-                                    @else
-                                        <button type="button" class="btn-delete" onclick="openConfirmation('delete', '{{ $user['username'] }}')">🗑️ Eliminar</button>
-                                    @endif
-                                </div>
-                            </td>
+                                        <button type="button" class="btn-reset"
+                                                onclick="openConfirmation('reset', '{{ $user['username'] }}')"
+                                                title="Generar una contraseña nueva" aria-label="Restablecer contraseña">🔑</button>
+
+                                        @if ($esCuentaPrincipal)
+                                            <button type="button" class="btn-delete" disabled
+                                                    title="La cuenta admin principal no se puede eliminar"
+                                                    aria-label="Eliminar">🗑️</button>
+                                        @else
+                                            <button type="button" class="btn-delete"
+                                                    onclick="openConfirmation('delete', '{{ $user['username'] }}')"
+                                                    title="Eliminar esta cuenta" aria-label="Eliminar">🗑️</button>
+                                        @endif
+                                    </div>
+                                </td>
                         </tr>
                     @empty
                         <tr>
@@ -1387,14 +1629,9 @@
             </div>
         </section>
 
-        <section class="admin-card admin-gadget gadget-size-wide" data-gadget-id="forum-reports" data-admin-panel="reportes" data-gadget-size="wide" data-default-size="wide">
+        <section class="admin-card admin-card-fija gadget-size-wide" data-gadget-id="forum-reports" data-admin-panel="reportes">
             <div class="gadget-head">
                 <h2>Reportes del Foro</h2>
-                <div class="gadget-head-controls">
-                    <span class="drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
-                    <button type="button" class="gadget-control-btn gadget-size-btn" onclick="cycleGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">▭</button>
-                    <button type="button" class="gadget-control-btn gadget-hide-btn" onclick="toggleCollapseGadget(event, this)" title="Contraer gadget" aria-label="Contraer gadget">▾</button>
-                </div>
             </div>
 
             <div class="gadget-content">
@@ -1443,14 +1680,9 @@
             </div>
         </section>
 
-        <section class="admin-card admin-gadget gadget-size-wide" data-gadget-id="suggestions" data-admin-panel="sugerencias" data-gadget-size="wide" data-default-size="wide">
+        <section class="admin-card admin-card-fija gadget-size-wide" data-gadget-id="suggestions" data-admin-panel="sugerencias">
             <div class="gadget-head">
                 <h2>Sugerencias Recibidas</h2>
-                <div class="gadget-head-controls">
-                    <span class="drag-chip" title="Arrastra para mover" aria-label="Arrastra para mover">⠿</span>
-                    <button type="button" class="gadget-control-btn gadget-size-btn" onclick="cycleGadgetSize(event, this)" title="Cambiar tamano" aria-label="Cambiar tamano">▭</button>
-                    <button type="button" class="gadget-control-btn gadget-hide-btn" onclick="toggleCollapseGadget(event, this)" title="Contraer gadget" aria-label="Contraer gadget">▾</button>
-                </div>
             </div>
 
             <div class="gadget-content">
