@@ -222,10 +222,28 @@ parrafo(
     "eliminarla. La desactivación es reversible; el borrado no.",
 )
 
+h3(doc, "Restablecer una contraseña")
+
 parrafo(
     doc,
-    "También hay un apartado para cambiar la contraseña de cualquier usuario existente, útil "
-    "cuando alguien la olvida y no tiene códigos de respaldo.",
+    "Cuando alguien olvida su contraseña y no tiene códigos de respaldo, use el botón "
+    "«Restablecer» de la fila de esa persona. No hay que escribir nada: el sistema genera una "
+    "contraseña aleatoria y la muestra una sola vez, en el cuadro de credenciales.",
+)
+
+parrafo(
+    doc,
+    "Anótela o cópiela en ese momento y entréguesela al alumno. La contraseña anterior deja de "
+    "funcionar en el acto, y el sistema no guarda la nueva en ningún sitio legible: si se pierde "
+    "el cuadro, hay que volver a restablecerla.",
+)
+
+nota(
+    doc,
+    "Antes era un formulario",
+    "El cambio de contraseña manual obligaba a inventar una clave segura y escribirla dos veces "
+    "sin errores. Con la generación aleatoria eso desaparece, y la cuenta nunca queda con una "
+    "contraseña débil puesta a mano.",
 )
 
 h2(doc, "4.2 Reportes del foro y sugerencias")

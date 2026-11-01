@@ -115,20 +115,36 @@ class AdminController extends Controller
         }
     }
 
-    public function updatePassword(Request $request): RedirectResponse
+    /**
+     * Restablece la contrasena de un usuario con una generada al azar.
+     *
+     * Sustituye al formulario de "cambiar password", donde el administrador
+     * escribia la contrasena a mano: eso obligaba a inventarla, a que fuera segura
+     * y a repetirla sin errores. Ahora se genera aqui y se muestra una sola vez.
+     *
+     * La contrasena nueva se guarda en la sesion con la misma clave que la de las
+     * cuentas recien creadas, asi que aparece en el mismo cuadro de credenciales.
+     */
+    public function resetPassword(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'username' => self::USERNAME_RULES,
-            'new_password' => 'required|string|min:6|max:72',
-        ]);
+        $validated = $request->validate(['username' => self::USERNAME_RULES]);
+        $username = (string) $validated['username'];
+
+        $password = $this->users->generateRandomPassword();
 
         try {
-            $this->users->updatePassword((string) $validated['username'], (string) $validated['new_password']);
+            $this->users->updatePassword($username, $password);
         } catch (RuntimeException $e) {
             return redirect('/admin/users')->with('error', $e->getMessage());
         }
 
-        return redirect('/admin/users')->with('success', 'Password actualizado para ' . $validated['username'] . '.');
+        request()->session()->put('credenciales_nuevas', [
+            'username' => $username,
+            'password' => $password,
+        ]);
+
+        return redirect('/admin/users')
+            ->with('success', 'Contrasena restablecida para ' . $username . '. Anotala: no se vuelve a mostrar.');
     }
 
     public function deactivateUser(Request $request): RedirectResponse

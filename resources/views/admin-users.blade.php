@@ -620,6 +620,11 @@
             background-color: rgba(117, 225, 160, 0.95);
         }
 
+        .btn-reset {
+            background-color: rgba(120, 190, 255, 0.8);
+            color: #ffffff;
+        }
+
         .btn-delete {
             background-color: rgba(255, 100, 100, 0.7);
             color: #ffffff;
@@ -1299,25 +1304,6 @@
                 <button type="submit">Crear Usuario</button>
             </form>
 
-            {{-- Cambiar la contrasena de alguien es algo puntual: va plegado. --}}
-            <details class="config-acordeon admin-acordeon">
-                <summary>Cambiar la contraseña de un usuario</summary>
-
-                <form method="POST" action="/admin/users/password" class="admin-form-acordeon">
-                @csrf
-                <label>
-                    Username existente
-                    <input type="text" name="username" placeholder="ej: admin" required>
-                </label>
-
-                <label>
-                    Nuevo password
-                    <input type="password" name="new_password" required>
-                </label>
-
-                <button type="submit">Actualizar Password</button>
-            </form>
-            </details>
             </div>
         </section>
 
@@ -1375,6 +1361,11 @@
                                     @else
                                         <button type="button" class="btn-activate" onclick="openConfirmation('activate', '{{ $user['username'] }}')">▶ Activar</button>
                                     @endif
+
+                                    {{-- Restablecer: genera una contraseña nueva al azar. --}}
+                                    <button type="button" class="btn-reset"
+                                            onclick="openConfirmation('reset', '{{ $user['username'] }}')"
+                                            title="Generar una contraseña nueva para esta cuenta">Restablecer</button>
 
                                     @if ($esCuentaPrincipal)
                                         <button type="button" class="btn-delete" disabled
@@ -1909,6 +1900,9 @@
             } else if (action === 'activate') {
                 title.textContent = '▶ Activar Usuario';
                 message.textContent = `¿Estás seguro de que deseas activar a "${username}"? Volverá a poder iniciar sesión.`;
+            } else if (action === 'reset') {
+                title.textContent = '🔑 Contraseña nueva';
+                message.textContent = `Se generará una contraseña aleatoria para "${username}". La anterior dejará de funcionar y la nueva se mostrará una sola vez.`;
             } else if (action === 'delete') {
                 title.textContent = '🗑️ Eliminar Usuario';
                 message.textContent = `¿Estás seguro de que deseas eliminar a "${username}"? Esta acción NO se puede deshacer.`;
@@ -1934,6 +1928,8 @@
                 form.action = '/admin/users/deactivate';
             } else if (currentAction === 'activate') {
                 form.action = '/admin/users/activate';
+            } else if (currentAction === 'reset') {
+                form.action = '/admin/users/reset-password';
             } else {
                 form.action = '/admin/users/delete';
             }

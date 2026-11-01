@@ -277,7 +277,8 @@ Route::middleware(EnsureRegisteredUser::class)->group(function (): void {
 Route::middleware(EnsureAdmin::class)->group(function (): void {
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
     Route::post('/admin/users', [AdminController::class, 'createUser'])->name('admin.users.create');
-    Route::post('/admin/users/password', [AdminController::class, 'updatePassword'])->name('admin.users.password');
+    // Restablecer la contrasena con una generada al azar (antes: cambio manual).
+    Route::post('/admin/users/reset-password', [AdminController::class, 'resetPassword'])->name('admin.users.reset');
     Route::post('/admin/users/deactivate', [AdminController::class, 'deactivateUser'])->name('admin.users.deactivate');
     Route::post('/admin/users/activate', [AdminController::class, 'activateUser'])->name('admin.users.activate');
     Route::post('/admin/users/delete', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
