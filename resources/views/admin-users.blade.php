@@ -2260,6 +2260,13 @@
                 tab.addEventListener('click', () => abrir(tab.dataset.adminTab));
 
                 tab.addEventListener('keydown', (evento) => {
+                    /*
+                     * Alt + flechas cambia de tema: ese atajo es suyo y nada mas.
+                     * Sin esta salida, pulsar Alt y una flecha cambiaba el tema Y
+                     * la pestaña a la vez.
+                     */
+                    if (evento.altKey) return;
+
                     if (evento.key !== 'ArrowRight' && evento.key !== 'ArrowLeft') return;
                     evento.preventDefault();
 
