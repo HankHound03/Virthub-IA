@@ -1602,9 +1602,16 @@
                                                     title="Activar esta cuenta" aria-label="Activar">▶</button>
                                         @endif
 
-                                        <button type="button" class="btn-reset"
-                                                onclick="openConfirmation('reset', '{{ $user['username'] }}')"
-                                                title="Generar una contraseña nueva" aria-label="Restablecer contraseña">🔑</button>
+                                        @if ($esCuentaPrincipal)
+                                            <button type="button" class="btn-reset" disabled
+                                                    title="La cuenta admin principal no se puede restablecer desde aquí"
+                                                    aria-label="Restablecer contraseña">🔑</button>
+                                        @else
+                                            <button type="button" class="btn-reset"
+                                                    onclick="openConfirmation('reset', '{{ $user['username'] }}')"
+                                                    title="Generar una contraseña nueva"
+                                                    aria-label="Restablecer contraseña">🔑</button>
+                                        @endif
 
                                         @if ($esCuentaPrincipal)
                                             <button type="button" class="btn-delete" disabled
