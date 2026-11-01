@@ -40,12 +40,23 @@
     --vh-surface: color-mix(in srgb, var(--vh-panel-bg) 82%, var(--vh-panel-text) 18%);
     --vh-surface-strong: color-mix(in srgb, var(--vh-panel-bg) 70%, var(--vh-panel-text) 30%);
 
-    background-color: var(--vh-bg-solid, #0b1220);
-    background-image: var(--vh-bg-image);
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
+    /*
+     * Solo el color solido. La imagen del tema se pinta en ::before, no aqui.
+     *
+     * Con background-attachment: fixed y los paneles usando desenfoque de fondo,
+     * Chrome muestra una copia desplazada y escalada del fondo a traves del panel:
+     * el famoso "fondo duplicado". Ademas obliga a repintar el fondo entero al
+     * desplazar, que es lo mas caro en un equipo modesto.
+     */
+    /*
+     * Sin color de fondo: lo pone la capa de atras.
+     *
+     * Si el body pinta su color solido, tapa la capa del fondo (que va con z-index
+     * negativo) y el tema se ve solo donde el body no llega. Con el body
+     * transparente, la capa se ve entera.
+     */
+    background-color: transparent;
+    background-image: none;
     color: var(--vh-panel-text);
     font-family: var(--vh-font);
 }
@@ -54,6 +65,26 @@
 [data-era] body::before,
 [data-era] body::after {
     display: none;
+}
+
+/*
+ * El fondo del tema, como capa fija detras de todo.
+ *
+ * Al ser un elemento y no un background-attachment, el desenfoque de los paneles
+ * lo muestra en su sitio, sin copias, y no se repinta al desplazar.
+ */
+[data-era] body::before {
+    content: '';
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--vh-bg-solid, #0b1220);
+    background-image: var(--vh-bg-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    pointer-events: none;
 }
 
 /* --- Barra superior ------------------------------------------------------- */
@@ -2757,4 +2788,41 @@ html.vh-ligero .awty-btn {
     .awty-tiempo {
         display: none;
     }
+}
+
+/* =============================================================================
+   SIN DESENFOQUE DE FONDO EN LAS SUPERFICIES GRANDES
+   =============================================================================
+   Con la imagen del tema fija detras, Chrome muestrea el fondo desplazado y a
+   otra escala cuando hay desenfoque: dentro del panel aparece una copia del fondo
+   que no coincide con la de fuera. Se comprobo con capturas del navegador: el
+   mismo panel, sin desenfoque, alinea la imagen al pixel.
+
+   Se quita solo en las superficies grandes. La barra superior y los elementos
+   pequenos lo conservan, que ahi no se nota y es donde da el aire de cristal.
+
+   De paso: el desenfoque es lo mas caro de pintar en un equipo modesto.
+   -------------------------------------------------------------------------- */
+
+[data-era] body :is(
+    .config-shell,
+    .config-card,
+    .config-lateral-form,
+    .forum-shell,
+    .forum-card,
+    .forum-post,
+    .admin-card,
+    .admin-card-fija,
+    .gadget,
+    .linux-news-panel,
+    .container-card,
+    .suggestions-card,
+    .profile-page,
+    .chat-panel,
+    .chat-widget-panel,
+    .chat-conversation-panel,
+    .chat-users-panel
+) {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
