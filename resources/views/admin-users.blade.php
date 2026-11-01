@@ -1705,6 +1705,7 @@
                             <th>Modo</th>
                             <th>Autor</th>
                             <th>Sugerencia</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1714,6 +1715,13 @@
                                 <td data-label="Modo">{{ ($suggestion['author_mode'] ?? 'anonymous') === 'identified' ? 'Identificado' : 'Anonimo' }}</td>
                                 <td data-label="Autor">{{ $suggestion['author'] ?? 'Anonimo' }}</td>
                                 <td data-label="Sugerencia" class="suggestion-text">{{ $suggestion['message'] ?? '' }}</td>
+                                <td data-label="Acciones">
+                                    <div class="user-actions">
+                                        <button type="button" class="btn-delete"
+                                                onclick="openConfirmation('suggestion', '{{ $suggestion['id'] ?? '' }}')"
+                                                title="Borrar esta sugerencia" aria-label="Borrar sugerencia">🗑️</button>
+                                    </div>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -2142,6 +2150,9 @@
             } else if (action === 'reset') {
                 title.textContent = '🔑 Contraseña nueva';
                 message.textContent = `Se generará una contraseña aleatoria para "${username}". La anterior dejará de funcionar y la nueva se mostrará una sola vez.`;
+            } else if (action === 'suggestion') {
+                title.textContent = '🗑️ Borrar sugerencia';
+                message.textContent = '¿Seguro que quieres borrar esta sugerencia? No se puede recuperar.';
             } else if (action === 'delete') {
                 title.textContent = '🗑️ Eliminar Usuario';
                 message.textContent = `¿Estás seguro de que deseas eliminar a "${username}"? Esta acción NO se puede deshacer.`;
@@ -2169,6 +2180,8 @@
                 form.action = '/admin/users/activate';
             } else if (currentAction === 'reset') {
                 form.action = '/admin/users/reset-password';
+            } else if (currentAction === 'suggestion') {
+                form.action = '/admin/suggestions/delete';
             } else {
                 form.action = '/admin/users/delete';
             }
@@ -2178,9 +2191,10 @@
             tokenInput.name = '_token';
             tokenInput.value = document.querySelector('input[name="_token"]').value;
 
+            // Las sugerencias se identifican por id; las cuentas, por username.
             const usernameInput = document.createElement('input');
             usernameInput.type = 'hidden';
-            usernameInput.name = 'username';
+            usernameInput.name = currentAction === 'suggestion' ? 'id' : 'username';
             usernameInput.value = currentUsername;
 
             form.appendChild(tokenInput);

@@ -282,6 +282,9 @@ Route::middleware(EnsureAdmin::class)->group(function (): void {
     Route::post('/admin/users/deactivate', [AdminController::class, 'deactivateUser'])->name('admin.users.deactivate');
     Route::post('/admin/users/activate', [AdminController::class, 'activateUser'])->name('admin.users.activate');
     Route::post('/admin/users/delete', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+
+    // Borrar una sugerencia recibida.
+    Route::post('/admin/suggestions/delete', [AdminController::class, 'deleteSuggestion'])->name('admin.suggestions.delete');
     Route::post('/admin/forum-reports/delete', [AdminController::class, 'deleteForumReport'])
         ->name('admin.forum-reports.delete');
 

@@ -267,6 +267,12 @@ parrafo(
     "forma de saber quién las escribió: es intencional.",
 )
 
+parrafo(
+    doc,
+    "Cada sugerencia tiene su botón de papelera en la columna de acciones. Al pulsarlo se pide "
+    "confirmación y se borra del archivo de sugerencias: no se puede recuperar.",
+)
+
 
 # --------------------------------------------------------------------------
 # 5. NSFW

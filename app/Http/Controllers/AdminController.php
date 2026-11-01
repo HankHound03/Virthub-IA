@@ -170,6 +170,64 @@ class AdminController extends Controller
         return redirect('/admin/users')->with('success', 'Usuario ' . $validated['username'] . ' eliminado.');
     }
 
+    /**
+     * Borra una sugerencia recibida.
+     *
+     * Las sugerencias viven en storage/app/data/suggestions.json, no en la base de
+     * datos. Se lee, se quita la que coincide por id y se reescribe con bloqueo,
+     * para no pisar una escritura simultanea del buzon.
+     */
+    public function deleteSuggestion(Request $request): RedirectResponse
+    {
+        $validated = $request->validate(['id' => 'required|string|max:32']);
+        $id = (string) $validated['id'];
+
+        $file = storage_path('app/data/suggestions.json');
+
+        if (! is_file($file)) {
+            return redirect('/admin/users')->with('error', 'No hay sugerencias guardadas.');
+        }
+
+        $handle = @fopen($file, 'c+');
+
+        if ($handle === false) {
+            return redirect('/admin/users')->with('error', 'No se pudo abrir el archivo de sugerencias.');
+        }
+
+        try {
+            if (! flock($handle, LOCK_EX)) {
+                return redirect('/admin/users')->with('error', 'El archivo de sugerencias esta ocupado. Intentalo de nuevo.');
+            }
+
+            $contenido = stream_get_contents($handle);
+            $datos = is_string($contenido) ? json_decode($contenido, true) : null;
+
+            if (! is_array($datos) || ! is_array($datos['suggestions'] ?? null)) {
+                return redirect('/admin/users')->with('error', 'El archivo de sugerencias esta danado.');
+            }
+
+            $antes = count($datos['suggestions']);
+
+            $datos['suggestions'] = array_values(array_filter(
+                $datos['suggestions'],
+                static fn (array $entrada): bool => (string) ($entrada['id'] ?? '') !== $id
+            ));
+
+            if (count($datos['suggestions']) === $antes) {
+                return redirect('/admin/users')->with('error', 'Esa sugerencia ya no existe.');
+            }
+
+            rewind($handle);
+            ftruncate($handle, 0);
+            fwrite($handle, json_encode($datos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            fflush($handle);
+            flock($handle, LOCK_UN);
+        } finally {
+            fclose($handle);
+        }
+
+        return redirect('/admin/users')->with('success', 'Sugerencia eliminada.');
+    }
     public function deleteForumReport(Request $request): RedirectResponse
     {
         $validated = $request->validate([
