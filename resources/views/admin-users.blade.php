@@ -1418,19 +1418,16 @@
     --}}
     <div class="config-tabs admin-tabs" role="tablist" aria-label="Secciones del panel">
         <button type="button" class="config-tab is-active" role="tab" aria-selected="true"
-                data-admin-tab="usuarios">
-            <span class="config-tab-icono" aria-hidden="true">◍</span> Usuarios
+                data-admin-tab="usuarios"> Usuarios
         </button>
         <button type="button" class="config-tab" role="tab" aria-selected="false"
-                data-admin-tab="reportes">
-            <span class="config-tab-icono" aria-hidden="true">⚑</span> Reportes
+                data-admin-tab="reportes"> Reportes
             @if (!empty($forumReports ?? []))
                 <span class="config-tab-punto" title="Hay reportes sin revisar" aria-label="Hay reportes sin revisar"></span>
             @endif
         </button>
         <button type="button" class="config-tab" role="tab" aria-selected="false"
-                data-admin-tab="sugerencias">
-            <span class="config-tab-icono" aria-hidden="true">✎</span> Sugerencias
+                data-admin-tab="sugerencias"> Sugerencias
         </button>
     </div>
 

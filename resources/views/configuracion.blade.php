@@ -233,18 +233,15 @@
             inicio depende de lo que necesite atencion: si la verificacion esta
             configurandose, abre en "Dos pasos"; si no, en "Perfil".
         --}}
-        <div class="config-tabs" role="tablist" aria-label="Secciones de configuraciÃ³n">
+        <div class="config-tabs" role="tablist" aria-label="Secciones de configuración">
             <button type="button" class="config-tab is-active" role="tab" aria-selected="true"
-                    aria-controls="panelPerfil" data-config-tab="perfil">
-                <span class="config-tab-icono" aria-hidden="true">â—</span> Perfil
+                    aria-controls="panelPerfil" data-config-tab="perfil"> Perfil
             </button>
             <button type="button" class="config-tab" role="tab" aria-selected="false"
-                    aria-controls="panelContrasena" data-config-tab="contrasena">
-                <span class="config-tab-icono" aria-hidden="true">âŒ˜</span> ContraseÃ±a
+                    aria-controls="panelContrasena" data-config-tab="contrasena"> Contraseña
             </button>
             <button type="button" class="config-tab" role="tab" aria-selected="false"
-                    aria-controls="panelDosPasos" data-config-tab="dos-pasos">
-                <span class="config-tab-icono" aria-hidden="true">âš¿</span> Dos pasos
+                    aria-controls="panelDosPasos" data-config-tab="dos-pasos"> Dos pasos
                 @if ($twoFactorEnabled)
                     <span class="config-tab-punto" title="Activo" aria-label="Activo"></span>
                 @endif
@@ -265,7 +262,7 @@
                         @endif
                     </div>
                     <strong class="config-vista-nombre">{{ $currentUser['username'] }}</strong>
-                    <small class="config-vista-nota">AsÃ­ te ven en el foro y en el chat.</small>
+                    <small class="config-vista-nota">Así te ven en el foro y en el chat.</small>
                 </aside>
 
                 <form method="POST" action="/profile/appearance" enctype="multipart/form-data" class="config-form">
@@ -308,16 +305,16 @@
         <section class="config-panel" id="panelContrasena" data-config-panel="contrasena" role="tabpanel" hidden>
             <div class="config-dos-columnas">
                 <aside class="config-lateral">
-                    <h3 class="config-titulo">Cambiar contraseÃ±a</h3>
+                    <h3 class="config-titulo">Cambiar contraseña</h3>
                     <p class="config-ayuda">
-                        Escribe tu contraseÃ±a actual y la nueva dos veces. La actual se pide para
-                        confirmar que eres tÃº.
+                        Escribe tu contraseña actual y la nueva dos veces. La actual se pide para
+                        confirmar que eres tú.
                     </p>
 
                     <ul class="config-lista">
                         <li>Al menos seis caracteres.</li>
                         <li>La nueva debe ser distinta de la actual.</li>
-                        <li>Si no la recuerdas, pÃ­dele al administrador que te la restablezca.</li>
+                        <li>Si no la recuerdas, pídele al administrador que te la restablezca.</li>
                     </ul>
                 </aside>
 
@@ -326,22 +323,22 @@
                     @csrf
 
                     <div class="config-campo">
-                        <label for="currentPassword">ContraseÃ±a actual</label>
+                        <label for="currentPassword">Contraseña actual</label>
                         <input type="password" id="currentPassword" name="current_password" required autocomplete="current-password">
                     </div>
 
                     <div class="config-campo">
-                        <label for="newPassword">ContraseÃ±a nueva</label>
+                        <label for="newPassword">Contraseña nueva</label>
                         <input type="password" id="newPassword" name="new_password" required autocomplete="new-password">
                     </div>
 
                     <div class="config-campo">
-                        <label for="newPasswordConfirm">Repite la contraseÃ±a nueva</label>
+                        <label for="newPasswordConfirm">Repite la contraseña nueva</label>
                         <input type="password" id="newPasswordConfirm" name="new_password_confirmation" required autocomplete="new-password">
                     </div>
 
                     <div class="config-acciones">
-                        <button type="submit" class="config-boton">Cambiar mi contraseÃ±a</button>
+                        <button type="submit" class="config-boton">Cambiar mi contraseña</button>
                     </div>
                 </form>
                 </div>
@@ -352,25 +349,25 @@
         <section class="config-panel" id="panelDosPasos" data-config-panel="dos-pasos" role="tabpanel" hidden>
             <div class="config-dos-columnas">
                 <aside class="config-lateral">
-                    <h3 class="config-titulo">VerificaciÃ³n en dos pasos</h3>
+                    <h3 class="config-titulo">Verificación en dos pasos</h3>
 
                     <div class="config-estado {{ $twoFactorEnabled ? 'is-activo' : 'is-inactivo' }}">
                     <span class="config-estado-bola" aria-hidden="true"></span>
                     <div>
-                        <strong>{{ $twoFactorEnabled ? 'VerificaciÃ³n en dos pasos activa' : 'VerificaciÃ³n en dos pasos desactivada' }}</strong>
+                        <strong>{{ $twoFactorEnabled ? 'Verificación en dos pasos activa' : 'Verificación en dos pasos desactivada' }}</strong>
                         <small>
                             {{ $twoFactorEnabled
-                                ? 'Al iniciar sesiÃ³n se pide el cÃ³digo de seis dÃ­gitos de Google Authenticator.'
-                                : 'Ahora mismo solo hace falta tu contraseÃ±a para entrar.' }}
+                                ? 'Al iniciar sesión se pide el código de seis dígitos de Google Authenticator.'
+                                : 'Ahora mismo solo hace falta tu contraseña para entrar.' }}
                         </small>
                     </div>
                     </div>
 
                     <p class="config-ayuda">
                         @if ($twoFactorEnabled)
-                            Todo estÃ¡ en orden. A la derecha quedan las dos operaciones que se hacen de vez en cuando.
+                            Todo está en orden. A la derecha quedan las dos operaciones que se hacen de vez en cuando.
                         @else
-                            Sin ella, tu contraseÃ±a sola basta para entrar. Activarla toma un minuto y un telÃ©fono.
+                            Sin ella, tu contraseña sola basta para entrar. Activarla toma un minuto y un teléfono.
                         @endif
                     </p>
                 </aside>
@@ -379,31 +376,31 @@
 
                 @if (!empty($twoFactorRecoveryCodes = session('two_factor_recovery_codes')))
                     <div class="config-aviso">
-                        <strong>Guarda estos cÃ³digos ahora</strong>
-                        <p>Cada uno sirve una sola vez, por si pierdes el telÃ©fono. No se volverÃ¡n a mostrar.</p>
+                        <strong>Guarda estos códigos ahora</strong>
+                        <p>Cada uno sirve una sola vez, por si pierdes el teléfono. No se volverán a mostrar.</p>
                         <pre class="two-factor-recovery">{{ implode("\n", $twoFactorRecoveryCodes) }}</pre>
                     </div>
                 @endif
 
                 @if ($twoFactorEnabled)
                     <details class="config-acordeon">
-                        <summary>Generar cÃ³digos de recuperaciÃ³n nuevos</summary>
+                        <summary>Generar códigos de recuperación nuevos</summary>
                         <form method="POST" action="/security/2fa/recovery-codes" class="config-form" id="recoveryCodesForm">
                             @csrf
-                            <p class="config-ayuda">Se piden tu contraseÃ±a y el cÃ³digo actual para confirmar que eres tÃº.</p>
+                            <p class="config-ayuda">Se piden tu contraseña y el código actual para confirmar que eres tú.</p>
 
                             <div class="config-campo">
-                                <label for="recoveryCurrentPassword">ContraseÃ±a actual</label>
+                                <label for="recoveryCurrentPassword">Contraseña actual</label>
                                 <input type="password" id="recoveryCurrentPassword" name="current_password" required autocomplete="current-password">
                             </div>
 
                             <div class="config-campo">
-                                <label for="recoveryCurrentCode">CÃ³digo de Authenticator</label>
+                                <label for="recoveryCurrentCode">Código de Authenticator</label>
                                 <input type="text" id="recoveryCurrentCode" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
                             </div>
 
                             <div class="config-acciones">
-                                <button type="submit" class="config-boton">Generar cÃ³digos</button>
+                                <button type="submit" class="config-boton">Generar códigos</button>
                             </div>
 
                             <p class="auth-message" id="recoveryCodesFeedback" hidden role="alert"></p>
@@ -412,18 +409,18 @@
                     </details>
 
                     <details class="config-acordeon config-acordeon-peligro">
-                        <summary>Desactivar la verificaciÃ³n en dos pasos</summary>
+                        <summary>Desactivar la verificación en dos pasos</summary>
                         <form method="POST" action="/security/2fa/disable" class="config-form">
                             @csrf
-                            <p class="config-ayuda">A partir de ese momento solo se pedirÃ¡ la contraseÃ±a. Puedes volver a activarla cuando quieras.</p>
+                            <p class="config-ayuda">A partir de ese momento solo se pedirá la contraseña. Puedes volver a activarla cuando quieras.</p>
 
                             <div class="config-campo">
-                                <label for="disableCurrentPassword">ContraseÃ±a actual</label>
+                                <label for="disableCurrentPassword">Contraseña actual</label>
                                 <input type="password" id="disableCurrentPassword" name="current_password" required autocomplete="current-password">
                             </div>
 
                             <div class="config-campo">
-                                <label for="disableCurrentCode">CÃ³digo de Authenticator</label>
+                                <label for="disableCurrentCode">Código de Authenticator</label>
                                 <input type="text" id="disableCurrentCode" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
                             </div>
 
@@ -434,18 +431,18 @@
                     </details>
                 @elseif ($twoFactorSetupQr)
                     <p class="config-ayuda config-ayuda-ancha">
-                        Escanea el cÃ³digo con Google Authenticator y escribe el nÃºmero que aparezca
+                        Escanea el código con Google Authenticator y escribe el número que aparezca
                         para terminar de activarla.
                     </p>
 
                     <div class="config-qr">
-                        <img class="two-factor-qr" src="{{ $twoFactorSetupQr }}" alt="CÃ³digo QR para configurar Google Authenticator" width="240" height="240">
+                        <img class="two-factor-qr" src="{{ $twoFactorSetupQr }}" alt="Código QR para configurar Google Authenticator" width="240" height="240">
 
                         <form method="POST" action="/security/2fa/confirm" class="config-form" id="twoFactorConfirmForm">
                             @csrf
 
                             <div class="config-campo">
-                                <label for="confirmCode">CÃ³digo de seis dÃ­gitos</label>
+                                <label for="confirmCode">Código de seis dígitos</label>
                                 <input type="text" id="confirmCode" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
                             </div>
 
@@ -459,8 +456,8 @@
                     <pre class="two-factor-recovery" id="activationRecoveryCodes" hidden></pre>
                 @else
                     <p class="config-ayuda config-ayuda-ancha">
-                        Con la verificaciÃ³n en dos pasos, tu contraseÃ±a sola no basta: hace falta
-                        tambiÃ©n un cÃ³digo que cambia cada treinta segundos en tu telÃ©fono.
+                        Con la verificación en dos pasos, tu contraseña sola no basta: hace falta
+                        también un código que cambia cada treinta segundos en tu teléfono.
                     </p>
 
                     <form method="POST" action="/security/2fa/setup" class="config-form">
