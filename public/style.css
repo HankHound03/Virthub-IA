@@ -2490,3 +2490,372 @@ body .chat-users-panel {
     font-family: inherit;
     font-size: 13px;
 }
+
+/* =============================================================================
+   PESTANAS DE SECCION
+   =============================================================================
+   Las usan la configuracion y el panel de administracion. Viven aqui y no en cada
+   vista para que las dos se vean igual y no haya reglas repetidas.
+   -------------------------------------------------------------------------- */
+
+/* Avatar grande en la vista previa del perfil. */
+.profile-aero-frame-lg {
+    width: 112px;
+    height: 112px;
+    font-size: 40px;
+}
+
+.profile-aero-frame-lg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* =============================================================
+   PESTANAS Y APARTADOS
+   =============================================================
+   Tres bloques, uno a la vez. Antes todo estaba apilado en dos
+   columnas y se veia amontonado.
+   ------------------------------------------------------------- */
+
+.config-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--vh-border);
+}
+
+.config-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--vh-text-soft);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.config-tab:hover {
+    color: var(--vh-text);
+    background: color-mix(in srgb, var(--vh-text) 8%, transparent);
+}
+
+.config-tab.is-active {
+    color: var(--vh-btn-text);
+    background: var(--vh-btn-bg);
+    border-color: var(--vh-evento, #e0a63c);
+    font-weight: 700;
+}
+
+.config-tab-icono {
+    font-size: 14px;
+    opacity: 0.85;
+}
+
+.config-tab-punto {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #3fbf7f;
+    box-shadow: 0 0 6px #3fbf7f;
+}
+
+.config-panel[hidden] {
+    display: none;
+}
+
+/* Perfil: vista previa a la izquierda, controles a la derecha. */
+.config-split {
+    display: grid;
+    grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.config-vista {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 14px;
+    border: 1px solid var(--vh-border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--vh-surface) 85%, transparent);
+    text-align: center;
+}
+
+.config-vista-nombre {
+    color: var(--vh-text);
+    font-size: 14px;
+}
+
+.config-vista-nota {
+    color: var(--vh-text-soft);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+/* Formularios: un campo por linea, con aire. */
+.config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.config-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.config-campo label {
+    color: var(--vh-text);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.config-campo input[type="text"],
+.config-campo input[type="password"],
+.config-campo input[type="file"],
+.config-campo input[type="color"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 11px;
+    border: 1px solid var(--vh-border);
+    border-radius: 8px;
+    background-color: var(--vh-btn-bg);
+    color: var(--vh-btn-text);
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.config-campo input[type="color"] {
+    height: 46px;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.config-campo input:focus-visible {
+    outline: 2px solid var(--vh-evento, #e0a63c);
+    outline-offset: 1px;
+}
+
+.config-ayuda {
+    margin: 0;
+    color: var(--vh-text-soft);
+    font-size: 11.5px;
+    line-height: 1.5;
+}
+
+.config-ayuda-ancha {
+    max-width: 62ch;
+    margin: 0 0 16px;
+    font-size: 12.5px;
+}
+
+.config-acciones {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 2px;
+}
+
+.config-boton {
+    padding: 10px 20px;
+    border: 1px solid var(--vh-border);
+    border-radius: 8px;
+    background: var(--vh-btn-bg);
+    color: var(--vh-btn-text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.config-boton:hover {
+    border-color: var(--vh-evento, #e0a63c);
+}
+
+.config-boton-peligro {
+    border-color: #b03a2e;
+    color: #c8553d;
+}
+
+.config-boton-peligro:hover {
+    background: #b03a2e;
+    border-color: #b03a2e;
+    color: #fff;
+}
+
+/* Columna estrecha, para los apartados de un solo formulario. */
+.config-estrecho {
+    max-width: 560px;
+}
+
+.config-titulo {
+    margin: 0 0 6px;
+    color: var(--vh-text);
+    font-size: 16px;
+}
+
+/* Estado de la verificacion en dos pasos. */
+.config-estado {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--vh-border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--vh-surface) 88%, transparent);
+}
+
+.config-estado strong {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--vh-text);
+    font-size: 13px;
+}
+
+.config-estado small {
+    color: var(--vh-text-soft);
+    font-size: 11.5px;
+    line-height: 1.5;
+}
+
+.config-estado-bola {
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    margin-top: 4px;
+    border-radius: 50%;
+}
+
+.config-estado.is-activo .config-estado-bola {
+    background: #3fbf7f;
+    box-shadow: 0 0 8px #3fbf7f;
+}
+
+.config-estado.is-inactivo .config-estado-bola {
+    background: #b03a2e;
+}
+
+.config-estado.is-activo {
+    border-color: color-mix(in srgb, #3fbf7f 55%, var(--vh-border));
+}
+
+/* Aviso de codigos de recuperacion recien generados. */
+.config-aviso {
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--vh-evento, #e0a63c);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--vh-evento, #e0a63c) 12%, var(--vh-surface));
+}
+
+.config-aviso strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--vh-text);
+    font-size: 13px;
+}
+
+.config-aviso p {
+    margin: 0 0 10px;
+    color: var(--vh-text-soft);
+    font-size: 11.5px;
+}
+
+/* Operaciones de mantenimiento: cerradas por defecto. */
+.config-acordeon {
+    margin-top: 14px;
+    border: 1px solid var(--vh-border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--vh-surface) 88%, transparent);
+    overflow: hidden;
+}
+
+.config-acordeon > summary {
+    padding: 13px 16px;
+    color: var(--vh-text);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+}
+
+.config-acordeon > summary::-webkit-details-marker {
+    display: none;
+}
+
+.config-acordeon > summary::before {
+    content: '▸';
+    display: inline-block;
+    margin-right: 8px;
+    color: var(--vh-text-soft);
+    transition: transform 0.15s ease;
+}
+
+.config-acordeon[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.config-acordeon[open] > summary {
+    border-bottom: 1px solid var(--vh-border);
+}
+
+.config-acordeon .config-form {
+    padding: 16px;
+}
+
+.config-acordeon-peligro > summary {
+    color: #c8553d;
+}
+
+.config-qr {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    align-items: flex-start;
+}
+
+.config-qr .two-factor-qr {
+    flex: 0 0 auto;
+    padding: 8px;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.config-qr .config-form {
+    flex: 1 1 240px;
+}
+
+@media (max-width: 760px) {
+    .config-split {
+        grid-template-columns: 1fr;
+    }
+
+    .config-vista {
+        flex-direction: row;
+        justify-content: flex-start;
+        text-align: left;
+        padding: 14px;
+    }
+
+    .config-acciones {
+        justify-content: stretch;
+    }
+
+    .config-boton {
+        width: 100%;
+    }
+}
+

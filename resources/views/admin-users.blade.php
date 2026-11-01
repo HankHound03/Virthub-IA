@@ -9,6 +9,65 @@
     <link rel="stylesheet" href="{{ asset('style.css') }}?v={{ filemtime(public_path('style.css')) }}">
     <link rel="stylesheet" href="{{ asset('container.css') }}?v={{ filemtime(public_path('container.css')) }}">
     <style>
+
+        /* =============================================================
+           PESTANAS DEL PANEL
+           =============================================================
+           Cada tarjeta dice a que pestana pertenece (data-admin-panel) y el
+           contenedor lleva la que esta activa (data-vista). El CSS hace el resto:
+           si el JavaScript fallara, todas las tarjetas siguen en el documento.
+           ------------------------------------------------------------- */
+
+        .admin-tabs {
+            margin: 8px 5px 2px;
+        }
+
+        .admin-wrapper[data-vista] .admin-gadget {
+            display: none;
+        }
+
+        .admin-wrapper[data-vista="usuarios"] .admin-gadget[data-admin-panel="usuarios"],
+        .admin-wrapper[data-vista="reportes"] .admin-gadget[data-admin-panel="reportes"],
+        .admin-wrapper[data-vista="sugerencias"] .admin-gadget[data-admin-panel="sugerencias"] {
+            display: block;
+        }
+
+        /* El acordeon dentro de una tarjeta del panel. */
+        .admin-acordeon {
+            margin-top: 22px;
+            background: color-mix(in srgb, #000 12%, transparent);
+        }
+
+        .admin-form-acordeon {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 16px;
+        }
+
+        .admin-form-acordeon label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .admin-form-acordeon input {
+            padding: 9px 10px;
+            border: 1px solid rgba(117, 225, 160, 0.22);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            color: inherit;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .admin-form-acordeon button {
+            align-self: flex-start;
+            padding: 9px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
         .admin-wrapper {
             display: grid;
             grid-template-columns: repeat(2, minmax(320px, 1fr));
@@ -815,7 +874,66 @@
 
         @media (max-width: 900px),
         (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
-            .admin-wrapper {
+    
+        /* =============================================================
+           PESTANAS DEL PANEL
+           =============================================================
+           Cada tarjeta dice a que pestana pertenece (data-admin-panel) y el
+           contenedor lleva la que esta activa (data-vista). El CSS hace el resto:
+           si el JavaScript fallara, todas las tarjetas siguen en el documento.
+           ------------------------------------------------------------- */
+
+        .admin-tabs {
+            margin: 8px 5px 2px;
+        }
+
+        .admin-wrapper[data-vista] .admin-gadget {
+            display: none;
+        }
+
+        .admin-wrapper[data-vista="usuarios"] .admin-gadget[data-admin-panel="usuarios"],
+        .admin-wrapper[data-vista="reportes"] .admin-gadget[data-admin-panel="reportes"],
+        .admin-wrapper[data-vista="sugerencias"] .admin-gadget[data-admin-panel="sugerencias"] {
+            display: block;
+        }
+
+        /* El acordeon dentro de una tarjeta del panel. */
+        .admin-acordeon {
+            margin-top: 22px;
+            background: color-mix(in srgb, #000 12%, transparent);
+        }
+
+        .admin-form-acordeon {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 16px;
+        }
+
+        .admin-form-acordeon label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .admin-form-acordeon input {
+            padding: 9px 10px;
+            border: 1px solid rgba(117, 225, 160, 0.22);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            color: inherit;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .admin-form-acordeon button {
+            align-self: flex-start;
+            padding: 9px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .admin-wrapper {
                 grid-template-columns: 1fr;
                 min-height: auto;
             }
@@ -952,7 +1070,66 @@
         }
 
         @media (max-width: 560px) {
-            .admin-wrapper {
+    
+        /* =============================================================
+           PESTANAS DEL PANEL
+           =============================================================
+           Cada tarjeta dice a que pestana pertenece (data-admin-panel) y el
+           contenedor lleva la que esta activa (data-vista). El CSS hace el resto:
+           si el JavaScript fallara, todas las tarjetas siguen en el documento.
+           ------------------------------------------------------------- */
+
+        .admin-tabs {
+            margin: 8px 5px 2px;
+        }
+
+        .admin-wrapper[data-vista] .admin-gadget {
+            display: none;
+        }
+
+        .admin-wrapper[data-vista="usuarios"] .admin-gadget[data-admin-panel="usuarios"],
+        .admin-wrapper[data-vista="reportes"] .admin-gadget[data-admin-panel="reportes"],
+        .admin-wrapper[data-vista="sugerencias"] .admin-gadget[data-admin-panel="sugerencias"] {
+            display: block;
+        }
+
+        /* El acordeon dentro de una tarjeta del panel. */
+        .admin-acordeon {
+            margin-top: 22px;
+            background: color-mix(in srgb, #000 12%, transparent);
+        }
+
+        .admin-form-acordeon {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 16px;
+        }
+
+        .admin-form-acordeon label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .admin-form-acordeon input {
+            padding: 9px 10px;
+            border: 1px solid rgba(117, 225, 160, 0.22);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            color: inherit;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .admin-form-acordeon button {
+            align-self: flex-start;
+            padding: 9px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .admin-wrapper {
                 margin: 0;
                 gap: 8px;
             }
@@ -1002,8 +1179,36 @@
     @include('partials.chat-widget')
 
 
-    <div class="admin-wrapper" id="adminGadgetBoard">
-        <section class="admin-card admin-gadget gadget-size-normal" data-gadget-id="create-user" data-gadget-size="normal" data-default-size="normal">
+    {{--
+        Tres pestañas para el panel.
+
+        Antes eran cuatro tarjetas seguidas: crear usuario, cambiar contraseña, la
+        lista de cuentas, los reportes y las sugerencias. Todo a la vez y sin un
+        orden de lectura.
+
+        Ahora cada cosa tiene su pestaña y solo se ve la que se está usando. Si hay
+        reportes pendientes, el panel abre directo en ellos.
+    --}}
+    <div class="config-tabs admin-tabs" role="tablist" aria-label="Secciones del panel">
+        <button type="button" class="config-tab is-active" role="tab" aria-selected="true"
+                data-admin-tab="usuarios">
+            <span class="config-tab-icono" aria-hidden="true">◍</span> Usuarios
+        </button>
+        <button type="button" class="config-tab" role="tab" aria-selected="false"
+                data-admin-tab="reportes">
+            <span class="config-tab-icono" aria-hidden="true">⚑</span> Reportes
+            @if (!empty($forumReports ?? []))
+                <span class="config-tab-punto" title="Hay reportes sin revisar" aria-label="Hay reportes sin revisar"></span>
+            @endif
+        </button>
+        <button type="button" class="config-tab" role="tab" aria-selected="false"
+                data-admin-tab="sugerencias">
+            <span class="config-tab-icono" aria-hidden="true">✎</span> Sugerencias
+        </button>
+    </div>
+
+    <div class="admin-wrapper" id="adminGadgetBoard" data-vista="usuarios">
+        <section class="admin-card admin-gadget gadget-size-normal" data-gadget-id="create-user" data-admin-panel="usuarios" data-gadget-size="normal" data-default-size="normal">
             <div class="gadget-head">
                 <h2>Crear Usuario</h2>
                 <div class="gadget-head-controls">
@@ -1094,11 +1299,11 @@
                 <button type="submit">Crear Usuario</button>
             </form>
 
-            <hr style="margin: 18px 0; border-color: rgba(117, 225, 160, 0.2);">
+            {{-- Cambiar la contrasena de alguien es algo puntual: va plegado. --}}
+            <details class="config-acordeon admin-acordeon">
+                <summary>Cambiar la contraseña de un usuario</summary>
 
-            <h2 style="margin-top: 0;">Cambiar Password</h2>
-
-            <form method="POST" action="/admin/users/password">
+                <form method="POST" action="/admin/users/password" class="admin-form-acordeon">
                 @csrf
                 <label>
                     Username existente
@@ -1112,10 +1317,11 @@
 
                 <button type="submit">Actualizar Password</button>
             </form>
+            </details>
             </div>
         </section>
 
-        <section class="admin-card admin-gadget gadget-size-normal" data-gadget-id="registered-users" data-gadget-size="normal" data-default-size="normal">
+        <section class="admin-card admin-gadget gadget-size-normal" data-gadget-id="registered-users" data-admin-panel="usuarios" data-gadget-size="normal" data-default-size="normal">
             <div class="gadget-head">
                 <h2>Usuarios Registrados</h2>
                 <div class="gadget-head-controls">
@@ -1190,7 +1396,7 @@
             </div>
         </section>
 
-        <section class="admin-card admin-gadget gadget-size-wide" data-gadget-id="forum-reports" data-gadget-size="wide" data-default-size="wide">
+        <section class="admin-card admin-gadget gadget-size-wide" data-gadget-id="forum-reports" data-admin-panel="reportes" data-gadget-size="wide" data-default-size="wide">
             <div class="gadget-head">
                 <h2>Reportes del Foro</h2>
                 <div class="gadget-head-controls">
@@ -1246,7 +1452,7 @@
             </div>
         </section>
 
-        <section class="admin-card admin-gadget gadget-size-wide" data-gadget-id="suggestions" data-gadget-size="wide" data-default-size="wide">
+        <section class="admin-card admin-gadget gadget-size-wide" data-gadget-id="suggestions" data-admin-panel="sugerencias" data-gadget-size="wide" data-default-size="wide">
             <div class="gadget-head">
                 <h2>Sugerencias Recibidas</h2>
                 <div class="gadget-head-controls">
@@ -1777,6 +1983,52 @@
         window.toggleCollapseGadget = toggleCollapseGadget;
         window.resetAdminGadgetLayout = resetAdminGadgetLayout;
         document.getElementById('create_role')?.addEventListener('change', enforceAdminCredentialPolicy);
+    
+        /*
+         * Pestanas del panel.
+         *
+         * No se oculta nada con JavaScript: el contenedor lleva data-vista y el CSS
+         * decide que tarjetas se ven. Asi, si el script fallara, todas las tarjetas
+         * siguen en el documento.
+         */
+        (function () {
+            const board = document.getElementById('adminGadgetBoard');
+            const tabs = Array.from(document.querySelectorAll('[data-admin-tab]'));
+
+            if (!board || !tabs.length) return;
+
+            function abrir(vista) {
+                board.dataset.vista = vista;
+
+                tabs.forEach(tab => {
+                    const activo = tab.dataset.adminTab === vista;
+                    tab.classList.toggle('is-active', activo);
+                    tab.setAttribute('aria-selected', activo ? 'true' : 'false');
+                });
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => abrir(tab.dataset.adminTab));
+
+                tab.addEventListener('keydown', (evento) => {
+                    if (evento.key !== 'ArrowRight' && evento.key !== 'ArrowLeft') return;
+                    evento.preventDefault();
+
+                    const indice = tabs.indexOf(tab);
+                    const siguiente = evento.key === 'ArrowRight'
+                        ? (indice + 1) % tabs.length
+                        : (indice - 1 + tabs.length) % tabs.length;
+
+                    tabs[siguiente].focus();
+                    abrir(tabs[siguiente].dataset.adminTab);
+                });
+            });
+
+            @if (!empty($forumReports ?? []))
+                abrir('reportes');
+            @endif
+        })();
+
     </script>
 </body>
 </html>
