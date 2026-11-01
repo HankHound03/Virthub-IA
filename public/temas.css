@@ -2816,6 +2816,7 @@ html.vh-ligero .awty-btn {
     .gadget,
     .linux-news-panel,
     .container-card,
+    .suggestions-shell,
     .suggestions-card,
     .profile-page,
     .chat-panel,
@@ -2854,6 +2855,7 @@ html.vh-ligero .awty-btn {
     .config-lateral-form,
     .config-shell,
     .container-card,
+    .suggestions-shell,
     .suggestions-card,
     .profile-page,
     .chat-panel,
@@ -2885,4 +2887,61 @@ html.vh-ligero .awty-btn {
 [data-era] body .config-campo input::placeholder,
 [data-era] body .admin-card input::placeholder {
     color: color-mix(in srgb, var(--vh-btn-text) 55%, transparent);
+}
+
+/* =============================================================================
+   CRISTAL AERO EN VISTA Y WINDOWS 7
+   =============================================================================
+   Estas dos epocas son las del cristal. Sus paneles venian con bastante opacidad
+   (62 % en Vista, 82 % en 7), mas cerca de una tarjeta solida que de una ventana.
+
+   Aqui se baja la opacidad del color del panel a tres cuartas partes y se le pone
+   encima el brillo del cristal. El resultado es una ventana de Aero: el escritorio
+   se ve con claridad, la franja blanca arriba hace el reflejo y el texto sigue
+   leyendose.
+
+   Sin desenfoque: eso es lo caro y lo que rompia el fondo. Una capa de color y una
+   de brillo cuestan practicamente nada, incluso en un equipo modesto.
+   -------------------------------------------------------------------------- */
+
+[data-era="vista"] body :is(
+    .gadget,
+    .linux-news-panel,
+    .forum-card,
+    .forum-post,
+    .admin-card,
+    .admin-card-fija,
+    .config-card,
+    .config-lateral-form,
+    .config-shell,
+    .container-card,
+    .suggestions-shell,
+    .suggestions-card,
+    .profile-page,
+    .chat-panel,
+    .chat-widget-panel
+),
+[data-era="win7"] body :is(
+    .gadget,
+    .linux-news-panel,
+    .forum-card,
+    .forum-post,
+    .admin-card,
+    .admin-card-fija,
+    .config-card,
+    .config-lateral-form,
+    .config-shell,
+    .container-card,
+    .suggestions-shell,
+    .suggestions-card,
+    .profile-page,
+    .chat-panel,
+    .chat-widget-panel
+) {
+    background-image:
+        var(--vh-glass-sheen),
+        linear-gradient(
+            color-mix(in srgb, var(--vh-panel-bg) 74%, transparent),
+            color-mix(in srgb, var(--vh-panel-bg) 74%, transparent)
+        ) !important;
 }
