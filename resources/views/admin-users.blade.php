@@ -1418,16 +1418,19 @@
     --}}
     <div class="config-tabs admin-tabs" role="tablist" aria-label="Secciones del panel">
         <button type="button" class="config-tab is-active" role="tab" aria-selected="true"
-                data-admin-tab="usuarios"> Usuarios
+                data-admin-tab="usuarios">
+            <span class="config-tab-icono" aria-hidden="true"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="5.6" r="2.3"/><path d="M1.8 13.2c.5-2.1 2.2-3.4 4.2-3.4s3.7 1.3 4.2 3.4"/><path d="M11 3.6a2.2 2.2 0 0 1 0 4.2M12.4 13.2c-.2-1.2-.7-2.2-1.5-2.9"/></svg></span>  Usuarios
         </button>
         <button type="button" class="config-tab" role="tab" aria-selected="false"
-                data-admin-tab="reportes"> Reportes
+                data-admin-tab="reportes">
+            <span class="config-tab-icono" aria-hidden="true"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14V2.4"/><path d="M4 3h7.5l-1.6 2.7L11.5 8.4H4z"/></svg></span>  Reportes
             @if (!empty($forumReports ?? []))
                 <span class="config-tab-punto" title="Hay reportes sin revisar" aria-label="Hay reportes sin revisar"></span>
             @endif
         </button>
         <button type="button" class="config-tab" role="tab" aria-selected="false"
-                data-admin-tab="sugerencias"> Sugerencias
+                data-admin-tab="sugerencias">
+            <span class="config-tab-icono" aria-hidden="true"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.4 2.2 13.8 4.6 5.6 12.8 2.4 13.6l.8-3.2z"/></svg></span>  Sugerencias
         </button>
     </div>
 

@@ -235,13 +235,16 @@
         --}}
         <div class="config-tabs" role="tablist" aria-label="Secciones de configuración">
             <button type="button" class="config-tab is-active" role="tab" aria-selected="true"
-                    aria-controls="panelPerfil" data-config-tab="perfil"> Perfil
+                    aria-controls="panelPerfil" data-config-tab="perfil">
+                <span class="config-tab-icono" aria-hidden="true"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.6"/><path d="M3 13.4c.6-2.4 2.6-3.8 5-3.8s4.4 1.4 5 3.8"/></svg></span>  Perfil
             </button>
             <button type="button" class="config-tab" role="tab" aria-selected="false"
-                    aria-controls="panelContrasena" data-config-tab="contrasena"> Contraseña
+                    aria-controls="panelContrasena" data-config-tab="contrasena">
+                <span class="config-tab-icono" aria-hidden="true"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.6" cy="10.4" r="2.9"/><path d="M7.7 8.3 13 3M10.8 5.2l1.7 1.7M12.2 3.8l1.6 1.6"/></svg></span>  Contraseña
             </button>
             <button type="button" class="config-tab" role="tab" aria-selected="false"
-                    aria-controls="panelDosPasos" data-config-tab="dos-pasos"> Dos pasos
+                    aria-controls="panelDosPasos" data-config-tab="dos-pasos">
+                <span class="config-tab-icono" aria-hidden="true"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8 13 3.6v4.2c0 3.2-2.1 5.6-5 6.4-2.9-.8-5-3.2-5-6.4V3.6z"/><path d="M6 8l1.6 1.6L10.4 6.6"/></svg></span>  Dos pasos
                 @if ($twoFactorEnabled)
                     <span class="config-tab-punto" title="Activo" aria-label="Activo"></span>
                 @endif

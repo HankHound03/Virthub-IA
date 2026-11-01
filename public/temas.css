@@ -2826,3 +2826,57 @@ html.vh-ligero .awty-btn {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
+
+/* =============================================================================
+   SUPERFICIE UNICA PARA TODOS LOS PANELES
+   =============================================================================
+   Las tarjetas usaban el color del panel tal cual. En los temas de cristal ese
+   color lleva transparencia, asi que el fondo se veia a traves y las tarjetas
+   quedaban turbias, con el mismo tono del escritorio de atras.
+
+   Aqui se apilan tres capas del mismo color: con un 62 % de opacidad cada una, el
+   resultado queda casi opaco (94 %), conservando el tono de la epoca. Asi una
+   tarjeta se ve como una superficie de verdad, clara en los temas claros y oscura
+   en los oscuros, y el texto siempre contrasta.
+
+   Se hace una sola vez y para todas: configuracion, foro, panel, gadgets, perfil y
+   chat.
+   -------------------------------------------------------------------------- */
+
+[data-era] body :is(
+    .gadget,
+    .linux-news-panel,
+    .forum-card,
+    .forum-post,
+    .admin-card,
+    .admin-card-fija,
+    .config-card,
+    .config-lateral-form,
+    .config-shell,
+    .container-card,
+    .suggestions-card,
+    .profile-page,
+    .chat-panel,
+    .chat-widget-panel
+) {
+    background-color: var(--vh-bg-solid, #12222e) !important;
+    background-image:
+        linear-gradient(var(--vh-panel-bg), var(--vh-panel-bg)),
+        linear-gradient(var(--vh-panel-bg), var(--vh-panel-bg)) !important;
+}
+
+/* Los campos y botones dentro de esos paneles tampoco deben transparentarse. */
+[data-era] body :is(
+    .config-campo input,
+    .admin-card input,
+    .admin-card select,
+    .admin-form-acordeon input
+) {
+    background-color: color-mix(in srgb, var(--vh-panel-bg) 82%, #ffffff 18%);
+    color: var(--vh-panel-text);
+}
+
+[data-era] body .config-campo input::placeholder,
+[data-era] body .admin-card input::placeholder {
+    color: color-mix(in srgb, var(--vh-panel-text) 55%, transparent);
+}

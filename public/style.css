@@ -2854,3 +2854,23 @@ body .chat-users-panel {
     }
 }
 
+/* Icono de las pestañas: SVG en linea, se colorea con el texto. */
+.config-tab-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+    opacity: 0.85;
+}
+
+.config-tab-icono svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.config-tab.is-active .config-tab-icono {
+    opacity: 1;
+}
