@@ -115,6 +115,367 @@
             }
         }
 
+          /* Avatar grande en la vista previa del perfil. */
+          .profile-aero-frame-lg {
+              width: 112px;
+              height: 112px;
+              font-size: 40px;
+          }
+
+          .profile-aero-frame-lg img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+          }
+
+          /* =============================================================
+             PESTANAS Y APARTADOS
+             =============================================================
+             Tres bloques, uno a la vez. Antes todo estaba apilado en dos
+             columnas y se veia amontonado.
+             ------------------------------------------------------------- */
+
+          .config-tabs {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 6px;
+              margin: 4px 0 16px;
+              padding-bottom: 12px;
+              border-bottom: 1px solid var(--vh-border);
+          }
+
+          .config-tab {
+              display: inline-flex;
+              align-items: center;
+              gap: 7px;
+              padding: 9px 16px;
+              border: 1px solid transparent;
+              border-radius: 8px;
+              background: transparent;
+              color: var(--vh-text-soft);
+              font-family: inherit;
+              font-size: 13px;
+              cursor: pointer;
+              transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+          }
+
+          .config-tab:hover {
+              color: var(--vh-text);
+              background: color-mix(in srgb, var(--vh-text) 8%, transparent);
+          }
+
+          .config-tab.is-active {
+              color: var(--vh-btn-text);
+              background: var(--vh-btn-bg);
+              border-color: var(--vh-evento, #e0a63c);
+              font-weight: 700;
+          }
+
+          .config-tab-icono {
+              font-size: 14px;
+              opacity: 0.85;
+          }
+
+          .config-tab-punto {
+              width: 7px;
+              height: 7px;
+              border-radius: 50%;
+              background: #3fbf7f;
+              box-shadow: 0 0 6px #3fbf7f;
+          }
+
+          .config-panel[hidden] {
+              display: none;
+          }
+
+          /* Perfil: vista previa a la izquierda, controles a la derecha. */
+          .config-split {
+              display: grid;
+              grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+              gap: 22px;
+              align-items: start;
+          }
+
+          .config-vista {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 10px;
+              padding: 20px 14px;
+              border: 1px solid var(--vh-border);
+              border-radius: 10px;
+              background: color-mix(in srgb, var(--vh-surface) 85%, transparent);
+              text-align: center;
+          }
+
+          .config-vista-nombre {
+              color: var(--vh-text);
+              font-size: 14px;
+          }
+
+          .config-vista-nota {
+              color: var(--vh-text-soft);
+              font-size: 11px;
+              line-height: 1.45;
+          }
+
+          /* Formularios: un campo por linea, con aire. */
+          .config-form {
+              display: flex;
+              flex-direction: column;
+              gap: 18px;
+          }
+
+          .config-campo {
+              display: flex;
+              flex-direction: column;
+              gap: 6px;
+          }
+
+          .config-campo label {
+              color: var(--vh-text);
+              font-size: 12.5px;
+              font-weight: 600;
+          }
+
+          .config-campo input[type="text"],
+          .config-campo input[type="password"],
+          .config-campo input[type="file"],
+          .config-campo input[type="color"] {
+              width: 100%;
+              box-sizing: border-box;
+              padding: 10px 11px;
+              border: 1px solid var(--vh-border);
+              border-radius: 8px;
+              background-color: var(--vh-btn-bg);
+              color: var(--vh-btn-text);
+              font-family: inherit;
+              font-size: 13px;
+          }
+
+          .config-campo input[type="color"] {
+              height: 46px;
+              padding: 4px;
+              cursor: pointer;
+          }
+
+          .config-campo input:focus-visible {
+              outline: 2px solid var(--vh-evento, #e0a63c);
+              outline-offset: 1px;
+          }
+
+          .config-ayuda {
+              margin: 0;
+              color: var(--vh-text-soft);
+              font-size: 11.5px;
+              line-height: 1.5;
+          }
+
+          .config-ayuda-ancha {
+              max-width: 62ch;
+              margin: 0 0 16px;
+              font-size: 12.5px;
+          }
+
+          .config-acciones {
+              display: flex;
+              gap: 10px;
+              justify-content: flex-end;
+              padding-top: 2px;
+          }
+
+          .config-boton {
+              padding: 10px 20px;
+              border: 1px solid var(--vh-border);
+              border-radius: 8px;
+              background: var(--vh-btn-bg);
+              color: var(--vh-btn-text);
+              font-family: inherit;
+              font-size: 13px;
+              font-weight: 600;
+              cursor: pointer;
+              transition: border-color 0.15s ease, background 0.15s ease;
+          }
+
+          .config-boton:hover {
+              border-color: var(--vh-evento, #e0a63c);
+          }
+
+          .config-boton-peligro {
+              border-color: #b03a2e;
+              color: #c8553d;
+          }
+
+          .config-boton-peligro:hover {
+              background: #b03a2e;
+              border-color: #b03a2e;
+              color: #fff;
+          }
+
+          /* Columna estrecha, para los apartados de un solo formulario. */
+          .config-estrecho {
+              max-width: 560px;
+          }
+
+          .config-titulo {
+              margin: 0 0 6px;
+              color: var(--vh-text);
+              font-size: 16px;
+          }
+
+          /* Estado de la verificacion en dos pasos. */
+          .config-estado {
+              display: flex;
+              align-items: flex-start;
+              gap: 12px;
+              margin-bottom: 18px;
+              padding: 14px 16px;
+              border: 1px solid var(--vh-border);
+              border-radius: 10px;
+              background: color-mix(in srgb, var(--vh-surface) 88%, transparent);
+          }
+
+          .config-estado strong {
+              display: block;
+              margin-bottom: 3px;
+              color: var(--vh-text);
+              font-size: 13px;
+          }
+
+          .config-estado small {
+              color: var(--vh-text-soft);
+              font-size: 11.5px;
+              line-height: 1.5;
+          }
+
+          .config-estado-bola {
+              flex: 0 0 auto;
+              width: 10px;
+              height: 10px;
+              margin-top: 4px;
+              border-radius: 50%;
+          }
+
+          .config-estado.is-activo .config-estado-bola {
+              background: #3fbf7f;
+              box-shadow: 0 0 8px #3fbf7f;
+          }
+
+          .config-estado.is-inactivo .config-estado-bola {
+              background: #b03a2e;
+          }
+
+          .config-estado.is-activo {
+              border-color: color-mix(in srgb, #3fbf7f 55%, var(--vh-border));
+          }
+
+          /* Aviso de codigos de recuperacion recien generados. */
+          .config-aviso {
+              margin-bottom: 18px;
+              padding: 14px 16px;
+              border: 1px solid var(--vh-evento, #e0a63c);
+              border-radius: 10px;
+              background: color-mix(in srgb, var(--vh-evento, #e0a63c) 12%, var(--vh-surface));
+          }
+
+          .config-aviso strong {
+              display: block;
+              margin-bottom: 4px;
+              color: var(--vh-text);
+              font-size: 13px;
+          }
+
+          .config-aviso p {
+              margin: 0 0 10px;
+              color: var(--vh-text-soft);
+              font-size: 11.5px;
+          }
+
+          /* Operaciones de mantenimiento: cerradas por defecto. */
+          .config-acordeon {
+              margin-top: 14px;
+              border: 1px solid var(--vh-border);
+              border-radius: 10px;
+              background: color-mix(in srgb, var(--vh-surface) 88%, transparent);
+              overflow: hidden;
+          }
+
+          .config-acordeon > summary {
+              padding: 13px 16px;
+              color: var(--vh-text);
+              font-size: 12.5px;
+              font-weight: 600;
+              cursor: pointer;
+              list-style: none;
+          }
+
+          .config-acordeon > summary::-webkit-details-marker {
+              display: none;
+          }
+
+          .config-acordeon > summary::before {
+              content: '▸';
+              display: inline-block;
+              margin-right: 8px;
+              color: var(--vh-text-soft);
+              transition: transform 0.15s ease;
+          }
+
+          .config-acordeon[open] > summary::before {
+              transform: rotate(90deg);
+          }
+
+          .config-acordeon[open] > summary {
+              border-bottom: 1px solid var(--vh-border);
+          }
+
+          .config-acordeon .config-form {
+              padding: 16px;
+          }
+
+          .config-acordeon-peligro > summary {
+              color: #c8553d;
+          }
+
+          .config-qr {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 22px;
+              align-items: flex-start;
+          }
+
+          .config-qr .two-factor-qr {
+              flex: 0 0 auto;
+              padding: 8px;
+              border-radius: 8px;
+              background: #fff;
+          }
+
+          .config-qr .config-form {
+              flex: 1 1 240px;
+          }
+
+          @media (max-width: 760px) {
+              .config-split {
+                  grid-template-columns: 1fr;
+              }
+
+              .config-vista {
+                  flex-direction: row;
+                  justify-content: flex-start;
+                  text-align: left;
+                  padding: 14px;
+              }
+
+              .config-acciones {
+                  justify-content: stretch;
+              }
+
+              .config-boton {
+                  width: 100%;
+              }
+          }
+
         @media (max-width: 560px) {
             .config-shell {
                 margin: 0;
@@ -161,12 +522,40 @@
             <p class="auth-message auth-success">{{ session('success') }}</p>
         @endif
 
-        <div class="config-grid">
-            <section class="config-card">
-                <h3>Foto y Marco Aero</h3>
-                <p class="config-note">Puedes subir una nueva foto y ajustar el color del marco estilo Aero.</p>
-                <div class="profile-area-card">
-                    <div class="profile-aero-frame" id="profileFramePreview" style="--profile-frame-color: {{ $frameColor }};">
+        {{--
+            Tres apartados en pestanas.
+
+            Antes eran dos columnas con todo apilado: marco, foto, recorte,
+            contrasena y las dos ramas de la verificacion en dos pasos. Se veia
+            amontonado y costaba encontrar nada.
+
+            Ahora cada cosa tiene su sitio y una sola se ve a la vez. La pestana de
+            inicio depende de lo que necesite atencion: si la verificacion esta
+            configurandose, abre en "Dos pasos"; si no, en "Perfil".
+        --}}
+        <div class="config-tabs" role="tablist" aria-label="Secciones de configuración">
+            <button type="button" class="config-tab is-active" role="tab" aria-selected="true"
+                    aria-controls="panelPerfil" data-config-tab="perfil">
+                <span class="config-tab-icono" aria-hidden="true">◍</span> Perfil
+            </button>
+            <button type="button" class="config-tab" role="tab" aria-selected="false"
+                    aria-controls="panelContrasena" data-config-tab="contrasena">
+                <span class="config-tab-icono" aria-hidden="true">⌘</span> Contraseña
+            </button>
+            <button type="button" class="config-tab" role="tab" aria-selected="false"
+                    aria-controls="panelDosPasos" data-config-tab="dos-pasos">
+                <span class="config-tab-icono" aria-hidden="true">⚿</span> Dos pasos
+                @if ($twoFactorEnabled)
+                    <span class="config-tab-punto" title="Activo" aria-label="Activo"></span>
+                @endif
+            </button>
+        </div>
+
+        {{-- ------------------------------- PERFIL ------------------------------- --}}
+        <section class="config-panel is-active" id="panelPerfil" data-config-panel="perfil" role="tabpanel">
+            <div class="config-split">
+                <aside class="config-vista">
+                    <div class="profile-aero-frame profile-aero-frame-lg" id="profileFramePreview" style="--profile-frame-color: {{ $frameColor }};">
                         {{-- La URL se genera por el enlace public/storage y solo se
                              pinta si el archivo existe; si no, se muestra la inicial. --}}
                         @if ($profileImage !== '' && \App\Support\AttachmentStorage::exists($profileImage))
@@ -175,119 +564,245 @@
                             <span>{{ $userInitial }}</span>
                         @endif
                     </div>
-                    <div class="profile-aero-meta">
-                        <strong>{{ $currentUser['username'] }}</strong>
-                        <small>Previsualizacion del marco</small>
-                    </div>
-                </div>
+                    <strong class="config-vista-nombre">{{ $currentUser['username'] }}</strong>
+                    <small class="config-vista-nota">Así te ven en el foro y en el chat.</small>
+                </aside>
 
-                <form method="POST" action="/profile/appearance" enctype="multipart/form-data" class="profile-form-block">
+                <form method="POST" action="/profile/appearance" enctype="multipart/form-data" class="config-form">
                     @csrf
-                    <label>
-                        Color del marco
+
+                    <div class="config-campo">
+                        <label for="frameColorInput">Color del marco</label>
+                        <p class="config-ayuda">El anillo que rodea tu foto. Elige uno que te guste: aparece en todo el sitio.</p>
                         <input type="color" name="frame_color" id="frameColorInput" value="{{ $frameColor }}" aria-label="Color del marco de perfil">
-                    </label>
-                    <label>
-                        Foto de perfil (opcional)
+                    </div>
+
+                    <div class="config-campo">
+                        <label for="profileImageInput">Foto de perfil</label>
+                        <p class="config-ayuda">Opcional. Se recorta en cuadrado; puedes ajustar el zoom antes de guardar.</p>
                         <input type="file" name="profile_image" id="profileImageInput" accept="image/png,image/jpeg,image/webp,image/gif">
-                    </label>
-                    <div class="profile-crop-editor" id="profileCropEditor" hidden>
-                        <canvas class="profile-crop-canvas" id="profileCropCanvas" width="320" height="320" aria-label="Vista previa del recorte de la foto"></canvas>
-                        <div class="profile-crop-controls">
-                            <label>
-                                Zoom
-                                <input type="range" id="profileCropZoom" min="1" max="3" step="0.01" value="1">
-                            </label>
-                            <div class="profile-crop-actions">
-                                <button type="button" id="profileCropApply">Aplicar recorte</button>
-                                <button type="button" id="profileCropCancel">Cancelar</button>
+
+                        <div class="profile-crop-editor" id="profileCropEditor" hidden>
+                            <canvas class="profile-crop-canvas" id="profileCropCanvas" width="320" height="320" aria-label="Vista previa del recorte de la foto"></canvas>
+                            <div class="profile-crop-controls">
+                                <label>
+                                    Zoom
+                                    <input type="range" id="profileCropZoom" min="1" max="3" step="0.01" value="1">
+                                </label>
+                                <div class="profile-crop-actions">
+                                    <button type="button" id="profileCropApply">Aplicar recorte</button>
+                                    <button type="button" id="profileCropCancel">Cancelar</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <button type="submit">Guardar perfil</button>
-                </form>
-            </section>
 
-            <section class="config-card">
-                <h3>Seguridad</h3>
-                <p class="config-note">Para cambiar tu contrasena, primero valida tu contrasena actual.</p>
-                <form method="POST" action="/profile/password" class="profile-form-block">
+                    <div class="config-acciones">
+                        <button type="submit" class="config-boton">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        {{-- ----------------------------- CONTRASENA ----------------------------- --}}
+        <section class="config-panel" id="panelContrasena" data-config-panel="contrasena" role="tabpanel" hidden>
+            <div class="config-estrecho">
+                <h3 class="config-titulo">Cambiar contraseña</h3>
+                <p class="config-ayuda config-ayuda-ancha">
+                    Escribe tu contraseña actual y la nueva dos veces. Si no la recuerdas, pídele
+                    al administrador que te la restablezca.
+                </p>
+
+                <form method="POST" action="/profile/password" class="config-form">
                     @csrf
-                    <label>
-                        Contrasena actual
-                        <input type="password" name="current_password" required>
-                    </label>
-                    <label>
-                        Nueva contrasena
-                        <input type="password" name="new_password" required>
-                    </label>
-                    <label>
-                        Repite la nueva contrasena
-                        <input type="password" name="new_password_confirmation" required>
-                    </label>
-                    <button type="submit">Cambiar mi contrasena</button>
-                </form>
 
-                <div class="two-factor-panel">
-                    <h4>Autenticacion de dos factores</h4>
+                    <div class="config-campo">
+                        <label for="currentPassword">Contraseña actual</label>
+                        <input type="password" id="currentPassword" name="current_password" required autocomplete="current-password">
+                    </div>
+
+                    <div class="config-campo">
+                        <label for="newPassword">Contraseña nueva</label>
+                        <input type="password" id="newPassword" name="new_password" required autocomplete="new-password">
+                    </div>
+
+                    <div class="config-campo">
+                        <label for="newPasswordConfirm">Repite la contraseña nueva</label>
+                        <input type="password" id="newPasswordConfirm" name="new_password_confirmation" required autocomplete="new-password">
+                    </div>
+
+                    <div class="config-acciones">
+                        <button type="submit" class="config-boton">Cambiar mi contraseña</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        {{-- ----------------------------- DOS PASOS ----------------------------- --}}
+        <section class="config-panel" id="panelDosPasos" data-config-panel="dos-pasos" role="tabpanel" hidden>
+            <div class="config-estrecho">
+                <div class="config-estado {{ $twoFactorEnabled ? 'is-activo' : 'is-inactivo' }}">
+                    <span class="config-estado-bola" aria-hidden="true"></span>
+                    <div>
+                        <strong>{{ $twoFactorEnabled ? 'Verificación en dos pasos activa' : 'Verificación en dos pasos desactivada' }}</strong>
+                        <small>
+                            {{ $twoFactorEnabled
+                                ? 'Al iniciar sesión se pide el código de seis dígitos de Google Authenticator.'
+                                : 'Ahora mismo solo hace falta tu contraseña para entrar.' }}
+                        </small>
+                    </div>
+                </div>
+
                 @if (!empty($twoFactorRecoveryCodes = session('two_factor_recovery_codes')))
-                    <p class="config-note">Guarda estos codigos. Cada uno puede usarse una sola vez.</p>
-                    <pre class="two-factor-recovery">{{ implode("\n", $twoFactorRecoveryCodes) }}</pre>
+                    <div class="config-aviso">
+                        <strong>Guarda estos códigos ahora</strong>
+                        <p>Cada uno sirve una sola vez, por si pierdes el teléfono. No se volverán a mostrar.</p>
+                        <pre class="two-factor-recovery">{{ implode("\n", $twoFactorRecoveryCodes) }}</pre>
+                    </div>
                 @endif
 
                 @if ($twoFactorEnabled)
-                    <p class="two-factor-status">2FA activo con Google Authenticator.</p>
-                    <form method="POST" action="/security/2fa/recovery-codes" class="profile-form-block" id="recoveryCodesForm">
-                        @csrf
-                        <label>
-                            Contrasena actual para regenerar codigos
-                            <input type="password" name="current_password" required>
-                        </label>
-                        <label>
-                            Codigo actual de Authenticator
-                            <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
-                        </label>
-                        <button type="submit">Generar nuevos codigos</button>
-                        <p class="auth-message" id="recoveryCodesFeedback" hidden role="alert"></p>
-                        <pre class="two-factor-recovery" id="recoveryCodesOutput" hidden></pre>
-                    </form>
-                    <form method="POST" action="/security/2fa/disable" class="profile-form-block">
-                        @csrf
-                        <label>
-                            Contrasena actual
-                            <input type="password" name="current_password" required>
-                        </label>
-                        <label>
-                            Codigo actual de Authenticator
-                            <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
-                        </label>
-                        <button type="submit">Desactivar 2FA</button>
-                    </form>
-                @elseif ($twoFactorSetupQr)
-                    <p class="config-note">Escanea este codigo con Google Authenticator y confirma el codigo de seis digitos.</p>
-                    <div class="two-factor-setup">
-                        <img class="two-factor-qr" src="{{ $twoFactorSetupQr }}" alt="Codigo QR para configurar Google Authenticator" width="240" height="240">
-                        <form method="POST" action="/security/2fa/confirm" class="profile-form-block" id="twoFactorConfirmForm">
+                    <p class="config-ayuda config-ayuda-ancha">
+                        Todo está en orden. Abajo quedan las dos operaciones que se hacen de vez en cuando.
+                    </p>
+
+                    <details class="config-acordeon">
+                        <summary>Generar códigos de recuperación nuevos</summary>
+                        <form method="POST" action="/security/2fa/recovery-codes" class="config-form" id="recoveryCodesForm">
                             @csrf
-                            <label>
-                                Codigo de confirmacion
-                                <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
-                            </label>
-                            <button type="submit">Confirmar 2FA</button>
+                            <p class="config-ayuda">Se piden tu contraseña y el código actual para confirmar que eres tú.</p>
+
+                            <div class="config-campo">
+                                <label for="recoveryCurrentPassword">Contraseña actual</label>
+                                <input type="password" id="recoveryCurrentPassword" name="current_password" required autocomplete="current-password">
+                            </div>
+
+                            <div class="config-campo">
+                                <label for="recoveryCurrentCode">Código de Authenticator</label>
+                                <input type="text" id="recoveryCurrentCode" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
+                            </div>
+
+                            <div class="config-acciones">
+                                <button type="submit" class="config-boton">Generar códigos</button>
+                            </div>
+
+                            <p class="auth-message" id="recoveryCodesFeedback" hidden role="alert"></p>
+                            <pre class="two-factor-recovery" id="recoveryCodesOutput" hidden></pre>
                         </form>
-                        <p class="auth-message" id="activationRecoveryFeedback" hidden role="alert"></p>
-                        <pre class="two-factor-recovery" id="activationRecoveryCodes" hidden></pre>
+                    </details>
+
+                    <details class="config-acordeon config-acordeon-peligro">
+                        <summary>Desactivar la verificación en dos pasos</summary>
+                        <form method="POST" action="/security/2fa/disable" class="config-form">
+                            @csrf
+                            <p class="config-ayuda">A partir de ese momento solo se pedirá la contraseña. Puedes volver a activarla cuando quieras.</p>
+
+                            <div class="config-campo">
+                                <label for="disableCurrentPassword">Contraseña actual</label>
+                                <input type="password" id="disableCurrentPassword" name="current_password" required autocomplete="current-password">
+                            </div>
+
+                            <div class="config-campo">
+                                <label for="disableCurrentCode">Código de Authenticator</label>
+                                <input type="text" id="disableCurrentCode" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
+                            </div>
+
+                            <div class="config-acciones">
+                                <button type="submit" class="config-boton config-boton-peligro">Desactivar</button>
+                            </div>
+                        </form>
+                    </details>
+                @elseif ($twoFactorSetupQr)
+                    <p class="config-ayuda config-ayuda-ancha">
+                        Escanea el código con Google Authenticator y escribe el número que aparezca
+                        para terminar de activarla.
+                    </p>
+
+                    <div class="config-qr">
+                        <img class="two-factor-qr" src="{{ $twoFactorSetupQr }}" alt="Código QR para configurar Google Authenticator" width="240" height="240">
+
+                        <form method="POST" action="/security/2fa/confirm" class="config-form" id="twoFactorConfirmForm">
+                            @csrf
+
+                            <div class="config-campo">
+                                <label for="confirmCode">Código de seis dígitos</label>
+                                <input type="text" id="confirmCode" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
+                            </div>
+
+                            <div class="config-acciones">
+                                <button type="submit" class="config-boton">Confirmar y activar</button>
+                            </div>
+                        </form>
                     </div>
+
+                    <p class="auth-message" id="activationRecoveryFeedback" hidden role="alert"></p>
+                    <pre class="two-factor-recovery" id="activationRecoveryCodes" hidden></pre>
                 @else
-                    <p class="config-note">Protege tu cuenta con un codigo temporal de Google Authenticator.</p>
-                    <form method="POST" action="/security/2fa/setup">
+                    <p class="config-ayuda config-ayuda-ancha">
+                        Con la verificación en dos pasos, tu contraseña sola no basta: hace falta
+                        también un código que cambia cada treinta segundos en tu teléfono.
+                    </p>
+
+                    <form method="POST" action="/security/2fa/setup" class="config-form">
                         @csrf
-                        <button type="submit">Configurar Google Authenticator</button>
+                        <div class="config-acciones">
+                            <button type="submit" class="config-boton">Configurar Google Authenticator</button>
+                        </div>
                     </form>
                 @endif
-                </div>
-            </section>
-        </div>
+            </div>
+        </section>
+
+        <script>
+            (function () {
+                /*
+                 * Pestanas de la configuracion.
+                 *
+                 * Solo se oculta lo que no toca: si el JavaScript falla, la pagina
+                 * sigue sirviendo, porque todas las secciones estan en el documento y
+                 * los formularios conservan su accion.
+                 */
+                const tabs = Array.from(document.querySelectorAll('[data-config-tab]'));
+                const paneles = Array.from(document.querySelectorAll('[data-config-panel]'));
+
+                function abrir(nombre) {
+                    tabs.forEach(tab => {
+                        const activo = tab.dataset.configTab === nombre;
+                        tab.classList.toggle('is-active', activo);
+                        tab.setAttribute('aria-selected', activo ? 'true' : 'false');
+                    });
+
+                    paneles.forEach(panel => {
+                        const activo = panel.dataset.configPanel === nombre;
+                        panel.classList.toggle('is-active', activo);
+                        panel.hidden = !activo;
+                    });
+                }
+
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => abrir(tab.dataset.configTab));
+
+                    tab.addEventListener('keydown', (evento) => {
+                        if (evento.key !== 'ArrowRight' && evento.key !== 'ArrowLeft') return;
+                        evento.preventDefault();
+
+                        const indice = tabs.indexOf(tab);
+                        const siguiente = evento.key === 'ArrowRight'
+                            ? (indice + 1) % tabs.length
+                            : (indice - 1 + tabs.length) % tabs.length;
+
+                        tabs[siguiente].focus();
+                        abrir(tabs[siguiente].dataset.configTab);
+                    });
+                });
+
+                // Si algo pide atencion en "Dos pasos", se abre ahi directamente.
+                @if ($twoFactorSetupQr || session('two_factor_recovery_codes') || session('error'))
+                    abrir('dos-pasos');
+                @endif
+            })();
+        </script>
+
     </div>
 
     <footer>{{ config('virthub.version') }}</footer>

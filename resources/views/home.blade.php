@@ -379,7 +379,7 @@
         </aside>
 
         @if (!empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest'))
-        <aside class="linux-news-panel gadget calendar-gadget gadget-size-wide" data-gadget-id="calendar" data-gadget-size="wide" data-default-size="wide">
+        <aside class="linux-news-panel gadget calendar-gadget gadget-size-normal" data-gadget-id="calendar" data-gadget-size="normal" data-default-size="normal">
             <div class="gadget-head">
                 <h3>Mini calendario</h3>
                 @if (!empty($currentUser))
@@ -542,7 +542,7 @@
         }
 
         function getGadgetSizeKey() {
-            return 'virthub_gadget_size_' + getUserKey();
+            // v2: el calendario paso a tamano normal. Con la clave vieja, quien ya\n        // tuviera una disposicion guardada seguiria viendolo a todo el ancho.\n        return 'virthub_gadget_size_v2_' + getUserKey();
         }
 
         function getProductivityKey() {

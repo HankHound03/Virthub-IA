@@ -2412,3 +2412,81 @@ body .chat-users-panel {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+/* =============================================================================
+   VERIFICACION EN DOS PASOS EN EL INICIO DE SESION
+   =============================================================================
+   El boton de recuperacion va al lado de "Verificar codigo", y el campo de
+   recuperacion se despliega solo si se pide. Antes eran dos formularios
+   apilados que ocupaban media pantalla.
+   -------------------------------------------------------------------------- */
+
+.twofa-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.twofa-principal,
+.twofa-alterno {
+    flex: 1 1 auto;
+    padding: 9px 14px;
+    border: 1px solid var(--vh-border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+}
+
+.twofa-principal {
+    background: var(--vh-btn-bg);
+    color: var(--vh-btn-text);
+    font-weight: 600;
+}
+
+.twofa-principal:hover {
+    border-color: var(--vh-evento, #e0a63c);
+}
+
+.twofa-alterno {
+    background: transparent;
+    color: var(--vh-text-soft);
+}
+
+.twofa-alterno:hover,
+.twofa-alterno[aria-expanded="true"] {
+    color: var(--vh-text);
+    border-color: var(--vh-evento, #e0a63c);
+}
+
+.twofa-recuperacion {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px dashed var(--vh-border);
+    border-radius: 8px;
+}
+
+.twofa-recuperacion[hidden] {
+    display: none;
+}
+
+.twofa-recuperacion label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--vh-text-soft);
+    font-size: 12px;
+}
+
+.twofa-recuperacion input {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    padding: 9px 10px;
+    border: 1px solid var(--vh-border);
+    border-radius: 8px;
+    background: var(--vh-btn-bg);
+    color: var(--vh-btn-text);
+    font-family: inherit;
+    font-size: 13px;
+}

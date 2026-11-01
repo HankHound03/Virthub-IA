@@ -180,19 +180,60 @@
                         <p class="auth-message auth-error" role="alert">{{ $errors->first() }}</p>
                     @endif
                     @if (session('two_factor_pending_username'))
-                        <p>Introduce el codigo de Google Authenticator para continuar.</p>
-                        <form method="POST" action="{{ url('/login/2fa') }}">
+                        <p>Introduce el código de Google Authenticator para continuar.</p>
+
+                        {{--
+                            Un solo formulario con dos salidas.
+
+                            Antes eran dos formularios apilados: uno para el código de seis
+                            dígitos y otro entero para el de recuperación. Ocupaba media
+                            pantalla para algo que se usa una vez cada nunca.
+
+                            Ahora el botón de recuperación va al lado de «Verificar código» y
+                            despliega su campo solo si hace falta. El envío cambia de
+                            dirección con formaction: el mismo controlador de siempre.
+                        --}}
+                        <form method="POST" action="{{ url('/login/2fa') }}" id="twoFactorLoginForm">
                             @csrf
-                            <label for="headerTwoFactorCode">Codigo de seis digitos</label>
-                            <input type="text" id="headerTwoFactorCode" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autofocus>
-                            <button type="submit">Verificar codigo</button>
+
+                            <label for="headerTwoFactorCode">Código de seis dígitos</label>
+                            <input type="text" id="headerTwoFactorCode" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autofocus>
+
+                            <div class="twofa-acciones">
+                                <button type="submit" class="twofa-principal">Verificar código</button>
+                                <button type="button" class="twofa-alterno" id="twofaUsarRecuperacion"
+                                        aria-expanded="false" aria-controls="twofaRecuperacion">
+                                    Usar recuperación
+                                </button>
+                            </div>
+
+                            <div class="twofa-recuperacion" id="twofaRecuperacion" hidden>
+                                <label for="headerRecoveryCode">Código de recuperación</label>
+                                <input type="text" id="headerRecoveryCode" name="recovery_code" maxlength="32" autocomplete="off">
+                                <button type="submit" class="twofa-principal"
+                                        formaction="{{ url('/login/2fa/recovery') }}">
+                                    Entrar con este código
+                                </button>
+                            </div>
                         </form>
-                        <form method="POST" action="{{ url('/login/2fa/recovery') }}">
-                            @csrf
-                            <label for="headerRecoveryCode">Codigo de recuperacion</label>
-                            <input type="text" id="headerRecoveryCode" name="recovery_code" maxlength="32" required>
-                            <button type="submit">Usar recuperacion</button>
-                        </form>
+
+                        <script>
+                            (function () {
+                                const boton = document.getElementById('twofaUsarRecuperacion');
+                                const panel = document.getElementById('twofaRecuperacion');
+                                const campo = document.getElementById('headerRecoveryCode');
+
+                                if (!boton || !panel) return;
+
+                                boton.addEventListener('click', () => {
+                                    const abrir = panel.hidden;
+                                    panel.hidden = !abrir;
+                                    boton.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+
+                                    if (abrir && campo) campo.focus();
+                                });
+                            })();
+                        </script>
                     @else
                         <form method="POST" action="{{ url('/login') }}">
                             @csrf
