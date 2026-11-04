@@ -360,7 +360,7 @@
                         <strong>{{ $twoFactorEnabled ? 'Verificación en dos pasos activa' : 'Verificación en dos pasos desactivada' }}</strong>
                         <small>
                             {{ $twoFactorEnabled
-                                ? 'Al iniciar sesión se pide el código de seis dígitos de Google Authenticator.'
+                                ? 'Al iniciar sesión se pide el código de seis dígitos de tu aplicación de autenticación.'
                                 : 'Ahora mismo solo hace falta tu contraseña para entrar.' }}
                         </small>
                     </div>
@@ -370,7 +370,7 @@
                         @if ($twoFactorEnabled)
                             Todo está en orden. A la derecha quedan las dos operaciones que se hacen de vez en cuando.
                         @else
-                            Sin ella, tu contraseña sola basta para entrar. Activarla toma un minuto y un teléfono.
+                            Sin ella, tu contraseña sola basta para entrar. Activarla toma un minuto y un teléfono. Recomendadas: Google Authenticator y Microsoft Authenticator.
                         @endif
                     </p>
                 </aside>
@@ -434,13 +434,17 @@
                     </details>
                 @elseif ($twoFactorSetupQr)
                     <p class="config-ayuda config-ayuda-ancha">
-                        Escanea el código con Google Authenticator y escribe el número que aparezca
+                        Escanea el código con tu aplicación de autenticación y escribe el número que aparezca
                         para terminar de activarla.
                     </p>
 
                     <div class="config-qr">
-                        <img class="two-factor-qr" src="{{ $twoFactorSetupQr }}" alt="Código QR para configurar Google Authenticator" width="240" height="240">
+                        <img class="two-factor-qr" src="{{ $twoFactorSetupQr }}" alt="Código QR para configurar la verificación en dos pasos" width="240" height="240">
 
+                        <div class="twofa-recomendadas">
+                            <strong>Recomendadas</strong>
+                            <p>Google Authenticator y Microsoft Authenticator. También funcionan Authy, Aegis, FreeOTP, 1Password, Bitwarden o KeePassXC: el código es estándar y cualquiera de ellas sirve.</p>
+                        </div>
                         <form method="POST" action="/security/2fa/confirm" class="config-form" id="twoFactorConfirmForm">
                             @csrf
 
@@ -466,7 +470,7 @@
                     <form method="POST" action="/security/2fa/setup" class="config-form">
                         @csrf
                         <div class="config-acciones">
-                            <button type="submit" class="config-boton">Configurar Google Authenticator</button>
+                            <button type="submit" class="config-boton">Configurar aplicación de autenticación</button>
                         </div>
                     </form>
                 @endif

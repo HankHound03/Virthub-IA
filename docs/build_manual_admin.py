@@ -697,6 +697,29 @@ parrafo(
     "servicio.",
 )
 
+h2(doc, "La verificación en dos pasos")
+
+parrafo(
+    doc,
+    "Es TOTP estándar (RFC 6238): SHA-1, seis dígitos y periodos de treinta segundos. La "
+    "aplicación genera el secreto, lo guarda cifrado y entrega al usuario un código QR con el "
+    "formato otpauth://. No depende de ningún fabricante.",
+)
+
+parrafo(
+    doc,
+    "Sirve cualquier aplicación de autenticación: Google Authenticator, Microsoft Authenticator, "
+    "Authy, Aegis, FreeOTP, 1Password, Bitwarden o KeePassXC. En la interfaz se recomiendan las dos "
+    "primeras por ser las más fáciles de instalar.",
+)
+
+parrafo(
+    doc,
+    "Al verificar se acepta un periodo de margen a cada lado, para que un reloj ligeramente "
+    "desfasado no deje a nadie fuera. Los códigos de recuperación son la salida cuando se pierde "
+    "el teléfono: cada uno sirve una sola vez y se guardan con hash.",
+)
+
 # --------------------------------------------------------------------------
 # 13. Diagnostico
 # --------------------------------------------------------------------------

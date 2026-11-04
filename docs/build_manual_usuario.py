@@ -738,6 +738,35 @@ parrafo(
     "segundos. Aunque alguien descubra su contraseña, sin ese código no puede entrar.",
 )
 
+parrafo(
+    doc,
+    "El código es estándar (TOTP): sirve cualquier aplicación de autenticación, no solo la de "
+    "Google. Estas son las más comunes; las dos primeras son las recomendadas.",
+)
+
+tabla(
+    doc,
+    ["Aplicación", "Plataforma", "Nota"],
+    [
+        ["Google Authenticator", "Android · iOS", "Recomendada"],
+        ["Microsoft Authenticator", "Android · iOS", "Recomendada"],
+        ["Authy", "Android · iOS · escritorio", "Permite copia de seguridad"],
+        ["Aegis", "Android", "Código abierto"],
+        ["FreeOTP", "Android · iOS", "Código abierto"],
+        ["1Password / Bitwarden", "Multiplataforma", "Si ya usa un gestor de contraseñas"],
+        ["KeePassXC", "Escritorio", "Código abierto"],
+    ],
+    anchos=[1.8, 2.2, 2.6],
+)
+
+nota(
+    doc,
+    "Cuál elegir",
+    "Google Authenticator y Microsoft Authenticator son las más fáciles de instalar y las que "
+    "mejor funcionan en teléfonos modestos. Si cambia de teléfono seguido, Authy o un gestor de "
+    "contraseñas le ahorran tener que volver a configurarla.",
+)
+
 imagen_con_pie(
     doc,
     imagen("30-config-dos-pasos.png"),

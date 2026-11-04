@@ -388,7 +388,7 @@ class AuthController extends Controller
         $request->session()->put('two_factor_pending_username', $authUser['username']);
         $request->session()->forget('two_factor_fail_count');
 
-        $message = 'Introduce el codigo de Google Authenticator para continuar.';
+        $message = 'Introduce el codigo de tu aplicacion de autenticacion para continuar.';
 
         return $request->expectsJson()
             ? response()->json(['two_factor_required' => true, 'message' => $message])

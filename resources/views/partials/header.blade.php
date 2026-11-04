@@ -180,7 +180,8 @@
                         <p class="auth-message auth-error" role="alert">{{ $errors->first() }}</p>
                     @endif
                     @if (session('two_factor_pending_username'))
-                        <p>Introduce el código de Google Authenticator para continuar.</p>
+                        <p>Introduce el código de tu aplicación de autenticación para continuar.</p>
+                        <p class="twofa-sugerencia">Sirve cualquiera (Google Authenticator, Microsoft Authenticator, Authy, Aegis…).</p>
 
                         {{--
                             Un solo formulario con dos salidas.
@@ -325,7 +326,7 @@
             const step = document.createElement('div');
             step.dataset.twoFactorStep = 'true';
             step.innerHTML = `
-                <p>Introduce el codigo de Google Authenticator para continuar.</p>
+                <p>Introduce el código de tu aplicación de autenticación para continuar.</p>
                 <form method="POST" action="{{ url('/login/2fa') }}">
                     <input type="hidden" name="_token" value="${token}">
                     <label for="dynamicTwoFactorCode">Codigo de seis digitos</label>
