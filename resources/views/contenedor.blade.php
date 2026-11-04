@@ -523,6 +523,165 @@
             contenedor.scrollTop = contenedor.scrollHeight;
         }
 
+
+        /*
+         * Markdown del chat de la IA.
+         *
+         * Un renderizador pequeno, sin librerias y sin aceptar HTML del modelo: se
+         * escapa todo primero y despues se aplican solo las marcas que interesan
+         * (encabezados, tablas, listas, codigo, negritas).
+         *
+         * Se queda corto a proposito. Lo que no entiende, lo deja como texto: es
+         * mejor una linea rara que un hueco.
+         */
+        function escaparHtml(texto) {
+            return String(texto || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function markdownEnLinea(texto) {
+            let t = escaparHtml(texto);
+
+            t = t.replace(/`([^`]+)`/g, '<code class="md-codigo-linea">$1</code>');
+            t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            t = t.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+            t = t.replace(/(^|[^_])_([^_\n]+)_/g, '$1<em>$2</em>');
+
+            return t;
+        }
+
+        function markdownFilas(linea) {
+            return linea.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+        }
+
+        function markdownTabla(cabecera, filas) {
+            let html = '<div class="md-tabla-scroll"><table class="md-tabla"><thead><tr>';
+
+            cabecera.forEach(celda => {
+                html += '<th>' + markdownEnLinea(celda) + '</th>';
+            });
+
+            html += '</tr></thead><tbody>';
+
+            filas.forEach(fila => {
+                html += '<tr>';
+
+                for (let i = 0; i < cabecera.length; i++) {
+                    html += '<td>' + markdownEnLinea(fila[i] || '') + '</td>';
+                }
+
+                html += '</tr>';
+            });
+
+            return html + '</tbody></table></div>';
+        }
+
+        function renderMarkdown(bruto) {
+            const texto = String(bruto || '').replace(/\r\n/g, '\n');
+
+            // Los bloques de codigo se apartan antes de partir por lineas.
+            const bloques = [];
+
+            const conMarcas = texto.replace(/```[a-zA-Z0-9]*\n([\s\S]*?)```/g, (todo, codigo) => {
+                bloques.push('<pre class="md-bloque"><code>' + escaparHtml(codigo.replace(/\n$/, '')) + '</code></pre>');
+                return '\u0000' + (bloques.length - 1) + '\u0000';
+            });
+
+            const lineas = conMarcas.split('\n');
+            const salida = [];
+            let i = 0;
+
+            const esTabla = (linea) => /^\s*\|/.test(linea);
+            const esSeparador = (linea) => /^\s*\|[\s:|-]+\|\s*$/.test(linea);
+            const esEncabezado = (linea) => /^\s*#{1,4}\s+/.test(linea);
+            const esLista = (linea) => /^\s*([-*+]|\d+\.)\s+/.test(linea);
+            const esCita = (linea) => /^\s*>\s?/.test(linea);
+            const esVacia = (linea) => /^\s*$/.test(linea);
+
+            while (i < lineas.length) {
+                const linea = lineas[i];
+
+                // Tabla: cabecera, separador y filas
+                if (esTabla(linea) && i + 1 < lineas.length && esSeparador(lineas[i + 1])) {
+                    const cabecera = markdownFilas(linea);
+                    const filas = [];
+                    i += 2;
+
+                    while (i < lineas.length && esTabla(lineas[i])) {
+                        filas.push(markdownFilas(lineas[i]));
+                        i++;
+                    }
+
+                    salida.push(markdownTabla(cabecera, filas));
+                    continue;
+                }
+
+                // Encabezado
+                if (esEncabezado(linea)) {
+                    const nivel = Math.min(linea.match(/^\s*(#{1,4})/)[1].length + 2, 6);
+                    const contenido = linea.replace(/^\s*#{1,4}\s+/, '');
+                    salida.push('<h' + nivel + ' class="md-titulo">' + markdownEnLinea(contenido) + '</h' + nivel + '>');
+                    i++;
+                    continue;
+                }
+
+                // Lista
+                if (esLista(linea)) {
+                    const ordenada = /^\s*\d+\./.test(linea);
+                    const etiqueta = ordenada ? 'ol' : 'ul';
+                    const elementos = [];
+
+                    while (i < lineas.length && esLista(lineas[i])) {
+                        elementos.push('<li>' + markdownEnLinea(lineas[i].replace(/^\s*([-*+]|\d+\.)\s+/, '')) + '</li>');
+                        i++;
+                    }
+
+                    salida.push('<' + etiqueta + ' class="md-lista">' + elementos.join('') + '</' + etiqueta + '>');
+                    continue;
+                }
+
+                // Cita: las lineas seguidas con ">" se juntan en un solo bloque
+                if (esCita(linea)) {
+                    const lineasCita = [];
+
+                    while (i < lineas.length && esCita(lineas[i])) {
+                        lineasCita.push(lineas[i].replace(/^\s*>\s?/, ''));
+                        i++;
+                    }
+
+                    salida.push('<blockquote class="md-cita">' + markdownEnLinea(lineasCita.join(' ')) + '</blockquote>');
+                    continue;
+                }
+
+                // Linea vacia
+                if (esVacia(linea)) {
+                    i++;
+                    continue;
+                }
+
+                // Parrafo
+                const parrafo = [];
+
+                while (i < lineas.length
+                    && !esVacia(lineas[i])
+                    && !esTabla(lineas[i])
+                    && !esEncabezado(lineas[i])
+                    && !esCita(lineas[i])
+                    && !esLista(lineas[i])) {
+                    parrafo.push(lineas[i]);
+                    i++;
+                }
+
+                salida.push('<p class="md-parrafo">' + markdownEnLinea(parrafo.join(' ')) + '</p>');
+            }
+
+            // Devolver los bloques de codigo a su sitio
+            return salida.join('').replace(/\u0000(\d+)\u0000/g, (todo, n) => bloques[Number(n)] || '');
+        }
+
         function renderChatMessages(container, messages, emptyText, ownUser, messageLabelPrefix = '') {
             if (!container) return;
 
@@ -552,8 +711,19 @@
                 const avatarNode = buildAvatarNode(senderProfile, 'chat-message-avatar');
                 header.appendChild(avatarNode);
 
-                const body = document.createElement('p');
+                /*
+                 * La IA responde en Markdown: tablas, encabezados y negritas.
+                 *
+                 * A sus mensajes se les da formato; los del chat entre personas se
+                 * dejan tal cual, que es lo que se escribio.
+                 */
+                const esRespuestaIA = sender === ollamaChatUser;
+                const body = document.createElement(esRespuestaIA ? 'div' : 'p');
                 const messageText = message.message || '';
+
+                if (esRespuestaIA) {
+                    body.className = 'chat-message-markdown';
+                }
 
                 if (messageLabelPrefix) {
                     const strong = document.createElement('strong');
@@ -562,7 +732,11 @@
                     body.appendChild(document.createTextNode(' '));
                 }
 
-                body.appendChild(document.createTextNode(messageText));
+                if (esRespuestaIA) {
+                    body.innerHTML = renderMarkdown(messageText);
+                } else {
+                    body.appendChild(document.createTextNode(messageText));
+                }
 
                 const meta = document.createElement('small');
                 const timeLabel = safeTimeLabel(message.created_at);
