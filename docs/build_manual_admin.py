@@ -257,8 +257,14 @@ parrafo(
 
 imagen_con_pie(
     doc,
-    imagen("08-admin-reportes-sugerencias.png"),
-    "Figura 2. Reportes del foro y sugerencias recibidas.",
+    imagen("27-admin-reportes.png"),
+    "Figura 2. Pestaña «Reportes»: los avisos de publicaciones del foro.",
+)
+
+imagen_con_pie(
+    doc,
+    imagen("28-admin-sugerencias.png"),
+    "Figura 3. Pestaña «Sugerencias»: cada fila tiene su botón para borrarla.",
 )
 
 parrafo(
@@ -319,7 +325,7 @@ tabla(
 imagen_con_pie(
     doc,
     imagen("04-temas-carrusel.png"),
-    "Figura 3. Las fotos del foro pasan por el filtro antes de publicarse.",
+    "Figura 4. Las fotos del foro pasan por el filtro antes de publicarse.",
     ancho=3.4,
 )
 
@@ -433,7 +439,7 @@ parrafo(
 imagen_con_pie(
     doc,
     imagen("12-contenedor-chat.png"),
-    "Figura 4. El administrador ve los botones para probar cada escritorio.",
+    "Figura 5. El administrador ve los botones para probar cada escritorio.",
     ancho=6.0,
 )
 
@@ -580,7 +586,7 @@ tabla(
 imagen_con_pie(
     doc,
     imagen("13-ia-tutorutt.png"),
-    "Figura 5. TutorUTT con el monitor de recursos debajo.",
+    "Figura 6. TutorUTT con el monitor de recursos debajo.",
     ancho=3.0,
 )
 

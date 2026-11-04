@@ -717,9 +717,17 @@ pasos(
     doc,
     [
         "Pulse su foto y elija «Configuracion».",
-        "En «Seguridad», escriba su contraseña actual y la nueva dos veces.",
+        "Abra la pestaña «Contraseña».",
+        "Escriba su contraseña actual y la nueva dos veces.",
         "Pulse «Cambiar mi contraseña».",
     ],
+)
+
+imagen_con_pie(
+    doc,
+    imagen("29-config-contrasena.png"),
+    "Figura 15. Pestaña «Contraseña»: a la izquierda los requisitos, a la derecha el formulario.",
+    ancho=5.8,
 )
 
 h2(doc, "11.2 Verificación en dos pasos (2FA)")
@@ -732,15 +740,15 @@ parrafo(
 
 imagen_con_pie(
     doc,
-    imagen("11-configuracion-2fa.png"),
-    "Figura 15. Configuración: seguridad y verificación en dos pasos.",
+    imagen("30-config-dos-pasos.png"),
+    "Figura 16. Pestaña «Dos pasos»: el estado a la izquierda y las operaciones plegadas a la derecha.",
     ancho=5.8,
 )
 
 pasos(
     doc,
     [
-        "Instale Google Authenticator en su teléfono.",
+        "Instale una aplicación de autenticación en su teléfono (Google Authenticator, Microsoft Authenticator, Authy, Aegis… cualquiera sirve).",
         "En Configuración, pulse «Generar nuevos códigos» y escanee el código que aparece.",
         "Guarde los códigos de respaldo en un lugar seguro.",
         "A partir de ahí, al iniciar sesión le pedirá el código de seis dígitos.",
