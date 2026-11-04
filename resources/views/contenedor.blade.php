@@ -1244,6 +1244,48 @@
             }
         }
 
+        /*
+         * Espera la respuesta de la IA cuando la petición se cortó.
+         *
+         * Un modelo grande puede tardar más que el límite del proxy (Cloudflare
+         * corta a los 100 segundos). El servidor sigue generando y guarda la
+         * respuesta; el navegador solo tiene que volver a preguntar por ella en
+         * vez de dar la consulta por perdida.
+         *
+         * Se lee cada tres segundos, con el aviso de "escribiendo" a la vista y el
+         * tiempo transcurrido, hasta cinco minutos.
+         */
+        async function esperarRespuestaIA(usuario, respuestasPrevias, inicio) {
+            const messagesDiv = document.getElementById('ollamaMessages');
+            const limiteMs = 300000;
+
+            for (let transcurrido = 0; transcurrido < limiteMs; transcurrido += 3000) {
+                await new Promise(resolver => window.setTimeout(resolver, 3000));
+
+                const texto = document.querySelector('#iaEscribiendo .ia-escribiendo-texto');
+
+                if (texto) {
+                    const segundos = Math.round((performance.now() - inicio) / 1000);
+                    texto.textContent = 'Sigue trabajando… ' + segundos + ' s';
+                }
+
+                try {
+                    const mensajes = await loadConversationMessages(usuario);
+                    const respuestas = mensajes.filter(m => (m.from || '') === usuario).length;
+
+                    if (respuestas > respuestasPrevias) {
+                        renderChatMessages(messagesDiv, mensajes, chatConversationTitle(usuario), getUserKey());
+                        chatSnapshots.conversations[usuario] = mensajes.length;
+                        return true;
+                    }
+                } catch (error) {
+                    // Un fallo de lectura no cancela la espera: se reintenta.
+                }
+            }
+
+            return false;
+        }
+
         async function sendChatMessage() {
             if (isGuestChatMode) return;
 
@@ -1255,10 +1297,15 @@
 
             const messageText = input.value.trim();
             const inicioConsulta = performance.now();
+            const usuarioDestino = currentChatUser;
+            const esLaIA = usuarioDestino === ollamaChatUser;
+            const respuestasPrevias = esLaIA
+                ? (chatSnapshots.conversations[usuarioDestino] || 0)
+                : 0;
             let avisoTarda = null;
 
             try {
-                const response = await apiFetch(`/chat/conversation/${encodeURIComponent(currentChatUser)}`, {
+                const response = await apiFetch(`/chat/conversation/${encodeURIComponent(usuarioDestino)}`, {
                     method: 'POST',
                     body: JSON.stringify({ message: messageText }),
                 });
@@ -1566,7 +1613,20 @@
                     }
                 }
             } catch (error) {
-                mostrarAvisoIA(error.message, 'error');
+                /*
+                 * Si era la IA, lo normal es que el proxy haya cortado por tiempo
+                 * mientras el modelo seguia. En vez de dar la consulta por
+                 * perdida, se espera a que el servidor termine y guarde.
+                 */
+                if (esLaIA) {
+                    const llego = await esperarRespuestaIA(usuarioDestino, respuestasPrevias, inicioConsulta);
+
+                    if (!llego) {
+                        mostrarAvisoIA('La respuesta tardo demasiado. Vuelve a preguntar; el modelo sigue cargado.', 'error');
+                    }
+                } else {
+                    mostrarAvisoIA(error.message, 'error');
+                }
             } finally {
                 clearTimeout(avisoTarda);
                 quitarEscribiendoIA();

@@ -217,6 +217,17 @@ class ChatController extends Controller
             return response()->json(['error' => 'Solo el admin puede usar esta IA.'], 403);
         }
 
+        /*
+         * Terminar aunque el navegador se haya cansado de esperar.
+         *
+         * El modelo puede tardar mas que el limite del proxy (Cloudflare corta a
+         * los 100 segundos con un 524). Si el navegador se desconecta, la respuesta
+         * se genera igual y se guarda: asi el mensaje aparece al refrescar, en vez
+         * de perderse despues de varios minutos de GPU.
+         */
+        ignore_user_abort(true);
+        @set_time_limit(0);
+
         if (! $this->ollama->isEnabled()) {
             return response()->json([
                 'error' => 'Configura OLLAMA_BASE_URL en .env para habilitar la IA local.',
