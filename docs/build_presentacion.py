@@ -751,6 +751,42 @@ vinietas(slide, [
 ], arriba=1.9, tam=17, alto=4.6)
 
 # ---------------------------------------------------------------------------
+# Verificacion en dos pasos
+# ---------------------------------------------------------------------------
+
+slide = nueva_diapositiva()
+titulo_diapositiva(slide, "Verificación en dos pasos",
+                   "TOTP estándar: sirve cualquier aplicación, no solo la de Google", 0)
+
+vinietas(slide, [
+    ("RFC 6238: SHA-1, 6 dígitos, 30 segundos.", 0),
+    ("Secreto guardado cifrado.", 0),
+    ("QR en formato otpauth://.", 0),
+    ("Margen de un periodo por relojes desfasados.", 0),
+    ("Recuperación: códigos de un solo uso.", 0),
+], izq=0.75, arriba=1.95, ancho=5.4, tam=15, alto=3.6)
+
+tarjeta(slide, 6.6, 1.95, 3.0, 1.25, "Google Authenticator",
+        ["Android · iOS", "Recomendada"], acento=VERDE, tam_titulo=13, tam_cuerpo=11)
+
+tarjeta(slide, 9.85, 1.95, 3.0, 1.25, "Microsoft Authenticator",
+        ["Android · iOS", "Recomendada"], acento=VERDE, tam_titulo=13, tam_cuerpo=11)
+
+texto(slide, 6.6, 3.4, 6.25, 1.2, [
+    "También funcionan:",
+    "Authy · Aegis · FreeOTP · 1Password · Bitwarden · KeePassXC",
+], tam=13, color=GRIS, espaciado=4)
+
+texto(slide, 6.6, 4.35, 6.25, 1.2, [
+    "Las dos de arriba son las más fáciles de instalar",
+    "y las que mejor van en teléfonos modestos.",
+], tam=13, color=BLANCO, espaciado=4)
+
+texto(slide, 0.75, 5.75, 11.9, 0.9,
+      "No hay dependencia de ningún fabricante: el código es el mismo en todas.",
+      tam=17, color=VERDE, negrita=True, alineacion=PP_ALIGN.CENTER)
+
+# ---------------------------------------------------------------------------
 # 24. Demostracion
 # ---------------------------------------------------------------------------
 
