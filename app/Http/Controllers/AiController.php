@@ -80,6 +80,13 @@ class AiController extends Controller
      */
     public function recursos(): JsonResponse
     {
+        /*
+         * Sin cache.
+         *
+         * Son cifras que cambian cada dos segundos; si el navegador o el proxy
+         * guardan la respuesta, el panel se queda mostrando "sin datos" de cuando
+         * el puente estaba apagado.
+         */
         $gpu = $this->gpu->leer();
         $modelos = [];
         $ollamaOk = false;
@@ -109,6 +116,10 @@ class AiController extends Controller
                 'modelo' => $this->ollama->model(),
                 'cargados' => $modelos,
             ],
+        ])->withHeaders([
+            // Son cifras de ahora mismo: que el navegador y el proxy no las guarden.
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
         ]);
     }
 }
