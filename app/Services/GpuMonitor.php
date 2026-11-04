@@ -32,6 +32,67 @@ class GpuMonitor
             return null;
         }
 
+        /*
+         * Primero el archivo.
+         *
+         * El puente del equipo escribe las cifras en storage/app/gpu/gpu.json y el
+         * contenedor lo tiene montado en solo lectura. Asi no hay ningun puerto
+         * abierto: nada que escanear ni que cerrar en el firewall.
+         */
+        $desdeArchivo = $this->leerArchivo();
+
+        if ($desdeArchivo !== null) {
+            return $desdeArchivo;
+        }
+
+        // Compatibilidad: si alguien corre el puente con -Http, sigue funcionando.
+        return $this->leerPorHttp();
+    }
+
+    /**
+     * Lee las cifras del archivo que deja el puente.
+     *
+     * @return array{name: string, util: int, mem_used: int, mem_total: int, temp: int}|null
+     */
+    private function leerArchivo(): ?array
+    {
+        $ruta = (string) config('virthub.ia.gpu_archivo', storage_path('app/gpu/gpu.json'));
+
+        if ($ruta === '' || ! is_file($ruta) || ! is_readable($ruta)) {
+            return null;
+        }
+
+        /*
+         * Si el puente lleva rato detenido, el archivo se queda con las ultimas
+         * cifras. Mostrarlas seria mentir: se descarta lo que tenga mas de un
+         * minuto, que es margen de sobra para dos segundos de intervalo.
+         */
+        $edad = time() - (int) @filemtime($ruta);
+
+        if ($edad > 60) {
+            return null;
+        }
+
+        $crudo = @file_get_contents($ruta);
+
+        if (! is_string($crudo) || $crudo === '') {
+            return null;
+        }
+
+        $datos = json_decode($crudo, true);
+
+        if (! is_array($datos) || ! ($datos['ok'] ?? false)) {
+            return null;
+        }
+
+        return $this->normalizar((array) ($datos['gpu'] ?? []));
+    }
+
+    /**
+     * @return array{name: string, util: int, mem_used: int, mem_total: int, temp: int}|null
+     */
+    private function leerPorHttp(): ?array
+    {
         $url = trim((string) config('virthub.ia.gpu_url', ''));
 
         if ($url === '') {
@@ -52,8 +113,18 @@ class GpuMonitor
         }
 
         $datos = (array) $respuesta->json();
-        $gpu = (array) ($datos['gpu'] ?? $datos);
 
+        return $this->normalizar((array) ($datos['gpu'] ?? $datos));
+    }
+
+    /**
+     * Da la misma forma a las cifras vengan del archivo o de HTTP.
+     *
+     * @param  array<string, mixed>  $gpu
+     * @return array{name: string, util: int, mem_used: int, mem_total: int, temp: int}|null
+     */
+    private function normalizar(array $gpu): ?array
+    {
         if (! isset($gpu['util'])) {
             return null;
         }

@@ -46,3 +46,7 @@ OBJETIVOS_PROYECTO.md
 # Archivo que crea PowerShell al redirigir a $null en algunos comandos.
 $null
 
+
+# Cifras de la GPU que deja tools/gpu-bridge.ps1 (son del equipo, no del proyecto).
+storage/app/gpu/
+

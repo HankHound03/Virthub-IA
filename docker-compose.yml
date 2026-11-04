@@ -82,6 +82,8 @@ services:
       retries: 3
       start_period: 40s
     volumes:
+      # Cifras de la GPU que deja tools/gpu-bridge.ps1 (solo lectura).
+      - ./storage/app/gpu:/var/www/html/gpu:ro
       - app_storage:/var/www/html/storage
       # Carpeta del escritorio de invitado, montada para poder borrar su
       # informacion personal al terminar la sesion. La aplicacion corre en otro

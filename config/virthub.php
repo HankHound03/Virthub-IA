@@ -350,6 +350,11 @@ return [
 
     'ia' => [
         'monitor' => filter_var(env('VIRTHUB_IA_MONITOR', false), FILTER_VALIDATE_BOOL),
+
+        // Modo sin puerto: el puente deja las cifras en este archivo.
+        'gpu_archivo' => trim((string) env('VIRTHUB_GPU_ARCHIVO', base_path('gpu/gpu.json'))),
+
+        // Modo antiguo, con puerto. Solo se usa si no hay archivo.
         'gpu_url' => trim((string) env('VIRTHUB_GPU_URL', '')),
     ],
 
