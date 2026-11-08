@@ -3333,3 +3333,99 @@ html.vh-ligero .awty-btn {
 [data-era] body > header .vh-temas .vh-temas-caret:hover {
     color: var(--vh-btn-hover-text) !important;
 }
+
+/* =============================================================================
+   VENTANA DE CONFIRMACION
+   =============================================================================
+   El modal que pregunta "Desactivar usuario", "Borrar sugerencia" y demas tenia
+   fondo oscuro y texto fijo: en los temas claros era una caja oscura con letras
+   ambar, y en los oscuros el titulo se perdia. Ahora usa el panel del tema, el
+   texto del panel y el rojo de aviso de cada esquema.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .modal-content {
+    background: var(--vh-panel-bg) !important;
+    border: 2px solid var(--vh-alert-error, #c8553d) !important;
+    box-shadow: var(--vh-panel-shadow, 0 18px 40px rgba(0, 0, 0, 0.45)) !important;
+}
+
+[data-era] body .modal-content h3 {
+    color: var(--vh-alert-error, #b03a2e) !important;
+    text-shadow: none !important;
+}
+
+[data-era] body .modal-content p,
+[data-era] body .modal-content span {
+    color: var(--vh-text) !important;
+    text-shadow: none !important;
+}
+
+/* Cancelar: boton normal del tema. Confirmar: rojo de aviso con texto legible. */
+[data-era] body .modal-btn-cancel {
+    background: var(--vh-btn-bg) !important;
+    border: 1px solid var(--vh-btn-border) !important;
+    color: var(--vh-btn-text) !important;
+    text-shadow: none !important;
+}
+
+[data-era] body .modal-btn-cancel:hover {
+    background: var(--vh-btn-hover-bg) !important;
+    border-color: var(--vh-btn-hover-border) !important;
+    color: var(--vh-btn-hover-text) !important;
+}
+
+/*
+ * El rojo de "Confirmar" es el mismo en todos los temas a proposito: en Vista el
+ * color de aviso del tema es un rosa claro, y el texto blanco encima no se leia.
+ * Un rojo oscuro fijo con texto blanco funciona en claro y en oscuro.
+ */
+[data-era] body .modal-btn-confirm {
+    background: #b03a2e !important;
+    border: 1px solid #8f2e24 !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+
+[data-era] body .modal-btn-confirm:hover {
+    background: #8f2e24 !important;
+}
+
+/* =============================================================================
+   SUPERFICIES QUE SEGUIAN SIENDO OSCURAS
+   =============================================================================
+   Varias cajas tenian el fondo oscuro fijo del diseno original: el cuadro de
+   credenciales del panel, la ventana de publicar del foro y la de reportar. En
+   los temas claros quedaban como manchas oscuras dentro de la pagina. Aqui toman
+   el panel del tema, igual que el resto.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .credentials-dropdown,
+[data-era] body .credentials-box,
+[data-era] body .forum-compose-card,
+[data-era] body .forum-report-card,
+[data-era] body .forum-compose-modal .forum-compose-card,
+[data-era] body .forum-report-modal > div {
+    background: var(--vh-panel-bg) !important;
+    border-color: var(--vh-panel-border, var(--vh-border)) !important;
+    color: var(--vh-text) !important;
+    box-shadow: var(--vh-panel-shadow, 0 18px 40px rgba(0, 0, 0, 0.45)) !important;
+}
+
+[data-era] body .credentials-dropdown :is(h4, p, span, label, li, small, strong),
+[data-era] body .credentials-box :is(h4, p, span, label, small, strong),
+[data-era] body .forum-compose-card :is(h1, h2, h3, h4, p, span, label, small, strong),
+[data-era] body .forum-report-card :is(h1, h2, h3, h4, p, span, label, small, strong) {
+    color: var(--vh-text) !important;
+    text-shadow: none !important;
+}
+
+/* Campos y bloques de codigo dentro de esas cajas. */
+[data-era] body .credentials-dropdown :is(input, select, textarea, code),
+[data-era] body .credentials-box :is(input, select, textarea, code),
+[data-era] body .credentials-row code,
+[data-era] body .forum-compose-card :is(input, textarea, select),
+[data-era] body .forum-report-card :is(input, textarea, select) {
+    background: var(--vh-input-bg) !important;
+    border: 1px solid var(--vh-input-border) !important;
+    color: var(--vh-input-text) !important;
+}
