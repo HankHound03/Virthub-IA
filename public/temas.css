@@ -3375,19 +3375,33 @@ html.vh-ligero .awty-btn {
 }
 
 /*
- * El rojo de "Confirmar" es el mismo en todos los temas a proposito: en Vista el
- * color de aviso del tema es un rosa claro, y el texto blanco encima no se leia.
- * Un rojo oscuro fijo con texto blanco funciona en claro y en oscuro.
+ * El rojo de "Confirmar" se saca del rojo y del panel del tema: en un esquema
+ * claro queda un rojo salmon con texto oscuro; en uno oscuro, un rojo profundo
+ * con texto claro. Sigue siendo rojo (es una accion destructiva) pero pertenece
+ * al tema en el que esta.
+ *
+ * No se usa el color de aviso del tema porque en Vista es un rosa claro pensado
+ * para texto, no para relleno.
  */
-[data-era] body .modal-btn-confirm {
-    background: #b03a2e !important;
-    border: 1px solid #8f2e24 !important;
-    color: #ffffff !important;
+[data-era] body .modal-btn-confirm,
+[data-era] body .danger-btn {
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, #d9534f 74%, var(--vh-panel-bg)),
+        color-mix(in srgb, #a33027 84%, var(--vh-panel-bg))
+    ) !important;
+    border: 1px solid color-mix(in srgb, #7d1f17 60%, var(--vh-panel-bg)) !important;
+    color: var(--vh-text) !important;
     text-shadow: none !important;
 }
 
-[data-era] body .modal-btn-confirm:hover {
-    background: #8f2e24 !important;
+[data-era] body .modal-btn-confirm:hover,
+[data-era] body .danger-btn:hover {
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, #c8443f 82%, var(--vh-panel-bg)),
+        color-mix(in srgb, #8a251d 90%, var(--vh-panel-bg))
+    ) !important;
 }
 
 /* =============================================================================
