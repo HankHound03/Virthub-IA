@@ -320,7 +320,7 @@ iframe {
 .admin-desktop-picker-label {
   font-family: Monocraft Nerd Font, monospace;
   font-size: 12px;
-  color: var(--vh-text-muted, rgba(226, 240, 255, 0.7));
+  color: var(--vh-text-soft, #6b7a86);
   margin-right: 2px;
 }
 

@@ -50,3 +50,7 @@ $null
 # Cifras de la GPU que deja tools/gpu-bridge.ps1 (son del equipo, no del proyecto).
 storage/app/gpu/
 
+
+# Capturas y pruebas temporales de la revision de temas.
+.tmp/
+

@@ -53,7 +53,7 @@ indice(
         (2, "3.2 Mini calendario"),
         (2, "3.3 To-do y notas rápidas"),
         (2, "3.4 Estado del sistema"),
-        (1, "4. Los temas: el carrusel"),
+        (1, "4. Los temas: pestañas por época"),
         (2, "4.1 Por qué este diseño: la nostalgia"),
         (1, "5. El foro"),
         (2, "5.1 Leer y reaccionar"),
@@ -258,7 +258,7 @@ imagen_con_pie(
 # 4. Temas
 # --------------------------------------------------------------------------
 
-h1(doc, "4. Los temas: el carrusel")
+h1(doc, "4. Los temas: pestañas por época")
 
 parrafo(
     doc,
@@ -270,15 +270,16 @@ parrafo(
 imagen_con_pie(
     doc,
     imagen("04-temas-carrusel.png"),
-    "Figura 5. Panel de temas: una fila deslizable por cada época de Windows.",
+    "Figura 5. Panel de temas: una pestaña por época y sus seis esquemas de color.",
     ancho=5.2,
 )
 
 pasos(
     doc,
     [
-        "Pulse el botón del tema (muestra el estilo actual, por ejemplo «Windows 7 · Escenas»).",
-        "Elija la época con la fila correspondiente y deslícela para ver sus esquemas.",
+        "Pulse el botón del tema (muestra el estilo actual, por ejemplo «7 · Escenas»).",
+        "Elija la época en las pestañas: XP, Vista, 7, 8 o 10. Son las versiones de Windows de "
+        "toda la vida; en la interfaz van por su nombre corto, para no repetir la palabra Windows.",
         "Pulse el esquema que quiera y se aplicará al instante.",
     ],
 )

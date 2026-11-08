@@ -75,34 +75,47 @@
 
 
                 <div class="vh-temas-panel" id="vhTemasPanel" hidden>
-                    @foreach ($vhCatalogo as $era => $datos)
-                        <div class="vh-temas-era">
-                            <h4>{{ $datos['nombre'] ?? $era }}</h4>
+                      <div class="vh-temas-cabecera">
+                          <div>
+                              <span class="vh-temas-titulo">Esquema de color</span>
+                              <span class="vh-temas-actual" id="vhTemasActual">&mdash;</span>
+                          </div>
+                          <button type="button" class="vh-temas-cerrar" id="vhTemasCerrar"
+                                  aria-label="Cerrar el selector" title="Cerrar">&times;</button>
+                      </div>
 
-                            <div class="vh-temas-track" data-track="{{ $era }}">
+                    {{-- Una pestana por epoca: se ve una a la vez y no hay nada que
+                         desplazar. --}}
+                    <div class="vh-temas-pestanas" role="tablist" aria-label="Epoca del escritorio">
+                        @foreach ($vhCatalogo as $era => $datos)
+                            <button type="button" class="vh-temas-pestana"
+                                    data-era-tab="{{ $era }}" role="tab"
+                                    title="{{ $datos['nombre_completo'] ?? $datos['nombre'] ?? $era }}">
+                                {{ $datos['nombre'] ?? $era }}
+                            </button>
+                        @endforeach
+                    </div>
+
+                    @foreach ($vhCatalogo as $era => $datos)
+                        <div class="vh-temas-era" data-era-panel="{{ $era }}" role="tabpanel">
+
+                            <div class="vh-temas-grid" data-track="{{ $era }}">
                                 @foreach (($datos['variantes'] ?? []) as $variante => $v)
                                     <button type="button" class="vh-tema-tile"
                                             data-era="{{ $era }}"
                                             data-variante="{{ $variante }}"
-                                            data-nombre="{{ $datos['nombre'] ?? $era }} · {{ $v['nombre'] ?? $variante }}"
+                                            data-nombre="{{ $datos['nombre'] ?? $era }} &middot; {{ $v['nombre'] ?? $variante }}"
                                             data-imagen="{{ $datos['imagen'] ?? '' }}"
-                                            style="--sw-a: {{ $v['a'] ?? '#444' }}; --sw-b: {{ $v['b'] ?? '#888' }};"
+                                              style="--sw-a: {{ $v['a'] ?? '#444' }}; --sw-b: {{ $v['b'] ?? '#888' }}; --sw-img: url('{{ $datos['imagen'] ?? '' }}');"
                                             title="{{ $datos['nombre'] ?? $era }} - {{ $v['nombre'] ?? $variante }}">
                                         <span class="vh-tema-swatch" aria-hidden="true"></span>
-                                        <span class="vh-tema-name">{{ $v['nombre'] ?? $variante }}</span>
+                                        <span class="vh-tema-check" aria-hidden="true">&#10003;</span>
+                                          <span class="vh-tema-name">{{ $v['nombre'] ?? $variante }}</span>
                                     </button>
                                 @endforeach
                             </div>
                         </div>
                     @endforeach
-
-                    <div class="vh-temas-nav">
-                        <button type="button" data-nav="-1" aria-label="Anterior">&#8249;</button>
-                        <button type="button" data-nav="1" aria-label="Siguiente">&#8250;</button>
-                        <span style="color:#8fb3d9;font:600 10px 'Segoe UI',sans-serif;">
-                            Desliza o usa las flechas
-                        </span>
-                    </div>
                 </div>
             </div>
         @else
@@ -511,6 +524,28 @@
                 }
 
 
+                var pestanas = Array.prototype.slice.call(panel.querySelectorAll('[data-era-tab]'));
+                var paneles = Array.prototype.slice.call(panel.querySelectorAll('[data-era-panel]'));
+
+                function activarPestana(era) {
+                    pestanas.forEach(function (p) {
+                        var suya = p.dataset.eraTab === era;
+                        p.classList.toggle('activa', suya);
+                        p.setAttribute('aria-selected', suya ? 'true' : 'false');
+                    });
+
+                    paneles.forEach(function (bloque) {
+                        bloque.classList.toggle('activa', bloque.dataset.eraPanel === era);
+                    });
+                }
+
+                pestanas.forEach(function (pestana) {
+                    pestana.addEventListener('click', function (evento) {
+                        evento.stopPropagation();
+                        activarPestana(pestana.dataset.eraTab);
+                    });
+                });
+
                 function buscar(era, variante) {
                     return fichas.find(function (f) {
                         return f.dataset.era === era && f.dataset.variante === variante;
@@ -534,6 +569,13 @@
                         nombre.textContent = ficha ? ficha.dataset.nombre : era;
                     }
 
+                    /* El nombre tambien en la cabecera del panel. */
+                    var actual = document.getElementById('vhTemasActual');
+
+                    if (actual) {
+                        actual.textContent = ficha ? ficha.dataset.nombre : era;
+                    }
+
                     if (punto && ficha) {
                         var estilo = ficha.getAttribute('style') || '';
                         var a = /--sw-a:\s*([^;]+)/.exec(estilo);
@@ -544,6 +586,11 @@
                     fichas.forEach(function (f) {
                         f.classList.toggle('activo', f === ficha);
                     });
+
+                    /* La pestaña sigue al tema, venga de donde venga el cambio:
+                       un clic, las flechas o la pastilla del encabezado. */
+                    activarPestana(era);
+
 
 
                     try {
@@ -588,6 +635,15 @@
                     esTactil = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
                 } catch (e) {
                     esTactil = false;
+                }
+
+                var cerrarPanelBtn = document.getElementById('vhTemasCerrar');
+
+                if (cerrarPanelBtn) {
+                    cerrarPanelBtn.addEventListener('click', function (evento) {
+                        evento.stopPropagation();
+                        abrirPanel(false);
+                    });
                 }
 
                 function abrirPanel(abierto) {

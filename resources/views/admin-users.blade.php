@@ -144,11 +144,18 @@
         }
         .admin-wrapper {
             display: grid;
-            grid-template-columns: repeat(2, minmax(320px, 1fr));
+            /* Dos columnas solo cuando cada una tiene sitio para la tabla. Con 320 px
+               la tabla de usuarios se salia del panel: la fecha y las acciones
+               quedaban fuera y habia que desplazar. */
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
             gap: 10px;
             margin: 5px;
             min-height: calc(100vh - 260px);
             align-items: start;
+
+            /* Con una sola columna, el alto minimo se repartia entre las filas y
+               quedaba un hueco enorme entre un panel y el siguiente. */
+            align-content: start;
         }
 
         .admin-card {
@@ -951,8 +958,7 @@
             background-color: rgba(222, 102, 102, 0.95);
         }
 
-        @media (max-width: 900px),
-        (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
+        @media (max-width: 620px) {
     
         /* =============================================================
            TABLA DE USUARIOS SIN DESPLAZAMIENTO
@@ -1166,14 +1172,16 @@
             .users-table tbody,
             .reports-table tbody,
             .suggestions-table tbody {
-                display: block;
+                display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                  gap: 10px;
             }
 
             .users-table tr,
             .reports-table tr,
             .suggestions-table tr {
                 display: block;
-                margin-bottom: 10px;
+                margin-bottom: 0;
                 padding: 10px 12px;
                 border: 1px solid var(--vh-border);
                 border-radius: 10px;
@@ -1393,7 +1401,45 @@
                 width: 100%;
             }
         }
-    </style>
+    
+
+          /* =============================================================
+             ACCIONES DENTRO DE LA TARJETA
+             =============================================================
+             La celda de acciones lleva width: 1% para que su columna no crezca en
+             la tabla. En modo tarjeta esa misma regla deja la celda en casi nada y
+             los botones se salian fuera del recuadro, a la izquierda.
+
+             Aqui se devuelve el ancho automatico y se alinean a la izquierda.
+             ------------------------------------------------------------- */
+
+          @media (max-width: 620px) {
+              .users-table td[data-label="Acciones"],
+              .reports-table td[data-label="Accion"],
+              .reports-table td[data-label="Acciones"],
+              .suggestions-table td[data-label="Acciones"] {
+                  width: auto;
+                  min-width: 0;
+                  white-space: normal;
+              }
+
+              .users-table td[data-label="Acciones"] .user-actions,
+              .reports-table td[data-label="Accion"] .user-actions,
+              .suggestions-table td[data-label="Acciones"] .user-actions {
+                  justify-content: flex-start;
+                  flex-wrap: wrap;
+              }
+
+              /* La celda tampoco necesita el relleno lateral de la tabla. */
+              .users-table td[data-label="Acciones"],
+              .reports-table td[data-label="Accion"],
+              .suggestions-table td[data-label="Acciones"] {
+                  padding-left: 0;
+                  padding-right: 0;
+              }
+          }
+
+</style>
     @include('partials.tema-boot')
 </head>
 <body>

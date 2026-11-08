@@ -107,7 +107,8 @@ return [
          */
         'catalogo' => [
             'xp' => [
-                'nombre' => 'Windows XP',
+                'nombre' => 'XP',
+                  'nombre_completo' => 'Windows XP',
                 'imagen' => '/pics/temas/winxp.jpg',
                 'variantes' => [
                     'luna' => ['nombre' => 'Luna azul', 'a' => '#0058e6', 'b' => '#3a93ff'],
@@ -119,7 +120,8 @@ return [
                 ],
             ],
             'vista' => [
-                'nombre' => 'Windows Vista',
+                'nombre' => 'Vista',
+                  'nombre_completo' => 'Windows Vista',
                 'imagen' => '/pics/temas/vista.jpg',
                 'variantes' => [
                     'aero' => ['nombre' => 'Aero', 'a' => '#1b4a63', 'b' => '#7ec8e3'],
@@ -131,7 +133,8 @@ return [
                 ],
             ],
             'win7' => [
-                'nombre' => 'Windows 7',
+                'nombre' => '7',
+                  'nombre_completo' => 'Windows 7',
                 'imagen' => '/pics/temas/win7.jpg',
                 'variantes' => [
                     'aero' => ['nombre' => 'Aero', 'a' => '#bfe3f7', 'b' => '#1f4a68'],
@@ -143,7 +146,8 @@ return [
                 ],
             ],
             'win8' => [
-                'nombre' => 'Windows 8',
+                'nombre' => '8',
+                  'nombre_completo' => 'Windows 8',
                 'imagen' => '/pics/temas/win8.jpg',
                 'variantes' => [
                     'blue' => ['nombre' => 'Azul', 'a' => '#00a4ef', 'b' => '#0072c6'],
@@ -155,7 +159,8 @@ return [
                 ],
             ],
             'win10' => [
-                'nombre' => 'Windows 10',
+                'nombre' => '10',
+                  'nombre_completo' => 'Windows 10',
                 'imagen' => '/pics/temas/win10.jpg',
                 'variantes' => [
                     'azul-claro' => ['nombre' => 'Claro azul', 'a' => '#f3f3f3', 'b' => '#0078d7'],

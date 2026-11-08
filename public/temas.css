@@ -507,7 +507,7 @@
     --vh-btn-bg: linear-gradient(180deg, rgba(120, 180, 225, 0.9) 0%, rgba(42, 90, 128, 0.92) 50%, rgba(16, 44, 68, 0.95) 100%);
     --vh-btn-border: rgba(190, 232, 255, 0.6);
     --vh-btn-text: #ffffff;
-    --vh-btn-hover-bg: linear-gradient(180deg, rgba(170, 220, 255, 0.95) 0%, rgba(70, 140, 190, 0.95) 50%, rgba(26, 70, 105, 0.98) 100%);
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(42, 90, 128, 0.92) 50%, rgba(16, 44, 68, 0.95) 100%);
     --vh-btn-hover-border: #bfe8ff;
     --vh-btn-hover-text: #ffffff;
     --vh-input-bg: rgba(6, 18, 30, 0.72);
@@ -528,7 +528,7 @@
     --vh-btn-bg: linear-gradient(180deg, rgba(160, 170, 182, 0.9) 0%, rgba(70, 78, 88, 0.92) 50%, rgba(34, 38, 44, 0.95) 100%);
     --vh-btn-border: rgba(215, 222, 230, 0.55);
     --vh-btn-text: #ffffff;
-    --vh-btn-hover-bg: linear-gradient(180deg, rgba(205, 212, 220, 0.95) 0%, rgba(105, 115, 126, 0.95) 50%, rgba(52, 58, 66, 0.98) 100%);
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(70, 78, 88, 0.92) 50%, rgba(34, 38, 44, 0.95) 100%);
     --vh-btn-hover-border: #e2e8ee;
     --vh-btn-hover-text: #ffffff;
     --vh-input-bg: rgba(16, 18, 22, 0.75);
@@ -550,7 +550,7 @@
     --vh-btn-bg: linear-gradient(180deg, rgba(90, 220, 205, 0.9) 0%, rgba(22, 110, 100, 0.92) 50%, rgba(8, 56, 52, 0.95) 100%);
     --vh-btn-border: rgba(170, 245, 235, 0.6);
     --vh-btn-text: #ffffff;
-    --vh-btn-hover-bg: linear-gradient(180deg, rgba(150, 245, 235, 0.95) 0%, rgba(40, 150, 140, 0.95) 50%, rgba(12, 80, 74, 0.98) 100%);
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(22, 110, 100, 0.92) 50%, rgba(8, 56, 52, 0.95) 100%);
     --vh-btn-hover-border: #b8fff5;
     --vh-btn-hover-text: #ffffff;
     --vh-input-bg: rgba(4, 26, 26, 0.75);
@@ -572,7 +572,7 @@
     --vh-btn-bg: linear-gradient(180deg, rgba(240, 130, 140, 0.9) 0%, rgba(150, 45, 55, 0.92) 50%, rgba(80, 20, 26, 0.95) 100%);
     --vh-btn-border: rgba(255, 200, 205, 0.6);
     --vh-btn-text: #ffffff;
-    --vh-btn-hover-bg: linear-gradient(180deg, rgba(255, 175, 185, 0.95) 0%, rgba(190, 70, 82, 0.95) 50%, rgba(110, 30, 38, 0.98) 100%);
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(150, 45, 55, 0.92) 50%, rgba(80, 20, 26, 0.95) 100%);
     --vh-btn-hover-border: #ffd0d5;
     --vh-btn-hover-text: #ffffff;
     --vh-input-bg: rgba(30, 8, 10, 0.75);
@@ -594,7 +594,7 @@
     --vh-btn-bg: linear-gradient(180deg, rgba(150, 230, 150, 0.9) 0%, rgba(48, 120, 52, 0.92) 50%, rgba(22, 66, 26, 0.95) 100%);
     --vh-btn-border: rgba(200, 255, 200, 0.6);
     --vh-btn-text: #ffffff;
-    --vh-btn-hover-bg: linear-gradient(180deg, rgba(190, 250, 190, 0.95) 0%, rgba(70, 160, 76, 0.95) 50%, rgba(32, 92, 36, 0.98) 100%);
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(48, 120, 52, 0.92) 50%, rgba(22, 66, 26, 0.95) 100%);
     --vh-btn-hover-border: #d8ffd8;
     --vh-btn-hover-text: #ffffff;
     --vh-input-bg: rgba(8, 26, 10, 0.75);
@@ -616,7 +616,7 @@
     --vh-btn-bg: linear-gradient(180deg, rgba(200, 170, 250, 0.9) 0%, rgba(90, 60, 150, 0.92) 50%, rgba(48, 28, 84, 0.95) 100%);
     --vh-btn-border: rgba(230, 215, 255, 0.6);
     --vh-btn-text: #ffffff;
-    --vh-btn-hover-bg: linear-gradient(180deg, rgba(225, 205, 255, 0.95) 0%, rgba(125, 90, 190, 0.95) 50%, rgba(70, 44, 115, 0.98) 100%);
+    --vh-btn-hover-bg: linear-gradient(180deg, rgba(90, 60, 150, 0.92) 50%, rgba(48, 28, 84, 0.95) 100%);
     --vh-btn-hover-border: #f0e6ff;
     --vh-btn-hover-text: #ffffff;
     --vh-input-bg: rgba(18, 10, 32, 0.75);
@@ -1094,7 +1094,7 @@
 
 .vh-temas-era h4 {
     margin: 0 0 8px;
-    color: #8fb3d9;
+    color: var(--vh-text-soft);
     font: 700 11px 'Segoe UI', sans-serif;
     letter-spacing: 0.8px;
     text-transform: uppercase;
@@ -1162,7 +1162,7 @@
 .vh-tema-name {
     display: block;
     padding: 5px 6px 6px;
-    color: #eaf4ff;
+    color: var(--vh-text);
     font: 600 10px 'Segoe UI', sans-serif;
     text-align: center;
     white-space: nowrap;
@@ -2944,4 +2944,392 @@ html.vh-ligero .awty-btn {
             color-mix(in srgb, var(--vh-panel-bg) 74%, transparent),
             color-mix(in srgb, var(--vh-panel-bg) 74%, transparent)
         ) !important;
+}
+
+/* =============================================================================
+   SELECTOR DE ESQUEMA (diseno nuevo)
+   =============================================================================
+   Cada epoca ensena sus seis esquemas en una rejilla: caben todos, no hay barra
+   de desplazamiento por fila, y cada muestra lleva el fondo real de su epoca
+   tenido con los dos colores del esquema.
+
+   La elegida se marca con un visto bueno ademas del borde: el color del borde solo
+   no basta, sobre todo en los esquemas claros.
+   -------------------------------------------------------------------------- */
+
+.vh-temas-panel {
+    width: min(96vw, 620px);
+    max-height: min(78vh, 640px);
+    padding: 0;
+    border-radius: 12px;
+}
+
+/* Cabecera: que se esta usando ahora y como cerrar. */
+.vh-temas-cabecera {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--vh-panel-bg);
+}
+
+.vh-temas-titulo {
+    display: block;
+    color: var(--vh-text-soft);
+    font: 700 10.5px 'Segoe UI', sans-serif;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+}
+
+.vh-temas-actual {
+    display: block;
+    margin-top: 2px;
+    color: var(--vh-text);
+    font: 600 13px 'Segoe UI', sans-serif;
+}
+
+.vh-temas-cerrar {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--vh-text);
+    font: 400 16px/1 'Segoe UI', sans-serif;
+    cursor: pointer;
+}
+
+.vh-temas-cerrar:hover {
+    background: #b03a2e;
+    border-color: #b03a2e;
+    color: #fff;
+}
+
+/* Las epocas, con margen lateral porque el panel ya no lleva relleno. */
+.vh-temas-era {
+    padding: 0 14px;
+}
+
+.vh-temas-era:first-of-type {
+    margin-top: 12px;
+}
+
+.vh-temas-era:last-of-type {
+    padding-bottom: 14px;
+}
+
+.vh-temas-era + .vh-temas-era {
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.vh-temas-era h4 {
+    margin: 0 0 7px;
+    color: var(--vh-text-soft);
+    font: 700 10.5px 'Segoe UI', sans-serif;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+/* Rejilla: seis columnas, sin desplazamiento. */
+.vh-temas-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 7px;
+}
+
+/* Muestra: fondo de la epoca tenido con los colores del esquema. */
+[data-era] body .vh-tema-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: auto !important;
+    border: 2px solid transparent !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+[data-era] body .vh-tema-tile:hover {
+    border-color: rgba(255, 255, 255, 0.34) !important;
+    transform: translateY(-2px);
+}
+
+.vh-tema-swatch {
+    display: block;
+    height: 48px;
+    background-image:
+        linear-gradient(
+            160deg,
+            color-mix(in srgb, var(--sw-a) 42%, transparent),
+            color-mix(in srgb, var(--sw-b) 42%, transparent)
+        ),
+        var(--sw-img);
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+/* Franja de brillo arriba, como una ventana. */
+.vh-tema-swatch::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 11px;
+    background: rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.22);
+}
+
+.vh-tema-name {
+    display: block;
+    padding: 5px 4px 6px;
+    color: var(--vh-text);
+    font: 600 10px 'Segoe UI', sans-serif;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Visto bueno en la elegida. */
+.vh-tema-check {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 1;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #58c4ff;
+    color: #04222f;
+    font: 700 10px/16px 'Segoe UI', sans-serif;
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+[data-era] body .vh-tema-tile.activo {
+    border-color: #58c4ff !important;
+    box-shadow: 0 0 0 2px rgba(88, 196, 255, 0.35) !important;
+}
+
+.vh-tema-tile.activo .vh-tema-check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Pantallas estrechas: tres columnas, dos filas por epoca. */
+@media (max-width: 560px) {
+    .vh-temas-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .vh-tema-swatch {
+        height: 42px;
+    }
+}
+
+/* =============================================================================
+   PESTANAS DEL SELECTOR
+   =============================================================================
+   Antes las cinco epocas estaban una debajo de otra y el panel tenia que
+   desplazarse: en una pantalla baja, Windows 8 y 10 quedaban fuera.
+
+   Con una pestana por epoca se ve una sola, el panel no crece y no hay nada que
+   desplazar.
+   -------------------------------------------------------------------------- */
+
+/* Sin desplazamiento: el panel mide lo que mide su contenido. */
+[data-era] body .vh-temas-panel {
+    max-height: none;
+    overflow: visible;
+}
+
+.vh-temas-pestanas {
+    display: flex;
+    gap: 4px;
+    padding: 10px 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vh-temas-pestana {
+    flex: 0 0 auto;
+    padding: 6px 13px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 7px 7px 0 0;
+    background: transparent;
+    color: var(--vh-text-soft);
+    font: 600 12px 'Segoe UI', sans-serif;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+}
+
+.vh-temas-pestana:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--vh-text);
+}
+
+.vh-temas-pestana.activa {
+    background: linear-gradient(180deg, rgba(88, 196, 255, 0.28), rgba(88, 196, 255, 0.12));
+    border-color: rgba(88, 196, 255, 0.55);
+    color: var(--vh-text);
+    box-shadow: inset 0 -3px 0 #58c4ff;
+}
+
+/* Solo se ve la epoca de la pestana activa. */
+.vh-temas-era[data-era-panel] {
+    display: none;
+    padding-top: 12px;
+}
+
+.vh-temas-era[data-era-panel].activa {
+    display: block;
+}
+
+/* La rejilla respira con el espacio que deja la pestana. */
+.vh-temas-era[data-era-panel] .vh-temas-grid {
+    padding-bottom: 14px;
+}
+
+.vh-temas-era[data-era-panel] + .vh-temas-era[data-era-panel] {
+    margin-top: 0;
+    padding-top: 12px;
+    border-top: none;
+}
+
+/* =============================================================================
+   TEXTO DE BOTONES Y ENLACES DE NAVEGACION
+   =============================================================================
+   Todo lo que se pinta con el fondo de boton del tema tiene que llevar el color
+   de texto de ese fondo. Son varios los sitios que tenian un color claro fijo
+   (pensado para el diseno oscuro original) y en los temas claros quedaban
+   ilegibles: la pestaña activa del menu, el boton del tema, los botones de los
+   gadgets.
+
+   Va al final y con !important a proposito: cualquiera de esas reglas sueltas
+   que queden por ahi tiene menos peso.
+   -------------------------------------------------------------------------- */
+
+[data-era] body button,
+[data-era] body .navbar-link,
+[data-era] body .container-load-btn,
+[data-era] body input[type="submit"],
+[data-era] body input[type="button"] {
+    color: var(--vh-btn-text) !important;
+}
+
+[data-era] body button:hover,
+[data-era] body button:focus-visible,
+[data-era] body .navbar-link:hover,
+[data-era] body .navbar-link.active,
+[data-era] body .container-load-btn:hover,
+[data-era] body input[type="submit"]:hover {
+    color: var(--vh-btn-hover-text) !important;
+}
+
+/* Las etiquetas dentro de un boton siguen al boton, no a su propio color. */
+[data-era] body button > span,
+[data-era] body button > b,
+[data-era] body button > strong,
+[data-era] body button > small,
+[data-era] body .navbar-link > span,
+[data-era] body .vh-temas-btn > span,
+[data-era] body .vh-temas-caret {
+    color: inherit !important;
+}
+
+/* Texto sin sombra: sobre fondos claros la sombra clara emborrona. */
+[data-era] body button,
+[data-era] body .navbar-link {
+    text-shadow: none !important;
+}
+
+/* El boton de chat de la barra del contenedor tenia fondo y texto fijos: en los
+   temas claros quedaba texto casi blanco sobre azul claro. Pasa a la paleta de
+   botones del tema, como el resto. */
+[data-era] body .chat-toggle {
+    background: var(--vh-btn-bg) !important;
+    border: 1px solid var(--vh-btn-border) !important;
+    color: var(--vh-btn-text) !important;
+    text-shadow: none !important;
+}
+
+[data-era] body .chat-toggle:hover {
+    background: var(--vh-btn-hover-bg) !important;
+    border-color: var(--vh-btn-hover-border) !important;
+    color: var(--vh-btn-hover-text) !important;
+}
+
+[data-era] body .chat-toggle .chat-button-label,
+[data-era] body .chat-toggle span {
+    color: inherit !important;
+}
+
+/* =============================================================================
+   MUESTRAS DEL SELECTOR
+   =============================================================================
+   La muestra lleva el papel pintado arriba y el nombre debajo, sobre el fondo del
+   propio recuadro. Ese fondo se pinta con el color del panel: si no, en los temas
+   claros el nombre (que ya va oscuro) caia sobre una franja oscura.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .vh-temas-era,
+[data-era] body .vh-temas-pestanas,
+[data-era] body .vh-temas-cabecera {
+    background: var(--vh-panel-bg) !important;
+}
+
+[data-era] body .vh-tema-tile {
+    background: color-mix(in srgb, var(--vh-panel-bg) 88%, #000 12%) !important;
+}
+
+[data-era] body .vh-tema-tile:hover {
+    background: color-mix(in srgb, var(--vh-panel-bg) 76%, #000 24%) !important;
+}
+
+[data-era] body .vh-tema-name {
+    color: var(--vh-text) !important;
+}
+
+/* =============================================================================
+   EL SELECTOR DE TEMAS VIVE DENTRO DEL ENCABEZADO
+   =============================================================================
+   El encabezado fuerza el color claro de la barra en TODOS sus botones:
+
+       [data-era] body > header button { color: var(--vh-head-text) !important; }
+
+   El panel del selector esta dentro de ese mismo encabezado, asi que sus
+   pestañas heredaban el blanco de la barra y quedaban invisibles sobre el panel
+   claro. Aqui se devuelve el color del panel a las pestañas y el del boton a la
+   pastilla del tema, con mas peso que la regla del encabezado.
+   -------------------------------------------------------------------------- */
+
+[data-era] body > header .vh-temas-panel .vh-temas-pestana,
+[data-era] body > header .vh-temas-panel .vh-temas-pestana:hover,
+[data-era] body > header .vh-temas-panel .vh-temas-pestana.activa {
+    color: var(--vh-text) !important;
+    text-shadow: none !important;
+}
+
+[data-era] body > header .vh-temas .vh-temas-btn,
+[data-era] body > header .vh-temas .vh-temas-caret {
+    color: var(--vh-btn-text) !important;
+    text-shadow: none !important;
+}
+
+[data-era] body > header .vh-temas .vh-temas-btn:hover,
+[data-era] body > header .vh-temas .vh-temas-caret:hover {
+    color: var(--vh-btn-hover-text) !important;
 }
