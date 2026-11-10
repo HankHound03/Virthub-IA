@@ -159,7 +159,8 @@
             font-family: var(--vh-font, 'Segoe UI', sans-serif);
             font-size: 12px;
             line-height: 1.35;
-            text-align: left;
+            /* Texto centrado: son dos acciones sueltas, no una lista de menu. */
+            text-align: center;
             cursor: pointer;
             list-style: none;
         }
