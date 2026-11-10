@@ -140,39 +140,56 @@
             margin: 0;
         }
 
+        /*
+         * Los dos botones del desplegable (Reportar y Borrar) usan la paleta de
+         * botones del tema. --vh-btn-bg es un DEGRADADO: va en background, no en
+         * background-color, o el navegador descarta el valor.
+         */
         .profile-post-menu-panel button,
         .profile-report > summary {
             display: block;
             width: 100%;
             box-sizing: border-box;
-            padding: 6px 10px;
-            border: 1px solid var(--vh-border);
-            border-radius: 6px;
-            background-color: var(--vh-button-bg, rgba(255, 255, 255, 0.12));
-            color: var(--vh-text);
+            margin: 0;
+            padding: 7px 10px;
+            border: 1px solid var(--vh-btn-border, var(--vh-border));
+            border-radius: var(--vh-btn-radius, 6px);
+            background: var(--vh-btn-bg, rgba(255, 255, 255, 0.12));
+            color: var(--vh-btn-text, var(--vh-text));
+            font-family: var(--vh-font, 'Segoe UI', sans-serif);
             font-size: 12px;
+            line-height: 1.35;
             text-align: left;
             cursor: pointer;
-        }
-
-        .profile-post-menu-panel button:hover,
-        .profile-report > summary:hover {
-            background-color: var(--vh-button-hover, rgba(255, 255, 255, 0.2));
+            list-style: none;
         }
 
         .profile-report > summary::-webkit-details-marker {
             display: none;
         }
 
+        /* Separacion entre Reportar y Borrar. */
+        .profile-post-menu-panel .profile-report + form {
+            margin-top: 6px;
+        }
+
+        .profile-post-menu-panel button:hover,
+        .profile-report > summary:hover,
+        .profile-report[open] > summary {
+            background: var(--vh-btn-hover-bg, var(--vh-btn-bg));
+            border-color: var(--vh-btn-hover-border, var(--vh-btn-border, var(--vh-border)));
+            color: var(--vh-btn-hover-text, var(--vh-btn-text));
+        }
+
         .profile-report textarea {
             width: 100%;
-            margin: 6px 0;
+            margin: 6px 0 0;
             padding: 6px;
             box-sizing: border-box;
-            border: 1px solid var(--vh-border);
+            border: 1px solid var(--vh-input-border, var(--vh-border));
             border-radius: 6px;
             background: var(--vh-input-bg, rgba(0, 0, 0, 0.2));
-            color: var(--vh-text);
+            color: var(--vh-input-text, var(--vh-text));
             font-size: 12px;
             resize: vertical;
         }
