@@ -2366,7 +2366,10 @@ html.vh-ligero body *::after {
 
 [data-era] body .forum-post-menu-panel .reaction-btn {
     width: 100%;
-    justify-content: flex-start;
+    /* Centrado: el texto de "Reportar" quedaba a la izquierda y no coincidia con
+       "Borrar", que ya iba centrado. */
+    justify-content: center;
+    text-align: center;
     padding: 8px 10px;
     border: 1px solid var(--vh-btn-border);
     border-radius: var(--vh-btn-radius);
