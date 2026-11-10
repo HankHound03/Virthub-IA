@@ -113,5 +113,8 @@
         function toggleTheme() { document.body.classList.toggle('dark-mode'); }
         function toggleProfileMenu(event) { event?.stopPropagation(); document.querySelector('.toggleable-profile-menu')?.classList.toggle('is-open'); }
     </script>
+    {{-- Boton flotante del chat: aparece en todas las paginas menos en el
+         contenedor, que tiene el suyo propio. --}}
+    @include('partials.chat-widget')
 </body>
 </html>

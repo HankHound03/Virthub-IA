@@ -223,5 +223,8 @@
         @if (Route::has('login'))
             <div class="h-14.5 hidden lg:block"></div>
         @endif
-    </body>
+        {{-- Boton flotante del chat: aparece en todas las paginas menos en el
+         contenedor, que tiene el suyo propio. --}}
+    @include('partials.chat-widget')
+</body>
 </html>

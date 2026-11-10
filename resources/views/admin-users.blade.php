@@ -1861,7 +1861,13 @@
                     <tbody>
                         @foreach (($suggestions ?? []) as $suggestion)
                             <tr>
-                                <td data-label="Fecha">{{ $suggestion['created_at'] ?? '-' }}</td>
+                                <td data-label="Fecha">
+                                    @if (!empty($suggestion['created_at']))
+                                        {{ \Illuminate\Support\Carbon::parse($suggestion['created_at'])->timezone(config('app.timezone'))->format('d/m/Y H:i') }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td data-label="Modo">{{ ($suggestion['author_mode'] ?? 'anonymous') === 'identified' ? 'Identificado' : 'Anonimo' }}</td>
                                 <td data-label="Autor">{{ $suggestion['author'] ?? 'Anonimo' }}</td>
                                 <td data-label="Sugerencia" class="suggestion-text">{{ $suggestion['message'] ?? '' }}</td>

@@ -583,5 +583,8 @@
             });
         });
     </script>
+    {{-- Boton flotante del chat: aparece en todas las paginas menos en el
+         contenedor, que tiene el suyo propio. --}}
+    @include('partials.chat-widget')
 </body>
 </html>
