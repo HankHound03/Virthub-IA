@@ -1813,7 +1813,13 @@
                                 </td>
                                 <td data-label="Autor post">{{ $report['post_author'] ?: '-' }}</td>
                                 <td data-label="Accion">
-                                    <a class="admin-link-btn" href="{{ url('/foro') }}">Ir al foro</a>
+                                    {{-- Un reporte del foro lleva al foro; uno del perfil, al perfil de quien
+                                         lo escribio. --}}
+                                    @if (($report['kind'] ?? 'foro') === 'perfil')
+                                        <a class="admin-link-btn" href="{{ url('/perfil/' . rawurlencode((string) ($report['post_author'] ?? ''))) }}">Ir al perfil</a>
+                                    @else
+                                        <a class="admin-link-btn" href="{{ url('/foro') }}">Ir al foro</a>
+                                    @endif
                                     <form class="report-delete-form" method="POST" action="{{ url('/admin/forum-reports/delete') }}">
                                         @csrf
                                         <input type="hidden" name="post_id" value="{{ $report['post_id'] }}">
