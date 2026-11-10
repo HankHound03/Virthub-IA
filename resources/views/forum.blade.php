@@ -97,7 +97,10 @@
             right: 0 !important;
             bottom: 0 !important;
             left: 0 !important;
-            z-index: 2000;
+              /* El encabezado se sube a 6000 con !important (para que el carrusel
+                 de temas quede entero), asi que la ventana tiene que ir por encima
+                 de eso. La ventana de confirmacion propia usa 9000. */
+              z-index: 7000 !important;
             display: none;
             align-items: center;
             justify-content: center;
@@ -115,9 +118,10 @@
         }
 
         .forum-compose-card {
-            width: min(680px, 100%);
+              /* Ancho comodo y, sobre todo, nunca mas alto que la ventana. */
+              width: min(760px, 94vw);
             box-sizing: border-box;
-            max-height: min(760px, 92vh);
+              max-height: calc(100vh - 28px);
             overflow: auto;
             padding: 16px;
             background: var(--vh-surface-strong);
@@ -806,7 +810,110 @@
                 padding: 8px;
             }
         }
-    </style>
+    
+
+          /* =============================================================
+             PANTALLAS BAJAS Y ESTRECHAS
+             =============================================================
+             En 1366x768, 1280x720 y menos, el formulario de publicar se salia
+             por arriba y por abajo. Ajustes por ALTURA y por ANCHO por separado,
+             porque son dos problemas distintos:
+
+               - poca altura  -> menos relleno y el area de texto mas corta
+               - poco ancho   -> la ventana ocupa el ancho disponible
+
+             La referencia de equipo modesto es la Samsung N150 (1024x600), asi
+             que a partir de 1024 de ancho se aprieta de verdad.
+             ------------------------------------------------------------- */
+
+          /* Portatiles de 720 y 768 de alto. */
+          @media (max-height: 800px) {
+              .forum-compose-modal {
+                  padding: 10px;
+              }
+
+              .forum-compose-card {
+                  padding: 14px 16px;
+                  max-height: calc(100vh - 20px);
+              }
+
+              .forum-compose-card textarea {
+                  min-height: 110px;
+              }
+          }
+
+          /* Pantallas muy bajas: 600 de alto o menos. */
+          @media (max-height: 620px) {
+              .forum-compose-card {
+                  padding: 12px 14px;
+              }
+
+              .forum-compose-head h3 {
+                  font-size: 15px;
+                  margin: 0 0 6px;
+              }
+
+              .forum-compose-card textarea {
+                  min-height: 84px;
+              }
+
+              .forum-compose-tools {
+                  gap: 4px;
+              }
+
+              .forum-compose-tools button {
+                  padding: 4px 8px;
+                  font-size: 11.5px;
+              }
+
+              .forum-compose-hint {
+                  font-size: 10.5px;
+              }
+          }
+
+          /* 1024 de ancho: la referencia de la N150. */
+          @media (max-width: 1024px) {
+              .forum-compose-card {
+                  width: 96vw;
+              }
+
+              .forum-card {
+                  padding: 12px;
+              }
+
+              .forum-post-head {
+                  gap: 8px;
+              }
+
+              .forum-post-actions {
+                  gap: 6px;
+              }
+          }
+
+          /* 800x600 y similares. */
+          @media (max-width: 820px) {
+              .forum-compose-card {
+                  width: 97vw;
+                  padding: 12px;
+              }
+
+              /* Dos botones por fila: cuatro filas se comian el alto de la ventana. */
+              .forum-compose-tools {
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 6px;
+              }
+
+              .forum-compose-tools > * {
+                  flex: 1 1 calc(50% - 6px);
+              }
+
+              .forum-post {
+                  padding: 10px;
+              }
+          }
+
+</style>
     @include('partials.tema-boot')
 </head>
 <body>
@@ -851,79 +958,6 @@
 
                 @if ($canPost)
                     <button type="button" class="forum-compose-launcher" id="openForumComposer">¿Que quieres compartir?</button>
-                    <div class="forum-compose-modal" id="forumComposeModal" aria-hidden="true">
-                        <div class="forum-compose-card" role="dialog" aria-modal="true" aria-labelledby="forumComposeTitle" onclick="event.stopPropagation()">
-                            <div class="forum-compose-head">
-                                <h3 id="forumComposeTitle">Crear publicacion</h3>
-                                <button type="button" class="forum-compose-close" id="closeForumComposer" aria-label="Cerrar">×</button>
-                            </div>
-                    <form class="forum-form" method="POST" action="{{ url('/foro') }}" enctype="multipart/form-data">
-                        @csrf
-                        <label for="forumTitle">Titulo (opcional)
-                            <input type="text" id="forumTitle" name="title" maxlength="120" placeholder="Tema del post...">
-                        </label>
-                        <label for="forumContent">Contenido
-                            <textarea id="forumContent" name="content" maxlength="5000" required placeholder="Comparte tu idea o pregunta..."></textarea>
-                        </label>
-                        <div class="forum-attachment-tools" aria-label="Agregar contenido">
-                            <button type="button" data-file-trigger="forumPhotos">▣ Foto</button>
-                            <button type="button" id="toggleForumPoll">▤ Encuesta</button>
-                            <button type="button" data-file-trigger="forumVideos">▶ Video</button>
-                            <button type="button" data-file-trigger="forumFiles">▤ Archivo</button>
-                            <input type="file" id="forumPhotos" name="photos[]" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
-                            <input type="file" id="forumVideos" name="videos[]" accept="video/mp4,video/webm,video/quicktime,video/x-msvideo" multiple>
-                            <input type="file" id="forumFiles" name="files[]" multiple>
-                        </div>
-
-                        {{-- Estado de los adjuntos: lista los archivos elegidos, avisa de los
-                             que superan el limite y muestra el progreso real de la subida. --}}
-                        <p class="forum-attachment-status" id="forumAttachmentStatus"
-                           data-max-bytes="{{ $chunkedMaxBytes }}"
-                           data-fast-path-bytes="{{ $attachmentMaxBytes }}"
-                           data-max-label="{{ $chunkedMaxLabel }}"
-                           data-fast-path-label="{{ $attachmentMaxLabel }}"
-                           data-max-files="{{ $maxFilesPerPost }}">
-                            Adjuntos de hasta {{ $chunkedMaxLabel }} cada uno. Los archivos grandes se suben por trozos.
-                        </p>
-
-                        <div class="forum-upload-progress" id="forumUploadProgress" hidden>
-                            <div class="forum-upload-bar">
-                                <span id="forumUploadBarFill"></span>
-                            </div>
-                            <p class="forum-upload-label" id="forumUploadLabel">Subiendo…</p>
-
-                            {{-- Corta la subida y borra del servidor lo que llevaba. --}}
-                            <button type="button" class="forum-upload-cancel" id="forumUploadCancel">
-                                Cancelar subida
-                            </button>
-                        </div>
-
-                        <ul class="forum-uploaded-list" id="forumUploadedList"></ul>
-
-                        <div class="poll-builder" id="forumPollBuilder" hidden>
-                            <h4>Encuesta (opcional)</h4>
-                            <p class="poll-builder-help">Si agregas pregunta, debes completar al menos 2 opciones.</p>
-                            <label for="pollQuestion">Pregunta
-                                <input type="text" id="pollQuestion" name="poll_question" maxlength="180" value="{{ old('poll_question') }}" placeholder="Ejemplo: Que tema quieres ver la proxima semana?">
-                            </label>
-                            <div class="poll-options-list" id="pollOptionsList">
-                                <label>Opcion 1
-                                    <input type="text" name="poll_options[]" maxlength="120" placeholder="Primera opcion">
-                                </label>
-                                <label>Opcion 2
-                                    <input type="text" name="poll_options[]" maxlength="120" placeholder="Segunda opcion">
-                                </label>
-                            </div>
-                            <button type="button" class="poll-add-option" id="addPollOption">+ Agregar opcion</button>
-                        </div>
-
-                        <div class="forum-compose-actions">
-                            <button type="button" class="forum-compose-close">Cancelar</button>
-                            <button type="submit">Publicar</button>
-                        </div>
-                    </form>
-                        </div>
-                    </div>
                 @else
                     <p class="auth-message auth-error">Solo usuarios registrados pueden publicar. Invitados y visitantes pueden leer el contenido del foro.</p>
                 @endif
@@ -1725,5 +1759,82 @@
         window.addEventListener('DOMContentLoaded', bindReportModalEvents);
         window.addEventListener('DOMContentLoaded', bindForumComposer);
     </script>
+
+    {{-- Fuera de .forum-card: esa tarjeta tiene backdrop-filter y crea un
+         contexto de apilamiento, asi que el encabezado tapaba la ventana. --}}
+                    <div class="forum-compose-modal" id="forumComposeModal" aria-hidden="true">
+                        <div class="forum-compose-card" role="dialog" aria-modal="true" aria-labelledby="forumComposeTitle" onclick="event.stopPropagation()">
+                            <div class="forum-compose-head">
+                                <h3 id="forumComposeTitle">Crear publicacion</h3>
+                                <button type="button" class="forum-compose-close" id="closeForumComposer" aria-label="Cerrar">×</button>
+                            </div>
+                    <form class="forum-form" method="POST" action="{{ url('/foro') }}" enctype="multipart/form-data">
+                        @csrf
+                        <label for="forumTitle">Titulo (opcional)
+                            <input type="text" id="forumTitle" name="title" maxlength="120" placeholder="Tema del post...">
+                        </label>
+                        <label for="forumContent">Contenido
+                            <textarea id="forumContent" name="content" maxlength="5000" required placeholder="Comparte tu idea o pregunta..."></textarea>
+                        </label>
+                        <div class="forum-attachment-tools" aria-label="Agregar contenido">
+                            <button type="button" data-file-trigger="forumPhotos">▣ Foto</button>
+                            <button type="button" id="toggleForumPoll">▤ Encuesta</button>
+                            <button type="button" data-file-trigger="forumVideos">▶ Video</button>
+                            <button type="button" data-file-trigger="forumFiles">▤ Archivo</button>
+                            <input type="file" id="forumPhotos" name="photos[]" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+                            <input type="file" id="forumVideos" name="videos[]" accept="video/mp4,video/webm,video/quicktime,video/x-msvideo" multiple>
+                            <input type="file" id="forumFiles" name="files[]" multiple>
+                        </div>
+
+                        {{-- Estado de los adjuntos: lista los archivos elegidos, avisa de los
+                             que superan el limite y muestra el progreso real de la subida. --}}
+                        <p class="forum-attachment-status" id="forumAttachmentStatus"
+                           data-max-bytes="{{ $chunkedMaxBytes }}"
+                           data-fast-path-bytes="{{ $attachmentMaxBytes }}"
+                           data-max-label="{{ $chunkedMaxLabel }}"
+                           data-fast-path-label="{{ $attachmentMaxLabel }}"
+                           data-max-files="{{ $maxFilesPerPost }}">
+                            Adjuntos de hasta {{ $chunkedMaxLabel }} cada uno. Los archivos grandes se suben por trozos.
+                        </p>
+
+                        <div class="forum-upload-progress" id="forumUploadProgress" hidden>
+                            <div class="forum-upload-bar">
+                                <span id="forumUploadBarFill"></span>
+                            </div>
+                            <p class="forum-upload-label" id="forumUploadLabel">Subiendo…</p>
+
+                            {{-- Corta la subida y borra del servidor lo que llevaba. --}}
+                            <button type="button" class="forum-upload-cancel" id="forumUploadCancel">
+                                Cancelar subida
+                            </button>
+                        </div>
+
+                        <ul class="forum-uploaded-list" id="forumUploadedList"></ul>
+
+                        <div class="poll-builder" id="forumPollBuilder" hidden>
+                            <h4>Encuesta (opcional)</h4>
+                            <p class="poll-builder-help">Si agregas pregunta, debes completar al menos 2 opciones.</p>
+                            <label for="pollQuestion">Pregunta
+                                <input type="text" id="pollQuestion" name="poll_question" maxlength="180" value="{{ old('poll_question') }}" placeholder="Ejemplo: Que tema quieres ver la proxima semana?">
+                            </label>
+                            <div class="poll-options-list" id="pollOptionsList">
+                                <label>Opcion 1
+                                    <input type="text" name="poll_options[]" maxlength="120" placeholder="Primera opcion">
+                                </label>
+                                <label>Opcion 2
+                                    <input type="text" name="poll_options[]" maxlength="120" placeholder="Segunda opcion">
+                                </label>
+                            </div>
+                            <button type="button" class="poll-add-option" id="addPollOption">+ Agregar opcion</button>
+                        </div>
+
+                        <div class="forum-compose-actions">
+                            <button type="button" class="forum-compose-close">Cancelar</button>
+                            <button type="submit">Publicar</button>
+                        </div>
+                    </form>
+                        </div>
+                    </div>
+
 </body>
 </html>
