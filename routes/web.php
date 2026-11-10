@@ -226,6 +226,9 @@ Route::middleware(EnsureRegisteredUser::class)->group(function (): void {
     Route::post('/perfil/{username}/publicacion/{postId}/borrar', [ProfileController::class, 'destroyPost'])
         ->name('profile.post.delete');
 
+    Route::post('/perfil/{username}/publicacion/{postId}/reportar', [ProfileController::class, 'reportPost'])
+        ->name('profile.post.report');
+
     Route::post('/profile/appearance', [ProfileController::class, 'updateAppearance'])->name('profile.appearance');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 

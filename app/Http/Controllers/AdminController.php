@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\ForumStore;
+use App\Services\ProfileStore;
 use App\Services\UserStore;
 use App\Support\ActiveUser;
 use Illuminate\Http\RedirectResponse;
@@ -20,6 +21,7 @@ class AdminController extends Controller
     public function __construct(
         private readonly UserStore $users,
         private readonly ForumStore $forum,
+        private readonly ProfileStore $profiles,
     ) {}
 
     public function users(): View
@@ -235,10 +237,15 @@ class AdminController extends Controller
             'report_id' => 'required|string',
         ]);
 
-        $deleted = $this->forum->removeReport(
-            (string) $validated['post_id'],
-            (string) $validated['report_id']
-        );
+        /*
+         * El reporte puede venir del foro o de una publicacion del perfil: cada
+         * uno vive en su archivo. La vista manda "kind" para saber donde buscar.
+         */
+        $kind = (string) $request->input('kind', 'foro');
+
+        $deleted = $kind === 'perfil'
+            ? $this->profiles->removeReport((string) $validated['post_id'], (string) $validated['report_id'])
+            : $this->forum->removeReport((string) $validated['post_id'], (string) $validated['report_id']);
 
         if (! $deleted) {
             return redirect('/admin/users')->with('error', 'No se pudo eliminar el reporte o ya no existe.');
@@ -283,6 +290,15 @@ class AdminController extends Controller
                     'reported_at' => (string) ($report['created_at'] ?? ''),
                 ];
             }
+        }
+
+        /*
+         * Los reportes de las publicaciones del perfil se guardan en otro archivo
+         * (profile_posts.json), asi que hay que sumarlos aqui: si no, se quedarian
+         * sin revisar para siempre.
+         */
+        foreach ($this->profiles->allReports() as $report) {
+            $reports[] = $report;
         }
 
         usort($reports, static fn (array $a, array $b): int => strcmp(

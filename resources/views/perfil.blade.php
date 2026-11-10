@@ -94,6 +94,88 @@
             font-size: 11px;
         }
 
+        /* Menu de acciones de la publicacion (tres puntos), igual que en el foro. */
+        .profile-post-menu {
+            position: relative;
+            margin: 8px 0 0;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .profile-post-menu > summary {
+            list-style: none;
+            padding: 2px 12px;
+            border: 1px solid var(--vh-border);
+            border-radius: 6px;
+            background-color: var(--vh-button-bg, rgba(255, 255, 255, 0.12));
+            color: var(--vh-text);
+            font-size: 15px;
+            line-height: 1.2;
+            cursor: pointer;
+        }
+
+        .profile-post-menu > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .profile-post-menu-panel {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 4px);
+            z-index: 30;
+            min-width: 210px;
+            padding: 6px;
+            border: 1px solid var(--vh-border);
+            border-radius: 8px;
+            /* El panel del tema es translucido: el desplegable necesita fondo
+               propio para no dejar ver la publicacion de abajo. */
+            background-color: var(--vh-surface-strong, var(--vh-panel-bg));
+            background-image: linear-gradient(var(--vh-panel-bg), var(--vh-panel-bg));
+            backdrop-filter: blur(8px);
+            box-shadow: var(--vh-panel-shadow, 0 12px 28px rgba(0, 0, 0, 0.4));
+        }
+
+        .profile-post-menu-panel form {
+            margin: 0;
+        }
+
+        .profile-post-menu-panel button,
+        .profile-report > summary {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 6px 10px;
+            border: 1px solid var(--vh-border);
+            border-radius: 6px;
+            background-color: var(--vh-button-bg, rgba(255, 255, 255, 0.12));
+            color: var(--vh-text);
+            font-size: 12px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .profile-post-menu-panel button:hover,
+        .profile-report > summary:hover {
+            background-color: var(--vh-button-hover, rgba(255, 255, 255, 0.2));
+        }
+
+        .profile-report > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .profile-report textarea {
+            width: 100%;
+            margin: 6px 0;
+            padding: 6px;
+            box-sizing: border-box;
+            border: 1px solid var(--vh-border);
+            border-radius: 6px;
+            background: var(--vh-input-bg, rgba(0, 0, 0, 0.2));
+            color: var(--vh-text);
+            font-size: 12px;
+            resize: vertical;
+        }
+
         .profile-post-content {
             margin: 0;
             color: var(--vh-panel-text);
@@ -352,15 +434,35 @@
                                     @endforeach
                                 </div>
                             @endif
-                            @if (!isset($post['title']) && ($isOwner || ($currentUser['role'] ?? 'guest') === 'admin'))
-                                {{-- Publicacion escrita aqui. Las del foro traen 'title' y se borran
-                                     desde el foro, donde esta su conversacion y sus comentarios. --}}
-                                <form class="profile-post-delete" method="POST"
-                                      action="{{ url('/perfil/' . rawurlencode($profile['username']) . '/publicacion/' . ($post['id'] ?? '') . '/borrar') }}"
-                                      onsubmit="return confirm('¿Borrar esta publicación? No se puede deshacer.');">
-                                    @csrf
-                                    <button type="submit" class="delete-btn">Borrar</button>
-                                </form>
+                            @if (!isset($post['title']))
+                                {{-- Menu de acciones, como en el foro: reportar para cualquiera con
+                                     cuenta, borrar solo para quien escribio la publicacion. --}}
+                                @if (!empty($currentUser) && (($currentUser['role'] ?? 'guest') !== 'guest'))
+                                    <details class="profile-post-menu">
+                                        <summary aria-label="Acciones de la publicacion">&#8943;</summary>
+                                        <div class="profile-post-menu-panel">
+                                            <details class="profile-report">
+                                                <summary>Reportar</summary>
+                                                <form method="POST"
+                                                      action="{{ url('/perfil/' . rawurlencode($profile['username']) . '/publicacion/' . ($post['id'] ?? '') . '/reportar') }}">
+                                                    @csrf
+                                                    <textarea name="reason" rows="3" maxlength="280" required
+                                                              minlength="8" placeholder="Cuenta que pasa (8 a 280 caracteres)"></textarea>
+                                                    <button type="submit">Enviar reporte</button>
+                                                </form>
+                                            </details>
+
+                                            @if ($isOwner || ($currentUser['role'] ?? 'guest') === 'admin')
+                                                <form method="POST"
+                                                      action="{{ url('/perfil/' . rawurlencode($profile['username']) . '/publicacion/' . ($post['id'] ?? '') . '/borrar') }}"
+                                                      onsubmit="return confirm('¿Borrar esta publicación? No se puede deshacer.');">
+                                                    @csrf
+                                                    <button type="submit" class="delete-btn">Borrar</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </details>
+                                @endif
                             @endif
                         </article>
                     @endforeach

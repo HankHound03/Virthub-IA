@@ -1684,13 +1684,13 @@
 
         <section class="admin-card admin-card-fija gadget-size-wide" data-gadget-id="forum-reports" data-admin-panel="reportes">
             <div class="gadget-head">
-                <h2>Reportes del Foro</h2>
+                <h2>Reportes</h2>
             </div>
 
             <div class="gadget-content">
 
             @if (empty($forumReports ?? []))
-                <p>No hay reportes del foro por ahora.</p>
+                <p>No hay reportes por ahora.</p>
             @else
                 <div class="table-scroll">
                 <table class="reports-table">
@@ -1721,6 +1721,7 @@
                                         @csrf
                                         <input type="hidden" name="post_id" value="{{ $report['post_id'] }}">
                                         <input type="hidden" name="report_id" value="{{ $report['report_id'] }}">
+                                        <input type="hidden" name="kind" value="{{ $report['kind'] ?? 'foro' }}">
                                         <button type="submit" class="report-delete-btn">Reporte verificado</button>
                                     </form>
                                 </td>

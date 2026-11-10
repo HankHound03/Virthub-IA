@@ -84,6 +84,113 @@ class ProfileStore
         });
     }
 
+    /**
+     * Anota un reporte sobre una publicacion del perfil.
+     *
+     * Los reportes viven dentro de la propia publicacion, igual que en el foro,
+     * para que borrar la publicacion se lleve tambien sus reportes.
+     */
+    public function addReport(string $postId, string $reporter, string $reason): array
+    {
+        $postId = trim($postId);
+        $reporter = trim($reporter);
+        $reason = trim($reason);
+
+        if ($postId === '' || $reporter === '') {
+            throw new RuntimeException('Datos invalidos para reportar.');
+        }
+
+        if ($reason === '') {
+            $reason = 'Sin detalle';
+        }
+
+        return $this->updatePosts(function (array &$posts) use ($postId, $reporter, $reason): array {
+            foreach ($posts as &$post) {
+                if (($post['id'] ?? '') !== $postId) {
+                    continue;
+                }
+
+                $reports = is_array($post['reports'] ?? null) ? $post['reports'] : [];
+                $reporte = [
+                    'id' => Str::uuid()->toString(),
+                    'reporter' => $reporter,
+                    'reason' => $reason,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
+
+                $reports[] = $reporte;
+                $post['reports'] = array_slice($reports, -100);
+                unset($post);
+
+                return $reporte;
+            }
+
+            unset($post);
+
+            throw new RuntimeException('Esa publicacion ya no existe.');
+        });
+    }
+
+    /**
+     * Todos los reportes de perfiles, con la forma que espera el panel.
+     *
+     * @return array<int, array<string, string>>
+     */
+    public function allReports(): array
+    {
+        $salida = [];
+
+        foreach ($this->readPosts() as $post) {
+            foreach ((array) ($post['reports'] ?? []) as $reporte) {
+                if (! is_array($reporte)) {
+                    continue;
+                }
+
+                $autor = (string) ($post['author'] ?? 'usuario');
+
+                $salida[] = [
+                    'kind' => 'perfil',
+                    'reported_at' => (string) ($reporte['created_at'] ?? ''),
+                    'reporter' => (string) ($reporte['reporter'] ?? ''),
+                    'reason' => (string) ($reporte['reason'] ?? ''),
+                    'post_id' => (string) ($post['id'] ?? ''),
+                    'post_title' => 'Perfil de ' . $autor,
+                    'post_content' => (string) ($post['content'] ?? ''),
+                    'post_author' => $autor,
+                    'report_id' => (string) ($reporte['id'] ?? ''),
+                ];
+            }
+        }
+
+        return $salida;
+    }
+
+    /** Quita un reporte ya revisado. */
+    public function removeReport(string $postId, string $reportId): bool
+    {
+        return $this->updatePosts(function (array &$posts) use ($postId, $reportId): bool {
+            foreach ($posts as &$post) {
+                if (($post['id'] ?? '') !== $postId) {
+                    continue;
+                }
+
+                $reports = is_array($post['reports'] ?? null) ? $post['reports'] : [];
+                $quedan = array_values(array_filter($reports, function (array $r) use ($reportId): bool {
+                    return (string) ($r['id'] ?? '') !== $reportId;
+                }));
+
+                $post['reports'] = $quedan;
+                unset($post);
+
+                return count($quedan) !== count($reports);
+            }
+
+            unset($post);
+
+            return false;
+        });
+    }
+
     private function ensureStore(): void
     {
         $directory = dirname($this->filePath);

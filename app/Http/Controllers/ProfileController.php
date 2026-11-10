@@ -10,6 +10,7 @@ use App\Support\ActiveUser;
 use App\Support\VirusScanner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use RuntimeException;
 use Illuminate\View\View;
 
 /**
@@ -86,6 +87,34 @@ class ProfileController extends Controller
 
         return redirect('/perfil/' . rawurlencode($username))
             ->with('success', 'Publicacion eliminada de tu perfil.');
+    }
+
+    /**
+     * Reporta una publicacion del perfil a moderacion.
+     *
+     * Mismas reglas que en el foro: motivo obligatorio de 8 a 280 caracteres y
+     * solo cuentas registradas. El reporte se guarda dentro de la publicacion,
+     * asi que si esta se borra, el reporte desaparece con ella.
+     */
+    public function reportPost(Request $request, string $username, string $postId, ProfileStore $store): RedirectResponse
+    {
+        if (! ActiveUser::isRegistered(ActiveUser::from($request))) {
+            return redirect('/perfil/' . rawurlencode($username))
+                ->with('error', 'Inicia sesion para reportar una publicacion.');
+        }
+
+        $validated = $request->validate([
+            'reason' => 'required|string|min:8|max:280',
+        ]);
+
+        try {
+            $store->addReport($postId, ActiveUser::username(ActiveUser::from($request)), (string) $validated['reason']);
+        } catch (RuntimeException $e) {
+            return redirect('/perfil/' . rawurlencode($username))->with('error', $e->getMessage());
+        }
+
+        return redirect('/perfil/' . rawurlencode($username))
+            ->with('success', 'Reporte enviado a moderacion.');
     }
 
     public function updateAppearance(Request $request): RedirectResponse
