@@ -1439,6 +1439,96 @@
               }
           }
 
+
+
+/* =============================================================================
+   TABLAS DEL PANEL CON TEXTOS LARGOS
+   =============================================================================
+   Con table-layout: auto, una publicacion larga o un motivo largo empujaban las
+   demas columnas: "Reportado por" se partia en dos lineas, "Autor post" quedaba
+   en un hilo y la columna de acciones se comia el ancho.
+
+   Con table-layout: fixed cada columna tiene su porcentaje y el texto largo se
+   parte dentro de la suya. Solo aplica en modo tabla (las tarjetas del movil
+   tienen sus propias reglas).
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 621px) {
+    .users-table,
+    .reports-table,
+    .suggestions-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .users-table th,
+    .users-table td,
+    .reports-table th,
+    .reports-table td,
+    .suggestions-table th,
+    .suggestions-table td {
+        /* El texto largo se parte dentro de su celda, no empuja la columna. */
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .reports-table th,
+    .reports-table td {
+        vertical-align: top;
+    }
+
+    /* Reparto fijo de columnas para los reportes. */
+    .reports-table th:nth-child(1),
+    .reports-table td:nth-child(1) {
+        width: 11%;
+    }
+
+    .reports-table th:nth-child(2),
+    .reports-table td:nth-child(2) {
+        width: 11%;
+    }
+
+    .reports-table th:nth-child(3),
+    .reports-table td:nth-child(3) {
+        width: 21%;
+    }
+
+    .reports-table th:nth-child(4),
+    .reports-table td:nth-child(4) {
+        width: 30%;
+    }
+
+    .reports-table th:nth-child(5),
+    .reports-table td:nth-child(5) {
+        width: 12%;
+    }
+
+    .reports-table th:nth-child(6),
+    .reports-table td:nth-child(6) {
+        width: 14%;
+    }
+
+    /* La columna de acciones, en vertical y sin apretarse. */
+    .reports-table td:nth-child(6) .admin-link-btn,
+    .reports-table td:nth-child(6) .report-delete-form {
+        display: block;
+        width: 100%;
+        margin-bottom: 6px;
+    }
+
+    .reports-table td:nth-child(6) .report-delete-btn {
+        width: 100%;
+    }
+
+    /* El resumen de la publicacion, como mucho tres lineas. */
+    .report-post-snippet {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
 </style>
     @include('partials.tema-boot')
 </head>
@@ -1696,18 +1786,25 @@
                 <table class="reports-table">
                     <thead>
                         <tr>
-                            <th>Fecha reporte</th>
-                            <th>Reportado por</th>
+                            <th>Fecha</th>
+                            <th>Reporta</th>
                             <th>Motivo</th>
                             <th>Post</th>
-                            <th>Autor post</th>
-                            <th>Accion</th>
+                            <th>Autor</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($forumReports as $report)
                             <tr>
-                                <td data-label="Fecha reporte">{{ $report['reported_at'] ?: '-' }}</td>
+                                <td data-label="Fecha reporte">
+                                    @if (!empty($report['reported_at']))
+                                        <span class="tabla-fecha">{{ \Illuminate\Support\Carbon::parse($report['reported_at'])->format('d/m/Y') }}</span>
+                                        <span class="tabla-hora">{{ \Illuminate\Support\Carbon::parse($report['reported_at'])->format('H:i') }}</span>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td data-label="Reportado por">{{ $report['reporter'] ?: '-' }}</td>
                                 <td data-label="Motivo" class="report-reason">{{ $report['reason'] ?: 'Sin detalle' }}</td>
                                 <td data-label="Post">
