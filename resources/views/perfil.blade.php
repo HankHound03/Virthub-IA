@@ -105,10 +105,11 @@
         .profile-post-menu > summary {
             list-style: none;
             padding: 2px 12px;
-            border: 1px solid var(--vh-border);
-            border-radius: 6px;
-            background-color: var(--vh-button-bg, rgba(255, 255, 255, 0.12));
-            color: var(--vh-text);
+            border: 1px solid var(--vh-btn-border, var(--vh-border));
+            border-radius: var(--vh-btn-radius, 6px);
+            /* --vh-btn-bg es un degradado: va en background, no en background-color. */
+            background: var(--vh-btn-bg, rgba(255, 255, 255, 0.12));
+            color: var(--vh-btn-text, var(--vh-text));
             font-size: 15px;
             line-height: 1.2;
             cursor: pointer;

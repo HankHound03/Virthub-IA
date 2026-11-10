@@ -2076,7 +2076,7 @@ body .chat-users-panel {
     padding: 6px 12px;
     border: 1px solid var(--vh-btn-border, rgba(255, 255, 255, 0.2));
     border-radius: 8px;
-    background-color: var(--vh-btn-bg, rgba(255, 255, 255, 0.1));
+    background: var(--vh-btn-bg, rgba(255, 255, 255, 0.1));
     color: inherit;
     font-family: inherit;
     font-size: 12px;
@@ -2105,7 +2105,7 @@ body .chat-users-panel {
     padding: 6px 14px;
     border: 1px solid var(--vh-btn-border, rgba(255, 255, 255, 0.2));
     border-radius: 8px;
-    background-color: var(--vh-btn-bg, rgba(255, 255, 255, 0.1));
+    background: var(--vh-btn-bg, rgba(255, 255, 255, 0.1));
     color: var(--vh-btn-text, inherit);
     font-family: inherit;
     font-size: 12px;
@@ -2625,7 +2625,7 @@ body .chat-users-panel {
     padding: 10px 11px;
     border: 1px solid var(--vh-border);
     border-radius: 8px;
-    background-color: var(--vh-btn-bg);
+    background: var(--vh-btn-bg);
     color: var(--vh-btn-text);
     font-family: inherit;
     font-size: 13px;

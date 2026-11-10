@@ -2880,7 +2880,7 @@ html.vh-ligero .awty-btn {
     .admin-card select,
     .admin-form-acordeon input
 ) {
-    background-color: var(--vh-btn-bg);
+    background: var(--vh-btn-bg);
     color: var(--vh-btn-text);
 }
 
