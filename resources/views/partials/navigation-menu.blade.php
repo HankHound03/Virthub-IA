@@ -4,7 +4,7 @@
     $userRole = (string) ($currentUser['role'] ?? 'guest');
 
     $links = [
-        ['key' => 'home', 'label' => 'Inicio', 'url' => url('/'), 'visible' => true],
+        ['key' => 'home', 'label' => 'Inicio', 'url' => url('/'), 'visible' => true, 'icono' => 'casa'],
         ['key' => 'foro', 'label' => 'Foro', 'url' => url('/foro'), 'visible' => true],
         ['key' => 'sugerencias', 'label' => 'Sugerencias', 'url' => url('/sugerencias'), 'visible' => true],
         ['key' => 'contenedor', 'label' => 'Contenedor', 'url' => url('/contenedor'), 'visible' => $hasUser],
@@ -18,15 +18,29 @@
             @continue
         @endif
 
+        @php($esCasa = ($link['icono'] ?? '') === 'casa')
+
         @if ($activePage === ($link['key'] ?? '') && !($link['external'] ?? false))
-            <a href="{{ $link['url'] }}" class="navbar-link active" aria-current="page">
-                {{ $link['label'] }}
+            <a href="{{ $link['url'] }}" class="navbar-link active" aria-current="page"
+               @if ($esCasa) aria-label="{{ $link['label'] }}" title="{{ $link['label'] }}" @endif>
+                @if ($esCasa)
+                    <span class="navbar-icono" aria-hidden="true"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7.3 8 2.2l6 5.1V14H2z"/><path d="M6.3 14V9.5h3.4V14"/></svg></span>
+                    <span class="navbar-texto-oculto">{{ $link['label'] }}</span>
+                @else
+                    {{ $link['label'] }}
+                @endif
             </a>
         @else
-            <a href="{{ $link['url'] }}" 
+            <a href="{{ $link['url'] }}"
                class="navbar-link"
+               @if ($esCasa) aria-label="{{ $link['label'] }}" title="{{ $link['label'] }}" @endif
                @if ($link['external'] ?? false) target="_blank" rel="noopener noreferrer" @endif>
-                {{ $link['label'] }}
+                @if ($esCasa)
+                    <span class="navbar-icono" aria-hidden="true"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7.3 8 2.2l6 5.1V14H2z"/><path d="M6.3 14V9.5h3.4V14"/></svg></span>
+                    <span class="navbar-texto-oculto">{{ $link['label'] }}</span>
+                @else
+                    {{ $link['label'] }}
+                @endif
             </a>
         @endif
     @endforeach
@@ -76,6 +90,32 @@
 
 .navbar-link.active:hover {
     transform: translateY(-2px);
+}
+
+
+.navbar-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+}
+
+/* Texto solo para lectores de pantalla: la casa se entiende sola a la vista. */
+.navbar-texto-oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.navbar-link[aria-label] {
+    padding-left: 11px;
+    padding-right: 11px;
 }
 
 @media (max-width: 768px) {

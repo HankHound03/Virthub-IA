@@ -3474,49 +3474,39 @@ html.vh-ligero .awty-btn {
 }
 
 /* =============================================================================
-   ENCABEZADO EN PANTALLAS NORMALES Y BAJAS
+   ENCABEZADO: UNA FILA HASTA 1100
    =============================================================================
-   En 1366x768 el menu se partia en dos lineas dentro de la misma fila (los cinco
-   botones no caben entre el logo y los controles) y la barra parecia rota.
+   Los cinco botones del menu no caben entre el logo y los controles en 1366 ni en
+   1600 cuando la tipografia del equipo es ancha, y la barra se partia.
 
-   En vez de encoger los botones hasta que entren -que depende de la tipografia
-   de cada equipo-, a partir de 1440 el menu pasa a su propia fila, centrado:
+   Para que quepa en una sola fila:
 
-       [logo]                         [buscador] [tema] [foto]
-       [  Inicio   Foro   Sugerencias   Contenedor   Admin  ]
+     - "Inicio" pasa a ser el icono de una casa (la casa se entiende sola y ahorra
+       el ancho de la palabra);
+     - la foto de perfil y el buscador se hacen mas pequenos segun el ancho;
+     - los botones del menu se aprietan un poco.
 
-   Asi la barra siempre tiene dos filas limpias, nunca tres, y el ancho de los
-   botones deja de ser un problema.
+   Solo cuando de verdad no cabe (1100 o menos) el menu baja a su propia fila.
 
-     1440 o menos  menu en su fila
-     1200 o menos  logo, buscador y foto mas pequenos
-      900 o menos  botones compactos
+     <= 1700  botones y foto un poco mas pequenos
+     <= 1400  otro paso: botones, buscador, logo y foto
+     <= 1100  el menu baja a su fila, centrado
+     <=  900  version compacta
    -------------------------------------------------------------------------- */
 
-@media (max-width: 1440px) {
+@media (max-width: 1700px) {
     [data-era] body > header {
-        flex-wrap: wrap !important;
-        gap: 10px !important;
+        gap: 14px !important;
         padding: 10px 14px !important;
-        row-gap: 8px !important;
     }
 
-    [data-era] body > header .navbar {
-        order: 3;
-        flex: 1 0 100% !important;
-        justify-content: center !important;
-        flex-wrap: wrap !important;
-        gap: 8px !important;
-    }
-
-    [data-era] body .header-controls {
-        margin-left: auto !important;
-        gap: 8px !important;
+    [data-era] body .navbar {
+        gap: 6px !important;
     }
 
     [data-era] body .navbar-link {
-        padding: 5px 12px !important;
-        font-size: 12px !important;
+        padding: 6px 11px !important;
+        font-size: 12.5px !important;
     }
 
     [data-era] body .header-friend-search input {
@@ -3524,24 +3514,61 @@ html.vh-ligero .awty-btn {
     }
 
     [data-era] body .brand-logo {
-        width: 104px !important;
-        height: 46px !important;
-    }
-}
-
-@media (max-width: 1200px) {
-    [data-era] body .header-friend-search input {
-        width: 110px !important;
-    }
-
-    [data-era] body .brand-logo {
-        width: 92px !important;
-        height: 40px !important;
+        width: 112px !important;
+        height: 50px !important;
     }
 
     [data-era] body .profile-aero-frame {
-        width: 48px !important;
-        height: 48px !important;
+        width: 62px !important;
+        height: 62px !important;
+    }
+}
+
+@media (max-width: 1400px) {
+    [data-era] body > header {
+        gap: 10px !important;
+        padding: 8px 12px !important;
+    }
+
+    [data-era] body .navbar {
+        gap: 5px !important;
+    }
+
+    [data-era] body .navbar-link {
+        padding: 5px 10px !important;
+        font-size: 12px !important;
+    }
+
+    [data-era] body .header-friend-search input {
+        width: 120px !important;
+    }
+
+    [data-era] body .brand-logo {
+        width: 96px !important;
+        height: 42px !important;
+    }
+
+    [data-era] body .profile-aero-frame {
+        width: 54px !important;
+        height: 54px !important;
+    }
+}
+
+@media (max-width: 1100px) {
+    [data-era] body > header {
+        flex-wrap: wrap !important;
+        row-gap: 8px !important;
+    }
+
+    [data-era] body > header .navbar {
+        order: 3;
+        flex: 1 0 100% !important;
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+
+    [data-era] body .header-controls {
+        margin-left: auto !important;
     }
 }
 
