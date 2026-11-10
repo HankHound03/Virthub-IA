@@ -132,10 +132,25 @@ class UserWorkspaceStore
                 continue;
             }
 
+            /*
+             * Una tarea puede llevar materia, fecha, fecha de entrega y una nota.
+             * Las fechas se guardan como YYYY-MM-DD (o vacias) para no arrastrar
+             * zonas horarias: es un dia, no un instante.
+             */
+            $fechaValida = static function ($valor): string {
+                $valor = trim((string) $valor);
+
+                return preg_match('/^\d{4}-\d{2}-\d{2}$/', $valor) ? $valor : '';
+            };
+
             $todos[] = [
                 'id' => substr($id, 0, 80),
                 'text' => mb_substr($text, 0, 120),
                 'done' => (bool) ($item['done'] ?? false),
+                'subject' => mb_substr(trim((string) ($item['subject'] ?? '')), 0, 40),
+                'date' => $fechaValida($item['date'] ?? ''),
+                'due' => $fechaValida($item['due'] ?? ''),
+                'info' => mb_substr(trim((string) ($item['info'] ?? '')), 0, 500),
             ];
         }
 

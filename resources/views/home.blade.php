@@ -436,10 +436,49 @@
             </div>
 
             <section class="todo-widget" aria-label="Tareas pendientes">
-                <form id="todoForm" class="todo-form">
-                    <input id="todoInput" type="text" maxlength="120" placeholder="Escribe una tarea y presiona Enter" autocomplete="off">
-                    <button type="submit">Agregar</button>
+                <button type="button" class="todo-add-btn" id="todoAddBtn" aria-expanded="false" aria-controls="todoPanel">
+                    + Agregar tarea
+                </button>
+
+                {{-- Panel de la tarea: se abre al pulsar el boton y pide titulo, materia,
+                     fechas y una nota. Las materias ya usadas se ofrecen para reutilizarlas. --}}
+                <form id="todoForm" class="todo-form todo-panel" hidden>
+                    <label class="todo-campo">
+                        <span>Título de la tarea</span>
+                        <input id="todoInput" type="text" maxlength="120" required
+                               placeholder="Ej: Entregar práctica 3" autocomplete="off">
+                    </label>
+
+                    <label class="todo-campo">
+                        <span>Materia</span>
+                        <input id="todoSubject" type="text" maxlength="40" list="todoMaterias"
+                               placeholder="Ej: Redes" autocomplete="off">
+                        <datalist id="todoMaterias"></datalist>
+                    </label>
+
+                    <div class="todo-fechas">
+                        <label class="todo-campo">
+                            <span>Fecha</span>
+                            <input id="todoDate" type="date">
+                        </label>
+                        <label class="todo-campo">
+                            <span>Fecha de entrega</span>
+                            <input id="todoDue" type="date">
+                        </label>
+                    </div>
+
+                    <label class="todo-campo">
+                        <span>Información de la tarea</span>
+                        <textarea id="todoInfo" rows="3" maxlength="500"
+                                  placeholder="Qué hay que hacer, con qué material, dónde se entrega..."></textarea>
+                    </label>
+
+                    <div class="todo-panel-acciones">
+                        <button type="button" class="todo-cancelar" id="todoCancelBtn">Cancelar</button>
+                        <button type="submit" class="todo-guardar">Agregar tarea</button>
+                    </div>
                 </form>
+
                 <ul id="todoList" class="todo-list"></ul>
             </section>
 
@@ -954,6 +993,10 @@
                         id: String(item?.id || '').trim(),
                         text: sanitizeTodoText(item?.text || ''),
                         done: !!item?.done,
+                        subject: String(item?.subject || '').trim().slice(0, 40),
+                        date: /^\d{4}-\d{2}-\d{2}$/.test(String(item?.date || '')) ? String(item.date) : '',
+                        due: /^\d{4}-\d{2}-\d{2}$/.test(String(item?.due || '')) ? String(item.due) : '',
+                        info: String(item?.info || '').slice(0, 500),
                     }))
                     .filter(item => item.id && item.text)
                     .slice(0, 120)
@@ -1183,6 +1226,43 @@
                 }
                 text.textContent = item.text;
 
+                if (item.info) {
+                    text.title = item.info;
+                }
+
+                // Materia y fechas, en una linea debajo del titulo.
+                const meta = document.createElement('span');
+                meta.className = 'todo-item-meta';
+
+                if (item.subject) {
+                    const chip = document.createElement('span');
+                    chip.className = 'todo-materia';
+                    chip.textContent = item.subject;
+                    meta.appendChild(chip);
+                }
+
+                const fechaLegible = (valor) => {
+                    const partes = String(valor || '').split('-');
+                    if (partes.length !== 3) return '';
+                    return partes[2] + '/' + partes[1] + '/' + partes[0];
+                };
+
+                if (item.due) {
+                    const entrega = document.createElement('span');
+                    entrega.className = 'todo-fecha todo-fecha-entrega';
+                    entrega.textContent = 'Entrega ' + fechaLegible(item.due);
+                    meta.appendChild(entrega);
+                } else if (item.date) {
+                    const fecha = document.createElement('span');
+                    fecha.className = 'todo-fecha';
+                    fecha.textContent = fechaLegible(item.date);
+                    meta.appendChild(fecha);
+                }
+
+                if (meta.childElementCount) {
+                    text.appendChild(meta);
+                }
+
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.className = 'todo-remove-btn';
@@ -1211,15 +1291,79 @@
             notesInput.value = state.notes;
             renderTodoList(state);
 
+            // ---------------------------------------------------------------
+            // Panel de la tarea
+            // ---------------------------------------------------------------
+            const todoAddBtn = document.getElementById('todoAddBtn');
+            const todoCancelBtn = document.getElementById('todoCancelBtn');
+            const todoSubjectInput = document.getElementById('todoSubject');
+            const todoDateInput = document.getElementById('todoDate');
+            const todoDueInput = document.getElementById('todoDue');
+            const todoInfoInput = document.getElementById('todoInfo');
+            const todoMaterias = document.getElementById('todoMaterias');
+
+            function abrirPanelTarea(abrir) {
+                if (!todoForm) return;
+                todoForm.hidden = !abrir;
+                if (todoAddBtn) {
+                    todoAddBtn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+                }
+                if (abrir && todoInput) {
+                    todoInput.focus();
+                }
+            }
+
+            /*
+             * Las materias que ya se usaron se ofrecen en el desplegable: al
+             * escribir una nueva queda guardada para la proxima vez.
+             */
+            function refrescarMaterias() {
+                if (!todoMaterias) return;
+
+                const vistas = new Set();
+                state.todos.forEach(item => {
+                    const materia = String(item.subject || '').trim();
+                    if (materia) vistas.add(materia);
+                });
+
+                todoMaterias.innerHTML = '';
+                Array.from(vistas).sort((a, b) => a.localeCompare(b, 'es')).forEach(materia => {
+                    const opcion = document.createElement('option');
+                    opcion.value = materia;
+                    todoMaterias.appendChild(opcion);
+                });
+            }
+
+            if (todoAddBtn) {
+                todoAddBtn.addEventListener('click', () => abrirPanelTarea(todoForm.hidden));
+            }
+
+            if (todoCancelBtn) {
+                todoCancelBtn.addEventListener('click', () => {
+                    abrirPanelTarea(false);
+                    todoForm.reset();
+                });
+            }
+
             todoForm.addEventListener('submit', event => {
                 event.preventDefault();
+
                 const text = sanitizeTodoText(todoInput.value);
-                if (!text) return;
+                if (!text) {
+                    todoInput.focus();
+                    return;
+                }
+
+                const fecha = valor => (/^\d{4}-\d{2}-\d{2}$/.test(String(valor || '')) ? String(valor) : '');
 
                 state.todos.unshift({
                     id: 'todo_' + Date.now() + '_' + Math.random().toString(16).slice(2, 8),
                     text,
                     done: false,
+                    subject: String(todoSubjectInput ? todoSubjectInput.value : '').trim().slice(0, 40),
+                    date: fecha(todoDateInput ? todoDateInput.value : ''),
+                    due: fecha(todoDueInput ? todoDueInput.value : ''),
+                    info: String(todoInfoInput ? todoInfoInput.value : '').trim().slice(0, 500),
                 });
                 if (state.todos.length > 120) {
                     state.todos = state.todos.slice(0, 120);
@@ -1227,9 +1371,15 @@
 
                 saveProductivityState(state);
                 renderTodoList(state);
-                todoInput.value = '';
-                todoInput.focus();
+                refrescarMaterias();
+                todoForm.reset();
+                abrirPanelTarea(false);
+                if (todoAddBtn) {
+                    todoAddBtn.focus();
+                }
             });
+
+            refrescarMaterias();
 
             notesInput.addEventListener('input', () => {
                 state.notes = String(notesInput.value || '').slice(0, 2400);

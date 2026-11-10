@@ -41,10 +41,17 @@ class HomeController extends Controller
 
     public function saveState(Request $request, UserWorkspaceStore $workspace): JsonResponse
     {
+        /*
+         * "present" y no "required": la persona puede guardar sin tareas, sin
+         * notas o sin eventos, y "required" rechaza las listas y los textos
+         * vacios. Ese era el motivo de que los cambios no se guardaran: la
+         * peticion volvia 422 y el navegador la descartaba en silencio.
+         */
         $validated = $request->validate([
-            'todos' => 'required|array|max:120',
-            'notes' => 'required|string|max:2400',
-            'calendarEvents' => 'required|array',
+            'todos' => 'present|array|max:120',
+            // nullable: el middleware convierte el texto vacio en null.
+            'notes' => 'present|nullable|string|max:2400',
+            'calendarEvents' => 'present|array',
         ]);
 
         return response()->json([
