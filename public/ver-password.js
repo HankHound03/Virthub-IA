@@ -73,6 +73,11 @@
         boton.title = 'Ver la contraseña';
         boton.innerHTML = OJO_ABIERTO;
 
+        /* Al pulsar con el raton, que el campo no pierda el foco. */
+        boton.addEventListener('mousedown', function (evento) {
+            evento.preventDefault();
+        });
+
         boton.addEventListener('click', function (evento) {
             evento.preventDefault();
             evento.stopPropagation();
@@ -95,9 +100,20 @@
             campo.focus();
         });
 
-        /* Al salir del campo vuelve a ocultarse: nadie deja una contrasena a la
-           vista porque se fue a otra ventana. */
-        campo.addEventListener('blur', function () {
+        /*
+         * Al salir del campo vuelve a ocultarse: nadie deja una contrasena a la
+         * vista porque se fue a otra ventana.
+         *
+         * OJO: cuando se pulsa el boton, el campo pierde el foco ANTES de que
+         * llegue el clic. Si se oculta aqui, el primer clic no hace nada visible
+         * (se revela y se vuelve a ocultar en el mismo instante). Por eso se
+         * ignora el blur cuando el foco se va al boton.
+         */
+        campo.addEventListener('blur', function (evento) {
+            if (evento.relatedTarget === boton) {
+                return;
+            }
+
             if (campo.type !== 'text') {
                 return;
             }
