@@ -823,3 +823,5 @@
             })();
         </script>
     @endif
+
+<script src="{{ asset('ver-password.js') }}?v={{ filemtime(public_path('ver-password.js')) }}" defer></script>

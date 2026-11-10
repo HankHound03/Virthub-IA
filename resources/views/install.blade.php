@@ -168,5 +168,6 @@
             <p class="footer-note">Si prefieres, puedes dejar el valor por defecto y continuar con la aplicación principal.</p>
         </div>
     </div>
+<script src="{{ asset('ver-password.js') }}?v={{ filemtime(public_path('ver-password.js')) }}" defer></script>
 </body>
 </html>

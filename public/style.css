@@ -3014,3 +3014,73 @@ h6.md-titulo {
     color: var(--vh-text);
     font-size: 12.5px;
 }
+
+/* =============================================================================
+   VER LA CONTRASENA
+   =============================================================================
+   Boton con forma de ojo dentro del propio campo. El texto revelado no se puede
+   copiar: ver public/ver-password.js.
+   -------------------------------------------------------------------------- */
+
+.campo-con-ver {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+/* Cuando el campo va suelto en el formulario, el envoltorio ocupa su sitio. */
+span.campo-con-ver > input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Sitio a la derecha para que el texto no quede debajo del boton. */
+.campo-con-ver > input[type="password"],
+.campo-con-ver > input.password-a-la-vista {
+    padding-right: 38px;
+}
+
+.boton-ver-password {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--vh-text-soft, #8aa3b8);
+    cursor: pointer;
+    opacity: 0.85;
+    z-index: 2;
+}
+
+.boton-ver-password:hover {
+    opacity: 1;
+    background: var(--vh-button-hover, rgba(255, 255, 255, 0.16));
+}
+
+.boton-ver-password[aria-pressed="true"] {
+    color: var(--vh-accent, #58c4ff);
+    opacity: 1;
+}
+
+.boton-ver-password svg {
+    pointer-events: none;
+}
+
+/* El texto revelado no se selecciona: no se puede copiar. */
+input.password-a-la-vista {
+    user-select: none;
+    -webkit-user-select: none;
+
+    /* Y se pinta con el color del campo del tema: al pasar a texto el navegador
+       puede heredar el color de otro sitio y quedar ilegible. */
+    color: var(--vh-input-text, var(--vh-text)) !important;
+    -webkit-text-security: none;
+}
