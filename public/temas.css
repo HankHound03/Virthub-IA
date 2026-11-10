@@ -3472,3 +3472,104 @@ html.vh-ligero .awty-btn {
 [data-era] body .forum-post-avatar {
     border-color: var(--marco, var(--vh-border)) !important;
 }
+
+/* =============================================================================
+   ENCABEZADO EN PANTALLAS NORMALES Y BAJAS
+   =============================================================================
+   En 1366x768 la barra partia el menu en tres filas (Inicio/Foro, Sugerencias/
+   Contenedor, Admin) y se comia 190 px de alto. La causa: los botones del tema
+   son mas anchos que los enlaces originales, y el menu solo recibia el hueco que
+   sobraba entre el logo y los controles.
+
+   Aqui la barra se ordena sola segun el ancho:
+
+     1400 o menos  todo mas junto (huecos, relleno y botones)
+     1200 o menos  el menu baja a su propia fila, centrado
+      900 o menos  el buscador se estrecha y los botones se hacen compactos
+
+   Va al final del archivo y con la misma especificidad que las reglas del tema
+   para poder ganarles.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1400px) {
+    [data-era] body > header {
+        gap: 16px !important;
+        padding: 10px 14px !important;
+    }
+
+    [data-era] body .navbar {
+        gap: 6px !important;
+    }
+
+    [data-era] body .navbar-link {
+        padding: 5px 11px !important;
+        font-size: 12px !important;
+    }
+
+    [data-era] body .header-friend-search input {
+        width: 130px !important;
+    }
+
+    [data-era] body .brand-logo {
+        width: 104px !important;
+        height: 46px !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    [data-era] body > header {
+        flex-wrap: wrap !important;
+        row-gap: 8px !important;
+        padding: 8px 12px !important;
+    }
+
+    /* El menu pasa a su propia fila, centrado. */
+    [data-era] body > header .navbar {
+        order: 3;
+        flex: 1 0 100% !important;
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+
+    [data-era] body .header-controls {
+        margin-left: auto !important;
+        gap: 8px !important;
+    }
+
+    [data-era] body .header-friend-search input {
+        width: 110px !important;
+    }
+
+    [data-era] body .brand-logo {
+        width: 92px !important;
+        height: 40px !important;
+    }
+
+    [data-era] body .profile-aero-frame {
+        width: 48px !important;
+        height: 48px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    [data-era] body > header {
+        gap: 10px !important;
+        padding: 8px 10px !important;
+        top: 4px !important;
+    }
+
+    [data-era] body .navbar-link {
+        padding: 4px 9px !important;
+        font-size: 11.5px !important;
+    }
+
+    [data-era] body .header-friend-search input {
+        width: 96px !important;
+        font-size: 11.5px !important;
+    }
+
+    [data-era] body .brand-logo {
+        width: 80px !important;
+        height: 34px !important;
+    }
+}
