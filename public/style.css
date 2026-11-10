@@ -1576,6 +1576,51 @@ header h1 {
     color: var(--vh-btn-hover-text, var(--vh-btn-text, var(--vh-text)));
 }
 
+/* Los dos botones de la tarea, juntos a la derecha. */
+.todo-acciones {
+    display: flex;
+    gap: 5px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Boton Editar: mismo aspecto que Quitar, sin llamar tanto la atencion. */
+.todo-edit-btn {
+    padding: 2px 8px;
+    border: 1px solid var(--vh-border);
+    border-radius: var(--vh-btn-radius, 6px);
+    background: transparent;
+    color: var(--vh-text-soft);
+    font: inherit;
+    font-size: 10.5px;
+    cursor: pointer;
+}
+
+.todo-edit-btn:hover {
+    background: var(--vh-btn-hover-bg, var(--vh-btn-bg));
+    color: var(--vh-btn-hover-text, var(--vh-btn-text, var(--vh-text)));
+}
+
+/* La descripcion de la tarea: se ve recortada a dos lineas y se abre al pulsarla. */
+.todo-item-info {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: 4px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--vh-text-soft);
+    white-space: normal;
+    cursor: pointer;
+}
+
+.todo-item-info.is-open {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+}
+
 /* Materia y fechas, debajo del titulo de la tarea. */
 .todo-item-meta {
     display: flex;

@@ -1207,6 +1207,9 @@
                 li.className = 'todo-item';
                 li.dataset.todoId = item.id;
 
+                // Se rellena si la tarea trae descripcion.
+                let info = null;
+
                 const check = document.createElement('input');
                 check.type = 'checkbox';
                 check.checked = item.done;
@@ -1226,9 +1229,15 @@
                 }
                 text.textContent = item.text;
 
-                if (item.info) {
-                    text.title = item.info;
-                }
+                // La descripcion se ve; si es larga se recorta a dos lineas y se
+                // abre al pulsarla.
+                info = document.createElement('span');
+                info.className = 'todo-item-info';
+                info.textContent = item.info;
+                info.title = 'Pulsa para ver completa';
+                info.addEventListener('click', () => {
+                        info.classList.toggle('is-open');
+                });
 
                 // Materia y fechas, en una linea debajo del titulo.
                 const meta = document.createElement('span');
@@ -1263,8 +1272,25 @@
                     text.appendChild(meta);
                 }
 
+                    if (info) {
+                        text.appendChild(info);
+                    }
+
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
+                const editBtn = document.createElement('button');
+                editBtn.type = 'button';
+                editBtn.className = 'todo-edit-btn';
+                editBtn.textContent = 'Editar';
+                editBtn.setAttribute('aria-label', 'Editar tarea');
+                editBtn.addEventListener('click', () => {
+                    // renderTodoList vive fuera del inicializador del widget,
+                    // asi que la funcion se publica en window.
+                    if (typeof window.vhEditarTarea === 'function') {
+                        window.vhEditarTarea(item.id);
+                    }
+                });
+
                 removeBtn.className = 'todo-remove-btn';
                 removeBtn.textContent = 'Quitar';
                 removeBtn.setAttribute('aria-label', 'Eliminar tarea');
@@ -1276,7 +1302,12 @@
 
                 li.appendChild(check);
                 li.appendChild(text);
-                li.appendChild(removeBtn);
+                // Editar y Quitar, juntos a la derecha.
+                const acciones = document.createElement('span');
+                acciones.className = 'todo-acciones';
+                acciones.appendChild(editBtn);
+                acciones.appendChild(removeBtn);
+                li.appendChild(acciones);
                 list.appendChild(li);
             });
         }
@@ -1302,6 +1333,18 @@
             const todoInfoInput = document.getElementById('todoInfo');
             const todoMaterias = document.getElementById('todoMaterias');
 
+            /*
+             * Tarea en edicion: null cuando se esta creando una nueva.
+             *
+             * Al editar, el mismo panel se rellena con los datos de la tarea y el
+             * boton de guardar dice "Guardar cambios".
+             */
+            let tareaEnEdicion = null;
+
+            function botonGuardarTarea() {
+                return todoForm ? todoForm.querySelector('.todo-guardar') : null;
+            }
+
             function abrirPanelTarea(abrir) {
                 if (!todoForm) return;
                 todoForm.hidden = !abrir;
@@ -1310,6 +1353,47 @@
                 }
                 if (abrir && todoInput) {
                     todoInput.focus();
+                }
+            }
+
+            function iniciarEdicionTarea(id) {
+                const tarea = state.todos.find(todo => todo.id === id);
+                if (!tarea) return;
+
+                tareaEnEdicion = tarea.id;
+
+                todoInput.value = tarea.text || '';
+                todoSubjectInput.value = tarea.subject || '';
+                todoDateInput.value = tarea.date || '';
+                todoDueInput.value = tarea.due || '';
+                todoInfoInput.value = tarea.info || '';
+
+                const guardar = botonGuardarTarea();
+                if (guardar) {
+                    guardar.textContent = 'Guardar cambios';
+                }
+
+                abrirPanelTarea(true);
+                todoInput.focus();
+
+                // El panel puede quedar fuera de la vista si la lista es larga.
+                if (todoForm.scrollIntoView) {
+                    todoForm.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+            }
+
+            window.vhEditarTarea = iniciarEdicionTarea;
+
+            function salirDeEdicion() {
+                tareaEnEdicion = null;
+
+                const guardar = botonGuardarTarea();
+                if (guardar) {
+                    guardar.textContent = 'Agregar tarea';
+                }
+
+                if (todoForm) {
+                    todoForm.reset();
                 }
             }
 
@@ -1341,7 +1425,7 @@
             if (todoCancelBtn) {
                 todoCancelBtn.addEventListener('click', () => {
                     abrirPanelTarea(false);
-                    todoForm.reset();
+                    salirDeEdicion();
                 });
             }
 
@@ -1356,23 +1440,36 @@
 
                 const fecha = valor => (/^\d{4}-\d{2}-\d{2}$/.test(String(valor || '')) ? String(valor) : '');
 
-                state.todos.unshift({
-                    id: 'todo_' + Date.now() + '_' + Math.random().toString(16).slice(2, 8),
+                const datos = {
                     text,
-                    done: false,
                     subject: String(todoSubjectInput ? todoSubjectInput.value : '').trim().slice(0, 40),
                     date: fecha(todoDateInput ? todoDateInput.value : ''),
                     due: fecha(todoDueInput ? todoDueInput.value : ''),
                     info: String(todoInfoInput ? todoInfoInput.value : '').trim().slice(0, 500),
-                });
-                if (state.todos.length > 120) {
-                    state.todos = state.todos.slice(0, 120);
+                };
+
+                if (tareaEnEdicion) {
+                    // Editar: se cambian los datos y se respeta si estaba hecha.
+                    const tarea = state.todos.find(todo => todo.id === tareaEnEdicion);
+                    if (tarea) {
+                        Object.assign(tarea, datos);
+                    }
+                } else {
+                    state.todos.unshift(Object.assign({
+                        id: 'todo_' + Date.now() + '_' + Math.random().toString(16).slice(2, 8),
+                        done: false,
+                    }, datos));
+
+                    if (state.todos.length > 120) {
+                        state.todos = state.todos.slice(0, 120);
+                    }
                 }
+
+                salirDeEdicion();
 
                 saveProductivityState(state);
                 renderTodoList(state);
                 refrescarMaterias();
-                todoForm.reset();
                 abrirPanelTarea(false);
                 if (todoAddBtn) {
                     todoAddBtn.focus();
