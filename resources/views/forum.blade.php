@@ -913,6 +913,31 @@
               }
           }
 
+
+
+/* =============================================================
+   BOTONES DEL MENU DE ACCIONES
+   =============================================================
+   "Reportar" y "Borrar" tienen que medir lo mismo: el segundo va dentro de un
+   formulario, y sin esto quedaba mas corto que el primero.
+   ------------------------------------------------------------- */
+
+.forum-post-menu-panel > button,
+.forum-post-menu-panel .delete-form > button {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* El formulario del borrado tambien ocupa el ancho del panel; si se queda en
+   inline-flex, se encoge al ancho del texto y el boton sale mas corto. */
+.forum-post-menu-panel .delete-form {
+    display: block;
+    width: 100%;
+    margin: 0;
+}
+
 </style>
     @include('partials.tema-boot')
 </head>
