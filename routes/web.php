@@ -219,6 +219,8 @@ Route::middleware(EnsureRegisteredUser::class)->group(function (): void {
         ->name('friends.request');
     Route::post('/amistad/responder', [FriendController::class, 'respond'])->name('friends.respond');
 
+    Route::post('/amistad/eliminar', [FriendController::class, 'remove'])->name('friends.remove');
+
     // Perfil propio
     Route::post('/perfil/{username}/publicar', [ProfileController::class, 'publish'])
         ->middleware('throttle:30,1')

@@ -111,6 +111,44 @@ class FriendStore
         });
     }
 
+    /**
+     * Elimina la amistad entre dos personas.
+     *
+     * Se borra la solicitud aceptada que las une, no la cuenta ni el chat: la
+     * conversacion se queda, solo deja de aparecer en la lista de amigos.
+     */
+    public function removeFriend(string $firstUsername, string $secondUsername): bool
+    {
+        $firstUsername = trim($firstUsername);
+        $secondUsername = trim($secondUsername);
+
+        if ($firstUsername === '' || $secondUsername === '' || $firstUsername === $secondUsername) {
+            return false;
+        }
+
+        return $this->updateData(function (array &$data) use ($firstUsername, $secondUsername): bool {
+            foreach ($data['requests'] as $indice => $request) {
+                $from = (string) ($request['from'] ?? "");
+                $to = (string) ($request['to'] ?? "");
+                $estado = (string) ($request['status'] ?? "");
+
+                $sonEstos = ($from === $firstUsername && $to === $secondUsername)
+                    || ($from === $secondUsername && $to === $firstUsername);
+
+                if (! $sonEstos || $estado !== "accepted") {
+                    continue;
+                }
+
+                unset($data["requests"][$indice]);
+                $data["requests"] = array_values($data["requests"]);
+
+                return true;
+            }
+
+            return false;
+        });
+    }
+
     public function friendsOf(string $username): array
     {
         $username = trim($username);

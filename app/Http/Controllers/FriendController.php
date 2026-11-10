@@ -83,6 +83,40 @@ class FriendController extends Controller
     /**
      * @return array<int, array<string, mixed>>
      */
+    /**
+     * Deja de ser amigo de alguien desde su perfil.
+     *
+     * Solo se puede quitar una amistad que existe y en la que uno participa: el
+     * nombre de la otra persona viene en el formulario.
+     */
+    public function remove(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'username' => ['required', 'string', 'max:64'],
+        ]);
+
+        $currentUser = ActiveUser::from($request);
+
+        if (! ActiveUser::isRegistered($currentUser)) {
+            return redirect('/buscar-amigos')->with('error', 'Inicia sesion para gestionar tus amigos.');
+        }
+
+        $yo = ActiveUser::username($currentUser);
+        $otro = (string) $validated['username'];
+
+        if ($yo === $otro) {
+            return redirect('/perfil/' . rawurlencode($yo))->with('error', 'No puedes eliminarte a ti mismo.');
+        }
+
+        $hecho = $this->friends->removeFriend($yo, $otro);
+
+        return redirect('/perfil/' . rawurlencode($otro))
+            ->with(
+                $hecho ? 'success' : 'error',
+                $hecho ? 'Has eliminado a esta persona de tus amigos.' : 'No se pudo eliminar la amistad.'
+            );
+    }
+
     private function search(string $query, string $currentUsername): array
     {
         if ($query === '') {

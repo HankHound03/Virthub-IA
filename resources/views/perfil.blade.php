@@ -209,17 +209,45 @@
             overflow-wrap: anywhere;
         }
 
+        /* Estado de amistad y menu de tres puntos, en la misma fila. */
         .profile-friend-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* El menu de amistad hereda el aspecto del menu de las publicaciones, pero
+           se alinea con el estado y no a la derecha. */
+        .profile-friend-menu {
+            margin: 0;
+            justify-content: flex-start;
+        }
+
+        /* El boton esta a la izquierda del perfil: el desplegable tiene que abrir
+           hacia la derecha, no hacia fuera de la tarjeta. */
+        .profile-friend-menu .profile-post-menu-panel {
+            left: 0;
+            right: auto;
+            min-width: 190px;
         }
 
         .profile-friend-action button {
-            padding: 7px 10px;
-            border: 1px solid var(--vh-border);
-            background: var(--vh-button-bg);
-            color: var(--vh-text);
+            padding: 5px 11px;
+            border: 1px solid var(--vh-btn-border, var(--vh-border));
+            border-radius: var(--vh-btn-radius, 6px);
+            /* --vh-btn-bg es un degradado: va en background, no en background-color. */
+            background: var(--vh-btn-bg, rgba(255, 255, 255, 0.12));
+            color: var(--vh-btn-text, var(--vh-text));
             font: inherit;
             cursor: pointer;
+        }
+
+        .profile-friend-action button:hover {
+            background: var(--vh-btn-hover-bg, var(--vh-btn-bg));
+            border-color: var(--vh-btn-hover-border, var(--vh-btn-border, var(--vh-border)));
+            color: var(--vh-btn-hover-text, var(--vh-btn-text));
         }
 
         .profile-friend-state {
@@ -382,7 +410,21 @@
                         @php($friendshipStatus = $friendship['status'] ?? '')
                         <div class="profile-friend-action">
                             @if ($friendshipStatus === 'accepted')
+                                {{-- Amigos: el estado se ve, y las acciones viven en el menu de tres puntos. --}}
                                 <span class="profile-friend-state">Amigos</span>
+                                <details class="profile-post-menu profile-friend-menu">
+                                    <summary aria-label="Opciones de amistad">&#8943;</summary>
+                                    <div class="profile-post-menu-panel">
+                                        <form method="POST" action="{{ url('/amistad/eliminar') }}"
+                                              data-confirmar="Dejaras de ser amigo de esta persona. Podreis volver a enviaros solicitud."
+                                              data-confirmar-titulo="Eliminar amigo"
+                                              data-confirmar-boton="Eliminar">
+                                            @csrf
+                                            <input type="hidden" name="username" value="{{ $profile['username'] }}">
+                                            <button type="submit">Eliminar amigo</button>
+                                        </form>
+                                    </div>
+                                </details>
                             @elseif (($friendship['from'] ?? '') === ($currentUser['username'] ?? '') && $friendshipStatus === 'pending')
                                 <span class="profile-friend-state">Solicitud enviada</span>
                             @elseif (($friendship['to'] ?? '') === ($currentUser['username'] ?? '') && $friendshipStatus === 'pending')
