@@ -528,8 +528,16 @@
                     });
                 });
 
-                // Si algo pide atencion en "Dos pasos", se abre ahi directamente.
-                @if ($twoFactorSetupQr || session('two_factor_recovery_codes') || session('error'))
+                /*
+                 * Pestaña de entrada:
+                 *   1. la que pida el servidor tras una accion (cambiar la
+                 *      contrasena deja en "Contrasena", cambiar la foto en
+                 *      "Perfil"), para no devolver a la persona al inicio;
+                 *   2. si algo pide atencion en "Dos pasos", esa.
+                 */
+                @if (session('config_tab'))
+                    abrir(@json(session('config_tab')));
+                @elseif ($twoFactorSetupQr || session('two_factor_recovery_codes') || session('error'))
                     abrir('dos-pasos');
                 @endif
             })();

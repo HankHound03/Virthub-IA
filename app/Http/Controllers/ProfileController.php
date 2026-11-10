@@ -129,7 +129,7 @@ class ProfileController extends Controller
         $existingUser = $this->users->findByUsername($username);
 
         if ($existingUser === null) {
-            return redirect('/')->with('error', 'Usuario no encontrado.');
+            return redirect('/configuracion')->with('error', 'Usuario no encontrado.');
         }
 
         $newImagePath = null;
@@ -139,13 +139,15 @@ class ProfileController extends Controller
                 $newImagePath = $this->storeAvatar($request, (string) ($existingUser['profile_image_path'] ?? ''));
             } catch (\RuntimeException $e) {
                 // El antivirus rechazo la imagen: se avisa sin romper la pagina.
-                return redirect('/configuracion')->with('error', $e->getMessage());
+                return redirect('/configuracion')->with('error', $e->getMessage())->with('config_tab', 'perfil');
             }
         }
 
         $this->users->updateProfileAppearance($username, $newImagePath, (string) $validated['frame_color']);
 
-        return redirect('/')->with('success', 'Perfil actualizado correctamente.');
+        return redirect('/configuracion')
+            ->with('success', 'Perfil actualizado correctamente.')
+            ->with('config_tab', 'perfil');
     }
 
     public function updatePassword(Request $request): RedirectResponse
@@ -158,12 +160,16 @@ class ProfileController extends Controller
         ]);
 
         if (! $this->users->verifyPassword($username, (string) $validated['current_password'])) {
-            return redirect('/')->with('error', 'La contrasena actual no es correcta.');
+            return redirect('/configuracion')
+                ->with('error', 'La contrasena actual no es correcta.')
+                ->with('config_tab', 'contrasena');
         }
 
         $this->users->updatePassword($username, (string) $validated['new_password']);
 
-        return redirect('/')->with('success', 'Tu contrasena fue actualizada correctamente.');
+        return redirect('/configuracion')
+            ->with('success', 'Tu contrasena fue actualizada correctamente.')
+            ->with('config_tab', 'contrasena');
     }
 
     /**
