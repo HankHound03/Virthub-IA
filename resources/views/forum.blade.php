@@ -1124,6 +1124,19 @@
                                 <span class="forum-post-meta">Inicia sesion con usuario registrado para reaccionar.</span>
                             @endif
 
+                            {{-- Borrar: a la vista para quien escribio la publicacion,
+                                 no escondido en el menu. La vista previa del modal de
+                                 reporte no servia aqui: borrar no se deshace. --}}
+                                            @if ($canDelete)
+                                <form class="delete-form" method="POST"
+                                      action="{{ url('/foro/' . ($post['id'] ?? '') . '/delete') }}"
+                                      onsubmit="return confirm('¿Borrar esta publicación? No se puede deshacer.');">
+                                    @csrf
+                                    <button type="submit" class="delete-btn"
+                                                      onclick="return confirm('¿Borrar esta publicación? No se puede deshacer.');">Borrar</button>
+                                </form>
+                            @endif
+
                             @if ($canReact)
                                 <details class="forum-post-menu">
                                     <summary>⋯</summary>

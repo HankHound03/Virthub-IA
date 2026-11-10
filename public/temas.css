@@ -3443,3 +3443,32 @@ html.vh-ligero .awty-btn {
     border: 1px solid var(--vh-input-border) !important;
     color: var(--vh-input-text) !important;
 }
+
+/* =============================================================================
+   LETRA INICIAL DE LOS AVATARES SIN FOTO
+   =============================================================================
+   Cuando el usuario no tiene foto, el avatar muestra su inicial. El circulo no
+   tenia fondo y la letra tomaba el color del marco personal, que puede ser claro:
+   en los temas claros la inicial desaparecia. Ahora el circulo usa el panel del
+   tema y la letra el texto del panel; el aro conserva el color de cada persona.
+   -------------------------------------------------------------------------- */
+
+[data-era] body .profile-aero-frame span,
+[data-era] body .forum-post-avatar,
+[data-era] body .chat-message-avatar,
+[data-era] body .chat-notification-avatar {
+    background-color: color-mix(in srgb, var(--vh-panel-bg) 86%, #000 14%) !important;
+}
+
+[data-era] body .profile-aero-frame span,
+[data-era] body .forum-post-avatar-inicial,
+[data-era] body .chat-message-avatar,
+[data-era] body .chat-notification-avatar {
+    color: var(--vh-text) !important;
+    text-shadow: none !important;
+}
+
+/* El aro sigue siendo el color elegido por la persona. */
+[data-era] body .forum-post-avatar {
+    border-color: var(--marco, var(--vh-border)) !important;
+}

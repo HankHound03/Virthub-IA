@@ -352,6 +352,16 @@
                                     @endforeach
                                 </div>
                             @endif
+                            @if (!isset($post['title']) && ($isOwner || ($currentUser['role'] ?? 'guest') === 'admin'))
+                                {{-- Publicacion escrita aqui. Las del foro traen 'title' y se borran
+                                     desde el foro, donde esta su conversacion y sus comentarios. --}}
+                                <form class="profile-post-delete" method="POST"
+                                      action="{{ url('/perfil/' . rawurlencode($profile['username']) . '/publicacion/' . ($post['id'] ?? '') . '/borrar') }}"
+                                      onsubmit="return confirm('¿Borrar esta publicación? No se puede deshacer.');">
+                                    @csrf
+                                    <button type="submit" class="delete-btn">Borrar</button>
+                                </form>
+                            @endif
                         </article>
                     @endforeach
                 </div>

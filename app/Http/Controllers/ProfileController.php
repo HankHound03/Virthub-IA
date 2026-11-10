@@ -60,6 +60,34 @@ class ProfileController extends Controller
         return redirect('/perfil/' . rawurlencode($username))->with('success', 'Publicacion añadida a tu perfil.');
     }
 
+    /**
+     * Borra una publicacion escrita en el perfil.
+     *
+     * Solo el autor de la publicacion (que es el dueño del perfil, porque aqui
+     * solo se publica en el propio) o un administrador.
+     */
+    public function destroyPost(Request $request, string $username, string $postId, ProfileStore $store): RedirectResponse
+    {
+        $currentUser = ActiveUser::from($request);
+        $esAdmin = ActiveUser::isAdmin($currentUser);
+        $esDueño = ActiveUser::username($currentUser) === $username;
+
+        if (! $esAdmin && ! $esDueño) {
+            return redirect('/perfil/' . rawurlencode($username))
+                ->with('error', 'Solo puedes borrar las publicaciones de tu perfil.');
+        }
+
+        $borrada = $store->deletePost($username, $postId);
+
+        if ($borrada === null) {
+            return redirect('/perfil/' . rawurlencode($username))
+                ->with('error', 'Esa publicacion ya no existe.');
+        }
+
+        return redirect('/perfil/' . rawurlencode($username))
+            ->with('success', 'Publicacion eliminada de tu perfil.');
+    }
+
     public function updateAppearance(Request $request): RedirectResponse
     {
         $username = ActiveUser::username(ActiveUser::from($request));

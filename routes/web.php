@@ -223,6 +223,9 @@ Route::middleware(EnsureRegisteredUser::class)->group(function (): void {
     Route::post('/perfil/{username}/publicar', [ProfileController::class, 'publish'])
         ->middleware('throttle:30,1')
         ->name('profile.publish');
+    Route::post('/perfil/{username}/publicacion/{postId}/borrar', [ProfileController::class, 'destroyPost'])
+        ->name('profile.post.delete');
+
     Route::post('/profile/appearance', [ProfileController::class, 'updateAppearance'])->name('profile.appearance');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 

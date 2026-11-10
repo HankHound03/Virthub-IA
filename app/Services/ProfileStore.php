@@ -48,6 +48,42 @@ class ProfileStore
         });
     }
 
+    /**
+     * Borra una publicacion del perfil.
+     *
+     * Devuelve la publicacion eliminada, o null si no existe o no es de esa
+     * persona. Se comprueba el autor aqui y no en el controlador para que nadie
+     * pueda borrar la publicacion de otro pasando un identificador.
+     */
+    public function deletePost(string $author, string $postId): ?array
+    {
+        $author = trim($author);
+        $postId = trim($postId);
+
+        if ($author === '' || $postId === '') {
+            return null;
+        }
+
+        return $this->updatePosts(function (array &$posts) use ($author, $postId): ?array {
+            foreach ($posts as $indice => $post) {
+                if (($post["id"] ?? "") !== $postId) {
+                    continue;
+                }
+
+                if (($post["author"] ?? "") !== $author) {
+                    return null;
+                }
+
+                unset($posts[$indice]);
+                $posts = array_values($posts);
+
+                return $post;
+            }
+
+            return null;
+        });
+    }
+
     private function ensureStore(): void
     {
         $directory = dirname($this->filePath);
