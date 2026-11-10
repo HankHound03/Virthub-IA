@@ -1139,7 +1139,9 @@
                                         @if ($canDelete)
                                             <form class="delete-form" method="POST"
                                                   action="{{ url('/foro/' . ($post['id'] ?? '') . '/delete') }}"
-                                                  onsubmit="return confirm('¿Borrar esta publicación? No se puede deshacer.');">
+                                                  data-confirmar="¿Borrar esta publicación? No se puede deshacer."
+                                                  data-confirmar-titulo="Borrar publicación"
+                                                  data-confirmar-boton="Borrar">
                                                 @csrf
                                                 <button type="submit" class="delete-btn">Borrar</button>
                                             </form>

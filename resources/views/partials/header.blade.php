@@ -825,3 +825,4 @@
     @endif
 
 <script src="{{ asset('ver-password.js') }}?v={{ filemtime(public_path('ver-password.js')) }}" defer></script>
+<script src="{{ asset('confirmar.js') }}?v={{ filemtime(public_path('confirmar.js')) }}" defer></script>
