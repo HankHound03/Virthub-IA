@@ -1066,3 +1066,54 @@ a.container-load-btn:active {
   color: var(--vh-text);
   text-decoration: none;
 }
+
+/* =============================================================
+   CABECERA DE LA CONVERSACION (chat del contenedor)
+   =============================================================
+   Nombre y estado de la persona con la que se habla. La banda entera cambia de
+   color con el estado, igual que en la ventana del chat.
+   ------------------------------------------------------------- */
+
+.chat-conversation-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    border: 1px solid var(--vh-border);
+    border-radius: var(--vh-btn-radius, 6px);
+    font-size: 12px;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.chat-conversation-header[hidden] {
+    display: none;
+}
+
+.chat-conversation-header strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-conversation-header span {
+    flex-shrink: 0;
+    color: var(--vh-text-soft);
+}
+
+.chat-conversation-header[data-presence="online"] {
+    background: linear-gradient(180deg, rgba(46, 204, 113, 0.35), rgba(46, 204, 113, 0.12));
+    border-color: rgba(46, 204, 113, 0.65);
+}
+
+.chat-conversation-header[data-presence="away"] {
+    background: linear-gradient(180deg, rgba(241, 196, 15, 0.35), rgba(241, 196, 15, 0.12));
+    border-color: rgba(241, 196, 15, 0.65);
+}
+
+.chat-conversation-header[data-presence="offline"] {
+    background: linear-gradient(180deg, rgba(217, 83, 79, 0.35), rgba(217, 83, 79, 0.12));
+    border-color: rgba(217, 83, 79, 0.65);
+}

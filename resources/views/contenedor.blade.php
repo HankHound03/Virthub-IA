@@ -45,6 +45,12 @@
 
             @if (($currentUser['role'] ?? 'guest') !== 'guest')
             <div id="messagesView" class="chat-view active">
+                {{-- Nombre y estado de la persona con la que se habla. El color de toda la
+                     banda cambia con el estado: verde, ambar o rojo. --}}
+                <div class="chat-conversation-header" id="contenedorChatHeader" hidden>
+                    <strong id="contenedorChatNombre"></strong>
+                    <span id="contenedorChatEstado"></span>
+                </div>
                 <div class="chat-messages" id="chatMessages">
                     <p style="text-align: center; color: var(--vh-text-soft); font-size: 12px; padding: 20px 10px;">Sin mensajes aún. Selecciona un usuario.</p>
                 </div>
@@ -1411,6 +1417,30 @@
             return payload.messages || [];
         }
 
+        /*
+         * Pinta el nombre y el estado en la cabecera de la conversacion.
+         *
+         * Se busca el contacto en la lista ya cargada, que trae el estado y el
+         * texto que calcula el servidor.
+         */
+        function pintarCabeceraConversacion(username) {
+            const cabecera = document.getElementById('contenedorChatHeader');
+            const nombre = document.getElementById('contenedorChatNombre');
+            const estado = document.getElementById('contenedorChatEstado');
+
+            if (!cabecera || !nombre || !estado) return;
+
+            const contacto = (chatContacts || []).find(usuario => usuario.username === username);
+            const presencia = (contacto && contacto.presence_status) || 'offline';
+
+            nombre.textContent = (contacto && (contacto.name || contacto.username)) || username;
+            estado.textContent = (contacto && contacto.presence_label)
+                || (presencia === 'online' ? 'En linea' : (presencia === 'away' ? 'Ausente' : 'Desconectado'));
+
+            cabecera.dataset.presence = presencia;
+            cabecera.hidden = false;
+        }
+
         async function selectChatUser(username) {
             currentChatUser = username;
             await switchChatTab('messages');
@@ -1423,6 +1453,23 @@
             try {
                 // Se acaba de abrir: sí se marca como leída.
                 const messages = await refreshConversationSilently(username, false, true);
+
+                // Estado fresco del contacto antes de pintar la cabecera.
+                try {
+                    const respuesta = await apiFetch('/chat/users');
+                    const datos = await respuesta.json();
+
+                    if (respuesta.ok) {
+                        (datos.users || []).forEach(usuario => {
+                            const indice = (chatContacts || []).findIndex(c => c.username === usuario.username);
+                            if (indice >= 0) chatContacts[indice] = usuario;
+                        });
+                    }
+                } catch (error) {
+                    // Si falla, se pinta con lo que ya se sabe.
+                }
+
+                pintarCabeceraConversacion(username);
                 renderChatMessages(messagesDiv, messages, chatConversationTitle(username), getUserKey());
             pintarEscribiendo(username);
             } catch (error) {
