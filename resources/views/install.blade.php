@@ -133,6 +133,55 @@
             background-color: var(--vh-button-hover);
             transform: translateY(-1px);
         }
+        /* Boton de ver la contrasena, dentro del campo. */
+        .campo-con-ver {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+
+        .campo-con-ver > input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .campo-con-ver > input[type="password"],
+        .campo-con-ver > input.password-a-la-vista {
+            padding-right: 42px !important;
+        }
+
+        /* Sin fondo ni borde: vive dentro del campo, no es un boton aparte. */
+        .boton-ver-password {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            margin: 0;
+            padding: 0;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            box-shadow: none;
+            color: var(--vh-panel-text);
+            opacity: 0.75;
+            cursor: pointer;
+        }
+
+        .boton-ver-password:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .boton-ver-password svg {
+            width: 17px;
+            height: 17px;
+        }
+
         .ayuda-campo {
             margin: -8px 0 16px;
             font-size: 0.85rem;
@@ -182,5 +231,6 @@
             <p class="footer-note">Si prefieres, puedes dejar el valor por defecto y continuar con la aplicación principal.</p>
         </div>
     </div>
+<script src="{{ asset('ver-password.js') }}?v={{ filemtime(public_path('ver-password.js')) }}" defer></script>
 </body>
 </html>
