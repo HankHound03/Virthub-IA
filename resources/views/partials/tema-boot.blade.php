@@ -24,6 +24,41 @@
                 guardado = null;
             }
 
+            /*
+             * Tema forzado desde la direccion: ?tema=vista-aero
+             *
+             * El tema vive en el localStorage del navegador, y ese almacen es por
+             * origen: localhost y el dominio pueden tener temas distintos. Con esto se
+             * puede dejar el mismo en los dos sin tocar el navegador a mano.
+             *
+             *   ?tema=vista-aero   fija y guarda ese tema
+             *   ?tema=default      borra el guardado y vuelve al de fabrica
+             */
+            var pedido = '';
+
+            try {
+                var parametros = new URLSearchParams(window.location.search);
+                pedido = String(parametros.get('tema') || '').trim().toLowerCase();
+            } catch (e) {
+                pedido = '';
+            }
+
+            if (pedido === 'default') {
+                try {
+                    localStorage.removeItem(CLAVE);
+                } catch (e) {}
+                guardado = null;
+            } else if (/^[a-z0-9]+-[a-z0-9-]+$/.test(pedido)) {
+                // La variante puede llevar guion (win10-azul-oscuro): se corta por el primero.
+                var corte = pedido.indexOf('-');
+                var partes = [pedido.slice(0, corte), pedido.slice(corte + 1)];
+                try {
+                    localStorage.setItem(CLAVE, JSON.stringify({ era: partes[0], variante: partes[1] }));
+                } catch (e) {}
+
+                guardado = { era: partes[0], variante: partes[1] };
+            }
+
             var era = guardado && guardado.era ? guardado.era : ERA;
             var variante = guardado && guardado.variante ? guardado.variante : VARIANTE;
 
