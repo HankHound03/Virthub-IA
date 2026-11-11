@@ -381,7 +381,11 @@
                     <div class="config-aviso">
                         <strong>Guarda estos códigos ahora</strong>
                         <p>Cada uno sirve una sola vez, por si pierdes el teléfono. No se volverán a mostrar.</p>
-                        <pre class="two-factor-recovery">{{ implode("\n", $twoFactorRecoveryCodes) }}</pre>
+                        <pre class="two-factor-recovery" id="sessionRecoveryCodes">{{ implode("\n", $twoFactorRecoveryCodes) }}</pre>
+                        <button type="button" class="config-boton config-boton-descarga"
+                                data-descargar-codigos="sessionRecoveryCodes">
+                            Descargar códigos
+                        </button>
                     </div>
                 @endif
 
@@ -408,6 +412,10 @@
 
                             <p class="auth-message" id="recoveryCodesFeedback" hidden role="alert"></p>
                             <pre class="two-factor-recovery" id="recoveryCodesOutput" hidden></pre>
+                      <button type="button" class="config-boton config-boton-descarga" id="downloadRecoveryCodes"
+                              data-descargar-codigos="recoveryCodesOutput" hidden>
+                          Descargar códigos
+                      </button>
                         </form>
                     </details>
 
@@ -461,6 +469,10 @@
 
                     <p class="auth-message" id="activationRecoveryFeedback" hidden role="alert"></p>
                     <pre class="two-factor-recovery" id="activationRecoveryCodes" hidden></pre>
+                    <button type="button" class="config-boton config-boton-descarga" id="downloadActivationCodes"
+                            data-descargar-codigos="activationRecoveryCodes" hidden>
+                        Descargar códigos
+                    </button>
                 @else
                     <p class="config-ayuda config-ayuda-ancha">
                         Con la verificación en dos pasos, tu contraseña sola no basta: hace falta
@@ -634,6 +646,60 @@
             return payload;
         }
 
+        /*
+         * Descarga de los codigos de recuperacion.
+         *
+         * El archivo se llama codigo-auth-<usuario>.txt y se arma en el navegador: los
+         * codigos ya estan en la pagina, asi que no hace falta pedirlos otra vez.
+         */
+        const usuarioCodigos = @json($currentUser['username'] ?? 'usuario');
+
+        function mostrarBotonDescarga(idBoton, codigos) {
+            const boton = document.getElementById(idBoton);
+            if (!boton) return;
+
+            const hayCodigos = codigos && String(codigos.textContent || '').trim() !== '';
+            boton.hidden = !hayCodigos;
+        }
+
+        function descargarCodigos(origen) {
+            const codigos = String(origen && origen.textContent ? origen.textContent : '').trim();
+            if (!codigos) return;
+
+            const hoy = new Date();
+            const fecha = String(hoy.getDate()).padStart(2, '0') + '/'
+                + String(hoy.getMonth() + 1).padStart(2, '0') + '/'
+                + hoy.getFullYear();
+
+            const contenido = [
+                'VirtHub - codigos de recuperacion',
+                'Usuario: ' + usuarioCodigos,
+                'Generados: ' + fecha,
+                '',
+                'Cada codigo sirve una sola vez. Guarda este archivo en un lugar seguro.',
+                '',
+                codigos,
+                '',
+            ].join('\n');
+
+            const archivo = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+            const enlace = document.createElement('a');
+            enlace.href = URL.createObjectURL(archivo);
+            enlace.download = 'codigo-auth-' + usuarioCodigos + '.txt';
+            document.body.appendChild(enlace);
+            enlace.click();
+            document.body.removeChild(enlace);
+
+            // Se libera el objeto despues de que el navegador empiece a guardar.
+            setTimeout(() => URL.revokeObjectURL(enlace.href), 1000);
+        }
+
+        document.querySelectorAll('[data-descargar-codigos]').forEach(boton => {
+            boton.addEventListener('click', () => {
+                descargarCodigos(document.getElementById(boton.dataset.descargarCodigos));
+            });
+        });
+
         function bindRecoveryCodesForm() {
             const form = document.getElementById('recoveryCodesForm');
             const feedback = document.getElementById('recoveryCodesFeedback');
@@ -648,6 +714,7 @@
                     const payload = await submitJsonForm(form);
                     output.textContent = (payload.recovery_codes || []).join('\n');
                     output.hidden = false;
+                    mostrarBotonDescarga('downloadRecoveryCodes', output);
                     feedback.className = 'auth-message auth-success';
                     feedback.textContent = 'Codigos regenerados. Guardalos ahora; cada uno se usa una sola vez.';
                     feedback.hidden = false;
@@ -674,6 +741,7 @@
                     const payload = await submitJsonForm(form);
                     output.textContent = (payload.recovery_codes || []).join('\n');
                     output.hidden = false;
+                    mostrarBotonDescarga('downloadActivationCodes', output);
                     feedback.className = 'auth-message auth-success';
                     feedback.textContent = '2FA activado. Guarda estos codigos de recuperacion ahora.';
                     feedback.hidden = false;

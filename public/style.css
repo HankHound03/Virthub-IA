@@ -834,6 +834,20 @@ header h1 {
     background: #fff;
 }
 
+/* Boton de descarga de los codigos de recuperacion: secundario, para no
+   competir con la accion principal del formulario. */
+.config-boton-descarga {
+    margin-top: 8px;
+    background: transparent;
+    border: 1px dashed var(--vh-border);
+    color: var(--vh-text);
+}
+
+.config-boton-descarga:hover {
+    background: var(--vh-btn-hover-bg, var(--vh-btn-bg));
+    color: var(--vh-btn-hover-text, var(--vh-btn-text, var(--vh-text)));
+}
+
 .two-factor-recovery {
     margin: 12px 0;
     padding: 12px;
