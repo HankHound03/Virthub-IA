@@ -117,6 +117,18 @@ class AppServiceProvider extends ServiceProvider
      */
     private function configureUrlScheme(Request $request): void
     {
+        /*
+         * El host de las URLs absolutas sale de la peticion, no de APP_URL.
+         *
+         * En el entorno de pruebas APP_URL es http://localhost:8001. Servido por
+         * el dominio de pruebas, cada redireccion (por ejemplo la del asistente de
+         * instalacion) apuntaba a localhost:8001: el navegador saltaba de host,
+         * dejaba alli la sesion y parecia que el login no funcionaba.
+         */
+        if ($request->getHost() !== '') {
+            URL::forceRootUrl($request->getSchemeAndHttpHost());
+        }
+
         $hasSecureEvidence = $request->isSecure()
             || $request->headers->get('x-forwarded-proto') === 'https';
 

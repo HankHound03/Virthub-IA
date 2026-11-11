@@ -63,7 +63,7 @@ class JsonUserStore implements UserStore
         return false;
     }
 
-    public function createOrUpdateAdmin(string $username, string $password): array
+    public function createOrUpdateAdmin(string $username, string $password, string $name = ''): array
     {
         $username = trim($username);
 
@@ -75,11 +75,15 @@ class JsonUserStore implements UserStore
             throw new RuntimeException('La contraseña de administrador no puede estar vacia.');
         }
 
-        return $this->updateUsers(function (array &$users) use ($username, $password): array {
+        return $this->updateUsers(function (array &$users) use ($username, $password, $name): array {
             foreach ($users as &$user) {
                 if (($user['username'] ?? '') === $username) {
                     $user['password_hash'] = Hash::make($password);
                     $user['role'] = 'admin';
+
+                    if (trim($name) !== '') {
+                        $user['name'] = trim($name);
+                    }
                     $user['is_active'] = true;
 
                     return [
@@ -92,6 +96,7 @@ class JsonUserStore implements UserStore
 
             $record = [
                 'id' => Str::uuid()->toString(),
+                'name' => trim($name) !== '' ? trim($name) : $username,
                 'username' => $username,
                 'password_hash' => Hash::make($password),
                 'role' => 'admin',

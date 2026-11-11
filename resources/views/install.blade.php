@@ -133,6 +133,12 @@
             background-color: var(--vh-button-hover);
             transform: translateY(-1px);
         }
+        .ayuda-campo {
+            margin: -8px 0 16px;
+            font-size: 0.85rem;
+            color: var(--vh-text-soft);
+        }
+
         .footer-note { margin-top: 14px; color: var(--vh-text-soft); font-size: 0.95rem; }
         @media (max-width: 640px) {
             .hero, .form { padding: 24px; }
@@ -158,6 +164,11 @@
                 <input type="hidden" name="key" value="{{ $installationKey }}">
                 <label for="admin_username">Nombre de administrador</label>
                 <input id="admin_username" name="admin_username" value="admin" required>
+
+                {{-- Nombre visible en el perfil, el foro y el chat. --}}
+                <label for="admin_name">Nombre de perfil</label>
+                <input id="admin_name" name="admin_name" maxlength="80" placeholder="Como quieres que te vean">
+                <p class="ayuda-campo">Opcional. Si lo dejas vacio se usa el nombre de usuario.</p>
 
                 <label for="admin_password">Contraseña</label>
                 <input id="admin_password" name="admin_password" type="password" required>

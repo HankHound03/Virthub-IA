@@ -39,12 +39,15 @@ class InstallController extends Controller
 
         $validated = $request->validate([
             'admin_username' => ['required', 'string', 'max:50'],
+            // Nombre visible. Si se deja vacio, se usa el del usuario.
+            'admin_name' => ['nullable', 'string', 'max:80'],
             'admin_password' => ['required', 'confirmed', 'min:8'],
         ]);
 
         $this->users->createOrUpdateAdmin(
             (string) $validated['admin_username'],
-            (string) $validated['admin_password']
+            (string) $validated['admin_password'],
+            (string) ($validated['admin_name'] ?? '')
         );
 
         return redirect('/')->with('status_message', 'Instalación completada. Ya puedes iniciar sesión con el administrador creado.');
@@ -87,8 +90,17 @@ class InstallController extends Controller
             return true;
         }
 
-        return (bool) config('virthub.installation.allow_localhost_without_key')
-            && $this->isLocalRequest($request);
+        return $this->hostIsAllowed($request);
+    }
+
+    private function hostIsAllowed(Request $request): bool
+    {
+        if ($this->isLocalRequest($request)) {
+            return (bool) config('virthub.installation.allow_localhost_without_key');
+        }
+
+        // Hosts declarados para entornos de pruebas con dominio propio.
+        return in_array($request->getHost(), (array) config('virthub.installation.allowed_hosts', []), true);
     }
 
     private function isLocalRequest(Request $request): bool

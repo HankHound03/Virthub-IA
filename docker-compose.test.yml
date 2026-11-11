@@ -44,6 +44,7 @@ services:
       # sin clave, mientras no exista un administrador.
       INSTALL_KEY: ""
       INSTALL_ALLOW_LOCALHOST: "true"
+      INSTALL_ALLOWED_HOSTS: "test.virthub.dpdns.org"
       DB_CONNECTION: mariadb
       DB_HOST: mariadb
       DB_PORT: 3306

@@ -33,7 +33,7 @@ class DatabaseUserStore extends JsonUserStore
         return User::where('role', 'admin')->exists();
     }
 
-    public function createOrUpdateAdmin(string $username, string $password): array
+    public function createOrUpdateAdmin(string $username, string $password, string $name = ''): array
     {
         $username = trim($username);
         if ($username === '' || $password === '') {
@@ -41,10 +41,18 @@ class DatabaseUserStore extends JsonUserStore
         }
 
         $user = User::where('username', $username)->first();
+        $nombre = trim($name);
+
         if (!$user) {
-            $this->createUser($username, $password, 'admin');
+            $this->createUser($username, $password, 'admin', $nombre !== '' ? $nombre : null);
         } else {
-            $user->forceFill(['password' => $password, 'role' => 'admin', 'is_active' => true])->save();
+            $cambios = ['password' => $password, 'role' => 'admin', 'is_active' => true];
+
+            if ($nombre !== '') {
+                $cambios['name'] = $nombre;
+            }
+
+            $user->forceFill($cambios)->save();
         }
 
         return ['username' => $username, 'role' => 'admin'];

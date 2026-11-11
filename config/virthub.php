@@ -526,6 +526,20 @@ return [
         // Permitir el instalador sin clave cuando la peticion llega desde el
         // propio host. Debe ser false en produccion.
         'allow_localhost_without_key' => (bool) env('INSTALL_ALLOW_LOCALHOST', false),
+
+        /*
+         * Hosts extra donde el asistente se abre sin clave.
+         *
+         * Existe para entornos de pruebas publicados con su propio dominio: sin
+         * esto, el asistente solo respondia en localhost y en el dominio daba
+         * 404, asi que la primera puesta en marcha alli era imposible.
+         *
+         * Nunca se aplica si INSTALL_KEY tiene valor.
+         */
+        'allowed_hosts' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('INSTALL_ALLOWED_HOSTS', ''))
+        ))),
     ],
 
     /*

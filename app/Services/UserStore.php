@@ -19,7 +19,7 @@ interface UserStore
 
     public function hasAdminAccount(): bool;
 
-    public function createOrUpdateAdmin(string $username, string $password): array;
+    public function createOrUpdateAdmin(string $username, string $password, string $name = ''): array;
 
     /** @return array<int, array<string, mixed>> */
     public function allPublicUsers(): array;

@@ -22,6 +22,11 @@ class EnsureInstalled
 
     public function handle(Request $request, Closure $next): Response
     {
+        // La suite de pruebas prepara sus propios usuarios: aquí no se interviene.
+        if (app()->environment('testing')) {
+            return $next($request);
+        }
+
         if ($this->users->hasAdminAccount()) {
             return $next($request);
         }
@@ -49,11 +54,13 @@ class EnsureInstalled
             return false;
         }
 
-        if (app()->environment('testing')) {
-            return true;
+        $esLocal = in_array($request->getHost(), ['localhost', '127.0.0.1', '::1'], true);
+
+        if ($esLocal) {
+            return (bool) config('virthub.installation.allow_localhost_without_key');
         }
 
-        return (bool) config('virthub.installation.allow_localhost_without_key')
-            && in_array($request->getHost(), ['localhost', '127.0.0.1', '::1'], true);
+        // Dominios declarados para entornos de pruebas.
+        return in_array($request->getHost(), (array) config('virthub.installation.allowed_hosts', []), true);
     }
 }
