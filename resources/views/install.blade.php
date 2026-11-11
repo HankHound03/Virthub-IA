@@ -172,6 +172,17 @@
             cursor: pointer;
         }
 
+        /*
+         * Al pasar el raton, el boton del formulario se levanta (button:hover).
+         * Esa regla le quitaba el centrado vertical y el ojo saltaba de sitio.
+         */
+        .boton-ver-password,
+        .boton-ver-password:hover,
+        .boton-ver-password:focus,
+        .boton-ver-password:active {
+            transform: translateY(-50%) !important;
+        }
+
         .boton-ver-password:hover {
             opacity: 1;
             background: rgba(255, 255, 255, 0.12);
