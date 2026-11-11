@@ -154,6 +154,40 @@ nota(
     "contenedor no surte efecto.",
 )
 
+h2(doc, "2.1 Primera puesta en marcha")
+
+parrafo(
+    doc,
+    "Con la base de datos vacia, la aplicacion no se queda en la portada: lleva sola al "
+    "asistente de instalacion. Alli se crea la cuenta de administrador y, a partir de ese "
+    "momento, el asistente queda cerrado.",
+)
+
+imagen_con_pie(
+    doc,
+    imagen("31-instalacion-asistente.png"),
+    "Figura. Asistente de primera puesta en marcha: crea el administrador.",
+)
+
+pasos(
+    doc,
+    [
+        "Levantar los contenedores con la base de datos limpia.",
+        "Abrir la direccion del sitio: redirige a /install.",
+        "Escribir el nombre del administrador y su contrasena dos veces.",
+        "Al guardar se vuelve al inicio, ya con la sesion del administrador.",
+    ],
+)
+
+nota(
+    doc,
+    "Cuando el asistente deja de estar abierto",
+    "En cuanto existe un administrador, /install responde 404. En produccion, ademas, el "
+    "asistente exige la clave INSTALL_KEY; el acceso sin clave solo se permite en el propio "
+    "equipo cuando se activa INSTALL_ALLOW_LOCALHOST.",
+)
+
+
 # --------------------------------------------------------------------------
 # 3. Variables
 # --------------------------------------------------------------------------
@@ -161,29 +195,29 @@ nota(
 h1(doc, "3. Variables de entorno")
 
 tabla(
-    doc,
-    ["Variable", "Para qué sirve", "Valor típico"],
-    [
-        ["VIRTHUB_TEMAS", "Carrusel de temas Redmond.", "true"],
-        ["VIRTHUB_NOTICIAS", "Gadget de noticias.", "false"],
-        ["VIRTHUB_2FA", "Verificación en dos pasos.", "true en producción"],
-        ["VIRTHUB_MODERACION", "Moderación NSFW.", "true"],
-        ["VIRTHUB_MODERACION_UMBRAL", "Sensibilidad del filtro (0 a 1).", "0.75"],
-        ["VIRTHUB_MODERACION_URL", "Dirección del servicio Sherlock.", "http://nsfw-sherlock:4000"],
-        ["CLAMAV_ENABLED", "Antivirus de archivos.", "true"],
-        ["OLLAMA_BASE_URL", "Servidor de la IA local.", "http://host.docker.internal:11434"],
-        ["OLLAMA_MODEL", "Modelo de la IA.", "virthub-ia"],
-        ["VIRTHUB_IA_MONITOR", "Monitor de GPU en el panel.", "true"],
-        ["VIRTHUB_GPU_URL", "Puente de métricas de la GPU.", "http://host.docker.internal:11435"],
-        ["VIRTHUB_VERSION", "Texto del pie de página.", "Virthub 2.0"],
-    ],
-    anchos=[1.9, 2.8, 1.9],
+doc,
+["Variable", "Para qué sirve", "Valor típico"],
+[
+    ["VIRTHUB_TEMAS", "Carrusel de temas Redmond.", "true"],
+    ["VIRTHUB_NOTICIAS", "Gadget de noticias.", "false"],
+    ["VIRTHUB_2FA", "Verificación en dos pasos.", "true en producción"],
+    ["VIRTHUB_MODERACION", "Moderación NSFW.", "true"],
+    ["VIRTHUB_MODERACION_UMBRAL", "Sensibilidad del filtro (0 a 1).", "0.75"],
+    ["VIRTHUB_MODERACION_URL", "Dirección del servicio Sherlock.", "http://nsfw-sherlock:4000"],
+    ["CLAMAV_ENABLED", "Antivirus de archivos.", "true"],
+    ["OLLAMA_BASE_URL", "Servidor de la IA local.", "http://host.docker.internal:11434"],
+    ["OLLAMA_MODEL", "Modelo de la IA.", "virthub-ia"],
+    ["VIRTHUB_IA_MONITOR", "Monitor de GPU en el panel.", "true"],
+    ["VIRTHUB_GPU_URL", "Puente de métricas de la GPU.", "http://host.docker.internal:11435"],
+    ["VIRTHUB_VERSION", "Texto del pie de página.", "Virthub 2.0"],
+],
+anchos=[1.9, 2.8, 1.9],
 )
 
 parrafo(
-    doc,
-    "El archivo .env no se versiona. Contiene la clave de la aplicación (APP_KEY), que es la que "
-    "firma los pases de los escritorios: si se pierde, todos los pases dejan de valer.",
+doc,
+"El archivo .env no se versiona. Contiene la clave de la aplicación (APP_KEY), que es la que "
+"firma los pases de los escritorios: si se pierde, todos los pases dejan de valer.",
 )
 
 # --------------------------------------------------------------------------

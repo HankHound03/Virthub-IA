@@ -99,15 +99,18 @@
         }
         label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--vh-panel-text); }
         input {
+            display: block;
+            box-sizing: border-box;
             width: 100%;
             padding: 0.85rem 0.95rem;
             border-radius: 10px;
             border: 1px solid var(--vh-border);
-            background-color: var(--vh-button-bg);
+            /* --vh-button-bg es un degradado: va en background, no en color. */
+            background: var(--vh-button-bg, rgba(255, 255, 255, 0.12));
             color: var(--vh-panel-text);
             margin-bottom: 14px;
             outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         }
         input::placeholder { color: rgba(232, 255, 243, 0.7); }
         input:focus {
@@ -168,6 +171,5 @@
             <p class="footer-note">Si prefieres, puedes dejar el valor por defecto y continuar con la aplicación principal.</p>
         </div>
     </div>
-<script src="{{ asset('ver-password.js') }}?v={{ filemtime(public_path('ver-password.js')) }}" defer></script>
 </body>
 </html>

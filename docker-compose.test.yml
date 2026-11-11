@@ -40,6 +40,10 @@ services:
     env_file:
       - .env
     environment:
+      # First setup de pruebas: el asistente se abre desde el propio host,
+      # sin clave, mientras no exista un administrador.
+      INSTALL_KEY: ""
+      INSTALL_ALLOW_LOCALHOST: "true"
       DB_CONNECTION: mariadb
       DB_HOST: mariadb
       DB_PORT: 3306

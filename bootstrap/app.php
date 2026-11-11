@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAdmin;
+use App\Http\Middleware\EnsureInstalled;
 use App\Http\Middleware\EnsureRegisteredUser;
 use App\Http\Middleware\ResolveActiveUser;
 use Illuminate\Foundation\Application;
@@ -33,6 +34,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // El usuario activo se resuelve una sola vez por peticion y queda
         // disponible para los controladores y el middleware de autorizacion.
         $middleware->web(append: [
+            // Con la aplicacion recien instalada se lleva al asistente; en cuanto
+            // hay administrador no hace nada.
+            EnsureInstalled::class,
             ResolveActiveUser::class,
         ]);
 

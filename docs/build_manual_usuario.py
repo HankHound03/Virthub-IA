@@ -601,6 +601,47 @@ parrafo(
     "si de verdad abrió la conversación: no se marca por tener el chat abierto de fondo.",
 )
 
+h2(doc, "8.3 El estado de cada contacto")
+
+parrafo(
+    doc,
+    "En la lista de usuarios y en la cabecera de la conversación aparece cómo está cada "
+    "persona, con el mismo lenguaje de Windows Live Messenger: un anillo y un punto de "
+    "color alrededor de la foto.",
+)
+
+tabla(
+    doc,
+    ["Color", "Estado", "Qué significa"],
+    [
+        ["Verde", "En línea", "Tiene la pestaña abierta y está activo."],
+        ["Ámbar", "Ausente", "La sesión sigue, pero lleva un rato sin hacer nada."],
+        ["Rojo", "Desconectado", "Cerró la pestaña o lleva mucho sin dar señal."],
+    ],
+    anchos=[1.1, 1.5, 4.0],
+)
+
+parrafo(
+    doc,
+    "Debajo del nombre se lee cuánto lleva así: «En línea», «Ausente hace 12 minutos», "
+    "«Desconectado hace 2 horas», «hace 3 días», «hace 2 semanas» y, a partir de las cuatro "
+    "semanas, «hace mucho tiempo».",
+)
+
+imagen_con_pie(
+    doc,
+    imagen("32-chat-estados.png"),
+    "Figura. La lista de contactos con los tres estados y su texto.",
+)
+
+nota(
+    doc,
+    "El color también pinta la conversación",
+    "Al abrir una conversación, la cabecera toma el color del estado de la otra persona, y el "
+    "nombre que se muestra es su nombre de perfil, no el usuario técnico.",
+)
+
+
 h2(doc, "8.3 Contador de mensajes sin leer")
 
 parrafo(
