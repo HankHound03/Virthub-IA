@@ -544,6 +544,13 @@ body.dark-mode iframe {
   align-items: center;
   gap: 8px;
   min-width: 0;
+  /* El estado va en su propia linea, debajo del nombre. */
+  flex-wrap: wrap;
+}
+
+.chat-user-presence {
+  flex: 0 0 100%;
+  order: 3;
 }
 
 .chat-user-avatar {

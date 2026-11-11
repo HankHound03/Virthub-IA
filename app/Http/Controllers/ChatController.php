@@ -48,7 +48,10 @@ class ChatController extends Controller
         return response()->json([
             'users' => array_map(function (array $user): array {
                 $user['account_active'] = (bool) ($user['is_active'] ?? true);
-                $user['presence_status'] = $this->presence->isRecent($user['last_seen_at'] ?? null) ? 'online' : 'offline';
+
+                // Estado y texto listos para pintar: en linea, ausente o desconectado.
+                $user['presence_status'] = $this->presence->state($user['last_seen_at'] ?? null);
+                $user['presence_label'] = $this->presence->describe($user['last_seen_at'] ?? null);
 
                 return $user;
             }, $contacts),

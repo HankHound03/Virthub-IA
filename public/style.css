@@ -3410,3 +3410,113 @@ input.password-a-la-vista {
     background: var(--vh-btn-hover-bg, rgba(255, 255, 255, 0.2));
     color: var(--vh-btn-hover-text, #ffffff);
 }
+
+
+/* =============================================================================
+   ANILLO DE PRESENCIA (estilo Windows Live Messenger)
+   =============================================================================
+   Verde en linea, ambar ausente, rojo desconectado. Se dibuja por fuera del
+   marco, asi que el color de marco que eligio la persona se respeta.
+   -------------------------------------------------------------------------- */
+
+.profile-aero-frame[data-presence] {
+    position: relative;
+    transition: box-shadow 0.3s ease;
+}
+
+.profile-aero-frame[data-presence="online"] {
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.58),
+        0 0 0 3px #2ecc71,
+        0 8px 24px rgba(46, 204, 113, 0.45);
+}
+
+.profile-aero-frame[data-presence="away"] {
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.58),
+        0 0 0 3px #f1c40f,
+        0 8px 24px rgba(241, 196, 15, 0.45);
+}
+
+.profile-aero-frame[data-presence="offline"] {
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.58),
+        0 0 0 3px #d9534f,
+        0 8px 24px rgba(217, 83, 79, 0.45);
+}
+
+/* El anillo pequeno del encabezado no necesita tanta sombra. */
+.profile-aero-frame-sm[data-presence] {
+    transition: box-shadow 0.3s ease;
+}
+
+.profile-aero-frame-sm[data-presence="online"] {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 0 0 2px #2ecc71;
+}
+
+.profile-aero-frame-sm[data-presence="away"] {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 0 0 2px #f1c40f;
+}
+
+.profile-aero-frame-sm[data-presence="offline"] {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 0 0 2px #d9534f;
+}
+
+
+/* =============================================================================
+   ESTADO DE CADA CONTACTO EN EL CHAT
+   =============================================================================
+   Verde en linea, ambar ausente, rojo desconectado. El texto dice cuanto lleva
+   asi: "Ausente hace 12 minutos", "Desconectado hace 3 dias".
+   -------------------------------------------------------------------------- */
+
+.chat-user-status.online {
+    background-color: #2ecc71 !important;
+}
+
+.chat-user-status.away {
+    background-color: #f1c40f !important;
+}
+
+.chat-user-status.offline {
+    background-color: #d9534f !important;
+}
+
+.chat-user-presence {
+    display: block;
+    width: 100%;
+    margin-top: 1px;
+    font-size: 10px;
+    line-height: 1.2;
+    color: var(--vh-text-soft);
+}
+
+.chat-user-presence.online {
+    color: #2ecc71;
+}
+
+.chat-user-presence.away {
+    color: #d4ac0d;
+}
+
+.chat-user-presence.offline {
+    color: var(--vh-text-soft);
+    opacity: 0.8;
+}
+
+/* El avatar de cada contacto en la lista, con su anillo. */
+.chat-user-avatar[data-presence] {
+    border-radius: 50%;
+}
+
+.chat-user-avatar[data-presence="online"] {
+    box-shadow: 0 0 0 2px #2ecc71;
+}
+
+.chat-user-avatar[data-presence="away"] {
+    box-shadow: 0 0 0 2px #f1c40f;
+}
+
+.chat-user-avatar[data-presence="offline"] {
+    box-shadow: 0 0 0 2px #d9534f;
+}

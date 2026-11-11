@@ -134,7 +134,7 @@
             @endphp
 
             <div class="header-profile-dock toggleable-profile-menu" onclick="toggleProfileMenu(event)" title="Menu de perfil" aria-label="Menu de perfil">
-                <div class="profile-aero-frame profile-aero-frame-sm" style="--profile-frame-color: {{ $frameColor }};">
+                <div class="profile-aero-frame profile-aero-frame-sm" data-presence-self data-presence="online" title="Tu estado" style="--profile-frame-color: {{ $frameColor }};">
                     {{-- Si el archivo del avatar ya no existe se muestra la inicial,
                          no un icono de imagen rota. --}}
                     @if ($profileImage !== '' && \App\Support\AttachmentStorage::exists($profileImage))
@@ -826,3 +826,4 @@
 
 <script src="{{ asset('ver-password.js') }}?v={{ filemtime(public_path('ver-password.js')) }}" defer></script>
 <script src="{{ asset('confirmar.js') }}?v={{ filemtime(public_path('confirmar.js')) }}" defer></script>
+<script src="{{ asset('presence.js') }}?v={{ filemtime(public_path('presence.js')) }}" defer></script>

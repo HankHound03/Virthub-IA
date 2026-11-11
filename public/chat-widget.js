@@ -539,7 +539,8 @@
                     profile_frame_color: user.profile_frame_color || '#6ea8ff',
                     is_active: accountActive,
                     name: user.name || user.username,
-                    presence_status: user.presence_status || (accountActive ? 'online' : 'offline')
+                    presence_status: user.presence_status || (accountActive ? 'online' : 'offline'),
+                    presence_label: user.presence_label || (accountActive ? 'En linea' : 'Desconectado')
                 };
             });
 
@@ -551,7 +552,8 @@
             list.innerHTML = '';
             chatContacts.forEach(user => {
                 const accountActive = user.account_active !== undefined ? !!user.account_active : !!user.is_active;
-                const isOnline = (user.presence_status || (accountActive ? 'online' : 'offline')) === 'online';
+                const estadoPresencia = user.presence_status || (accountActive ? 'online' : 'offline');
+                const isOnline = estadoPresencia === 'online';
                 const item = document.createElement('div');
                 item.className = 'chat-user-item';
                 item.dataset.username = user.username;
@@ -565,7 +567,11 @@
                 main.className = 'chat-user-main';
 
                 const profile = userProfiles[user.username] || { username: user.username, profile_image_path: null, is_active: false };
-                main.appendChild(buildAvatarNode(profile, 'chat-user-avatar'));
+                const avatarContacto = buildAvatarNode(profile, 'chat-user-avatar');
+                if (avatarContacto) {
+                    avatarContacto.dataset.presence = estadoPresencia;
+                }
+                main.appendChild(avatarContacto);
 
                 const name = document.createElement('span');
                 name.className = 'chat-user-name';
@@ -578,8 +584,14 @@
                 main.appendChild(badge);
 
                 const status = document.createElement('span');
-                status.className = 'chat-user-status ' + (isOnline ? 'active' : 'inactive');
-                status.title = isOnline ? 'Conectado recientemente' : 'Desconectado';
+                status.className = 'chat-user-status ' + estadoPresencia;
+                status.title = user.presence_label || (isOnline ? 'En linea' : 'Desconectado');
+
+                // Texto del estado: En linea, Ausente hace 12 minutos...
+                const etiqueta = document.createElement('span');
+                etiqueta.className = 'chat-user-presence ' + estadoPresencia;
+                etiqueta.textContent = user.presence_label || (isOnline ? 'En linea' : 'Desconectado');
+                main.appendChild(etiqueta);
                 main.appendChild(status);
 
                 item.appendChild(main);

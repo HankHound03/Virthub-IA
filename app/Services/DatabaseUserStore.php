@@ -87,6 +87,8 @@ class DatabaseUserStore extends JsonUserStore
             'profile_image_path' => $user->profile_image_path,
             'profile_frame_color' => $user->profile_frame_color,
             'created_at' => $user->created_at?->toDateTimeString(),
+            // Para el anillo de presencia del perfil.
+            'last_seen_at' => $user->last_seen_at?->toDateTimeString(),
         ];
     }
 

@@ -546,6 +546,12 @@ return [
 
     'chat' => [
         'presence_window_seconds' => (int) env('CHAT_PRESENCE_WINDOW', 90),
+
+        // Estilo Windows Live Messenger: en linea, ausente y desconectado.
+        'away_after_seconds' => (int) env('CHAT_AWAY_AFTER', 300),
+        'offline_after_seconds' => (int) env('CHAT_OFFLINE_AFTER', 1800),
+        'much_time_after_seconds' => (int) env('CHAT_MUCH_TIME_AFTER', 2419200),
+
         'posts_per_page' => (int) env('CHAT_PAGE_SIZE', 120),
     ],
 

@@ -177,6 +177,8 @@ class JsonUserStore implements UserStore
             'profile_image_path' => $user['profile_image_path'] ?? null,
             'profile_frame_color' => $user['profile_frame_color'] ?? '#6ea8ff',
             'created_at' => $user['created_at'] ?? null,
+            // Para el anillo de presencia del perfil (en linea, ausente, desconectado).
+            'last_seen_at' => $user['last_seen_at'] ?? null,
         ];
     }
 

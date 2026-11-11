@@ -395,7 +395,7 @@
             @endif
 
             <div class="profile-hero">
-                <div class="profile-aero-frame" style="--profile-frame-color: {{ $frameColor }};">
+                <div class="profile-aero-frame" data-presence="{{ app(\App\Support\ChatPresence::class)->state($profile['last_seen_at'] ?? null) }}" title="{{ app(\App\Support\ChatPresence::class)->describe($profile['last_seen_at'] ?? null) }}" style="--profile-frame-color: {{ $frameColor }};">
                     {{-- Solo se pinta la imagen si el archivo sigue existiendo. Si no,
                          el navegador mostraria el texto alternativo y se veria roto. --}}
                     @if ($profileImage !== '' && \App\Support\AttachmentStorage::exists($profileImage))
