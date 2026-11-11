@@ -1,0 +1,83 @@
+# =============================================================================
+# Escritorio Webtop para importar en un panel tipo Hyorym (Dockploy, etc.)
+# =============================================================================
+# Este archivo es para pegar en el editor "Compose File" del panel. NO sustituye
+# al docker-compose.yml del proyecto: el de aqui es solo el escritorio, sin la
+# aplicacion, sin Caddy y sin MariaDB.
+#
+# Diferencias con el compose del proyecto y por que:
+#
+#   C:\webtop\ct0      ->  volumen con nombre (el panel corre en Linux)
+#   red "virthub"      ->  se quita (la red la crea el propio panel)
+#   sin puertos        ->  publica el 5000 hacia el 3000, que es el de Webtop
+#   TITLE              ->  igual
+#
+# La imagen de ct0 es publica, asi que este bloque funciona tal cual.
+# Los clones (ct2 a ct7) usan la imagen local "virthub-desktop:clon", que solo
+# existe en la maquina donde se creo con docker commit. Para usarlos aqui hay
+# que subirla a un registro (ver el final del archivo).
+# -----------------------------------------------------------------------------
+
+services:
+  webtop:
+    image: lscr.io/linuxserver/webtop:ubuntu-mate
+    container_name: virthub-webtop
+    restart: unless-stopped
+
+    # Webtop necesita memoria compartida; sin esto el escritorio se cae.
+    shm_size: "1gb"
+
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: America/Mexico_City
+      TITLE: "Escritorio VirtHub"
+
+    ports:
+      # 5000 en el servidor -> 3000 dentro del contenedor (el puerto de Webtop).
+      # El 3000 del servidor queda libre para lo que ya lo use.
+      - "5000:3000"
+
+    volumes:
+      # Los datos del escritorio. Con volumen con nombre el panel lo gestiona y
+      # sobrevive a recrear el contenedor.
+      - webtop_config:/config
+
+volumes:
+  webtop_config:
+
+# =============================================================================
+# PARA USAR LOS CLONES (ct2...ct7)
+# =============================================================================
+# La imagen virthub-desktop:clon no esta en ningun registro, asi que primero hay
+# que publicarla. En la maquina donde la creaste:
+#
+#     docker tag virthub-desktop:clon TUUSUARIO/virthub-desktop:clon
+#     docker login
+#     docker push TUUSUARIO/virthub-desktop:clon
+#
+# Y despues, en el panel, anade un servicio mas por cada escritorio cambiando
+# la imagen por la publicada y el volumen:
+#
+#   webtop2:
+#     image: TUUSUARIO/virthub-desktop:clon
+#     container_name: virthub-webtop2
+#     restart: unless-stopped
+#     shm_size: "1gb"
+#     environment:
+#       PUID: 1000
+#       PGID: 1000
+#       TZ: America/Mexico_City
+#       TITLE: "Escritorio VirtHub 2"
+#     ports:
+#       - "5001:3000"
+#     volumes:
+#       - webtop2_config:/config
+#
+#   volumes:
+#     webtop2_config:
+#
+# Aviso: la imagen del clon pesa varios GB, porque incluye las aplicaciones
+# instaladas (VS Code, Packet Tracer...). Si no quieres pagar ese peso, la
+# opcion simple es usar la imagen publica en todos los escritorios y aceptar
+# que no traen esas aplicaciones.
