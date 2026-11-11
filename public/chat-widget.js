@@ -749,6 +749,26 @@
         currentChatUser = username;
         await switchChatTab('messages');
 
+        // Se pide el estado actual antes de pintar la cabecera: si no, se veia
+        // el que habia en memoria y cambiaba a desconectado al abrir.
+        try {
+            const respuestaUsuarios = await apiFetch('/chat/users');
+            const datosUsuarios = await respuestaUsuarios.json();
+
+            if (respuestaUsuarios.ok) {
+                (datosUsuarios.users || []).forEach(usuario => {
+                    if (usuario.username !== username) return;
+
+                    const perfil = profileFor(username);
+                    perfil.presence_status = usuario.presence_status || 'offline';
+                    perfil.presence_label = usuario.presence_label || '';
+                    perfil.name = usuario.name || perfil.name;
+                });
+            }
+        } catch (error) {
+            // Si falla, se pinta con lo que ya se sabe.
+        }
+
         updateConversationHeader(username);
 
         const box = document.getElementById('chatMessages');
@@ -771,10 +791,17 @@
         if (!header || !name || !status) return;
 
         const profile = profileFor(username);
-        const isOnline = profile.presence_status === 'online';
+        const estado = profile.presence_status || 'offline';
+
+        // Nombre de perfil, no el usuario tecnico.
         name.textContent = profile.name || username;
-        status.textContent = isOnline ? 'Conectado' : 'Desconectado';
-        status.style.color = isOnline ? '#69d391' : 'var(--vh-text-soft)';
+
+        // El mismo texto que en la lista: En linea, Ausente hace 12 minutos...
+        status.textContent = profile.presence_label
+            || (estado === 'online' ? 'En linea' : (estado === 'away' ? 'Ausente' : 'Desconectado'));
+
+        // El fondo entero de la cabecera cambia con el estado.
+        header.dataset.presence = estado;
         header.hidden = false;
     }
 

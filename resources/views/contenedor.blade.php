@@ -1222,7 +1222,8 @@
                 list.innerHTML = '';
                 otherUsers.forEach(user => {
                     const accountActive = user.account_active !== undefined ? !!user.account_active : !!user.is_active;
-                    const isOnline = (user.presence_status || (accountActive ? 'online' : 'offline')) === 'online';
+                    const estadoPresencia = user.presence_status || (accountActive ? 'online' : 'offline');
+                    const isOnline = estadoPresencia === 'online';
 
                     const item = document.createElement('div');
                     item.className = 'chat-user-item';
@@ -1236,10 +1237,15 @@
                     const main = document.createElement('div');
                     main.className = 'chat-user-main';
 
-                    main.appendChild(buildAvatarNode({
+                    const avatarContacto = buildAvatarNode({
                         username: user.username,
                         profile_image_path: user.profile_image_path || null,
-                    }));
+                        name: user.name || user.username,
+                    });
+                    if (avatarContacto) {
+                        avatarContacto.dataset.presence = estadoPresencia;
+                    }
+                    main.appendChild(avatarContacto);
 
                     const name = document.createElement('span');
                     name.className = 'chat-user-name';
@@ -1252,8 +1258,14 @@
                     main.appendChild(badge);
 
                     const status = document.createElement('span');
-                    status.className = 'chat-user-status ' + (isOnline ? 'active' : 'inactive');
-                    status.title = isOnline ? 'Conectado recientemente' : 'Desconectado';
+                    status.className = 'chat-user-status ' + estadoPresencia;
+                    status.title = user.presence_label || (isOnline ? 'En linea' : 'Desconectado');
+
+                    // Texto del estado, como en la ventana del chat.
+                    const etiqueta = document.createElement('span');
+                    etiqueta.className = 'chat-user-presence ' + estadoPresencia;
+                    etiqueta.textContent = user.presence_label || (isOnline ? 'En linea' : 'Desconectado');
+                    main.appendChild(etiqueta);
                     main.appendChild(status);
 
                     item.appendChild(main);
