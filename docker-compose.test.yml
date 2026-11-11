@@ -61,6 +61,11 @@ services:
       FORCE_HTTPS: "false"
       SESSION_DOMAIN: ""
       SESSION_SECURE_COOKIE: "false"
+      # Nombre propio: produccion usa "laravel-session" con
+      # SESSION_DOMAIN=.virthub.dpdns.org, asi que el navegador enviaba DOS
+      # cookies con el mismo nombre al dominio de pruebas y Laravel leia la
+      # de produccion. El login "funcionaba" y la sesion se perdia.
+      SESSION_COOKIE: "virthub_test_session"
 
       # Selector de temas de diseno (XP, Vista, 7, 8, 10).
       VIRTHUB_TEMAS: "true"

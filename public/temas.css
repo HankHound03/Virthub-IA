@@ -181,6 +181,32 @@
     transform: translateY(1px);
 }
 
+
+/* =============================================================================
+   CAMPOS AUTOCOMPLETADOS
+   =============================================================================
+   Cuando el navegador rellena un campo (usuario y contrasena, sobre todo), le
+   pone encima su propio fondo claro y se sale del tema: en el inicio de sesion se
+   veia el campo de usuario blanco y el de la contrasena oscuro.
+
+   El fondo del autocompletado no se puede cambiar con background, asi que se tapa
+   con una sombra interior del color del campo.
+   -------------------------------------------------------------------------- */
+
+[data-era] body input:-webkit-autofill,
+[data-era] body input:-webkit-autofill:hover,
+[data-era] body input:-webkit-autofill:focus,
+[data-era] body input:-webkit-autofill:active,
+[data-era] body textarea:-webkit-autofill,
+[data-era] body select:-webkit-autofill {
+    -webkit-text-fill-color: var(--vh-input-text, var(--vh-text)) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--vh-input-bg, rgba(0, 0, 0, 0.35)) inset !important;
+    box-shadow: 0 0 0 1000px var(--vh-input-bg, rgba(0, 0, 0, 0.35)) inset !important;
+    caret-color: var(--vh-input-text, var(--vh-text)) !important;
+    /* Evita que el navegador anime su propio color al enfocar. */
+    transition: background-color 99999s ease-out 0s, color 99999s ease-out 0s !important;
+}
+
 /* --- Campos --------------------------------------------------------------- */
 
 [data-era] body input[type="text"],
