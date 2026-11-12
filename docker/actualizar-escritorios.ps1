@@ -112,20 +112,42 @@ function Ejecutar {
     return $LASTEXITCODE
 }
 
-function Existe-Contenedor {
-    param([string] $Nombre)
+function Nombre-Contenedor {
+    param([string] $Ct)
 
-    $salida = docker ps -a --filter ("name=^/" + $Nombre + '$') --format '{{.Names}}' 2>$null
+    # El compose crea "virthub-ct0-1", no "ct0".
+    return ("virthub-{0}-1" -f $Ct)
+}
 
-    return ($salida -contains $Nombre)
+function Estado-Contenedor {
+    param([string] $Ct)
+
+    $nombre = Nombre-Contenedor $Ct
+    $estado = docker inspect --format '{{.State.Status}}' $nombre 2>$null
+
+    if ($LASTEXITCODE -ne 0 -or -not $estado) {
+        return 'no existe'
+    }
+
+    return ($estado | Select-Object -First 1).Trim()
+}
+
+function Estado-Legible {
+    param([string] $Ct)
+
+    switch (Estado-Contenedor $Ct) {
+        'running' { return 'arriba' }
+        'exited' { return 'parado' }
+        'paused' { return 'en pausa' }
+        'created' { return 'sin arrancar' }
+        default { return 'no existe' }
+    }
 }
 
 function Esta-Arriba {
-    param([string] $Nombre)
+    param([string] $Ct)
 
-    $salida = docker ps --filter ("name=^/" + $Nombre + '$') --format '{{.Names}}' 2>$null
-
-    return ($salida -contains $Nombre)
+    return ((Estado-Contenedor $Ct) -eq 'running')
 }
 
 # ---------------------------------------------------------------------------
@@ -143,8 +165,7 @@ Write-Host ''
 
 Write-Host '  Se van a actualizar estos escritorios:' -ForegroundColor Cyan
 foreach ($ct in $Escritorios) {
-    $estado = if (Esta-Arriba $ct) { 'arriba' } elseif (Existe-Contenedor $ct) { 'parado' } else { 'no existe' }
-    Write-Host ("    {0,-5} {1}" -f $ct, $estado) -ForegroundColor Gray
+    Write-Host ("    {0,-5} {1}" -f $ct, (Estado-Legible $ct)) -ForegroundColor Gray
 }
 
 Write-Host ''
@@ -185,7 +206,7 @@ foreach ($ct in $Escritorios) {
     }
 
     $etiqueta = "virthub-desktop:respaldo-{0}-{1}" -f $ct, $Sello
-    $codigo = Ejecutar @('docker', 'commit', ("virthub-{0}-1" -f $ct), $etiqueta) ("   {0}: respaldando en {1}" -f $ct, $etiqueta)
+    $codigo = Ejecutar @('docker', 'commit', (Nombre-Contenedor $ct), $etiqueta) ("   {0}: respaldando en {1}" -f $ct, $etiqueta)
 
     if ($codigo -ne 0) {
         throw ("No se pudo respaldar {0}. Se detiene para no dejar nada a medias." -f $ct)
@@ -236,7 +257,7 @@ apt-get -y clean
 '@
 
     foreach ($ct in $Escritorios) {
-        $contenedor = "virthub-{0}-1" -f $ct
+        $contenedor = Nombre-Contenedor $ct
 
         if (-not (Esta-Arriba $ct)) {
             Escribir-Guion ("   {0}: no esta en marcha, se omite" -f $ct) 'DarkGray'
@@ -295,8 +316,7 @@ Write-Host ''
 Escribir-Guion 'Resumen' 'Cyan'
 
 foreach ($ct in $Escritorios) {
-    $estado = if (Esta-Arriba $ct) { 'arriba' } else { 'parado' }
-    Escribir-Guion ("   {0,-5} {1}" -f $ct, $estado) 'Gray'
+    Escribir-Guion ("   {0,-5} {1}" -f $ct, (Estado-Legible $ct)) 'Gray'
 }
 
 Write-Host ''
