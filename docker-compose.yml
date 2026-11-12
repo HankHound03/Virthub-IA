@@ -148,8 +148,10 @@ services:
   # nombre/su carpeta, y anade su ruta en docker/Caddyfile.
 
   ct0:
+    # Esta imagen trae las apps (VS Code, Packet Tracer). La base de Webtop
+    # no las tiene: se perdian al recrear ct0 desde ella.
     # Cambiado a Ubuntu Mate (antes ubuntu-xfce).
-    image: lscr.io/linuxserver/webtop:ubuntu-mate
+    image: virthub-desktop:ct0-con-apps
     restart: unless-stopped
     shm_size: "1gb"
     environment:
@@ -157,9 +159,13 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct0"
+      # Pantalla inicial; el gancho de docker/hooks permite crecer hasta 2560x1440.
+      SELKIES_MANUAL_WIDTH: 1920
+      SELKIES_MANUAL_HEIGHT: 1080
     volumes:
       # 647 archivos con el escritorio que ya tenias (antes en C:\webtop\test).
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct0:/config
+      - ./docker/hooks:/custom-cont-init.d:ro
     networks:
       - virthub
 
@@ -172,8 +178,12 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct2"
+      # Pantalla inicial; el gancho de docker/hooks permite crecer hasta 2560x1440.
+      SELKIES_MANUAL_WIDTH: 1920
+      SELKIES_MANUAL_HEIGHT: 1080
     volumes:
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct2:/config
+      - ./docker/hooks:/custom-cont-init.d:ro
     networks:
       - virthub
 
@@ -186,8 +196,12 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct3"
+      # Pantalla inicial; el gancho de docker/hooks permite crecer hasta 2560x1440.
+      SELKIES_MANUAL_WIDTH: 1920
+      SELKIES_MANUAL_HEIGHT: 1080
     volumes:
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct3:/config
+      - ./docker/hooks:/custom-cont-init.d:ro
     networks:
       - virthub
 
@@ -203,8 +217,12 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct4"
+      # Pantalla inicial; el gancho de docker/hooks permite crecer hasta 2560x1440.
+      SELKIES_MANUAL_WIDTH: 1920
+      SELKIES_MANUAL_HEIGHT: 1080
     volumes:
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct4:/config
+      - ./docker/hooks:/custom-cont-init.d:ro
     networks:
       - virthub
 
@@ -226,8 +244,12 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct5"
+      # Pantalla inicial; el gancho de docker/hooks permite crecer hasta 2560x1440.
+      SELKIES_MANUAL_WIDTH: 1920
+      SELKIES_MANUAL_HEIGHT: 1080
     volumes:
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct5:/config
+      - ./docker/hooks:/custom-cont-init.d:ro
     networks:
       - virthub
 
@@ -240,8 +262,12 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct6"
+      # Pantalla inicial; el gancho de docker/hooks permite crecer hasta 2560x1440.
+      SELKIES_MANUAL_WIDTH: 1920
+      SELKIES_MANUAL_HEIGHT: 1080
     volumes:
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct6:/config
+      - ./docker/hooks:/custom-cont-init.d:ro
     networks:
       - virthub
 
@@ -254,8 +280,12 @@ services:
       PGID: 1000
       TZ: ${TZ:-America/Mexico_City}
       TITLE: "Escritorio ct7"
+      # Pantalla inicial; el gancho de docker/hooks permite crecer hasta 2560x1440.
+      SELKIES_MANUAL_WIDTH: 1920
+      SELKIES_MANUAL_HEIGHT: 1080
     volumes:
       - ${CONTAINER_DATA_DIR:-C:\webtop}\ct7:/config
+      - ./docker/hooks:/custom-cont-init.d:ro
     networks:
       - virthub
 
