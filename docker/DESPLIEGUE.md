@@ -363,3 +363,42 @@ docker compose -p virthub exec -u www-data app php artisan virthub:sync-containe
 docker compose -p virthub ps
 docker compose -p virthub logs -f app
 ```
+
+## Actualizar los escritorios
+
+`docker/actualizar-escritorios.ps1` deja los escritorios al dia sin perder nada
+del home de cada persona.
+
+```powershell
+# Todo: respaldo, imagen nueva de Webtop, ct0 recreado y paquetes al dia
+.\docker\actualizar-escritorios.ps1
+
+# Sin cortar la sesion de nadie: solo apt (y proot) dentro de los contenedores
+.\docker\actualizar-escritorios.ps1 -SoloPaquetes -Si
+
+# Solo la imagen base de Webtop, sin tocar paquetes
+.\docker\actualizar-escritorios.ps1 -SoloImagenes
+
+# Ademas de ct0, volver a congelar la imagen de los clones y recrearlos
+.\docker\actualizar-escritorios.ps1 -Clonar
+```
+
+Que hace, en orden:
+
+| Paso | Detalle |
+|---|---|
+| 1. Respaldo | `docker commit` de cada escritorio a `virthub-desktop:respaldo-<ct>-<fecha>` |
+| 2. Imagen base | `docker pull lscr.io/linuxserver/webtop:ubuntu-mate` y `ct0` recreado |
+| 3. Paquetes | `apt-get update && upgrade` dentro de cada escritorio |
+| 3b. proot | si el escritorio tiene `proot-distro`, actualiza cada distro instalada |
+| 4. Clones | (con `-Clonar`) congela `virthub-desktop:clon` y recrea ct2…ct7 |
+
+Que **no** toca: `/config` (home, ajustes y apps del usuario), los volumenes, la
+base de datos, ni Virthub.
+
+Cada ejecucion deja un registro en `docker/actualizar-escritorios-<fecha>.log`, y
+al terminar dice como volver atras con la imagen de respaldo.
+
+> Recrear un escritorio cierra su sesion. Con `-SoloPaquetes` no se recrea nada,
+> asi que nadie pierde lo que tenga abierto.
+
