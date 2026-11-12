@@ -369,6 +369,20 @@ docker compose -p virthub logs -f app
 `docker/actualizar-escritorios.ps1` deja los escritorios al dia sin perder nada
 del home de cada persona.
 
+Si Windows no deja ejecutar el `.ps1` por la politica de scripts, usa el lanzador
+`.cmd`, que la salta solo para esa ejecucion (no cambia la politica del sistema):
+
+```bat
+docker\actualizar-escritorios.cmd
+docker\actualizar-escritorios.cmd -SoloPaquetes -Si
+```
+
+O, si prefieres llamar al `.ps1` directamente:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\docker\actualizar-escritorios.ps1
+```
+
 ```powershell
 # Todo: respaldo, imagen nueva de Webtop, ct0 recreado y paquetes al dia
 .\docker\actualizar-escritorios.ps1

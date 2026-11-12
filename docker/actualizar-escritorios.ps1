@@ -63,11 +63,31 @@ Set-StrictMode -Version Latest
 # ---------------------------------------------------------------------------
 
 $Proyecto = 'virthub'
-$Compose = 'docker-compose.yml'
 $ImagenBase = 'lscr.io/linuxserver/webtop:ubuntu-mate'
 $ImagenClon = 'virthub-desktop:clon'
 $Sello = Get-Date -Format 'yyyyMMdd-HHmmss'
-$Registro = Join-Path (Get-Location) ("docker\actualizar-escritorios-{0}.log" -f $Sello)
+
+# La raiz del proyecto se busca subiendo desde donde esta el script, asi se puede
+# ejecutar tanto desde la raiz como desde la carpeta docker.
+$Raiz = $PSScriptRoot
+
+while ($Raiz -and -not (Test-Path (Join-Path $Raiz 'docker-compose.yml'))) {
+    $padre = Split-Path $Raiz -Parent
+
+    if (-not $padre -or $padre -eq $Raiz) {
+        $Raiz = $null
+        break
+    }
+
+    $Raiz = $padre
+}
+
+if (-not $Raiz) {
+    throw 'No encuentro docker-compose.yml. El script tiene que estar dentro del proyecto.'
+}
+
+$Compose = Join-Path $Raiz 'docker-compose.yml'
+$Registro = Join-Path $Raiz ("docker\actualizar-escritorios-{0}.log" -f $Sello)
 
 # ---------------------------------------------------------------------------
 # Utilidades
@@ -113,7 +133,7 @@ function Esta-Arriba {
 # ---------------------------------------------------------------------------
 
 if (-not (Test-Path $Compose)) {
-    throw "No encuentro $Compose. Ejecuta el script desde la carpeta del proyecto."
+    throw "No encuentro $Compose en $Raiz."
 }
 
 New-Item -ItemType Directory -Force -Path (Split-Path $Registro) | Out-Null
