@@ -3,45 +3,50 @@
     Actualiza los escritorios Webtop y las aplicaciones instaladas dentro.
 
 .DESCRIPTION
-    Hace tres cosas, en este orden:
+    Por defecto NO borra nada: respalda cada escritorio y actualiza los paquetes
+    que ya tiene dentro del contenedor.
 
-      1. Respalda la imagen actual de cada escritorio (docker commit).
-      2. Descarga la imagen base nueva de Webtop y recrea ct0.
-      3. Actualiza los paquetes de dentro (apt) y, si el escritorio usa
-         proot-distro, tambien cada distribucion instalada por proot.
+    Ojo con "actualizar la imagen base": los escritorios tienen aplicaciones
+    instaladas DENTRO del contenedor (VS Code vive en /usr/bin/code, no en la
+    imagen de Webtop). Recrear ct0 desde la imagen base lo deja sin esas
+    aplicaciones. Por eso esa parte es opcional (-ActualizarImagenBase) y avisa
+    antes de hacerla.
 
-    No toca NINGUN dato: ni /config (el home de cada escritorio), ni los
-    volumenes, ni la base de datos de Virthub.
+    Que NO se toca nunca: /config (el home de cada persona), los volumenes, la
+    base de datos ni Virthub.
 
 .PARAMETER Escritorios
     Que escritorios actualizar. Por defecto, todos los del compose
     (ct0, ct2, ct3, ct4, ct5, ct6, ct7).
 
-.PARAMETER SoloPaquetes
-    Solo actualiza lo de dentro de los contenedores. No descarga imagenes ni
-    recrea contenedores: no se pierde la sesion de nadie.
+.PARAMETER ActualizarImagenBase
+    Descarga la imagen nueva de Webtop y recrea ct0 con ella.
 
-.PARAMETER SoloImagenes
-    Solo descarga la imagen base y recrea ct0. No instala nada por dentro.
+    ESTO BORRA las aplicaciones instaladas dentro de ct0 (VS Code, Packet Tracer
+    y lo que haya). El respaldo permite volver atras, pero hay que reinstalarlas.
+    Los clones (ct2 a ct7) NO se tocan: siguen con su imagen congelada.
 
 .PARAMETER Clonar
-    Despues de actualizar ct0, vuelve a congelar la imagen de los clones
-    (virthub-desktop:clon) y recrea ct2 a ct7 con ella.
+    Vuelve a congelar ct0 como virthub-desktop:clon y recrea ct2 a ct7 con ella.
+    Util despues de actualizar paquetes en ct0 para que los clones hereden.
 
 .PARAMETER Si
     No pide confirmacion.
 
 .EXAMPLE
     .\actualizar-escritorios.ps1
-    Actualizacion completa, preguntando antes.
+    Respaldo + actualizacion de paquetes dentro. Nada se borra.
 
 .EXAMPLE
-    .\actualizar-escritorios.ps1 -SoloPaquetes -Si
-    Solo apt upgrade dentro de los contenedores, sin preguntar y sin cortar
-    la sesion de los escritorios.
+    .\actualizar-escritorios.ps1 -Clonar
+    Ademas, congela ct0 y recrea los clones con esa imagen.
+
+.EXAMPLE
+    .\actualizar-escritorios.ps1 -ActualizarImagenBase
+    Trae la imagen nueva de Webtop y recrea ct0. Pierde las apps de ct0.
 
 .NOTES
-    Se ejecuta desde la carpeta del proyecto (donde esta docker-compose.yml).
+    Se ejecuta desde cualquier carpeta del proyecto: el script busca la raiz.
     Requiere Docker en marcha.
 #>
 
@@ -49,8 +54,7 @@
 param(
     [string[]] $Escritorios = @('ct0', 'ct2', 'ct3', 'ct4', 'ct5', 'ct6', 'ct7'),
 
-    [switch] $SoloPaquetes,
-    [switch] $SoloImagenes,
+    [switch] $ActualizarImagenBase,
     [switch] $Clonar,
     [switch] $Si
 )
@@ -59,7 +63,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 # ---------------------------------------------------------------------------
-# Ajustes
+# Ajustes y raiz del proyecto
 # ---------------------------------------------------------------------------
 
 $Proyecto = 'virthub'
@@ -67,8 +71,8 @@ $ImagenBase = 'lscr.io/linuxserver/webtop:ubuntu-mate'
 $ImagenClon = 'virthub-desktop:clon'
 $Sello = Get-Date -Format 'yyyyMMdd-HHmmss'
 
-# La raiz del proyecto se busca subiendo desde donde esta el script, asi se puede
-# ejecutar tanto desde la raiz como desde la carpeta docker.
+# La raiz se busca subiendo desde donde esta el script: asi funciona tanto desde
+# la raiz del proyecto como desde la carpeta docker.
 $Raiz = $PSScriptRoot
 
 while ($Raiz -and -not (Test-Path (Join-Path $Raiz 'docker-compose.yml'))) {
@@ -163,22 +167,29 @@ New-Item -ItemType Directory -Force -Path (Split-Path $Registro) | Out-Null
 Ejecutar @('docker', 'version', '--format', '{{.Server.Version}}') 'Comprobando que Docker responde' | Out-Null
 Write-Host ''
 
-Write-Host '  Se van a actualizar estos escritorios:' -ForegroundColor Cyan
+Write-Host '  Escritorios:' -ForegroundColor Cyan
 foreach ($ct in $Escritorios) {
     Write-Host ("    {0,-5} {1}" -f $ct, (Estado-Legible $ct)) -ForegroundColor Gray
 }
 
 Write-Host ''
-Write-Host '  Que hace y que NO hace:' -ForegroundColor Cyan
-Write-Host '    - Respalda la imagen actual de cada escritorio (docker commit).' -ForegroundColor Gray
-Write-Host '    - Actualiza paquetes dentro (apt) y, si hay, cada distro de proot.' -ForegroundColor Gray
-Write-Host '    - NO toca /config: el home, los ajustes y las apps del usuario siguen.' -ForegroundColor Gray
-Write-Host '    - NO toca volumenes, ni la base de datos, ni Virthub.' -ForegroundColor Gray
+Write-Host '  Que NO se toca:' -ForegroundColor Cyan
+Write-Host '    /config  ->  el home, los ajustes y los archivos de cada persona' -ForegroundColor Gray
+Write-Host '    volumenes, base de datos y Virthub' -ForegroundColor Gray
 
-if (-not $SoloPaquetes) {
-    Write-Host ''
-    Write-Host '  Aviso: recrear un escritorio cierra su sesion. Quien este trabajando' -ForegroundColor Yellow
-    Write-Host '         dentro perdera lo que no haya guardado.' -ForegroundColor Yellow
+Write-Host ''
+if ($ActualizarImagenBase) {
+    Write-Host '  ATENCION: -ActualizarImagenBase recrea ct0 desde la imagen de Webtop.' -ForegroundColor Red
+    Write-Host '            Las aplicaciones instaladas DENTRO de ct0 se pierden' -ForegroundColor Red
+    Write-Host '            (VS Code en /usr/bin/code, Packet Tracer...). Hay respaldo, pero' -ForegroundColor Red
+    Write-Host '            habra que reinstalarlas. Los clones no se tocan.' -ForegroundColor Red
+} else {
+    Write-Host '  Modo normal: respaldo + actualizar paquetes dentro. No se recrea nada,' -ForegroundColor Green
+    Write-Host '  asi que no se pierde ninguna aplicacion ni sesion.' -ForegroundColor Green
+}
+
+if ($Clonar) {
+    Write-Host '  Ademas: ct0 se congela como imagen de los clones y se recrean ct2 a ct7.' -ForegroundColor Yellow
 }
 
 if (-not $Si) {
@@ -194,7 +205,7 @@ if (-not $Si) {
 Write-Host ''
 
 # ---------------------------------------------------------------------------
-# 1. Respaldo de la imagen de cada escritorio
+# 1. Respaldo de cada escritorio
 # ---------------------------------------------------------------------------
 
 Escribir-Guion '1. Respaldo de las imagenes actuales' 'Cyan'
@@ -214,10 +225,10 @@ foreach ($ct in $Escritorios) {
 }
 
 # ---------------------------------------------------------------------------
-# 2. Imagen base nueva y recreacion de ct0
+# 2. Imagen base nueva (opcional y con aviso)
 # ---------------------------------------------------------------------------
 
-if (-not $SoloPaquetes) {
+if ($ActualizarImagenBase) {
     Escribir-Guion '2. Imagen base de Webtop' 'Cyan'
 
     $codigo = Ejecutar @('docker', 'pull', $ImagenBase) ("   descargando {0}" -f $ImagenBase)
@@ -226,28 +237,24 @@ if (-not $SoloPaquetes) {
         throw 'No se pudo descargar la imagen base. Revisa la conexion o si el registro responde.'
     }
 
-    if (-not $SoloImagenes) {
-        Escribir-Guion '   ct0 se recrea con la imagen nueva' 'DarkGray'
-    }
-
-    $codigo = Ejecutar @('docker', 'compose', '-p', $Proyecto, '-f', $Compose, 'up', '-d', '--force-recreate', 'ct0') '   recreando ct0'
+    $codigo = Ejecutar @('docker', 'compose', '-p', $Proyecto, '-f', $Compose, 'up', '-d', '--force-recreate', 'ct0') '   recreando ct0 con la imagen nueva'
 
     if ($codigo -ne 0) {
         throw 'No se pudo recrear ct0.'
     }
 
+    Escribir-Guion '   ct0 recreado. Sus apps de dentro ya no estan: reinstalalas si las usas.' 'Yellow'
     Write-Host ''
     Start-Sleep -Seconds 15
 }
 
 # ---------------------------------------------------------------------------
-# 3. Actualizacion de paquetes dentro de cada escritorio
+# 3. Paquetes dentro de cada escritorio
 # ---------------------------------------------------------------------------
 
-if (-not $SoloImagenes) {
-    Escribir-Guion '3. Paquetes dentro de cada escritorio' 'Cyan'
+Escribir-Guion '3. Paquetes dentro de cada escritorio' 'Cyan'
 
-    $guionApt = @'
+$guionApt = @'
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
@@ -256,55 +263,58 @@ apt-get -y autoremove
 apt-get -y clean
 '@
 
-    foreach ($ct in $Escritorios) {
-        $contenedor = Nombre-Contenedor $ct
+foreach ($ct in $Escritorios) {
+    $contenedor = Nombre-Contenedor $ct
 
-        if (-not (Esta-Arriba $ct)) {
-            Escribir-Guion ("   {0}: no esta en marcha, se omite" -f $ct) 'DarkGray'
-            continue
+    if (-not (Esta-Arriba $ct)) {
+        Escribir-Guion ("   {0}: no esta en marcha, se omite" -f $ct) 'DarkGray'
+        continue
+    }
+
+    Ejecutar @('docker', 'exec', $contenedor, 'bash', '-lc', $guionApt) ("   {0}: apt update + upgrade" -f $ct) | Out-Null
+
+    # proot-distro, si ese escritorio lo usa
+    $hayProot = docker exec $contenedor bash -lc "command -v proot-distro >/dev/null 2>&1 && echo si || echo no" 2>$null
+
+    if (($hayProot | Select-Object -Last 1) -eq 'si') {
+        $distros = docker exec $contenedor bash -lc "proot-distro list --installed 2>/dev/null | awk -F': ' '/^[a-z]/ {print \$1}'" 2>$null
+        $lista = @($distros | Where-Object { $_ -and $_.Trim() -ne '' })
+
+        foreach ($distro in $lista) {
+            $nombre = $distro.Trim()
+            $guionProot = "proot-distro login {0} -- sh -c 'export DEBIAN_FRONTEND=noninteractive; apt-get update -qq && apt-get -y upgrade && apt-get -y clean' || true" -f $nombre
+
+            Ejecutar @('docker', 'exec', $contenedor, 'bash', '-lc', $guionProot) ("   {0}: proot {1} actualizado" -f $ct, $nombre) | Out-Null
         }
 
-        # apt dentro del contenedor (Ubuntu Mate)
-        Ejecutar @('docker', 'exec', $contenedor, 'bash', '-lc', $guionApt) ("   {0}: apt update + upgrade" -f $ct) | Out-Null
-
-        # proot-distro, si el escritorio lo usa
-        $hayProot = docker exec $contenedor bash -lc "command -v proot-distro >/dev/null 2>&1 && echo si || echo no" 2>$null
-
-        if (($hayProot | Select-Object -Last 1) -eq 'si') {
-            $distros = docker exec $contenedor bash -lc "proot-distro list --installed 2>/dev/null | awk -F': ' '/^[a-z]/ {print \$1}'" 2>$null
-
-            foreach ($distro in ($distros | Where-Object { $_ -and $_.Trim() -ne '' })) {
-                $nombre = $distro.Trim()
-                $guionProot = "proot-distro login {0} -- sh -c 'export DEBIAN_FRONTEND=noninteractive; apt-get update -qq && apt-get -y upgrade && apt-get -y clean' || true" -f $nombre
-
-                Ejecutar @('docker', 'exec', $contenedor, 'bash', '-lc', $guionProot) ("   {0}: proot {1} actualizado" -f $ct, $nombre) | Out-Null
-            }
-
-            if (-not $distros) {
-                Escribir-Guion ("   {0}: proot-distro presente pero sin distros instaladas" -f $ct) 'DarkGray'
-            }
+        if ($lista.Count -eq 0) {
+            Escribir-Guion ("   {0}: proot-distro presente pero sin distros instaladas" -f $ct) 'DarkGray'
         }
     }
 }
 
 # ---------------------------------------------------------------------------
-# 4. Congelar la imagen y recrear los clones
+# 4. Congelar ct0 y recrear los clones
 # ---------------------------------------------------------------------------
 
-if ($Clonar -and -not $SoloPaquetes) {
+if ($Clonar) {
     Escribir-Guion '4. Congelando ct0 para los clones' 'Cyan'
 
-    $codigo = Ejecutar @('docker', 'commit', 'virthub-ct0-1', $ImagenClon) ("   ct0 -> {0}" -f $ImagenClon)
+    if (-not (Esta-Arriba 'ct0')) {
+        Escribir-Guion '   ct0 no esta en marcha: no se puede congelar' 'Yellow'
+    } else {
+        $codigo = Ejecutar @('docker', 'commit', (Nombre-Contenedor 'ct0'), $ImagenClon) ("   ct0 -> {0}" -f $ImagenClon)
 
-    if ($codigo -ne 0) {
-        throw 'No se pudo congelar la imagen de los clones.'
-    }
+        if ($codigo -ne 0) {
+            throw 'No se pudo congelar la imagen de los clones.'
+        }
 
-    $clones = $Escritorios | Where-Object { $_ -ne 'ct0' }
+        $clones = @($Escritorios | Where-Object { $_ -ne 'ct0' })
 
-    if ($clones.Count -gt 0) {
-        $argumentos = @('docker', 'compose', '-p', $Proyecto, '-f', $Compose, 'up', '-d', '--force-recreate') + $clones
-        Ejecutar $argumentos ("   recreando {0}" -f ($clones -join ', ')) | Out-Null
+        if ($clones.Count -gt 0) {
+            $argumentos = @('docker', 'compose', '-p', $Proyecto, '-f', $Compose, 'up', '-d', '--force-recreate') + $clones
+            Ejecutar $argumentos ("   recreando {0}" -f ($clones -join ', ')) | Out-Null
+        }
     }
 }
 
@@ -322,9 +332,9 @@ foreach ($ct in $Escritorios) {
 Write-Host ''
 Write-Host ("  Registro: {0}" -f $Registro) -ForegroundColor DarkGray
 Write-Host ''
-Write-Host '  Si algo va mal, se puede volver atras:' -ForegroundColor Yellow
+Write-Host '  Volver atras con el respaldo:' -ForegroundColor Yellow
 Write-Host ("    docker image ls | Select-String 'respaldo-{0}'" -f $Sello) -ForegroundColor Gray
-Write-Host "    docker commit <contenedor> <imagen-de-respaldo>   # o recrear con la imagen de respaldo" -ForegroundColor Gray
+Write-Host '    docker tag virthub-desktop:respaldo-ct0-<fecha> virthub-desktop:clon   # y recrear' -ForegroundColor Gray
 Write-Host ''
-Write-Host '  Recuerda: /config no se ha tocado. Ahí siguen el home, los ajustes y las apps del usuario.' -ForegroundColor Green
+Write-Host '  /config no se ha tocado: ahi siguen el home, los ajustes y los archivos de cada persona.' -ForegroundColor Green
 Write-Host ''

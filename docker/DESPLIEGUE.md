@@ -366,53 +366,46 @@ docker compose -p virthub logs -f app
 
 ## Actualizar los escritorios
 
-`docker/actualizar-escritorios.ps1` deja los escritorios al dia sin perder nada
-del home de cada persona.
-
-Si Windows no deja ejecutar el `.ps1` por la politica de scripts, usa el lanzador
-`.cmd`, que la salta solo para esa ejecucion (no cambia la politica del sistema):
+`docker/actualizar-escritorios.ps1` deja los escritorios al dia **sin recrearlos**.
+Por defecto solo respalda y actualiza los paquetes de dentro: no se pierde
+ninguna aplicacion ni sesion.
 
 ```bat
+rem Normal: respaldo + apt upgrade dentro. Nada se borra.
 docker\actualizar-escritorios.cmd
-docker\actualizar-escritorios.cmd -SoloPaquetes -Si
+
+rem Ademas: congelar ct0 y recrear los clones con esa imagen
+docker\actualizar-escritorios.cmd -Clonar
+
+rem Traer la imagen nueva de Webtop y recrear ct0 (PIERDE las apps de ct0)
+docker\actualizar-escritorios.cmd -ActualizarImagenBase
 ```
 
-O, si prefieres llamar al `.ps1` directamente:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\docker\actualizar-escritorios.ps1
-```
-
-```powershell
-# Todo: respaldo, imagen nueva de Webtop, ct0 recreado y paquetes al dia
-.\docker\actualizar-escritorios.ps1
-
-# Sin cortar la sesion de nadie: solo apt (y proot) dentro de los contenedores
-.\docker\actualizar-escritorios.ps1 -SoloPaquetes -Si
-
-# Solo la imagen base de Webtop, sin tocar paquetes
-.\docker\actualizar-escritorios.ps1 -SoloImagenes
-
-# Ademas de ct0, volver a congelar la imagen de los clones y recrearlos
-.\docker\actualizar-escritorios.ps1 -Clonar
-```
+> Si Windows no deja ejecutar el `.ps1` por la politica de scripts, usa el
+> lanzador `.cmd`: la salta solo para esa ejecucion.
 
 Que hace, en orden:
 
 | Paso | Detalle |
 |---|---|
 | 1. Respaldo | `docker commit` de cada escritorio a `virthub-desktop:respaldo-<ct>-<fecha>` |
-| 2. Imagen base | `docker pull lscr.io/linuxserver/webtop:ubuntu-mate` y `ct0` recreado |
-| 3. Paquetes | `apt-get update && upgrade` dentro de cada escritorio |
-| 3b. proot | si el escritorio tiene `proot-distro`, actualiza cada distro instalada |
-| 4. Clones | (con `-Clonar`) congela `virthub-desktop:clon` y recrea ct2…ct7 |
+| 2. Paquetes | `apt-get update && upgrade` dentro de cada escritorio |
+| 2b. proot | si el escritorio tiene `proot-distro`, actualiza cada distro instalada |
+| 3. Clones | (con `-Clonar`) congela `virthub-desktop:clon` y recrea ct2…ct7 |
+| 4. Imagen base | (con `-ActualizarImagenBase`) descarga Webtop y recrea ct0 |
 
-Que **no** toca: `/config` (home, ajustes y apps del usuario), los volumenes, la
-base de datos, ni Virthub.
+### Cuidado con la imagen base
 
-Cada ejecucion deja un registro en `docker/actualizar-escritorios-<fecha>.log`, y
-al terminar dice como volver atras con la imagen de respaldo.
+Los escritorios tienen aplicaciones **instaladas dentro del contenedor**: VS Code
+vivve en `/usr/bin/code`, no en la imagen de Webtop. Recrear ct0 desde la imagen
+base **lo deja sin ellas**. Por eso es una opcion aparte, que avisa antes, y los
+clones no se tocan.
 
-> Recrear un escritorio cierra su sesion. Con `-SoloPaquetes` no se recrea nada,
-> asi que nadie pierde lo que tenga abierto.
+Si algun dia quieres la imagen base nueva **sin perder las apps**, el camino
+correcto es un `Dockerfile` que instale esas apps sobre la imagen nueva, y que los
+escritorios usen esa imagen.
 
+Que **no** toca nunca: `/config` (home, ajustes y archivos del usuario), los
+volumenes, la base de datos, ni Virthub.
+
+Cada ejecucion deja un registro en `docker/actualizar-escritorios-<fecha>.log`.
