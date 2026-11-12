@@ -72,6 +72,16 @@ param(
 $RecrearCt0 = $ActualizarImagenBase -or $Unsafe
 
 $ErrorActionPreference = 'Stop'
+
+# Al llamar con "-File", PowerShell recibe la lista como un solo texto
+# ("ct0,ct2,..."). Se normaliza aqui para que valga cualquier forma.
+$Escritorios = @(
+    $Escritorios |
+        ForEach-Object { $_ -split ',' } |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_ -ne '' }
+)
+
 Set-StrictMode -Version Latest
 
 # ---------------------------------------------------------------------------
