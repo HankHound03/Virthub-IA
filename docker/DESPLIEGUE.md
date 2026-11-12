@@ -377,12 +377,15 @@ docker\actualizar-escritorios.cmd
 rem Ademas: congelar ct0 y recrear los clones con esa imagen
 docker\actualizar-escritorios.cmd -Clonar
 
-rem Traer la imagen nueva de Webtop y recrear ct0 (PIERDE las apps de ct0)
-docker\actualizar-escritorios.cmd -ActualizarImagenBase
+rem Unsafe: traer la imagen nueva de Webtop y recrear ct0 (PIERDE las apps de ct0)
+docker\actualizar-escritorios.cmd -Unsafe
+
+rem Un solo escritorio, para probar
+docker\actualizar-escritorios.cmd -Escritorios ct7 -Si
 ```
 
-> Si Windows no deja ejecutar el `.ps1` por la politica de scripts, usa el
-> lanzador `.cmd`: la salta solo para esa ejecucion.
+> Si Windows bloquea el `.ps1` por la politica de scripts, usa el lanzador `.cmd`:
+> la salta solo para esa ejecucion.
 
 Que hace, en orden:
 
@@ -390,14 +393,14 @@ Que hace, en orden:
 |---|---|
 | 1. Respaldo | `docker commit` de cada escritorio a `virthub-desktop:respaldo-<ct>-<fecha>` |
 | 2. Paquetes | `apt-get update && upgrade` dentro de cada escritorio |
-| 2b. proot | si el escritorio tiene `proot-distro`, actualiza cada distro instalada |
+| 2b. proot | si hay `proot-apps` en `/config/local/bin`, se actualiza; y si hay `proot-distro`, cada distro |
 | 3. Clones | (con `-Clonar`) congela `virthub-desktop:clon` y recrea ct2…ct7 |
-| 4. Imagen base | (con `-ActualizarImagenBase`) descarga Webtop y recrea ct0 |
+| 4. Imagen base | (con `-Unsafe`) descarga Webtop y recrea ct0 |
 
-### Cuidado con la imagen base
+### Cuidado con la imagen base (`-Unsafe`)
 
 Los escritorios tienen aplicaciones **instaladas dentro del contenedor**: VS Code
-vivve en `/usr/bin/code`, no en la imagen de Webtop. Recrear ct0 desde la imagen
+vive en `/usr/bin/code`, no en la imagen de Webtop. Recrear ct0 desde la imagen
 base **lo deja sin ellas**. Por eso es una opcion aparte, que avisa antes, y los
 clones no se tocan.
 
@@ -407,5 +410,16 @@ escritorios usen esa imagen.
 
 Que **no** toca nunca: `/config` (home, ajustes y archivos del usuario), los
 volumenes, la base de datos, ni Virthub.
+
+### Ruido de Docker Desktop
+
+En Windows, cada `docker exec` imprime:
+
+```
+Failed to create stream fd: No such file or directory
+```
+
+Es un aviso de Docker Desktop, no un fallo: los comandos terminan bien y su salida
+queda en el registro. El script ya lo tolera.
 
 Cada ejecucion deja un registro en `docker/actualizar-escritorios-<fecha>.log`.

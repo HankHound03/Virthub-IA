@@ -26,6 +26,11 @@
     y lo que haya). El respaldo permite volver atras, pero hay que reinstalarlas.
     Los clones (ct2 a ct7) NO se tocan: siguen con su imagen congelada.
 
+.PARAMETER Unsafe
+    Igual que -ActualizarImagenBase: descarga la imagen nueva de Webtop, recrea
+    ct0 con ella y ademas actualiza paquetes en todos. Se llama asi porque
+    pierde las aplicaciones instaladas dentro de ct0.
+
 .PARAMETER Clonar
     Vuelve a congelar ct0 como virthub-desktop:clon y recrea ct2 a ct7 con ella.
     Util despues de actualizar paquetes en ct0 para que los clones hereden.
@@ -55,9 +60,16 @@ param(
     [string[]] $Escritorios = @('ct0', 'ct2', 'ct3', 'ct4', 'ct5', 'ct6', 'ct7'),
 
     [switch] $ActualizarImagenBase,
+
+    # Igual que -ActualizarImagenBase, con un nombre que avisa de lo que implica.
+    [switch] $Unsafe,
+
     [switch] $Clonar,
     [switch] $Si
 )
+
+# Cualquiera de los dos activa la parte que recrea ct0 con la imagen nueva.
+$RecrearCt0 = $ActualizarImagenBase -or $Unsafe
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -109,11 +121,42 @@ function Ejecutar {
     param([string[]] $Comando, [string] $Que)
 
     Escribir-Guion $Que
-    & $Comando[0] $Comando[1..($Comando.Count - 1)] 2>&1 | ForEach-Object {
-        Add-Content -Path $Registro -Value $_ -Encoding UTF8
-    }
+
+    # * La salida se redirige con cmd y no con la tuberia de PowerShell: al pasar
+    # * la salida de docker.exe por una tuberia, en Windows aparece
+    # * "Failed to create stream fd: No such file or directory" y el comando se
+    # * queda a medias.
+
+    $linea = ($Comando | ForEach-Object {
+        if ($_ -match '\s') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
+    }) -join ' '
+
+    cmd /c ($linea + ' >> "' + $Registro + '" 2>&1')
 
     return $LASTEXITCODE
+}
+
+function Salida-Comando {
+    param([string[]] $Comando)
+
+    # Docker Desktop escribe "Failed to create stream fd" por stderr en cada
+    # docker exec. Con ErrorActionPreference = Stop eso se convierte en un error
+    # que corta el script, asi que aqui la salida se recoge por archivo.
+    $temporal = [System.IO.Path]::GetTempFileName()
+
+    $linea = ($Comando | ForEach-Object {
+        if ($_ -match '\s') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
+    }) -join ' '
+
+    cmd /c ($linea + ' > "' + $temporal + '" 2>nul') | Out-Null
+
+    $salida = ''
+    if (Test-Path $temporal) {
+        $salida = (Get-Content $temporal -Raw -ErrorAction SilentlyContinue)
+        Remove-Item $temporal -Force -ErrorAction SilentlyContinue
+    }
+
+    return $salida
 }
 
 function Nombre-Contenedor {
@@ -127,7 +170,7 @@ function Estado-Contenedor {
     param([string] $Ct)
 
     $nombre = Nombre-Contenedor $Ct
-    $estado = docker inspect --format '{{.State.Status}}' $nombre 2>$null
+    $estado = Salida-Comando @('docker', 'inspect', '--format', '{{.State.Status}}', $nombre)
 
     if ($LASTEXITCODE -ne 0 -or -not $estado) {
         return 'no existe'
@@ -166,6 +209,8 @@ New-Item -ItemType Directory -Force -Path (Split-Path $Registro) | Out-Null
 
 Ejecutar @('docker', 'version', '--format', '{{.Server.Version}}') 'Comprobando que Docker responde' | Out-Null
 Write-Host ''
+Write-Host '  Nota: Docker Desktop en Windows imprime "Failed to create stream fd"' -ForegroundColor DarkGray
+Write-Host '        en cada docker exec. Es ruido suyo, no un fallo del script.' -ForegroundColor DarkGray
 
 Write-Host '  Escritorios:' -ForegroundColor Cyan
 foreach ($ct in $Escritorios) {
@@ -178,8 +223,8 @@ Write-Host '    /config  ->  el home, los ajustes y los archivos de cada persona
 Write-Host '    volumenes, base de datos y Virthub' -ForegroundColor Gray
 
 Write-Host ''
-if ($ActualizarImagenBase) {
-    Write-Host '  ATENCION: -ActualizarImagenBase recrea ct0 desde la imagen de Webtop.' -ForegroundColor Red
+if ($RecrearCt0) {
+    Write-Host '  ATENCION: se va a recrear ct0 desde la imagen de Webtop.' -ForegroundColor Red
     Write-Host '            Las aplicaciones instaladas DENTRO de ct0 se pierden' -ForegroundColor Red
     Write-Host '            (VS Code en /usr/bin/code, Packet Tracer...). Hay respaldo, pero' -ForegroundColor Red
     Write-Host '            habra que reinstalarlas. Los clones no se tocan.' -ForegroundColor Red
@@ -228,7 +273,7 @@ foreach ($ct in $Escritorios) {
 # 2. Imagen base nueva (opcional y con aviso)
 # ---------------------------------------------------------------------------
 
-if ($ActualizarImagenBase) {
+if ($RecrearCt0) {
     Escribir-Guion '2. Imagen base de Webtop' 'Cyan'
 
     $codigo = Ejecutar @('docker', 'pull', $ImagenBase) ("   descargando {0}" -f $ImagenBase)
@@ -254,14 +299,10 @@ if ($ActualizarImagenBase) {
 
 Escribir-Guion '3. Paquetes dentro de cada escritorio' 'Cyan'
 
-$guionApt = @'
-set -e
-export DEBIAN_FRONTEND=noninteractive
-apt-get update -qq
-apt-get -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef upgrade
-apt-get -y autoremove
-apt-get -y clean
-'@
+# Una sola linea: al pasar por cmd, un guion con saltos de linea se rompe.
+$guionApt = 'export DEBIAN_FRONTEND=noninteractive; apt-get update -qq; ' +
+    'apt-get -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef upgrade; ' +
+    'apt-get -y autoremove; apt-get -y clean'
 
 foreach ($ct in $Escritorios) {
     $contenedor = Nombre-Contenedor $ct
@@ -273,16 +314,30 @@ foreach ($ct in $Escritorios) {
 
     Ejecutar @('docker', 'exec', $contenedor, 'bash', '-lc', $guionApt) ("   {0}: apt update + upgrade" -f $ct) | Out-Null
 
+    # proot-apps: la herramienta con la que LinuxServer instala apps por proot.
+    $hayProotApps = Salida-Comando @('docker', 'exec', $contenedor, 'bash', '-lc', 'test -x /config/local/bin/proot-apps && echo si || echo no')
+
+    if (($hayProotApps | Select-Object -Last 1) -eq 'si') {
+        # --help para saber si el subcomando existe en esta version
+        $ayuda = Salida-Comando @('docker', 'exec', $contenedor, 'bash', '-lc', '/config/local/bin/proot-apps --help 2>&1 | head -20')
+
+        if (($ayuda -join ' ') -match 'update') {
+            Ejecutar @('docker', 'exec', $contenedor, '/config/local/bin/proot-apps', 'update') ("   {0}: proot-apps update" -f $ct) | Out-Null
+        } else {
+            Escribir-Guion ("   {0}: proot-apps no tiene subcomando update; se actualiza desde el escritorio" -f $ct) 'DarkGray'
+        }
+    }
+
     # proot-distro, si ese escritorio lo usa
-    $hayProot = docker exec $contenedor bash -lc "command -v proot-distro >/dev/null 2>&1 && echo si || echo no" 2>$null
+    $hayProot = Salida-Comando @('docker', 'exec', $contenedor, 'bash', '-lc', 'command -v proot-distro >/dev/null 2>&1 && echo si || echo no')
 
     if (($hayProot | Select-Object -Last 1) -eq 'si') {
-        $distros = docker exec $contenedor bash -lc "proot-distro list --installed 2>/dev/null | awk -F': ' '/^[a-z]/ {print \$1}'" 2>$null
+        $distros = Salida-Comando @('docker', 'exec', $contenedor, 'bash', '-lc', "proot-distro list --installed 2>/dev/null")
         $lista = @($distros | Where-Object { $_ -and $_.Trim() -ne '' })
 
         foreach ($distro in $lista) {
             $nombre = $distro.Trim()
-            $guionProot = "proot-distro login {0} -- sh -c 'export DEBIAN_FRONTEND=noninteractive; apt-get update -qq && apt-get -y upgrade && apt-get -y clean' || true" -f $nombre
+            $guionProot = "proot-distro login {0} -- sh -c 'export DEBIAN_FRONTEND=noninteractive; apt-get update -qq; apt-get -y upgrade; apt-get -y clean' || true" -f $nombre
 
             Ejecutar @('docker', 'exec', $contenedor, 'bash', '-lc', $guionProot) ("   {0}: proot {1} actualizado" -f $ct, $nombre) | Out-Null
         }
