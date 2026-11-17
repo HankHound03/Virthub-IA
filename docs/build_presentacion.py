@@ -233,7 +233,7 @@ texto(
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "El problema", "Lo que nos encontramos en el aula", 2)
+titulo_diapositiva(slide, "El problema", "Lo que nos encontramos en el aula", 1)
 
 tarjeta(slide, 0.95, 1.95, 3.7, 3.5, "Equipos viejos",
         ["Computadoras de hace más de diez años.",
@@ -259,7 +259,7 @@ texto(slide, 0.95, 5.75, 11.5, 0.9,
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "La idea", "¿Y si el trabajo pesado no ocurre en tu computadora?", 3)
+titulo_diapositiva(slide, "La idea", "¿Y si el trabajo pesado no ocurre en tu computadora?", 2)
 
 texto(slide, 0.95, 1.9, 11.5, 1.0,
       "Virthub lleva la universidad al navegador. El equipo solo dibuja la pantalla.",
@@ -278,7 +278,7 @@ vinietas(slide, [
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "Arquitectura", "Servicios independientes, todos en Docker", 4)
+titulo_diapositiva(slide, "Arquitectura", "Servicios independientes, todos en Docker", 3)
 
 # Navegador
 tarjeta(slide, 0.6, 2.15, 2.3, 1.5, "Navegador", ["Solo dibuja", "la pantalla"], acento=GRIS, tam_titulo=14, tam_cuerpo=12)
@@ -308,7 +308,7 @@ texto(slide, 0.95, 6.35, 11.5, 0.5,
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "Con qué está hecho", "Tecnologías del proyecto", 5)
+titulo_diapositiva(slide, "Con qué está hecho", "Tecnologías del proyecto", 4)
 
 vinietas(slide, [
     ("PHP 8.4 con Laravel 13: toda la lógica de la aplicación.", 0),
@@ -334,7 +334,7 @@ separador(slide, "Parte 1", "Escritorios virtuales",
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "Los escritorios Webtop", "Un contenedor por persona", 7)
+titulo_diapositiva(slide, "Los escritorios Webtop", "Un contenedor por persona", 5)
 
 vinietas(slide, [
     ("Cada escritorio es un contenedor Linux independiente: ct0, ct1, ct2…", 0),
@@ -351,7 +351,7 @@ imagen_ajustada(slide, os.path.join(IMG, "14-escritorio-webtop.png"), 1.2, 4.35,
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "El problema de acceso", "Por qué no bastaba la cookie", 8)
+titulo_diapositiva(slide, "El problema de acceso", "Por qué no bastaba la cookie", 6)
 
 tarjeta(slide, 0.95, 1.95, 5.4, 2.2, "Lo que pasaba",
         ["La comprobación dependía de la cookie de sesión.",
@@ -374,7 +374,7 @@ texto(slide, 0.95, 4.55, 11.4, 1.2,
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "La solución: un pase firmado", "Un enlace que no se puede fabricar", 9)
+titulo_diapositiva(slide, "La solución: un pase firmado", "Un enlace que no se puede fabricar", 7)
 
 tarjeta(slide, 0.95, 1.9, 3.6, 2.6, "Firmado",
         ["Con la clave de la aplicación.",
@@ -400,7 +400,7 @@ texto(slide, 0.95, 5.45, 11.4, 1.2,
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "El control de acceso", "Cinco pasos antes de entregar un escritorio", 10)
+titulo_diapositiva(slide, "El control de acceso", "Cinco pasos antes de entregar un escritorio", 8)
 
 pasos = [
     ("1", "El navegador pide el escritorio con su pase."),
@@ -445,7 +445,7 @@ separador(slide, "Parte 2", "Moderación de imágenes",
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "NSFW-Sherlock", "Un servicio aparte, con una sola tarea", 12)
+titulo_diapositiva(slide, "NSFW-Sherlock", "Un servicio aparte, con una sola tarea", 9)
 
 vinietas(slide, [
     ("Analiza una imagen y estima si es contenido no apto.", 0),
@@ -464,7 +464,7 @@ tarjeta(slide, 1.4, 4.75, 10.5, 1.5, "¿Por qué separarlo?",
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "El flujo de una revisión", "Qué ocurre cuando alguien sube una foto", 13)
+titulo_diapositiva(slide, "El flujo de una revisión", "Qué ocurre cuando alguien sube una foto", 10)
 
 cajas = [
     ("Sube la foto", "El usuario publica", VERDE),
@@ -493,7 +493,7 @@ vinietas(slide, [
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "El umbral: dónde ponerlo", "La herramienta propone, la persona decide", 14)
+titulo_diapositiva(slide, "El umbral: dónde ponerlo", "La herramienta propone, la persona decide", 11)
 
 filas = [
     ("0.90", "Muy permisivo", "Solo lo evidente", VERDE),
@@ -524,7 +524,7 @@ separador(slide, "Parte 3", "Antivirus de archivos",
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "ClamAV: cómo se escanea", "Por socket, sin compartir archivos", 16)
+titulo_diapositiva(slide, "ClamAV: cómo se escanea", "Por socket, sin compartir archivos", 12)
 
 vinietas(slide, [
     ("La subida llega por trozos; al terminar se juntan en un archivo temporal.", 0),
@@ -547,7 +547,7 @@ tarjeta(slide, 6.9, 5.05, 5.5, 1.3, "Base de firmas",
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "Si el antivirus no responde", "Una decisión de criterio, no técnica", 17)
+titulo_diapositiva(slide, "Si el antivirus no responde", "Una decisión de criterio, no técnica", 13)
 
 tarjeta(slide, 1.1, 2.0, 5.3, 3.2, "Modo abierto",
         ["El archivo pasa.",
@@ -572,7 +572,7 @@ texto(slide, 0.95, 5.55, 11.4, 0.8,
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "Subidas de hasta 5 GB", "Por trozos, con reanudación", 18)
+titulo_diapositiva(slide, "Subidas de hasta 5 GB", "Por trozos, con reanudación", 14)
 
 vinietas(slide, [
     ("Los archivos se parten en trozos de 8 MB.", 0),
@@ -587,7 +587,7 @@ vinietas(slide, [
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "El diseño: Redmond", "Cinco épocas de Windows, treinta esquemas", 19)
+titulo_diapositiva(slide, "El diseño: Redmond", "Cinco épocas de Windows, treinta esquemas", 15)
 
 imagen_ajustada(slide, os.path.join(IMG, "04-temas-carrusel.png"), 0.9, 1.9, 5.2, 4.3)
 imagen_ajustada(slide, os.path.join(IMG, "05-inicio-admin-calendario.png"), 6.4, 1.9, 6.2, 4.3)
@@ -601,7 +601,7 @@ texto(slide, 0.95, 6.4, 11.4, 0.6,
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "¿Por qué Redmond?", "Una decisión de diseño, no un capricho", 20)
+titulo_diapositiva(slide, "¿Por qué Redmond?", "Una decisión de diseño, no un capricho", 16)
 
 tarjeta(slide, 0.75, 1.95, 2.9, 2.15, "Ya lo conocemos",
         ["Aprendimos a usar una computadora en XP, Vista o 7.",
@@ -636,7 +636,7 @@ texto(slide, 0.95, 6.0, 11.5, 0.6,
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "De la 1.0 a la 2.0", "Lo que trajo esta versión", 21)
+titulo_diapositiva(slide, "De la 1.0 a la 2.0", "Lo que trajo esta versión", 17)
 
 tarjeta(slide, 0.75, 1.9, 3.85, 2.3, "Diseño",
         ["30 esquemas en 5 épocas.",
@@ -679,7 +679,7 @@ tarjeta(slide, 8.95, 4.45, 3.7, 2.2, "Seguridad",
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "El asistente TutorUTT", "IA local, sin mandar nada a internet", 20)
+titulo_diapositiva(slide, "El asistente TutorUTT", "IA local, sin mandar nada a internet", 18)
 
 vinietas(slide, [
     ("El modelo corre en el equipo del administrador, con Ollama.", 0),
@@ -696,7 +696,7 @@ imagen_ajustada(slide, os.path.join(IMG, "13-ia-tutorutt.png"), 9.2, 1.85, 3.4, 
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "El chat", "Conversación entre estudiantes", 21)
+titulo_diapositiva(slide, "El chat", "Conversación entre estudiantes", 19)
 
 vinietas(slide, [
     ("Se abre desde cualquier página, y siempre en la lista de usuarios.", 0),
@@ -714,7 +714,7 @@ imagen_ajustada(slide, os.path.join(IMG, "12-contenedor-chat.png"), 7.4, 1.85, 5
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "Hecho para equipos modestos", "Cada decisión pensada en un Core 2 Duo", 22)
+titulo_diapositiva(slide, "Hecho para equipos modestos", "Cada decisión pensada en un Core 2 Duo", 20)
 
 tarjeta(slide, 0.9, 1.95, 3.75, 2.5, "Detección automática",
         ["Si el equipo tiene pocos núcleos o poca memoria, se activa el modo ligero."],
@@ -738,7 +738,7 @@ vinietas(slide, [
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "Seguridad en conjunto", "Capas, no una sola puerta", 23)
+titulo_diapositiva(slide, "Seguridad en conjunto", "Capas, no una sola puerta", 21)
 
 vinietas(slide, [
     ("HTTPS y cookies seguras en todo el sitio público.", 0),
@@ -756,7 +756,7 @@ vinietas(slide, [
 
 slide = nueva_diapositiva()
 titulo_diapositiva(slide, "Verificación en dos pasos",
-                   "TOTP estándar: sirve cualquier aplicación, no solo la de Google", 0)
+                   "TOTP estándar: sirve cualquier aplicación, no solo la de Google", 22)
 
 vinietas(slide, [
     ("RFC 6238: SHA-1, 6 dígitos, 30 segundos.", 0),
@@ -791,12 +791,76 @@ texto(slide, 0.75, 5.75, 11.9, 0.9,
 # ---------------------------------------------------------------------------
 
 slide = nueva_diapositiva()
-titulo_diapositiva(slide, "Así se ve", "Capturas del sistema en uso", 24)
+titulo_diapositiva(slide, "Así se ve", "Capturas del sistema en uso", 23)
 
 imagen_ajustada(slide, os.path.join(IMG, "18-inicio-admin.png"), 0.7, 1.85, 6.0, 2.4)
 imagen_ajustada(slide, os.path.join(IMG, "17-crear-publicacion.png"), 6.9, 1.85, 5.8, 2.4)
 imagen_ajustada(slide, os.path.join(IMG, "12-contenedor-chat.png"), 0.7, 4.4, 6.0, 2.4)
 imagen_ajustada(slide, os.path.join(IMG, "15-ventana-nueva.png"), 6.9, 4.4, 5.8, 2.4)
+
+# ---------------------------------------------------------------------------
+# 24. Primera puesta en marcha
+# ---------------------------------------------------------------------------
+
+slide = nueva_diapositiva()
+titulo_diapositiva(slide, "El primer arranque", "Sin claves por defecto ni base precargada", 24)
+
+vinietas(slide, [
+    ("Con la base vacía, cualquier dirección lleva al asistente: no hay que saberse /install.", 0),
+    ("Se crea la cuenta de administrador: usuario, nombre de perfil y contraseña.", 0),
+    ("En cuanto existe un administrador, el asistente se cierra solo (404).", 0),
+    ("En producción exige INSTALL_KEY; sin la clave no hay forma de llegar.", 0),
+], izq=1.05, ancho=6.0, arriba=1.85, tam=16, alto=3.0)
+
+imagen_ajustada(slide, os.path.join(IMG, "31-instalacion-asistente.png"), 7.2, 1.85, 5.4, 3.4)
+
+tarjeta(slide, 0.9, 5.0, 11.4, 1.35, "Por qué importa",
+        ["Una instalación nueva no debería venir con una contraseña que todo el mundo conoce."],
+        acento=VERDE, tam_titulo=14, tam_cuerpo=13)
+
+# ---------------------------------------------------------------------------
+# 25. Presencia
+# ---------------------------------------------------------------------------
+
+slide = nueva_diapositiva()
+titulo_diapositiva(slide, "Saber quién está", "El anillo de la foto dice el estado", 25)
+
+tarjeta(slide, 0.9, 1.95, 3.75, 2.3, "Verde: en línea",
+        ["La pestaña está abierta y hay actividad."],
+        acento=RGBColor(0x2e, 0xcc, 0x71), tam_titulo=14, tam_cuerpo=12)
+
+tarjeta(slide, 4.8, 1.95, 3.75, 2.3, "Ámbar: ausente",
+        ["La sesión sigue, pero lleva un rato sin hacer nada."],
+        acento=RGBColor(0xf1, 0xc4, 0x0f), tam_titulo=14, tam_cuerpo=12)
+
+tarjeta(slide, 8.7, 1.95, 3.75, 2.3, "Rojo: desconectado",
+        ["Cerró la pestaña o lleva mucho sin dar señal."],
+        acento=RGBColor(0xd9, 0x53, 0x4f), tam_titulo=14, tam_cuerpo=12)
+
+vinietas(slide, [
+    ("Se ve en el encabezado, en cada perfil y en la lista del chat.", 0),
+    ("El chat lo escribe con palabras: «Ausente hace 12 minutos», «Desconectado hace 3 días».", 0),
+    ("A partir de las cuatro semanas: «hace mucho tiempo».", 0),
+    ("Todo se deduce de la última señal: no hay que configurar nada.", 0),
+], arriba=4.5, tam=15, alto=2.2)
+
+# ---------------------------------------------------------------------------
+# 26. Tareas del aula
+# ---------------------------------------------------------------------------
+
+slide = nueva_diapositiva()
+titulo_diapositiva(slide, "Las tareas del aula", "Título, materia, fechas y nota", 26)
+
+vinietas(slide, [
+    ("«Agregar tarea» abre un panel con todos los campos, no una sola línea.", 0),
+    ("Materia como etiqueta: las que ya usaste vuelven a ofrecerse.", 0),
+    ("Fecha y fecha de entrega; la entrega se marca en rojo.", 0),
+    ("Nota de la tarea, visible bajo el título; se abre entera al pulsarla.", 0),
+    ("Cada tarea se puede editar sin perder si estaba hecha.", 0),
+    ("El espacio de trabajo se guarda en el servidor, no solo en el navegador.", 0),
+], izq=1.05, ancho=6.1, arriba=1.85, tam=16, alto=4.4)
+
+imagen_ajustada(slide, os.path.join(IMG, "16-todo-notas.png"), 7.4, 1.85, 5.2, 4.4)
 
 # ---------------------------------------------------------------------------
 # 25. Cierre
@@ -809,8 +873,8 @@ banda.fill.solid()
 banda.fill.fore_color.rgb = VERDE
 banda.line.fill.background()
 
-texto(slide, 1.2, 1.55, 10.8, 0.5, "AWTY  ·  «are we there yet?»", tam=15, color=VERDE, negrita=True)
-texto(slide, 1.2, 2.1, 10.8, 1.0, "¿Ya estamos ahí?", tam=54, color=BLANCO, negrita=True, fuente=FUENTE_TITULO)
+texto(slide, 1.2, 1.55, 10.8, 0.5, "GRACIAS", tam=15, color=VERDE, negrita=True)
+texto(slide, 1.2, 2.1, 10.8, 1.0, "¿Preguntas?", tam=54, color=BLANCO, negrita=True, fuente=FUENTE_TITULO)
 
 texto(slide, 1.2, 3.35, 10.6, 2.2, [
     "Este proyecto se hizo para estudiantes que no tienen dinero suficiente",
