@@ -2064,5 +2064,7 @@
             </div>
         </div>
     @endif
+{{-- Libreta digital: boton encima del chat, panel flotante sin difuminar. --}}
+@include('partials.libreta-flotante')
 </body>
 </html>

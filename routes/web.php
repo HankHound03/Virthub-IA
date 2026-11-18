@@ -13,6 +13,7 @@ use App\Http\Controllers\GuestWorkspaceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PasswordChangeController;
 use App\Http\Controllers\InstallController;
+use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProxyAuthController;
 use App\Http\Controllers\SuggestionController;
@@ -107,6 +108,17 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ---------------------------------------------------------------------------
 
 Route::get('/contenedor', [ContainerController::class, 'show'])->name('container.show');
+
+    /*
+     * Libreta digital: notas en markdown.
+     *
+     * La misma vista sirve para la pagina completa y para el flotante del
+     * contenedor (?flotante=1).
+     */
+    Route::get('/libreta', [NoteController::class, 'index'])->name('notes.index');
+    Route::post('/libreta', [NoteController::class, 'store'])->name('notes.store');
+    Route::post('/libreta/{id}', [NoteController::class, 'update'])->name('notes.update');
+    Route::post('/libreta/{id}/borrar', [NoteController::class, 'destroy'])->name('notes.destroy');
 Route::get('/contenedor/launch', [ContainerController::class, 'launch'])->name('container.launch');
 
 // Ventana aparte con el escritorio dentro. Vive en nuestro dominio para que la
