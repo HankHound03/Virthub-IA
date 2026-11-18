@@ -13,6 +13,11 @@
 
 <body class="libreta-cuerpo">
 
+@include('partials.header', [
+    'currentUser' => $currentUser ?? null,
+    'currentPage' => 'libreta',
+])
+
 @include('partials.libreta-cuerpo', ['flotante' => false])
 
 </body>
