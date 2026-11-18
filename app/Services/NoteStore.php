@@ -5,19 +5,24 @@ namespace App\Services;
 use RuntimeException;
 
 /**
- * Notas de la libreta digital, una por persona.
+ * Libreta digital: notas en markdown, agrupadas por carpetas (materias).
  *
- * Se guardan en storage/app/data/notes.json, igual que el resto de almacenes del
+ * Se guarda en storage/app/data/notes.json, igual que el resto de almacenes del
  * proyecto: sin base de datos nueva y facil de copiar o vaciar.
  *
- * Cada nota es:
- *   id, title, body (markdown), created_at, updated_at
+ * Estructura:
+ *   users.<usuario>.folders = ["Redes", "Calculo"]
+ *   users.<usuario>.notes   = [{ id, title, body, folder, created_at, updated_at }]
+ *
+ * Una nota con folder vacio esta "sin materia".
  */
 class NoteStore
 {
-    private const MAX_NOTAS = 200;
+    private const MAX_NOTAS = 500;
+    private const MAX_CARPETAS = 40;
     private const MAX_TITULO = 120;
     private const MAX_CUERPO = 40000;
+    private const MAX_CARPETA = 60;
 
     private string $filePath;
 
@@ -41,6 +46,42 @@ class NoteStore
         return $notas;
     }
 
+    /**
+     * Carpetas del usuario, ordenadas, incluyendo las que ya usan sus notas.
+     *
+     * @return array<int, string>
+     */
+    public function folders(string $username): array
+    {
+        $datos = $this->readData();
+        $clave = $this->clave($username);
+        $guardadas = $datos['users'][$clave]['folders'] ?? [];
+
+        $carpetas = [];
+
+        foreach ((array) $guardadas as $carpeta) {
+            $nombre = $this->limpiarNombre((string) $carpeta);
+
+            if ($nombre !== '') {
+                $carpetas[$nombre] = true;
+            }
+        }
+
+        // Por si una nota apunta a una carpeta que no esta en la lista.
+        foreach ($datos['users'][$clave]['notes'] ?? [] as $nota) {
+            $nombre = $this->limpiarNombre((string) ($nota['folder'] ?? ''));
+
+            if ($nombre !== '') {
+                $carpetas[$nombre] = true;
+            }
+        }
+
+        $lista = array_keys($carpetas);
+        sort($lista, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return $lista;
+    }
+
     public function find(string $username, string $id): ?array
     {
         foreach ($this->all($username) as $nota) {
@@ -52,9 +93,9 @@ class NoteStore
         return null;
     }
 
-    public function create(string $username, string $title = '', string $body = ''): array
+    public function create(string $username, string $title = '', string $body = '', string $folder = ''): array
     {
-        return $this->updateData(function (array &$datos) use ($username, $title, $body): array {
+        return $this->updateData(function (array &$datos) use ($username, $title, $body, $folder): array {
             $clave = $this->clave($username);
             $notas = $datos['users'][$clave]['notes'] ?? [];
 
@@ -68,6 +109,7 @@ class NoteStore
                 'id' => bin2hex(random_bytes(8)),
                 'title' => $this->limpiarTitulo($title),
                 'body' => $this->limpiarCuerpo($body),
+                'folder' => $this->limpiarNombre($folder),
                 'created_at' => $ahora,
                 'updated_at' => $ahora,
             ];
@@ -79,9 +121,9 @@ class NoteStore
         });
     }
 
-    public function update(string $username, string $id, string $title, string $body): array
+    public function update(string $username, string $id, string $title, string $body, ?string $folder = null): array
     {
-        return $this->updateData(function (array &$datos) use ($username, $id, $title, $body): array {
+        return $this->updateData(function (array &$datos) use ($username, $id, $title, $body, $folder): array {
             $clave = $this->clave($username);
             $notas = $datos['users'][$clave]['notes'] ?? [];
 
@@ -93,6 +135,10 @@ class NoteStore
                 $notas[$indice]['title'] = $this->limpiarTitulo($title);
                 $notas[$indice]['body'] = $this->limpiarCuerpo($body);
                 $notas[$indice]['updated_at'] = date('Y-m-d H:i:s');
+
+                if ($folder !== null) {
+                    $notas[$indice]['folder'] = $this->limpiarNombre($folder);
+                }
 
                 $datos['users'][$clave]['notes'] = $notas;
 
@@ -124,6 +170,112 @@ class NoteStore
         });
     }
 
+    // -----------------------------------------------------------------------
+    // Carpetas
+    // -----------------------------------------------------------------------
+
+    public function createFolder(string $username, string $name): string
+    {
+        return $this->updateData(function (array &$datos) use ($username, $name): string {
+            $clave = $this->clave($username);
+            $nombre = $this->limpiarNombre($name);
+
+            if ($nombre === '') {
+                throw new RuntimeException('La carpeta necesita un nombre.');
+            }
+
+            $carpetas = (array) ($datos['users'][$clave]['folders'] ?? []);
+
+            if (count($carpetas) >= self::MAX_CARPETAS) {
+                throw new RuntimeException('Ya hay demasiadas carpetas.');
+            }
+
+            foreach ($carpetas as $existente) {
+                if (mb_strtolower((string) $existente) === mb_strtolower($nombre)) {
+                    throw new RuntimeException('Ya existe una carpeta con ese nombre.');
+                }
+            }
+
+            $carpetas[] = $nombre;
+            $datos['users'][$clave]['folders'] = $carpetas;
+
+            return $nombre;
+        });
+    }
+
+    /**
+     * Borra la carpeta. Las notas que tenia NO se borran: se quedan sin materia.
+     */
+    public function deleteFolder(string $username, string $name): int
+    {
+        return $this->updateData(function (array &$datos) use ($username, $name): int {
+            $clave = $this->clave($username);
+            $nombre = $this->limpiarNombre($name);
+
+            $carpetas = array_values(array_filter(
+                (array) ($datos['users'][$clave]['folders'] ?? []),
+                static fn ($carpeta): bool => mb_strtolower((string) $carpeta) !== mb_strtolower($nombre)
+            ));
+
+            $datos['users'][$clave]['folders'] = $carpetas;
+
+            $movidas = 0;
+            $notas = $datos['users'][$clave]['notes'] ?? [];
+
+            foreach ($notas as $indice => $nota) {
+                if (mb_strtolower((string) ($nota['folder'] ?? '')) !== mb_strtolower($nombre)) {
+                    continue;
+                }
+
+                $notas[$indice]['folder'] = '';
+                $movidas++;
+            }
+
+            $datos['users'][$clave]['notes'] = $notas;
+
+            return $movidas;
+        });
+    }
+
+    public function renameFolder(string $username, string $old, string $new): string
+    {
+        return $this->updateData(function (array &$datos) use ($username, $old, $new): string {
+            $clave = $this->clave($username);
+            $viejo = $this->limpiarNombre($old);
+            $nuevo = $this->limpiarNombre($new);
+
+            if ($nuevo === '') {
+                throw new RuntimeException('La carpeta necesita un nombre.');
+            }
+
+            $carpetas = (array) ($datos['users'][$clave]['folders'] ?? []);
+
+            foreach ($carpetas as $indice => $carpeta) {
+                if (mb_strtolower((string) $carpeta) === mb_strtolower($viejo)) {
+                    $carpetas[$indice] = $nuevo;
+                }
+            }
+
+            $datos['users'][$clave]['folders'] = array_values(array_unique($carpetas));
+
+            $notas = $datos['users'][$clave]['notes'] ?? [];
+
+            foreach ($notas as $indice => $nota) {
+                if (mb_strtolower((string) ($nota['folder'] ?? '')) === mb_strtolower($viejo)) {
+                    $notas[$indice]['folder'] = $nuevo;
+                }
+            }
+
+            $datos['users'][$clave]['notes'] = $notas;
+
+            return $nuevo;
+        });
+    }
+
+    // -----------------------------------------------------------------------
+    // Limpieza y almacenamiento
+    // -----------------------------------------------------------------------
+
     private function limpiarTitulo(string $titulo): string
     {
         $titulo = trim(preg_replace('/\s+/', ' ', $titulo) ?? '');
@@ -139,6 +291,11 @@ class NoteStore
     {
         // Se guarda tal cual, incluidos los saltos de linea del markdown.
         return mb_substr(str_replace("\r\n", "\n", $cuerpo), 0, self::MAX_CUERPO);
+    }
+
+    private function limpiarNombre(string $nombre): string
+    {
+        return mb_substr(trim(preg_replace('/\s+/', ' ', $nombre) ?? ''), 0, self::MAX_CARPETA);
     }
 
     private function clave(string $username): string

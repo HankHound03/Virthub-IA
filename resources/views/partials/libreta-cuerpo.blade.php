@@ -89,6 +89,115 @@
             white-space: nowrap;
         }
 
+        .libreta-carpetas {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 6px 6px 4px;
+            max-height: 34%;
+            overflow-y: auto;
+        }
+
+        .libreta-carpeta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid transparent;
+            border-radius: var(--vh-btn-radius, 6px);
+            background: transparent;
+            color: var(--vh-text);
+            font: inherit;
+            font-size: 11.5px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .libreta-carpeta:hover {
+            background: var(--vh-btn-hover-bg, rgba(255, 255, 255, 0.08));
+        }
+
+        .libreta-carpeta.activa {
+            border-color: var(--vh-accent, var(--vh-border));
+            background: var(--vh-btn-hover-bg, rgba(255, 255, 255, 0.1));
+        }
+
+        .libreta-carpeta-nombre {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .libreta-cuenta {
+            font-size: 10px;
+            color: var(--vh-text-soft);
+        }
+
+        /* La × para borrar la materia aparece al pasar por encima */
+        .libreta-carpeta-borrar {
+            display: none;
+            padding: 0 3px;
+            color: var(--vh-alert-error, #d9534f);
+        }
+
+        .libreta-carpeta:hover .libreta-carpeta-borrar {
+            display: inline;
+        }
+
+        .libreta-carpeta-nueva {
+            color: var(--vh-text-soft);
+            border-style: dashed;
+            border-color: var(--vh-border);
+            justify-content: center;
+        }
+
+        .libreta-carpeta-form {
+            display: flex;
+            gap: 4px;
+            padding: 2px;
+        }
+
+        .libreta-carpeta-form[hidden] {
+            display: none;
+        }
+
+        .libreta-carpeta-form input {
+            flex: 1;
+            min-width: 0;
+            padding: 4px 6px;
+            border: 1px solid var(--vh-input-border, var(--vh-border));
+            border-radius: 6px;
+            background: var(--vh-input-bg, rgba(0, 0, 0, 0.18));
+            color: var(--vh-input-text, var(--vh-text));
+            font: inherit;
+            font-size: 11.5px;
+        }
+
+        .libreta-selector {
+            max-width: 150px;
+            padding: 4px 6px;
+            border: 1px solid var(--vh-border);
+            border-radius: var(--vh-btn-radius, 6px);
+            background: var(--vh-input-bg, rgba(0, 0, 0, 0.18));
+            color: var(--vh-input-text, var(--vh-text));
+            font: inherit;
+            font-size: 11.5px;
+        }
+
+        /* Materia de cada nota en la lista */
+        .libreta-nota .libreta-nota-carpeta {
+            display: inline-block;
+            margin-top: 2px;
+            padding: 0 6px;
+            border: 1px solid var(--vh-border);
+            border-radius: 999px;
+            font-size: 9.5px;
+            color: var(--vh-text-soft);
+        }
+
         .libreta-buscador {
             margin: 8px;
             padding: 5px 8px;
@@ -368,6 +477,37 @@
             <button type="button" class="libreta-boton" id="libretaNueva" title="Nueva nota">+ Nota</button>
         </div>
 
+        {{-- Materias: cada carpeta agrupa sus notas. --}}
+        <div class="libreta-carpetas" id="libretaCarpetas">
+            <button type="button" class="libreta-carpeta activa" data-carpeta="*" title="Todas las notas">
+                Todas <span class="libreta-cuenta">{{ count($notas) }}</span>
+            </button>
+
+            @if (collect($notas)->where('folder', '')->count() > 0)
+                <button type="button" class="libreta-carpeta" data-carpeta="" title="Notas sin materia">
+                    Sin materia <span class="libreta-cuenta">{{ collect($notas)->where('folder', '')->count() }}</span>
+                </button>
+            @endif
+
+            @foreach (($carpetas ?? []) as $carpeta)
+                <button type="button" class="libreta-carpeta" data-carpeta="{{ $carpeta }}"
+                        title="Doble clic para renombrar">
+                    <span class="libreta-carpeta-nombre">{{ $carpeta }}</span>
+                    <span class="libreta-cuenta">{{ collect($notas)->where('folder', $carpeta)->count() }}</span>
+                    <span class="libreta-carpeta-borrar" data-borrar-carpeta="{{ $carpeta }}" title="Borrar materia">×</span>
+                </button>
+            @endforeach
+
+            <button type="button" class="libreta-carpeta libreta-carpeta-nueva" id="libretaNuevaCarpeta" title="Crear una materia">
+                + Materia
+            </button>
+
+            <div class="libreta-carpeta-form" id="libretaCarpetaForm" hidden>
+                <input type="text" id="libretaCarpetaNombre" maxlength="60" placeholder="Nombre de la materia" autocomplete="off">
+                <button type="button" id="libretaCarpetaGuardar" class="libreta-boton">Crear</button>
+            </div>
+        </div>
+
         <input type="search" id="libretaBuscar" class="libreta-buscador" placeholder="Buscar en la libreta…" autocomplete="off">
 
         <ul class="libreta-notas" id="libretaNotas">
@@ -375,9 +515,13 @@
                 <li class="libreta-nota" data-id="{{ $nota['id'] }}"
                     data-titulo="{{ $nota['title'] }}"
                     data-cuerpo="{{ $nota['body'] }}"
+                    data-carpeta="{{ $nota['folder'] ?? '' }}"
                     data-actualizada="{{ $nota['updated_at'] }}">
                     <strong>{{ $nota['title'] }}</strong>
                     <small>{{ \Illuminate\Support\Carbon::parse($nota['updated_at'])->format('d/m/Y H:i') }}</small>
+                    @if (!empty($nota['folder']))
+                        <span class="libreta-nota-carpeta">{{ $nota['folder'] }}</span>
+                    @endif
                 </li>
             @empty
                 <li class="libreta-vacia" id="libretaVacia">Todavía no hay notas. Pulsa «+ Nota».</li>
@@ -388,6 +532,13 @@
     <section class="libreta-editor" aria-label="Nota abierta">
         <div class="libreta-cabecera">
             <h1 id="libretaTituloCabecera">Sin nota abierta</h1>
+            <select class="libreta-selector" id="libretaCarpetaNota" title="Materia de la nota" disabled>
+                <option value="">Sin materia</option>
+                @foreach (($carpetas ?? []) as $carpeta)
+                    <option value="{{ $carpeta }}">{{ $carpeta }}</option>
+                @endforeach
+            </select>
+
             <button type="button" class="libreta-boton peligro" id="libretaBorrar" title="Borrar esta nota" hidden>Borrar</button>
             <button type="button" class="libreta-boton" id="libretaGuardar" title="Guardar (Ctrl+S)">Guardar</button>
         </div>
@@ -438,11 +589,20 @@
     const botonGuardar = document.getElementById('libretaGuardar');
     const botonBorrar = document.getElementById('libretaBorrar');
     const estado = document.getElementById('libretaEstado');
+    const carpetas = document.getElementById('libretaCarpetas');
+    const carpetaNota = document.getElementById('libretaCarpetaNota');
+    const nuevaCarpeta = document.getElementById('libretaNuevaCarpeta');
+    const carpetaForm = document.getElementById('libretaCarpetaForm');
+    const carpetaNombre = document.getElementById('libretaCarpetaNombre');
+    const carpetaGuardar = document.getElementById('libretaCarpetaGuardar');
     const cuenta = document.getElementById('libretaCuenta');
     const registrado = raiz.dataset.registrado === '1';
 
     let notaActual = null;
     let guardadoPendiente = null;
+    // '*' = todas; '' = sin materia; cualquier otro = nombre de la materia
+    let carpetaActiva = '*';
+    let carpetaRenombrando = '';
 
     const csrf = () => {
         const meta = document.querySelector('meta[name="csrf-token"]');
@@ -594,6 +754,29 @@
         contarPalabras();
     };
 
+    /*
+     * Muestra u oculta las notas segun la materia elegida y lo que se busque.
+     * Las dos cosas se aplican a la vez.
+     */
+    const aplicarFiltro = () => {
+        const consulta = buscador.value.trim().toLowerCase();
+
+        Array.from(lista.querySelectorAll('.libreta-nota')).forEach((elemento) => {
+            const deCarpeta = carpetaActiva === '*'
+                || (elemento.dataset.carpeta || '') === carpetaActiva;
+            const buscado = consulta === ''
+                || (elemento.dataset.titulo + ' ' + elemento.dataset.cuerpo).toLowerCase().includes(consulta);
+
+            elemento.hidden = !(deCarpeta && buscado);
+        });
+    };
+
+    const marcarCarpeta = () => {
+        Array.from(carpetas.querySelectorAll('.libreta-carpeta[data-carpeta]')).forEach((boton) => {
+            boton.classList.toggle('activa', (boton.dataset.carpeta || '') === carpetaActiva);
+        });
+    };
+
     const marcarActiva = () => {
         Array.from(lista.querySelectorAll('.libreta-nota')).forEach((elemento) => {
             elemento.classList.toggle('activa', elemento.dataset.id === notaActual);
@@ -608,6 +791,8 @@
             titulo.disabled = true;
             texto.disabled = true;
             botonBorrar.hidden = true;
+            carpetaNota.disabled = true;
+            carpetaNota.value = '';
             cabecera.textContent = 'Sin nota abierta';
             avisar('');
             actualizarVista();
@@ -621,6 +806,8 @@
         titulo.disabled = false;
         texto.disabled = false;
         botonBorrar.hidden = false;
+        carpetaNota.disabled = false;
+        carpetaNota.value = elementoNota.dataset.carpeta || '';
         cabecera.textContent = titulo.value || 'Sin título';
         avisar('Guardado ' + (elementoNota.dataset.actualizada || '').slice(11, 16));
         actualizarVista();
@@ -660,6 +847,7 @@
         elemento.dataset.titulo = nota.title;
         elemento.dataset.cuerpo = nota.body;
         elemento.dataset.actualizada = nota.updated_at;
+        elemento.dataset.carpeta = nota.folder || '';
 
         const fuerte = document.createElement('strong');
         fuerte.textContent = nota.title;
@@ -668,6 +856,13 @@
         const pequena = document.createElement('small');
         pequena.textContent = 'ahora';
         elemento.appendChild(pequena);
+
+        if (nota.folder) {
+            const etiquetaCarpeta = document.createElement('span');
+            etiquetaCarpeta.className = 'libreta-nota-carpeta';
+            etiquetaCarpeta.textContent = nota.folder;
+            elemento.appendChild(etiquetaCarpeta);
+        }
 
         elemento.addEventListener('click', () => abrir(elemento));
 
@@ -685,12 +880,14 @@
         try {
             const datos = await enviar(raiz.dataset.urlNota + '/' + notaActual, {
                 title: titulo.value,
-                body: texto.value
+                body: texto.value,
+                folder: carpetaNota.value
             });
 
             elemento.dataset.titulo = datos.note.title;
             elemento.dataset.cuerpo = datos.note.body;
             elemento.dataset.actualizada = datos.note.updated_at;
+            elemento.dataset.carpeta = datos.note.folder || '';
             elemento.querySelector('strong').textContent = datos.note.title;
             cabecera.textContent = datos.note.title;
 
@@ -717,6 +914,11 @@
         clearTimeout(guardadoPendiente);
         guardadoPendiente = setTimeout(() => guardar(true), 1200);
     });
+
+    // Cambiar de materia en el selector guarda la nota al momento
+    if (carpetaNota) {
+        carpetaNota.addEventListener('change', () => guardar(true));
+    }
 
     titulo.addEventListener('blur', () => guardar(true));
     texto.addEventListener('blur', () => guardar(true));
@@ -772,13 +974,26 @@
         }
 
         try {
-            const datos = await enviar(raiz.dataset.urlNueva, { title: 'Nota sin título', body: '' });
+            const datos = await enviar(raiz.dataset.urlNueva, {
+                title: 'Nota sin título',
+                body: '',
+                folder: carpetaActiva === '*' ? '' : carpetaActiva
+            });
 
             const vacia = lista.querySelector('.libreta-vacia');
             if (vacia) vacia.remove();
 
             const elemento = crearElemento(datos.note);
             lista.prepend(elemento);
+
+            // Si se esta viendo una materia concreta y la nota no es de ella,
+            // conviene verla: se pasa a "todas" para no dejarla escondida.
+            if (carpetaActiva !== '*' && (datos.note.folder || '') !== carpetaActiva) {
+                carpetaActiva = '*';
+                marcarCarpeta();
+            }
+
+            aplicarFiltro();
             abrir(elemento);
             titulo.focus();
             titulo.select();
@@ -799,14 +1014,7 @@
         elemento.addEventListener('click', () => abrir(elemento));
     });
 
-    buscador.addEventListener('input', () => {
-        const consulta = buscador.value.trim().toLowerCase();
-
-        Array.from(lista.querySelectorAll('.libreta-nota')).forEach((elemento) => {
-            const contenido = (elemento.dataset.titulo + ' ' + elemento.dataset.cuerpo).toLowerCase();
-            elemento.hidden = consulta !== '' && !contenido.includes(consulta);
-        });
-    });
+    buscador.addEventListener('input', () => aplicarFiltro());
 
     // Botones de formato: envuelven la selección o insertan al principio de la línea
     document.querySelectorAll('[data-formato]').forEach((boton) => {
@@ -859,6 +1067,104 @@
             paneles.classList.add('solo-editor');
         }
     });
+
+    // -----------------------------------------------------------------
+    // Materias
+    // -----------------------------------------------------------------
+
+    carpetas.addEventListener('click', (evento) => {
+        const borrar = evento.target.closest('[data-borrar-carpeta]');
+
+        if (borrar) {
+            evento.stopPropagation();
+            borrarCarpeta(borrar.dataset.borrarCarpeta);
+            return;
+        }
+
+        const boton = evento.target.closest('.libreta-carpeta[data-carpeta]');
+
+        if (!boton) return;
+
+        carpetaActiva = boton.dataset.carpeta || '';
+        marcarCarpeta();
+        aplicarFiltro();
+    });
+
+    // Doble clic en una materia: renombrar
+    carpetas.addEventListener('dblclick', (evento) => {
+        const boton = evento.target.closest('.libreta-carpeta[data-carpeta]');
+
+        if (!boton || !boton.dataset.carpeta) return;
+
+        carpetaRenombrando = boton.dataset.carpeta;
+        carpetaForm.hidden = false;
+        carpetaNombre.value = carpetaRenombrando;
+        carpetaNombre.focus();
+        carpetaNombre.select();
+    });
+
+    nuevaCarpeta.addEventListener('click', () => {
+        carpetaRenombrando = '';
+        carpetaForm.hidden = false;
+        carpetaNombre.value = '';
+        carpetaNombre.focus();
+    });
+
+    carpetaGuardar.addEventListener('click', () => crearCarpeta());
+
+    carpetaNombre.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Enter') {
+            evento.preventDefault();
+            crearCarpeta();
+        }
+
+        if (evento.key === 'Escape') {
+            carpetaForm.hidden = true;
+            carpetaNombre.value = '';
+        }
+    });
+
+    const crearCarpeta = async () => {
+        const nombre = carpetaNombre.value.trim();
+
+        if (nombre === '') return;
+
+        try {
+            if (carpetaRenombrando !== '') {
+                await enviar('/libreta/carpeta/renombrar', { from: carpetaRenombrando, to: nombre });
+            } else {
+                await enviar('/libreta/carpeta', { name: nombre });
+            }
+
+            // La lista de materias la pinta el servidor: se recarga para verla.
+            window.location.reload();
+        } catch (error) {
+            avisar(error.message);
+        }
+    };
+
+    async function borrarCarpeta(nombre) {
+        const cuantas = Array.from(lista.querySelectorAll('.libreta-nota'))
+            .filter((elemento) => (elemento.dataset.carpeta || '') === nombre).length;
+
+        const pregunta = window.vhConfirmar
+            ? await window.vhConfirmar({
+                titulo: 'Borrar materia',
+                mensaje: 'Se va a borrar la materia «' + nombre + '». Sus ' + cuantas
+                    + (cuantas === 1 ? ' nota se queda' : ' notas se quedan') + ' sin materia.',
+                boton: 'Borrar materia'
+            })
+            : window.confirm('¿Borrar la materia «' + nombre + '»?');
+
+        if (!pregunta) return;
+
+        try {
+            await enviar('/libreta/carpeta/borrar', { name: nombre });
+            window.location.reload();
+        } catch (error) {
+            avisar(error.message);
+        }
+    }
 
     // Primera nota abierta al entrar
     const primera = lista.querySelector('.libreta-nota');

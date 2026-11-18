@@ -117,8 +117,14 @@ Route::get('/contenedor', [ContainerController::class, 'show'])->name('container
      */
     Route::get('/libreta', [NoteController::class, 'index'])->name('notes.index');
     Route::post('/libreta', [NoteController::class, 'store'])->name('notes.store');
-    Route::post('/libreta/{id}', [NoteController::class, 'update'])->name('notes.update');
-    Route::post('/libreta/{id}/borrar', [NoteController::class, 'destroy'])->name('notes.destroy');
+    Route::post('/libreta/{id}', [NoteController::class, 'update'])->name('notes.update')
+        ->where('id', '[a-f0-9]{16}');
+    Route::post('/libreta/{id}/borrar', [NoteController::class, 'destroy'])->name('notes.destroy')
+        ->where('id', '[a-f0-9]{16}');
+
+    Route::post('/libreta/carpeta', [NoteController::class, 'storeFolder'])->name('notes.folder.store');
+    Route::post('/libreta/carpeta/renombrar', [NoteController::class, 'renameFolder'])->name('notes.folder.rename');
+    Route::post('/libreta/carpeta/borrar', [NoteController::class, 'destroyFolder'])->name('notes.folder.destroy');
 Route::get('/contenedor/launch', [ContainerController::class, 'launch'])->name('container.launch');
 
 // Ventana aparte con el escritorio dentro. Vive en nuestro dominio para que la
