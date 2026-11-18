@@ -29,7 +29,9 @@
             <button type="button" class="libreta-flotante-cerrar" id="libretaCerrar" aria-label="Cerrar la libreta">×</button>
         </div>
 
-        <iframe id="libretaMarco" title="Libreta digital" src="about:blank" loading="lazy"></iframe>
+        <div class="libreta-flotante-cuerpo" id="libretaCuerpo">
+            @include('partials.libreta-cuerpo', ['flotante' => true])
+        </div>
     </section>
 </div>
 
@@ -161,11 +163,17 @@
         background: var(--vh-btn-hover-bg, rgba(255, 255, 255, 0.12));
     }
 
-    .libreta-flotante-panel iframe {
+    .libreta-flotante-cuerpo {
         flex: 1;
-        width: 100%;
-        border: none;
-        background: transparent;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    /* La libreta, dentro del panel, usa el alto disponible en vez de 100vh. */
+    .libreta-flotante-cuerpo .libreta {
+        height: 100%;
+        min-height: 0;
+        margin: 0;
     }
 
     @media (max-width: 700px) {
@@ -193,12 +201,10 @@
     const boton = document.getElementById('libretaAbrir');
     const panel = document.getElementById('libretaPanel');
     const cerrar = document.getElementById('libretaCerrar');
-    const marco = document.getElementById('libretaMarco');
     const asa = document.getElementById('libretaArrastre');
 
-    if (!boton || !panel || !marco || !asa) return;
+    if (!boton || !panel || !asa) return;
 
-    const url = @json(url('/libreta') . '?flotante=1');
     const CLAVE = 'virthub-libreta-posicion';
     const MARGEN = 8;
 
@@ -327,10 +333,6 @@
     // ------------------------------------------------------------------
 
     const abrir = () => {
-        if (marco.getAttribute('src') !== url) {
-            marco.setAttribute('src', url);
-        }
-
         panel.hidden = false;
         boton.setAttribute('aria-expanded', 'true');
 
