@@ -2627,13 +2627,40 @@ html.vh-ligero body *::after {
 /* El boton del gadget de bienvenida va junto al enlace, alineado con el. */
 .welcome-gadget-actions {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+    min-width: 0;
 }
 
-.welcome-gadget-actions .awty-btn {
+/*
+ * Los tres botones de la tarjeta (Sugerencias, AWTY y Mi perfil) comparten alto y
+ * tamano de letra: antes AWTY salia mas pequeno y parecia de otra familia.
+ */
+[data-era] body .welcome-gadget-actions > .welcome-gadget-link,
+[data-era] body .welcome-gadget-actions > .awty-btn,
+.welcome-gadget-actions > .welcome-gadget-link,
+.welcome-gadget-actions > .awty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 32px;
+    padding: 7px 12px;
+    border-radius: var(--vh-btn-radius, 4px);
+    font-family: var(--vh-font, Monocraft Nerd Font, monospace);
     font-size: 11px;
-    padding: 6px 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* AWTY conserva su color de acento; solo se iguala el tamano. */
+[data-era] body .welcome-gadget-actions > .awty-btn,
+.welcome-gadget-actions > .awty-btn {
+    background: color-mix(in srgb, var(--vh-evento, #e0a63c) 14%, var(--vh-btn-bg));
+    color: var(--vh-btn-text);
 }
 
 /* Fondo oscurecido. */

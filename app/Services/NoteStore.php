@@ -345,6 +345,11 @@ class NoteStore
             $datos = is_array($datos) ? $datos : ['users' => []];
             $datos['users'] = is_array($datos['users'] ?? null) ? $datos['users'] : [];
 
+            // Antes de escribir, se guarda una copia de lo que habia. Si algo
+            // sale mal (o alguien borra el archivo), la libreta se puede
+            // recuperar desde notes.json.bak.
+            $this->guardarRespaldo($contenido);
+
             $resultado = $callback($datos);
 
             $json = json_encode($datos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -363,6 +368,27 @@ class NoteStore
             flock($handle, LOCK_UN);
             fclose($handle);
         }
+    }
+
+    /**
+     * Copia el contenido anterior a notes.json.bak (y rota la copia previa).
+     *
+     * Es una red de seguridad barata: la libreta es un solo archivo y perderlo
+     * es perder todas las notas de todas las personas.
+     */
+    private function guardarRespaldo(string $contenido): void
+    {
+        if (trim($contenido) === '' || json_decode($contenido, true) === null) {
+            return;
+        }
+
+        $respaldo = $this->filePath . '.bak';
+
+        if (is_file($respaldo)) {
+            @copy($respaldo, $respaldo . '.1');
+        }
+
+        @file_put_contents($respaldo, $contenido);
     }
 
     private function ensureStore(): void
