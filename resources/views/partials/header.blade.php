@@ -39,10 +39,13 @@
 @endif
 
 <header>
-    <h1 class="brand-mark">
-        <a href="{{ url('/') }}" aria-label="Ir al inicio de VirtHub">
-            <img src="{{ asset('pics/logovh.png') }}" alt="VirtHub" class="brand-logo">
-        </a>
+    {{--
+        El logo ya no es un enlace al inicio: el gesto de triple clic activa la
+        Aurora de Vista y un enlace se llevaria el clic. Para volver al inicio
+        esta el boton del menu.
+    --}}
+    <h1 class="brand-mark" title="VirtHub">
+        <img src="{{ asset('pics/logovh.png') }}" alt="VirtHub" class="brand-logo">
     </h1>
     @include('partials.navigation-menu', ['currentUser' => $currentUser ?? null, 'currentPage' => $currentPage ?? 'home'])
     <div class="header-controls">
