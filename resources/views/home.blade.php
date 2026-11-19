@@ -30,20 +30,22 @@
     }
 
     .welcome-gadget-copy {
-        margin: 8px 0 0;
-        color: var(--vh-panel-text);
-        font-size: 13px;
-        line-height: 1.5;
-    }
+            margin: 8px 0 0;
+            color: var(--vh-panel-text);
+            font-size: clamp(12px, 1vw + 8px, 13px);
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
 
     .welcome-gadget-footer {
-        display: flex;
-        align-items: end;
-        justify-content: space-between;
-        gap: 12px;
-        border-top: 1px solid var(--vh-border);
-        padding-top: 10px;
-    }
+            display: flex;
+            flex-wrap: wrap;
+            align-items: end;
+            justify-content: space-between;
+            gap: 10px 12px;
+            border-top: 1px solid var(--vh-border);
+            padding-top: 10px;
+        }
 
     .welcome-gadget-clock {
         margin: 0;
@@ -58,14 +60,17 @@
     }
 
     .welcome-gadget-link {
-        padding: 7px 9px;
-        border: 1px solid var(--vh-border);
-        background: var(--vh-button-bg);
-        color: var(--vh-text);
-        font: 11px Monocraft Nerd Font, monospace;
-        text-decoration: none;
-        white-space: nowrap;
-    }
+            padding: 7px 10px;
+            border: 1px solid var(--vh-border);
+            background: var(--vh-button-bg);
+            color: var(--vh-text);
+            font: 11px/1.2 Monocraft Nerd Font, monospace;
+            text-decoration: none;
+            text-align: center;
+            white-space: nowrap;
+            min-width: 0;
+            flex: 0 1 auto;
+        }
 
     .welcome-gadget-link:hover {
         background: var(--vh-button-hover);

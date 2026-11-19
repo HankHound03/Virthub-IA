@@ -1902,9 +1902,11 @@ header h1 {
     }
 
     .welcome-gadget-link {
-        width: 100%;
         box-sizing: border-box;
         text-align: center;
+        /* Antes era width: 100%, que con tres botones los apilaba de golpe. */
+        flex: 1 1 auto;
+        min-width: 0;
     }
 
     .header-controls {
