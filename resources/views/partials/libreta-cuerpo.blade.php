@@ -14,10 +14,16 @@
 
     $flotante = $flotante ?? false;
 
-    if (!isset($notas)) {
-        $notas = $esRegistrado && $usuarioLibreta !== ''
-            ? app(\App\Services\NoteStore::class)->all($usuarioLibreta)
-            : [];
+    /* Cuando la libreta viene dentro del contenedor no hay controlador que
+       prepare los datos: se piden aqui. Las carpetas hay que pedirlas tambien,
+       si no el flotante se quedaba sin materias. */
+    if (!isset($notas) || !isset($carpetas)) {
+        $almacen = $esRegistrado && $usuarioLibreta !== ''
+            ? app(\App\Services\NoteStore::class)
+            : null;
+
+        $notas = $notas ?? ($almacen ? $almacen->all($usuarioLibreta) : []);
+        $carpetas = $carpetas ?? ($almacen ? $almacen->folders($usuarioLibreta) : []);
     }
 @endphp
 
