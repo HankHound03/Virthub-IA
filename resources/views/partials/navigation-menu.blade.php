@@ -6,7 +6,7 @@
     $links = [
         ['key' => 'home', 'label' => 'Inicio', 'url' => url('/'), 'visible' => true, 'icono' => 'casa'],
         ['key' => 'foro', 'label' => 'Foro', 'url' => url('/foro'), 'visible' => true],
-        ['key' => 'sugerencias', 'label' => 'Sugerencias', 'url' => url('/sugerencias'), 'visible' => true],
+
         ['key' => 'contenedor', 'label' => 'Contenedor', 'url' => url('/contenedor'), 'visible' => $hasUser],
         ['key' => 'libreta', 'label' => 'Libreta', 'url' => url('/libreta'), 'visible' => $hasUser],
         ['key' => 'admin', 'label' => 'Admin', 'url' => url('/admin/users'), 'visible' => $userRole === 'admin'],

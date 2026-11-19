@@ -365,6 +365,9 @@
                         <p class="welcome-gadget-date" id="welcomeDate">Cargando fecha...</p>
                     </div>
                     <div class="welcome-gadget-actions">
+                        {{-- Sugerencias: antes estaba en el topbar. --}}
+                        <a class="welcome-gadget-link" href="{{ url('/sugerencias') }}" title="Sugerencias e ideas para mejorar VirtHub">Sugerencias</a>
+
                         {{-- AWTY: abre el mensaje de Francisco. --}}
                         <button type="button" class="awty-btn awty-trigger" title="AWTY · ¿Ya estamos ahí?" aria-label="Abrir el mensaje AWTY">
                             AWTY
