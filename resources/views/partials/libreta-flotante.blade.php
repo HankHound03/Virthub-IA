@@ -96,7 +96,10 @@
         border-radius: var(--vh-btn-radius, 10px);
         background-color: var(--vh-surface-strong);
         box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
-        animation: libretaEntra 0.18s ease-out;
+        transform-origin: 100% 100%;
+        /* Se abre como una libreta: crece desde la esquina del boton, con un
+           leve giro que se endereza y el contenido aparece un pelo despues. */
+        animation: libretaAbre 0.34s cubic-bezier(0.2, 0.9, 0.25, 1.06) both;
     }
 
     .libreta-flotante-panel[hidden] {
@@ -109,14 +112,63 @@
         animation: none;
     }
 
-    @keyframes libretaEntra {
+    @keyframes libretaAbre {
+        0% {
+            opacity: 0;
+            transform: translate(14px, 18px) scale(0.82) rotate(2.2deg);
+        }
+        55% {
+            opacity: 1;
+            transform: translate(-2px, -3px) scale(1.015) rotate(-0.4deg);
+        }
+        100% {
+            opacity: 1;
+            transform: translate(0, 0) scale(1) rotate(0deg);
+        }
+    }
+
+    /* El contenido entra con un retraso corto: da la sensacion de que la tapa
+       se abre y despues aparece la hoja. */
+    .libreta-flotante-panel .libreta-flotante-cabecera,
+    .libreta-flotante-panel .libreta-flotante-cuerpo {
+        animation: libretaContenido 0.3s ease-out 0.08s both;
+    }
+
+    @keyframes libretaContenido {
         from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(-6px);
         }
         to {
             opacity: 1;
             transform: translateY(0);
+        }
+    }
+
+    /* El boton responde al abrir y al cerrar. */
+    .libreta-flotante-boton[aria-expanded="true"] {
+        animation: libretaBoton 0.36s ease-out;
+    }
+
+    @keyframes libretaBoton {
+        0% {
+            transform: scale(1);
+        }
+        40% {
+            transform: scale(0.9);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Quien pide menos movimiento, no lo recibe. */
+    @media (prefers-reduced-motion: reduce) {
+        .libreta-flotante-panel,
+        .libreta-flotante-panel .libreta-flotante-cabecera,
+        .libreta-flotante-panel .libreta-flotante-cuerpo,
+        .libreta-flotante-boton[aria-expanded="true"] {
+            animation: none;
         }
     }
 
@@ -334,6 +386,12 @@
 
     const abrir = () => {
         panel.hidden = false;
+
+        // Se reinicia la animacion para que se vuelva a ver en cada apertura.
+        panel.classList.remove('recien-abierto');
+        void panel.offsetWidth;
+        panel.classList.add('recien-abierto');
+
         boton.setAttribute('aria-expanded', 'true');
 
         restaurarPosicion();

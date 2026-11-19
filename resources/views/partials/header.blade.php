@@ -161,6 +161,10 @@
 @include('partials.awty')
 </header>
 
+{{-- Funcion secreta de los temas de Windows Vista (fuera del header, para que
+     el overlay no dependa de nada del encabezado). --}}
+@include('partials.vista-aurora')
+
 {{--
     Errores de validacion en cualquier pagina, para usuarios con sesion.
 
