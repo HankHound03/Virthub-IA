@@ -65,7 +65,7 @@
             @endif
 
             <form class="friends-search" method="GET" action="{{ url('/buscar-amigos') }}">
-                <input type="search" name="q" value="{{ $query }}" maxlength="100" placeholder="Nombre, ID de usuario o username" autofocus>
+                <input type="search" name="q" value="{{ $query }}" maxlength="100" placeholder="Nombre o username" autofocus>
                 <button type="submit">Buscar</button>
             </form>
             @if ($query !== '')
@@ -75,7 +75,6 @@
                             <article class="friend-result">
                                 <div>
                                     <strong>{{ $user['name'] ?: $user['username'] }}</strong>
-                                    <span>ID: {{ $user['id'] }}</span>
                                     <span>Username: {{ '@' . $user['username'] }}</span>
                                 </div>
                                 <div>
