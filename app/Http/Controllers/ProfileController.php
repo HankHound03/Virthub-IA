@@ -9,6 +9,7 @@ use App\Services\UserStore;
 use App\Support\ActiveUser;
 use App\Support\VirusScanner;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use RuntimeException;
 use Illuminate\View\View;
@@ -19,6 +20,7 @@ use Illuminate\View\View;
 class ProfileController extends Controller
 {
     public function __construct(
+        private readonly \App\Services\ModerationService $moderation,
         private readonly UserStore $users,
         private readonly ProfileStore $profiles,
         private readonly ForumStore $forum,
@@ -210,6 +212,27 @@ class ProfileController extends Controller
         // Antivirus antes de guardar: un avatar tambien es contenido de usuario.
         if (! $this->antivirus->escanear((string) $uploaded->getRealPath())['limpio']) {
             throw new \RuntimeException('La imagen de perfil no paso el analisis de seguridad.');
+        }
+
+        /*
+         * Moderacion de contenido. La foto de perfil es lo mas visible del sitio
+         * (cabecera, chat, foro y perfil), asi que tiene que pasar el mismo
+         * filtro que las imagenes del foro.
+         *
+         * Se revisa el archivo temporal, antes de moverlo: si se rechaza, no
+         * queda nada en la carpeta publica.
+         */
+        if ($this->moderation->habilitado()) {
+            $revision = $this->moderation->revisarImagen((string) $uploaded->getRealPath(), 'avatar');
+
+            if ($revision['prohibida']) {
+                Log::warning('Foto de perfil rechazada por moderacion.', [
+                    'usuario' => ActiveUser::username(ActiveUser::from($request)),
+                    'puntuacion' => $revision['puntuacion'] ?? 0,
+                ]);
+
+                throw new \RuntimeException('Esa imagen no se puede usar como foto de perfil.');
+            }
         }
 
         $filename = bin2hex(random_bytes(8)) . '_' . time() . '.' . $extension;
