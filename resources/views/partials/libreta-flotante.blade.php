@@ -94,7 +94,9 @@
         overflow: hidden;
         border: 1px solid var(--vh-border);
         border-radius: var(--vh-btn-radius, 10px);
-        background-color: var(--vh-surface-strong);
+        /* Con respaldo: si el tema no define la variable, el panel quedaba
+           transparente y se veia la pagina de detras mezclada con la libreta. */
+        background-color: var(--vh-surface-strong, #1b1f24);
         box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
         transform-origin: 100% 100%;
         /* Se abre como una libreta: crece desde la esquina del boton, con un
@@ -219,6 +221,7 @@
         flex: 1;
         min-height: 0;
         overflow: hidden;
+        background-color: var(--vh-surface-strong, #1b1f24);
     }
 
     /* La libreta, dentro del panel, usa el alto disponible en vez de 100vh. */
@@ -228,20 +231,74 @@
         margin: 0;
     }
 
-    @media (max-width: 700px) {
+    /*
+     * En el movil el panel es una hoja a pantalla completa.
+     *
+     * Con un alto fijo de 520 px la libreta se salia por abajo y las tarjetas
+     * quedaban cortadas; ahora el panel ocupa la pantalla y la libreta se
+     * desplaza dentro, en un solo sentido.
+     */
+    @media (max-width: 820px) {
         .libreta-flotante {
-            right: 14px;
-            bottom: 84px;
-        }
-
-        .libreta-flotante-boton {
-            width: 46px;
-            height: 46px;
+            right: 12px;
+            bottom: 76px;
         }
 
         .libreta-flotante-panel {
-            width: calc(100vw - 28px);
-            height: min(520px, calc(100vh - 190px));
+            inset: 0;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            max-height: none;
+            border-radius: 0;
+            border-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* El asa sobra cuando ocupa todo: no hay donde arrastrarla. */
+        .libreta-flotante-cabecera {
+            flex: 0 0 auto;
+            cursor: default;
+            touch-action: auto;
+        }
+
+        .libreta-flotante-puntos {
+            display: none;
+        }
+
+        /* El panel desplaza su contenido; la libreta no necesita alto propio. */
+        .libreta-flotante-cuerpo {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .libreta-flotante-cuerpo .libreta {
+            height: auto;
+            max-height: none;
+            overflow: visible;
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: auto auto;
+            padding: 6px;
+            gap: 6px;
+        }
+
+        .libreta-flotante-cuerpo .libreta-notas {
+            max-height: 30dvh;
+        }
+
+        .libreta-flotante-cuerpo .libreta-texto {
+            min-height: 34dvh;
+        }
+
+        .libreta-flotante-cuerpo .libreta-vista {
+            min-height: 16dvh;
+            max-height: none;
         }
     }
 </style>
@@ -386,6 +443,14 @@
 
     const abrir = () => {
         panel.hidden = false;
+
+        // En pantalla pequena el panel ocupa todo: no tiene sentido la posicion
+        // que se hubiera arrastrado en escritorio.
+        if (window.matchMedia('(max-width: 820px)').matches) {
+            panel.classList.remove('arrastrado');
+            panel.style.left = '';
+            panel.style.top = '';
+        }
 
         // Se reinicia la animacion para que se vuelva a ver en cada apertura.
         panel.classList.remove('recien-abierto');

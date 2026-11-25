@@ -49,7 +49,9 @@
             grid-template-columns: minmax(210px, 260px) minmax(0, 1fr);
             gap: 10px;
             padding: 10px;
-            min-height: calc(100vh - 150px);
+            /* 100dvh y no 100vh: en el movil la barra del navegador aparece y
+               desaparece, y con vh el alto queda descuadrado. */
+            min-height: calc(100dvh - 150px);
             color: var(--vh-panel-text);
             font-family: Monocraft Nerd Font, monospace;
         }
@@ -67,7 +69,7 @@
 
         .libreta-lista,
         .libreta-editor {
-            background-color: var(--vh-surface);
+            background-color: var(--vh-surface, #23282f);
             border: 1px solid var(--vh-border);
             border-radius: var(--vh-btn-radius, 8px);
             display: flex;
@@ -100,8 +102,15 @@
             flex-direction: column;
             gap: 2px;
             padding: 6px 6px 4px;
-            max-height: 34%;
             overflow-y: auto;
+        }
+
+        /* En escritorio la lista de materias no debe comerse las notas; en el
+           movil, recortarla hacia que se vieran filas a medias. */
+        @media (min-width: 721px) {
+            .libreta-carpetas {
+                max-height: 34%;
+            }
         }
 
         .libreta-lista-materias {
@@ -472,18 +481,65 @@
             white-space: nowrap;
         }
 
-        @media (max-width: 720px) {
+        /* ------------------------------------------------------------------
+           MOVIL: una sola columna y sin altos fijos
+
+           Antes la lista se quedaba en 160 px con overflow oculto y el editor
+           se montaba encima: se veian filas cortadas y tarjetas solapadas.
+           Ahora cada bloque ocupa lo que necesita y la lista de notas tiene su
+           propio desplazamiento.
+           ------------------------------------------------------------------ */
+        @media (max-width: 820px) {
+            body.libreta-cuerpo {
+                overflow-y: auto;
+            }
+
             .libreta {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto 1fr;
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-rows: auto auto;
+                min-height: 0;
+                padding: 8px;
+                gap: 8px;
             }
 
             .libreta-lista {
-                max-height: 160px;
+                max-height: none;
+            }
+
+            .libreta-notas {
+                max-height: 38dvh;
+            }
+
+            .libreta-editor {
+                min-height: 72dvh;
             }
 
             .libreta-paneles {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .libreta-texto {
+                min-height: 34dvh;
+            }
+
+            .libreta-vista {
+                min-height: 20dvh;
+                max-height: 40dvh;
+            }
+
+            /* La cabecera del editor cabe en dos filas si hace falta. */
+            .libreta-editor > .libreta-cabecera {
+                flex-wrap: wrap;
+            }
+
+            .libreta-selector {
+                max-width: none;
+                flex: 1 1 120px;
+            }
+
+            /* Botones de formato: que no se salgan del ancho. */
+            .libreta-herramientas {
+                flex-wrap: wrap;
             }
         }
     </style>
