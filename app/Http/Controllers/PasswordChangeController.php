@@ -43,6 +43,7 @@ class PasswordChangeController extends Controller
         }
 
         $validated = $request->validate([
+            'current_password' => ['nullable', 'string', 'max:72'],
             'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed'],
         ], [
             'password.confirmed' => 'Las dos contrasenas no coinciden.',
@@ -53,6 +54,26 @@ class PasswordChangeController extends Controller
 
         if ($usuario === null) {
             return redirect('/')->with('error', 'Tu cuenta ya no existe.');
+        }
+
+        /*
+         * Cambiar la contrasena de una cuenta ajena exige saber la actual.
+         *
+         * Antes bastaba con tener la sesion abierta (un aula con el equipo
+         * compartido, una cookie olvidada): cualquiera podia cambiarla y dejar
+         * fuera al dueno sin conocer su contrasena.
+         *
+         * Se exime solo el primer cambio obligatorio, donde la contrasena actual
+         * es la temporal que se acaba de escribir para entrar.
+         */
+        if (! $this->debeCambiar((string) $usuario->username)) {
+            $actual = (string) ($validated['current_password'] ?? '');
+
+            if ($actual === '' || ! password_verify($actual, (string) $usuario->password)) {
+                return back()->withErrors([
+                    'current_password' => 'Escribe tu contrasena actual para poder cambiarla.',
+                ]);
+            }
         }
 
         // La contrasena nueva no puede ser la misma que le generaron: si no, el

@@ -1,3 +1,11 @@
+# Tope comun de logs: sin esto los logs de ocho escritorios y de ClamAV crecen
+# sin limite en el mismo disco donde viven los volumenes.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "3"
+
 # =============================================================================
 # Entorno de PRUEBAS de Virthub
 # =============================================================================

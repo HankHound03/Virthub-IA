@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\WebtopContainer;
 use App\Services\WebtopAllocator;
 use Illuminate\Support\Facades\DB;
 
@@ -59,8 +60,22 @@ class ContainerResolver
             }
         }
 
-        // Respaldo: reparto determinista sobre los contenedores declarados.
-        return $this->urlForIndex($this->poolIndexFor($username));
+        /*
+         * Respaldo: reparto determinista sobre los contenedores declarados.
+         *
+         * Antes se devolvia el escritorio del hash sin mirar si estaba ocupado, y
+         * dos alumnos podian acabar compartiendo la misma sesion Linux. Ahora, si
+         * ese escritorio no tiene plaza, se devuelve vacio y el controlador lo
+         * trata como "no hay escritorio libre".
+         */
+        $indice = $this->poolIndexFor($username);
+        $contenedor = WebtopContainer::query()->where('name', 'ct' . $indice)->first();
+
+        if ($contenedor !== null && ! $this->allocator->hasCapacity($contenedor)) {
+            return '';
+        }
+
+        return $this->urlForIndex($indice);
     }
 
     /**
@@ -127,10 +142,12 @@ class ContainerResolver
         /** @var list<int> $indices */
         $indices = array_values((array) config('virthub.containers.indices', []));
         $admin = $this->adminIndex();
+        $invitado = $this->guestIndex();
 
+        // Ni el de administradores ni el de invitados entran en el reparto.
         $pool = array_values(array_filter(
             $indices,
-            static fn (int $index): bool => $index !== $admin
+            static fn (int $index): bool => $index !== $admin && $index !== $invitado
         ));
 
         // Si solo hay el de administradores, se usa ese antes que dejar a alguien

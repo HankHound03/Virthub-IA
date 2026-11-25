@@ -198,6 +198,19 @@ class ProfileController extends Controller
      * Se escribe en storage/app/public, que en Docker esta en el volumen
      * persistente; public/uploads se perderia al reconstruir el contenedor.
      */
+    /**
+     * Extension a partir del tipo real del archivo. Solo imagenes.
+     */
+    private function extensionSegura(string $mime): string
+    {
+        return match (strtolower(trim($mime))) {
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            default => 'jpg',
+        };
+    }
+
     private function storeAvatar(Request $request, string $oldImagePath): string
     {
         $uploadsDir = storage_path('app/public/uploads/profiles');
@@ -207,7 +220,13 @@ class ProfileController extends Controller
         }
 
         $uploaded = $request->file('profile_image');
-        $extension = strtolower((string) $uploaded->getClientOriginalExtension()) ?: 'jpg';
+
+        /*
+         * La extension no se toma del nombre que manda el cliente: una imagen
+         * valida llamada "x.html" se guardaba como .html y Apache la servia como
+         * pagina, con el script que llevara dentro. Se deduce del contenido.
+         */
+        $extension = $this->extensionSegura((string) $uploaded->getMimeType());
 
         // Antivirus antes de guardar: un avatar tambien es contenido de usuario.
         if (! $this->antivirus->escanear((string) $uploaded->getRealPath())['limpio']) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\TwoFactorService;
 use App\Services\UserStore;
 use App\Support\ActiveUser;
+use App\Support\GuestSlot;
 use App\Support\GuestWorkspace;
 use App\Support\SecurityAudit;
 use Illuminate\Http\JsonResponse;
@@ -149,6 +150,27 @@ class AuthController extends Controller
         $minutes = max(1, (int) config('virthub.guests.session_minutes', 30));
 
         /*
+         * El escritorio de invitados es uno solo y compartido: solo puede haber
+         * un invitado dentro a la vez. Si ya hay otro, se avisa en vez de
+         * borrarle los archivos (la limpieza de abajo vacia el escritorio).
+         */
+        $turno = app(GuestSlot::class);
+        $sesion = $request->session()->getId();
+
+        if ($turno->ocupadoPorOtro($sesion)) {
+            $minutos = $turno->minutosRestantes();
+
+            return back()->with(
+                'error',
+                'Ahora mismo hay alguien usando el escritorio de invitado'
+                . ($minutos > 0 ? ' (le quedan ' . $minutos . ' minutos)' : '')
+                . '. Intentalo de nuevo en un rato.'
+            );
+        }
+
+        $turno->reclamar($sesion, time() + ($minutes * 60));
+
+        /*
          * Cada invitado empieza con el escritorio limpio.
          *
          * Todos comparten el mismo contenedor, asi que si el anterior se fue sin
@@ -179,7 +201,14 @@ class AuthController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
-        $this->audit->log($request, 'authentication.logout', ActiveUser::from($request));
+        $usuario = ActiveUser::from($request);
+
+        $this->audit->log($request, 'authentication.logout', $usuario);
+
+        // Si era un invitado, suelta el turno para que entre el siguiente.
+        if (($usuario['role'] ?? '') === 'guest') {
+            app(GuestSlot::class)->liberar($request->session()->getId());
+        }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

@@ -471,6 +471,31 @@ class ForumController extends Controller
     /**
      * @return array<int, array<string, string>>
      */
+    /**
+     * Extension con la que se guarda un adjunto.
+     *
+     * Del lado del cliente solo se acepta una extension de la lista blanca; para
+     * imagenes y videos se normaliza a una conocida, de modo que un archivo
+     * llamado .html nunca acabe siendo servido como HTML.
+     */
+    private function extensionDelTipo(string $tipo, string $original): string
+    {
+        if ($tipo === 'photo') {
+            return match (true) {
+                in_array($original, ['png', 'webp', 'gif', 'jpeg', 'jpg'], true) => $original,
+                default => 'jpg',
+            };
+        }
+
+        if ($tipo === 'video') {
+            return in_array($original, ['mp4', 'webm', 'mov', 'mkv'], true) ? $original : 'mp4';
+        }
+
+        $permitidas = (array) config('virthub.uploads.allowed_extensions', []);
+
+        return in_array($original, $permitidas, true) ? $original : 'bin';
+    }
+
     private function storeAttachments(Request $request): array
     {
         $attachments = [];
@@ -481,7 +506,16 @@ class ForumController extends Controller
                 // tocar el disco del servidor.
                 $this->verificarArchivo($uploaded);
 
-                $extension = strtolower((string) $uploaded->getClientOriginalExtension()) ?: 'bin';
+                /*
+                 * La extension del archivo guardado no se copia del nombre del
+                 * cliente: una imagen valida llamada "x.html" se guardaba como
+                 * .html y Apache la servia como pagina (script dentro del origen
+                 * de la aplicacion). Se deduce del tipo real.
+                 */
+                $extension = $this->extensionDelTipo(
+                    $this->tipoDeArchivo(strtolower((string) $uploaded->getClientOriginalExtension()), (string) $uploaded->getClientMimeType()),
+                    strtolower((string) $uploaded->getClientOriginalExtension())
+                );
 
                 /*
                  * El tipo se deduce del archivo, no del boton con el que se subio.

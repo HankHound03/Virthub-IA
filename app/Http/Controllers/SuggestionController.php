@@ -13,6 +13,12 @@ use RuntimeException;
  */
 class SuggestionController extends Controller
 {
+    /**
+     * Tope del buzon. Sin el, el archivo crece con cada envio (el POST es
+     * publico) y el panel del administrador lo lee y ordena entero cada vez.
+     */
+    private const MAX_SUGERENCIAS = 500;
+
     public function index(Request $request): View
     {
         return view('sugerencias', [
@@ -38,6 +44,11 @@ class SuggestionController extends Controller
         }
 
         try {
+            // Si el buzon esta lleno, se avisa en vez de seguir creciendo.
+            if ($this->cuantasSugerencias() >= self::MAX_SUGERENCIAS) {
+                return back()->with('error', 'El buzon de sugerencias esta lleno. Avisa al administrador.');
+            }
+
             $this->appendToStore([
                 'id' => bin2hex(random_bytes(8)),
                 'author_mode' => $authorMode,
@@ -50,6 +61,24 @@ class SuggestionController extends Controller
         }
 
         return redirect('/sugerencias')->with('success', 'Gracias por compartir tu sugerencia. Ya fue registrada.');
+    }
+
+    /**
+     * Cuantas sugerencias hay guardadas.
+     */
+    private function cuantasSugerencias(): int
+    {
+        $file = storage_path('app/data/suggestions.json');
+
+        if (! is_file($file)) {
+            return 0;
+        }
+
+        $decoded = json_decode((string) @file_get_contents($file), true);
+
+        return is_array($decoded) && is_array($decoded['suggestions'] ?? null)
+            ? count($decoded['suggestions'])
+            : 0;
     }
 
     /**

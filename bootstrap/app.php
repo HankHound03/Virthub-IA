@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureInstalled;
+use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureRegisteredUser;
 use App\Http\Middleware\ResolveActiveUser;
 use Illuminate\Foundation\Application;
@@ -38,6 +39,8 @@ return Application::configure(basePath: dirname(__DIR__))
             // hay administrador no hace nada.
             EnsureInstalled::class,
             ResolveActiveUser::class,
+            // Con la contrasena temporal puesta, solo se puede ir a cambiarla.
+            EnsurePasswordChanged::class,
         ]);
 
         $middleware->alias([

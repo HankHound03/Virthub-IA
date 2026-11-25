@@ -10,3 +10,19 @@ storage/framework/views/*
 public/build
 Dockerfile
 docker-compose.yml
+
+# Respaldos y secretos que vivian en la raiz del proyecto y acababan dentro de la
+# imagen (respaldo.env tiene APP_KEY y ADMIN_PASSWORD; respaldo-virthub.tgz lleva
+# el datadir completo de MariaDB).
+respaldo*
+*.tgz
+.env*
+_*.js
+_*.php
+
+# Cosas de desarrollo que no se usan en ejecucion
+docs
+.tmp
+tests
+# docker/ se necesita en la imagen (php.ini, apache, entrypoint)
+database/*.sqlite

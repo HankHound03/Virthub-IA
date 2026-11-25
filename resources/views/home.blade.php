@@ -1978,8 +1978,35 @@
                     return;
                 }
 
+                /*
+                 * El titulo y el enlace vienen de un RSS de terceros: se escapan antes de
+                 * meterlos en el HTML. Antes se interpolaban tal cual, y un feed manipulado
+                 * inyectaba codigo en el inicio de todos los usuarios.
+                 */
+                const limpiar = (texto) => String(texto == null ? '' : texto)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+
+                const enlaceSeguro = (url) => {
+                    try {
+                        const destino = new URL(String(url), window.location.href);
+                        return (destino.protocol === 'http:' || destino.protocol === 'https:') ? destino.href : '';
+                    } catch (e) {
+                        return '';
+                    }
+                };
+
                 list.innerHTML = data.items
-                    .map(item => `<li><a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a></li>`)
+                    .map(item => {
+                        const href = enlaceSeguro(item.link);
+
+                        return href === ''
+                            ? `<li>${limpiar(item.title)}</li>`
+                            : `<li><a href="${limpiar(href)}" target="_blank" rel="noopener noreferrer">${limpiar(item.title)}</a></li>`;
+                    })
                     .join('');
             } catch (error) {
                 list.innerHTML = '<li>Error cargando noticias.</li>';

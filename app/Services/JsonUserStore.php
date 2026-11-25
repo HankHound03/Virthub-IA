@@ -302,7 +302,7 @@ class JsonUserStore implements UserStore
         return array_slice(array_values($matches), 0, max(1, $limit));
     }
 
-    public function updatePassword(string $username, string $newPassword): void
+    public function updatePassword(string $username, string $newPassword, bool $mustChange = false): void
     {
         $username = trim($username);
 

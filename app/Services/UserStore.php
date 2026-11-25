@@ -43,7 +43,7 @@ interface UserStore
     /** @return array<int, array<string, mixed>> */
     public function searchPublicUsers(string $query, int $limit = 30): array;
 
-    public function updatePassword(string $username, string $newPassword): void;
+    public function updatePassword(string $username, string $newPassword, bool $mustChange = false): void;
 
     public function verifyPassword(string $username, string $password): bool;
 

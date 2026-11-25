@@ -1,3 +1,11 @@
+# Tope comun de logs: sin esto los logs de ocho escritorios y de ClamAV crecen
+# sin limite en el mismo disco donde viven los volumenes.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "3"
+
 services:
   # ---------------------------------------------------------------------------
   # Puerta de entrada unica
@@ -8,6 +16,7 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    logging: *logging
     ports:
       # Se publica solo en loopback: el tunel de Cloudflare corre en el host y
       # llega por aqui. No queda expuesto a la red local ni a internet.
@@ -19,6 +28,15 @@ services:
       - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+      # Los adjuntos se sirven desde aqui: un ISO de 3.8 GB pasaba por PHP en
+      # cada descarga, ocupando un proceso Apache y sin cache.
+      - app_storage:/srv/storage:ro
+    healthcheck:
+      test: ["CMD", "caddy", "version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - virthub
 
@@ -26,6 +44,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    logging: *logging
     restart: unless-stopped
     # La aplicacion sigue accesible en este puerto, para no romper el despliegue
     # actual. Caddy la alcanza por la red interna en `app:80`.
@@ -75,6 +94,10 @@ services:
         condition: service_healthy
       nsfw-sherlock:
         condition: service_healthy
+      # Sin esto, los primeros minutos tras un reinicio se aceptaban subidas sin
+      # antivirus (fail_open las deja pasar).
+      clamav:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1/up\") === false ? 1 : 0);'"]
       interval: 30s
@@ -94,6 +117,9 @@ services:
 
   mariadb:
     image: mariadb:11.4
+    # 10 s por defecto puede matar mysqld a mitad de escritura.
+    stop_grace_period: 30s
+    logging: *logging
     restart: unless-stopped
     environment:
       MARIADB_DATABASE: ${DB_DATABASE:-virthub}
@@ -124,6 +150,7 @@ services:
   # justo, se puede apagar con CLAMAV_ENABLED=false y el antivirus se salta.
   clamav:
     image: clamav/clamav:stable
+    logging: *logging
     restart: unless-stopped
     environment:
       # Solo se escanean archivos; el filtro de correo no hace falta.

@@ -833,4 +833,5 @@
 
 <script src="{{ asset('ver-password.js') }}?v={{ filemtime(public_path('ver-password.js')) }}" defer></script>
 <script src="{{ asset('confirmar.js') }}?v={{ filemtime(public_path('confirmar.js')) }}" defer></script>
-<script src="{{ asset('presence.js') }}?v={{ filemtime(public_path('presence.js')) }}" defer></script>
+<script src="{{ asset('menu-perfil.js') }}?v={{ filemtime(public_path('menu-perfil.js')) }}" defer></script>
+    <script src="{{ asset('presence.js') }}?v={{ filemtime(public_path('presence.js')) }}" defer></script>

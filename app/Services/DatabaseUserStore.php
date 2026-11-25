@@ -164,9 +164,14 @@ class DatabaseUserStore extends JsonUserStore
         })->limit(max(1, $limit))->get()->map(fn (User $user): array => $this->publicUser($user))->all();
     }
 
-    public function updatePassword(string $username, string $newPassword): void
+    public function updatePassword(string $username, string $newPassword, bool $mustChange = false): void
     {
-        $this->requireUser($username)->update(['password' => $newPassword]);
+        $this->requireUser($username)->update([
+            'password' => $newPassword,
+            // Un reseteo del administrador obliga a cambiarla al entrar: si no,
+            // la contrasena que ve el administrador vale para siempre.
+            'must_change_password' => $mustChange,
+        ]);
     }
 
     public function verifyPassword(string $username, string $password): bool

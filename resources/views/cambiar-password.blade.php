@@ -113,6 +113,12 @@
         <form method="POST" action="{{ url('/cambiar-password') }}">
             @csrf
 
+            <label for="current_password">Contraseña actual</label>
+            <input type="password" id="current_password" name="current_password" autocomplete="current-password" placeholder="Solo si no es tu primer cambio">
+            @error('current_password')
+                <p class="campo-error">{{ $message }}</p>
+            @enderror
+
             <label for="password">Contrasena nueva</label>
             <input type="password" id="password" name="password" required
                    minlength="8" autocomplete="new-password" autofocus>

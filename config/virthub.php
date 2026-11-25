@@ -82,6 +82,10 @@ return [
         'url' => env('VIRTHUB_MODERACION_URL', 'http://nsfw-sherlock:4000'),
         'umbral' => (float) env('VIRTHUB_MODERACION_UMBRAL', 0.75),
         'timeout' => (int) env('VIRTHUB_MODERACION_TIMEOUT', 25),
+
+        // Por encima de estos MB no se revisa (se lee entera en memoria y
+        // tumbaria el proceso). 0 = sin limite.
+        'max_mb' => (int) env('VIRTHUB_MODERACION_MAX_MB', 12),
     ],
 
     'seguridad' => [

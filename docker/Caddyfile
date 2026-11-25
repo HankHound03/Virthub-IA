@@ -76,6 +76,21 @@ http://virthub.dpdns.org:8080 {
 	}
 
 	# -------------------------------------------------------------------------
+	# Adjuntos del foro: se sirven directamente del disco del volumen, sin pasar
+	# por PHP. Antes cada descarga de un archivo grande ocupaba un proceso Apache
+	# y todo el ancho de banda se movia por la aplicacion.
+	handle_path /storage/* {
+		# El volumen app_storage monta storage/ completo: los adjuntos publicos
+		# estan en app/public dentro de el.
+		root * /srv/storage/app/public
+		file_server
+		# Sin Cache-Control propio: Caddy ya manda Last-Modified y ETag, y un 404
+		# cacheado por mucho tiempo deja el archivo "roto" en el borde aunque luego
+		# se arregle.
+		header -Cache-Control
+	}
+
+	# -------------------------------------------------------------------------
 	handle {
 		reverse_proxy app:80 {
 			header_up X-Real-IP {http.request.header.CF-Connecting-IP}

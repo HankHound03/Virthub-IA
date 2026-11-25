@@ -135,7 +135,9 @@ class AdminController extends Controller
         $password = $this->users->generateRandomPassword();
 
         try {
-            $this->users->updatePassword($username, $password);
+            // El reseteo obliga a cambiarla al entrar: la que ve el admin no
+            // puede quedarse valida para siempre.
+            $this->users->updatePassword($username, $password, true);
         } catch (RuntimeException $e) {
             return redirect('/admin/users')->with('error', $e->getMessage());
         }

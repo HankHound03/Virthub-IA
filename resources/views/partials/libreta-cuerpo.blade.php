@@ -148,6 +148,17 @@
             color: var(--vh-text-soft);
         }
 
+        /* En pantallas sin raton no hay hover: la × se ve siempre. */
+        @media (hover: none) {
+            .libreta-carpeta-borrar {
+                display: inline;
+            }
+        }
+
+        .libreta-carpeta:focus-within .libreta-carpeta-borrar {
+            display: inline;
+        }
+
         /* La × para borrar la materia aparece al pasar por encima */
         .libreta-carpeta-borrar {
             display: none;
@@ -644,7 +655,17 @@
         salida = salida.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
         salida = salida.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
         // Enlaces
-        salida = salida.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        // Solo enlaces http(s) y con el atributo bien cerrado: antes,
+        // [x](a" onmouseover="...) inyectaba atributos en la nota.
+        salida = salida.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (todo, texto, destino) => {
+            const limpio = String(destino).replace(/[\"']/g, '');
+
+            if (!/^https?:\/\//i.test(limpio)) {
+                return texto;
+            }
+
+            return '<a href="' + limpio + '" target="_blank" rel="noopener noreferrer">' + texto + '</a>';
+        });
 
         return salida;
     };
@@ -1050,6 +1071,15 @@
 
     document.addEventListener('keydown', (evento) => {
         if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === 's') {
+            // Solo si la libreta se puede ver: antes secuestraba Ctrl+S en toda la
+            // pagina del contenedor aunque el panel estuviera cerrado.
+            const panel = document.getElementById('libretaPanel');
+            const visible = panel === null || ! panel.hidden;
+
+            if (!visible || !notaActual) {
+                return;
+            }
+
             evento.preventDefault();
             guardar();
         }

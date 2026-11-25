@@ -100,6 +100,13 @@ class ContainerController extends Controller
 
         $url = $this->resolver->urlFor($currentUser);
 
+        // Sin escritorio libre (todos ocupados), mejor decirlo que abrir un marco
+        // vacio o, peor, el escritorio de otra persona.
+        if (trim($url) === '') {
+            return redirect('/contenedor')
+                ->with('error', 'No hay ningun escritorio libre ahora mismo. Intentalo en unos minutos.');
+        }
+
         // El enlace lleva un pase firmado.
         //
         // Motivo: Caddy comprueba el acceso ANTES de entregar el escritorio, pero

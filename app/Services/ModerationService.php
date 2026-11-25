@@ -44,6 +44,25 @@ class ModerationService
             return $this->sinRevision('No se pudo leer la imagen para revisarla.');
         }
 
+        /*
+         * El analisis manda la imagen entera en base64, asi que se lee completa en
+         * memoria. Con memory_limit de 256 MB, una imagen de cientos de MB tumbaba
+         * el proceso PHP (y el archivo ya estaba subido). Por encima del limite se
+         * deja pasar sin revisar y se anota: mejor eso que un 500 y un archivo
+         * huerfano.
+         */
+        $limiteMB = (int) config('virthub.moderacion.max_mb', 12);
+
+        if ($limiteMB > 0 && filesize($rutaAbsoluta) > $limiteMB * 1024 * 1024) {
+            Log::warning('Moderacion NSFW: imagen demasiado grande, no se revisa.', [
+                'archivo' => $nombre,
+                'bytes' => filesize($rutaAbsoluta),
+                'limite_mb' => $limiteMB,
+            ]);
+
+            return $this->sinRevision('La imagen supera el tamano que se puede revisar.');
+        }
+
         $contenido = @file_get_contents($rutaAbsoluta);
 
         if ($contenido === false || $contenido === '') {

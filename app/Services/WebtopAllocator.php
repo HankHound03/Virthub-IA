@@ -69,6 +69,23 @@ class WebtopAllocator
                 return null;
             }
 
+            /*
+             * Se bloquea la fila del escritorio y se vuelve a contar dentro del
+             * bloqueo. Antes, dos peticiones simultaneas podian ver la misma plaza
+             * libre (capacidad 1) y crear dos asignaciones: dos alumnos en el mismo
+             * escritorio.
+             */
+            $bloqueado = WebtopContainer::query()
+                ->whereKey($container->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($bloqueado === null || ! $this->hasCapacity($bloqueado)) {
+                return null;
+            }
+
+            $container = $bloqueado;
+
             WorkspaceAssignment::create([
                 'user_id' => $userId,
                 'webtop_container_id' => $container->id,
@@ -144,6 +161,13 @@ class WebtopAllocator
      */
     public function reservedNames(): array
     {
+        /*
+         * El escritorio de invitados SIEMPRE queda fuera del reparto: lo comparte
+         * cualquiera que entre como invitado y GuestWorkspace lo vacia en cada
+         * entrada. Si un alumno acabara ahi, un invitado le borraria el home.
+         */
+        $invitados = ['ct' . (int) config('virthub.containers.guest_index', 7)];
+
         $configurados = (string) env('CONTAINER_RESERVED', '');
 
         $nombres = array_values(array_filter(
@@ -152,7 +176,8 @@ class WebtopAllocator
         ));
 
         if ($nombres !== []) {
-            return $nombres;
+            // Lo configurado manda, pero el de invitados se suma siempre.
+            return array_values(array_unique(array_merge($nombres, $invitados)));
         }
 
         // Respaldo: el escritorio del indice de administradores.
@@ -161,7 +186,7 @@ class WebtopAllocator
         $url = (string) ($urls[$indice] ?? '');
 
         if ($url === '') {
-            return [];
+            return $invitados;
         }
 
         // Puede ser un nombre ("ct0") o una URL completa.
@@ -170,7 +195,10 @@ class WebtopAllocator
             ? (explode('.', $host)[0] ?? '')
             : ltrim($url, '/');
 
-        return $nombre !== '' ? [$nombre] : [];
+        return array_values(array_unique(array_merge(
+            $nombre !== '' ? [$nombre] : [],
+            $invitados
+        )));
     }
 
     /**

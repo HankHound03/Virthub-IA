@@ -44,12 +44,17 @@ class NoteController extends Controller
             return response()->json(['error' => 'Inicia sesion para usar la libreta.'], 403);
         }
 
-        $nota = $this->notes->create(
-            $usuario,
-            (string) $request->input('title', ''),
-            (string) $request->input('body', ''),
-            (string) $request->input('folder', '')
-        );
+        try {
+            $nota = $this->notes->create(
+                $usuario,
+                (string) $request->input('title', ''),
+                (string) $request->input('body', ''),
+                (string) $request->input('folder', '')
+            );
+        } catch (\RuntimeException $e) {
+            // Libreta llena o fallo al escribir: es un error del cliente, no un 500.
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
 
         return response()->json(['note' => $nota]);
     }
