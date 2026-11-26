@@ -84,7 +84,7 @@ indice(
 # 1. Que es
 # --------------------------------------------------------------------------
 
-h1(doc, "1. Qué es Virthub")
+h1(doc, "2 Qué es Virthub")
 
 parrafo(
     doc,
@@ -121,7 +121,7 @@ nota(
 # 2. Entrar y salir
 # --------------------------------------------------------------------------
 
-h1(doc, "2. Entrar y salir")
+h1(doc, "3 Entrar y salir")
 
 h2(doc, "Si ya tiene cuenta")
 
@@ -174,7 +174,7 @@ nota(
 # 3. Inicio
 # --------------------------------------------------------------------------
 
-h1(doc, "3. La pantalla de inicio")
+h1(doc, "4 La pantalla de inicio")
 
 parrafo(
     doc,
@@ -188,7 +188,7 @@ imagen_con_pie(
     "Figura 2. El inicio con el panel de bienvenida y el mini calendario.",
 )
 
-h2(doc, "3.1 Panel de bienvenida y reloj")
+h2(doc, "41 Panel de bienvenida y reloj")
 
 parrafo(
     doc,
@@ -196,7 +196,7 @@ parrafo(
     "los accesos a su perfil. Para un invitado, indica cuánto le queda de sesión.",
 )
 
-h2(doc, "3.2 Mini calendario")
+h2(doc, "42 Mini calendario")
 
 parrafo(
     doc,
@@ -209,7 +209,7 @@ vineta(doc, "Las flechas de la esquina cambian de mes.")
 vineta(doc, "Los eventos se guardan en su navegador, no en el servidor: son de ese equipo.")
 vineta(doc, "El color del marcador cambia según el tema elegido.")
 
-h2(doc, "3.3 To-do y notas rápidas")
+h2(doc, "43 To-do y notas rápidas")
 
 parrafo(
     doc,
@@ -231,7 +231,7 @@ nota(
     "escritorio virtual o el foro.",
 )
 
-h2(doc, "3.4 Estado del sistema (solo administrador)")
+h2(doc, "44 Estado del sistema (solo administrador)")
 
 parrafo(
     doc,
@@ -258,7 +258,7 @@ imagen_con_pie(
 # 4. Temas
 # --------------------------------------------------------------------------
 
-h1(doc, "4. Los temas: pestañas por época")
+h1(doc, "5 Los temas: pestañas por época")
 
 parrafo(
     doc,
@@ -297,7 +297,7 @@ nota(
     "y fondos fijos). No hace falta configurar nada: sigue siendo cómodo de usar.",
 )
 
-h2(doc, "4.1 Por qué este diseño: la nostalgia")
+h2(doc, "51 Por qué este diseño: la nostalgia")
 
 parrafo(
     doc,
@@ -341,7 +341,7 @@ parrafo(
 # 5. Foro
 # --------------------------------------------------------------------------
 
-h1(doc, "5. El foro")
+h1(doc, "6 El foro")
 
 parrafo(
     doc,
@@ -349,7 +349,7 @@ parrafo(
     "solo leen.",
 )
 
-h2(doc, "5.1 Leer y reaccionar")
+h2(doc, "61 Leer y reaccionar")
 
 parrafo(
     doc,
@@ -363,7 +363,7 @@ imagen_con_pie(
     "Figura 6. Publicación del foro con un video adjunto.",
 )
 
-h2(doc, "5.2 Publicar")
+h2(doc, "62 Publicar")
 
 pasos(
     doc,
@@ -382,7 +382,7 @@ imagen_con_pie(
     ancho=5.4,
 )
 
-h2(doc, "5.3 Adjuntos: foto, video, archivo y encuesta")
+h2(doc, "63 Adjuntos: foto, video, archivo y encuesta")
 
 tabla(
     doc,
@@ -402,7 +402,7 @@ parrafo(
     "puede reanudarse. El botón «Cancelar» detiene la subida sin dejar restos.",
 )
 
-h2(doc, "5.4 Reportar una publicación")
+h2(doc, "64 Reportar una publicación")
 
 parrafo(
     doc,
@@ -422,7 +422,7 @@ nota(
 # 6. Perfil
 # --------------------------------------------------------------------------
 
-h1(doc, "6. Tu perfil")
+h1(doc, "7 Tu perfil")
 
 parrafo(
     doc,
@@ -446,7 +446,7 @@ pasos(
     ],
 )
 
-h2(doc, "6.1 Foto y color del marco")
+h2(doc, "71 Foto y color del marco")
 
 parrafo(
     doc,
@@ -495,7 +495,7 @@ imagen_con_pie(
 # 7. Amigos
 # --------------------------------------------------------------------------
 
-h1(doc, "7. Amigos")
+h1(doc, "8 Amigos")
 
 parrafo(
     doc,
@@ -529,9 +529,9 @@ parrafo(
 # 8. Chat
 # --------------------------------------------------------------------------
 
-h1(doc, "8. El chat")
+h1(doc, "9 El chat")
 
-h2(doc, "8.1 Abrir el chat y sus pestañas")
+h2(doc, "91 Abrir el chat y sus pestañas")
 
 parrafo(
     doc,
@@ -586,7 +586,7 @@ imagen_con_pie(
     ancho=3.1,
 )
 
-h2(doc, "8.2 Escribir, «está escribiendo» y «visto»")
+h2(doc, "92 Escribir, «está escribiendo» y «visto»")
 
 parrafo(
     doc,
@@ -601,7 +601,7 @@ parrafo(
     "si de verdad abrió la conversación: no se marca por tener el chat abierto de fondo.",
 )
 
-h2(doc, "8.3 El estado de cada contacto")
+h2(doc, "93 El estado de cada contacto")
 
 parrafo(
     doc,
@@ -642,7 +642,7 @@ nota(
 )
 
 
-h2(doc, "8.3 Contador de mensajes sin leer")
+h2(doc, "93 Contador de mensajes sin leer")
 
 parrafo(
     doc,
@@ -650,7 +650,7 @@ parrafo(
     "persona le mandó y que todavía no ha abierto. El contador desaparece al abrir la conversación.",
 )
 
-h2(doc, "8.4 Sonido y avisos del navegador")
+h2(doc, "94 Sonido y avisos del navegador")
 
 parrafo(
     doc,
@@ -667,7 +667,7 @@ vineta(doc, "Si cambia a otra pestaña del navegador, el aviso sí salta: no est
 # 9. Contenedor
 # --------------------------------------------------------------------------
 
-h1(doc, "9. El contenedor: tu escritorio virtual")
+h1(doc, "10 El contenedor: tu escritorio virtual")
 
 parrafo(
     doc,
@@ -717,8 +717,80 @@ nota(
 # --------------------------------------------------------------------------
 # 10. IA
 # --------------------------------------------------------------------------
+# 11. La libreta
+# --------------------------------------------------------------------------
 
-h1(doc, "10. La IA TutorUTT")
+h1(doc, "11 La libreta")
+
+parrafo(
+    doc,
+    "La libreta es un cuaderno de notas en markdown dentro de la plataforma. Sirve para apuntes "
+    "de clase, listas de pendientes o borradores, y se guarda en el servidor: estara ahi cuando "
+    "vuelva a entrar, desde cualquier equipo.",
+)
+
+parrafo(
+    doc,
+    "Se abre desde el boton Libreta del menu, o desde el icono con forma de libreta que aparece "
+    "en la esquina inferior derecha del contenedor, encima del boton del chat.",
+)
+
+imagen_con_pie(
+    doc,
+    imagen("33-libreta-materias.png"),
+    "Figura 15. La libreta, con las notas agrupadas por materia.",
+    ancho=6.2,
+)
+
+h2(doc, "12.1 Crear y editar una nota")
+
+for linea in [
+    "Pulse + Nota para crear una nota nueva.",
+    "El titulo se escribe arriba; el texto, en el recuadro grande.",
+    "A la derecha se ve la vista previa: el markdown se convierte en titulos, listas y negritas.",
+    "Se guarda solo al dejar de escribir, y tambien con Ctrl + S.",
+    "El contador de la esquina inferior derecha indica las palabras escritas.",
+]:
+    vineta(doc, linea)
+
+h2(doc, "12.2 Agrupar las notas por materia")
+
+parrafo(
+    doc,
+    "Cada nota puede pertenecer a una materia. Las materias son carpetas: sirven para no mezclar "
+    "los apuntes de una asignatura con los de otra.",
+)
+
+for linea in [
+    "Pulse + Materia, escriba el nombre y confirme.",
+    "Para ver solo una materia, pulse su nombre en la barra de la izquierda.",
+    "Todas muestra todo y Sin materia las notas que todavia no tienen carpeta.",
+    "Para mover una nota, cambie el selector de materia en la cabecera del editor.",
+    "Doble clic sobre una materia la renombra; la x la borra (sus notas pasan a Sin materia).",
+]:
+    vineta(doc, linea)
+
+h2(doc, "12.3 La libreta flotante")
+
+parrafo(
+    doc,
+    "Dentro del contenedor, el icono de la libreta abre la misma libreta en un panel flotante, sin "
+    "salir del escritorio. En el ordenador se puede arrastrar por su cabecera y se queda donde se "
+    "deje; un doble clic la devuelve a su sitio, y se cierra con la x o con Esc. En el movil el "
+    "panel ocupa la pantalla completa.",
+)
+
+nota(
+    doc,
+    "La libreta tambien tiene buscador",
+    "El campo Buscar en la libreta filtra por titulo y por contenido, dentro de la materia que "
+    "este viendo.",
+    tono="info",
+)
+
+# --------------------------------------------------------------------------
+
+h1(doc, "12 La IA TutorUTT")
 
 parrafo(
     doc,
@@ -729,7 +801,7 @@ parrafo(
 imagen_con_pie(
     doc,
     imagen("13-ia-tutorutt.png"),
-    "Figura 14. TutorUTT respondiendo dentro del chat.",
+    "Figura 15. TutorUTT respondiendo dentro del chat.",
     ancho=3.2,
 )
 
@@ -751,9 +823,9 @@ nota(
 # 11. Cuenta y seguridad
 # --------------------------------------------------------------------------
 
-h1(doc, "11. Tu cuenta y la seguridad")
+h1(doc, "13 Tu cuenta y la seguridad")
 
-h2(doc, "11.1 Cambiar la contraseña")
+h2(doc, "121 Cambiar la contraseña")
 
 pasos(
     doc,
@@ -768,11 +840,11 @@ pasos(
 imagen_con_pie(
     doc,
     imagen("29-config-contrasena.png"),
-    "Figura 15. Pestaña «Contraseña»: a la izquierda los requisitos, a la derecha el formulario.",
+    "Figura 16. Pestaña «Contraseña»: a la izquierda los requisitos, a la derecha el formulario.",
     ancho=5.8,
 )
 
-h2(doc, "11.2 Verificación en dos pasos (2FA)")
+h2(doc, "122 Verificación en dos pasos (2FA)")
 
 parrafo(
     doc,
@@ -812,7 +884,7 @@ nota(
 imagen_con_pie(
     doc,
     imagen("30-config-dos-pasos.png"),
-    "Figura 16. Pestaña «Dos pasos»: el estado a la izquierda y las operaciones plegadas a la derecha.",
+    "Figura 17. Pestaña «Dos pasos»: el estado a la izquierda y las operaciones plegadas a la derecha.",
     ancho=5.8,
 )
 
@@ -838,7 +910,7 @@ nota(
 # 12. AWTY
 # --------------------------------------------------------------------------
 
-h1(doc, "12. AWTY")
+h1(doc, "14 AWTY")
 
 parrafo(
     doc,
@@ -856,7 +928,7 @@ parrafo(
 # 13. Problemas
 # --------------------------------------------------------------------------
 
-h1(doc, "13. Problemas frecuentes")
+h1(doc, "15 Problemas frecuentes")
 
 tabla(
     doc,
@@ -878,7 +950,7 @@ tabla(
 # 14. Detalles
 # --------------------------------------------------------------------------
 
-h1(doc, "14. Detalles que conviene saber")
+h1(doc, "16 Detalles que conviene saber")
 
 vineta(doc, "El sitio recuerda su tema y su último estado en ese navegador, no en su cuenta.")
 vineta(doc, "Los gadgets se pueden arrastrar y ensanchar; el botón dice Normal o Ancho.")
@@ -898,7 +970,7 @@ parrafo(
 # 15. Cambios de la 1.0 a la 2.0
 # --------------------------------------------------------------------------
 
-h1(doc, "15. De la versión 1.0 a la 2.0")
+h1(doc, "17 De la versión 1.0 a la 2.0")
 
 parrafo(
     doc,

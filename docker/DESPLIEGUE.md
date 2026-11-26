@@ -344,7 +344,65 @@ composer audit
 
 ---
 
-## 12. Resumen de comandos
+## 12. Respaldos y restauración
+
+Hay dos cosas que se pueden perder y no se recuperan solas: **la base de datos**
+(usuarios, sesiones, foro, asignaciones de escritorio) y **los archivos**
+(`storage/app/data` y los adjuntos del foro).
+
+El script `docker/respaldar-datos.ps1` respalda las dos y comprueba cada paso:
+
+```powershell
+# respaldar produccion
+.\respaldar-datos.ps1 -Proyecto virthub
+
+# y guardarlo en otro disco (recomendado)
+.\respaldar-datos.ps1 -Proyecto virthub -Destino D:\respaldos
+
+# devolver el respaldo mas reciente
+.\respaldar-datos.ps1 -Proyecto virthub -Restaurar
+
+# o uno concreto
+.\respaldar-datos.ps1 -Proyecto virthub -Restaurar -Fecha 20261124-195439
+```
+
+Qué hace bien, y que antes no hacía:
+
+| Antes | Ahora |
+| --- | --- |
+| Solo copiaba los JSON | Vuelca la base con `mariadb-dump` + datos + adjuntos |
+| Restaurar perdía `workspace/` | Restaura todo, con subcarpetas |
+| La copia «antes de restaurar» era un no-op | Se crea y se comprueba |
+| Fallos silenciosos | Si un paso falla, aborta |
+
+> **Un respaldo en el mismo disco no protege de que el disco falle.** Copia la
+> carpeta a otro equipo o a la nube de vez en cuando.
+
+## 13. Reglas del invitado y de las contraseñas
+
+**Un solo invitado a la vez.** El escritorio de invitados (`ct7`) es compartido y
+se limpia en cada entrada, así que solo puede haber uno dentro. El segundo
+intento recibe un aviso en vez de borrar los archivos del primero. El turno se
+libera al cerrar sesión y caduca solo.
+
+**`ct7` no entra en el reparto de alumnos.** `reservedNames()` lo reserva y
+`poolIndices()` lo excluye: si un alumno acabara ahí, un invitado le vaciaría el
+home.
+
+**La contraseña temporal obliga a cambiarla.** Mientras `must_change_password`
+esté puesto, el middleware `EnsurePasswordChanged` solo deja ir a
+`/cambiar-password` o salir. El reseteo del administrador marca el flag, y
+cambiar la contraseña exige la actual (salvo el primer cambio).
+
+## 14. Adjuntos servidos por Caddy
+
+Los archivos de `storage/app/public/uploads` se sirven **directo desde el
+volumen** (`/storage/*`), sin pasar por PHP. Antes un ISO de 3.8 GB ocupaba un
+proceso Apache por descarga y todo el ancho de banda pasaba por la aplicación.
+
+---
+
+## 15. Resumen de comandos
 
 ```bash
 # Preparar

@@ -638,6 +638,23 @@ h1(doc, "10. Copias de seguridad")
 
 parrafo(
     doc,
+    "Todo lo que hay que respaldar lo hace el script docker/respaldar-datos.ps1 de una vez: "
+    "vuelca la base con mariadb-dump, copia storage/app/data completo (con subcarpetas) y los "
+    "adjuntos, y comprueba cada paso. Si algo falla, aborta en vez de decir que salio bien.",
+)
+
+parrafo(doc, "Para respaldar produccion:", negrita=False)
+parrafo(doc, ".\\respaldar-datos.ps1 -Proyecto virthub", negrita=True)
+parrafo(doc, "Para devolver el respaldo mas reciente:")
+parrafo(doc, ".\\respaldar-datos.ps1 -Proyecto virthub -Restaurar", negrita=True)
+
+vineta(doc, "Antes de restaurar se guarda una copia del estado actual.")
+vineta(doc, "Con -Destino D:\\respaldos se guarda en otro disco: uno en el mismo disco no protege de que ese disco falle.")
+vineta(doc, "Con -Fecha 20261124-195439 se restaura un respaldo concreto.")
+vineta(doc, "El script deja un resumen.txt en cada carpeta, con lo que se copio.")
+
+parrafo(
+    doc,
     "Hay dos cosas que respaldar: la base de datos y los archivos de datos.",
 )
 
